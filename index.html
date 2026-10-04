@@ -8,7 +8,7 @@
 :root{
   --bg:#ECEEF1; --panel:#FAFAFB; --panel2:#F1F3F6; --ink:#1E2228; --muted:#646B76; --line:#D9DDE3;
   --accent:#27408B; --accent-ink:#FFFFFF; --accent-soft:#E3E7F2; --danger:#B4432F; --focus:#27408B; --line-strong:#B4BBC5;
-  --checker:conic-gradient(#d4d7dc 25%, #fff 0 50%, #d4d7dc 0 75%, #fff 0) 0 0/8px 8px; --hdr:#26292E; --hdr2:#33373D; --hdr-line:#43484F; --hdr-ink:#EDEEF0; --hdr-muted:#A3A9B2; --mustard:#D9A42B;
+  --checker:conic-gradient(#d4d7dc 25%, #fff 0 50%, #d4d7dc 0 75%, #fff 0) 0 0/8px 8px; --hdr:#26292E; --hdr2:#33373D; --hdr-line:#43484F; --hdr-ink:#EDEEF0; --hdr-muted:#A3A9B2; --mustard:#ffb137;
   --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -264,7 +264,7 @@ main{position:relative; overflow:hidden; background:var(--bg); flex:1 1 auto; mi
 .app.collapsed .sideTab svg{transform:rotate(180deg)}
 .zoombar{position:absolute; right:22px; bottom:22px; display:flex; flex-direction:column; gap:4px}
 .zoombar .btn{background:var(--panel); box-shadow:0 1px 3px rgba(20,25,35,.14)}
-.status.right{left:auto; right:22px; background:#FFF6CC; color:#5a4a00}
+.status.right{left:auto; right:22px; background:#FFE8C7; color:#6B4300}
 .status .sub{color:#7d848e; margin-top:1px}
 .status{position:absolute; left:40px; top:20px; font-size:12px; color:#4f5660; background:rgba(255,255,255,.88); padding:3px 8px; border-radius:6px; pointer-events:none; max-width:calc(100% - 60px)}
 .empty{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:24px; color:#4f5660; pointer-events:none}
@@ -370,7 +370,7 @@ main{position:relative; overflow:hidden; background:var(--bg); flex:1 1 auto; mi
 .freelock circle{fill:#27408B; stroke:#fff; stroke-width:1.5}
 .freelock rect{fill:#fff}
 .freelock path{fill:none; stroke:#fff; stroke-width:1.6; stroke-linecap:round}
-.freeitem.unlocked .freelock circle{fill:#D9A42B}
+.freeitem.unlocked .freelock circle{fill:var(--mustard)}
 .pop .lgtext{width:100%; height:28px; padding:0 8px; border:1px solid var(--line-strong); border-radius:6px; background:var(--panel); color:var(--ink)}
 .imgrot{fill:transparent; cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M17 6.5A7.5 7.5 0 1 0 18.5 13' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M17 6.5A7.5 7.5 0 1 0 18.5 13' fill='none' stroke='black' stroke-width='1.6'/%3E%3Cpath d='M13.5 5.5h4.5V1' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") 11 11, alias}
 .guidelab{cursor:text}
@@ -466,7 +466,7 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
           <button type="button" role="menuitem" data-fmt="png">PNG<span>Image</span></button>
           <button type="button" role="menuitem" data-fmt="tif">TIFF<span>Image</span></button>
           <button type="button" role="menuitem" data-fmt="nwk">Newick<span>Tree</span></button>
-          <button type="button" role="menuitem" data-fmt="nex">NEXUS<span>Tree, FigTree colors</span></button>
+          <button type="button" role="menuitem" data-fmt="nex">NEXUS<span>Tree</span></button>
           <div class="expsize expsep">
             <div class="exprow"><label for="dpiTop">Resolution</label><span class="numwrap"><input class="num boxed" type="number" id="dpiTop" min="36" max="2400" step="1" list="dpiListG"><span>dpi</span></span></div>
             <div class="exprow"><span>Units</span><span class="useg" role="group" aria-label="Size unit"><button type="button" data-u="px">px</button><button type="button" data-u="cm">cm</button><button type="button" data-u="in">in</button></span></div>
@@ -2791,7 +2791,7 @@ function renderOnce() {
   const hitSet = new Set(searchHits.map(n => n.id));
   const visSet0 = new Set(vis), hitTri = new Set();
   for (const l of searchHits) { let x = l.parent; while (x) { if (x._tri && visSet0.has(x)) hitTri.add(x.id); x = x.parent; } }
-  for (const n of tips) if (n._tri && hitTri.has(n.id) && n._tp) ovL.push(`<polygon points="${n._tp}" fill="#FFD84D" fill-opacity=".35" stroke="#E0B400" stroke-width="2" stroke-linejoin="round"/>`);
+  for (const n of tips) if (n._tri && hitTri.has(n.id) && n._tp) ovL.push(`<polygon points="${n._tp}" fill="#ffb137" fill-opacity=".35" stroke="#ffb137" stroke-width="2" stroke-linejoin="round"/>`);
   if (S.showTips) {
     for (const n of tips) {
       const txt = tipText(n); if (!txt) continue;
@@ -2802,7 +2802,7 @@ function renderOnce() {
       const rx = anchor === 'end' ? -n._lw - 2 : -2;
       n._lt = t; n._lrx = rx;
       hitL.push(`<rect class="hitlabel" transform="${t}" x="${f2(rx)}" y="${f2(-n._fs * 0.6)}" width="${f2(n._lw + 4)}" height="${f2(n._fs * 1.2)}" data-id="${n.id}" data-kind="label"/>`);
-      if (hitSet.has(n.id) || hitTri.has(n.id)) ovL.push(`<rect transform="${t}" x="${f2(rx)}" y="${f2(-n._fs * 0.65)}" width="${f2(n._lw + 4)}" height="${f2(n._fs * 1.3)}" rx="2" fill="#FFD84D" opacity=".55"/>`);
+      if (hitSet.has(n.id) || hitTri.has(n.id)) ovL.push(`<rect transform="${t}" x="${f2(rx)}" y="${f2(-n._fs * 0.65)}" width="${f2(n._lw + 4)}" height="${f2(n._fs * 1.3)}" rx="2" fill="#ffb137" opacity=".55"/>`);
     }
   }
 
@@ -5939,7 +5939,7 @@ function moveFree(k, dx, dy) {
 function syncPanelKeys(keys) { for (const k of keys) { const it = allItems().find(i => i.k === k); if (it) syncControl(it); } refreshVisibility(); }
 const LOCK_CLOSED = 'M-2.6,-1.2v-2.2a2.6,2.6 0 0 1 5.2,0v2.2', LOCK_OPEN = 'M-2.6,-1.2v-2.2a2.6,2.6 0 0 1 5.2,0';
 function freeItemsSvg() {
-  const k = view.k || 1, pad = 4 / k, out = [];
+  const k = 1, pad = 4 / k, out = [];   // figure units: the lock zooms together with the tree
   for (const [key, b] of Object.entries(freeBoxes)) {
     const open = isFreeKey(key), x = b.x - pad, y = b.y - pad, w = b.w + pad * 2, h = b.h + pad * 2, s = 1 / k;
     const focus = focusFree === key;
@@ -6166,7 +6166,7 @@ function drawGuides() {
   guideNow = null;
   const tgt = guideTarget(); if (!tgt || !tree || settings.layout !== 'rect') return;
   const G = computeGuidesBox(tgt.box); guideNow = { G, tgt };
-  const k = view.k || 1, lw = 1.2 / k, fs = 11 / k, col = '#27408B';
+  const k = 1, lw = 1.2 / k, fs = 11 / k, col = '#27408B';   // figure units: the distances zoom together with the tree
   const lines = [], labels = [];
   for (const [dir, g] of Object.entries(G)) {
     const vert = dir === 'up' || dir === 'down';
