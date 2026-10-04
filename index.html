@@ -1296,7 +1296,7 @@ const SECTIONS_RAW = [
     { k: 'legendBlockGap', type: 'range', label: 'Space between legends', min: 0, max: 60, step: 1, hmax: 600, unit: 'px' },
     { k: 'legendColor', type: 'color', label: 'Text color' }
   ]},
-  { title: 'Pages', items: [
+  { title: 'Split into pages', items: [
     { type: 'hint', text: () => 'Split a long rectangular tree into pages that line up when placed one after another. Every page has the same width.' },
     { type: 'custom', build: pagesBox },
     { type: 'head', label: 'Look', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
