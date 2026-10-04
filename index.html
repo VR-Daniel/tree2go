@@ -4942,7 +4942,7 @@ const closeAbout = () => { aboutM.hidden = true; $('aboutBtn').focus(); };
    'https://raw.githubusercontent.com/USER/REPO/main/about.html'
    While it is empty, the app reads about.html from the same folder (handy for local tests).
    Every time the text loads, a copy is kept in the browser, so it still shows without internet. */
-const ABOUT_URL = 'https://raw.githubusercontent.com/VR-Daniel/tree2go/main/about.html';
+const ABOUT_URL = 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/about.html';
 const ABOUT_CACHE = 'tree2go-about';
 function cleanAbout(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -4964,7 +4964,7 @@ async function loadAbout() {
   const box = $('aboutBody'); if (box.dataset.loaded) return;
   let cached = null; try { cached = JSON.parse(localStorage.getItem(ABOUT_CACHE) || 'null'); } catch (e) { }
   if (cached && cached.html) box.innerHTML = cached.html;          // show the saved copy right away
-  for (const url of [ABOUT_URL, 'about.html'].filter(Boolean)) {
+  for (const url of [ABOUT_URL, 'about.html', 'content/about.html'].filter(Boolean)) {   // the configured address, then next to the app, then in content/
     try {
       const html = cleanAbout(await fetchText(url));
       if (!html) continue;
