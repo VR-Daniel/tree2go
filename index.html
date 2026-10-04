@@ -390,6 +390,17 @@ main{position:relative; overflow:hidden; background:var(--bg); flex:1 1 auto; mi
 aside{display:flex; flex-direction:column}
 aside > *{flex:none}
 aside > .sidefoot{margin-top:auto}
+.hovertip{position:fixed; z-index:90; pointer-events:none; max-width:280px; padding:7px 10px; border-radius:8px; background:var(--panel); border:1px solid var(--line); box-shadow:0 8px 22px rgba(20,25,35,.18); font-size:12.5px; display:flex; flex-direction:column; gap:2px}
+.hovertip[hidden]{display:none}
+.hovertip span{color:var(--muted)}
+.hovbtn{margin-right:auto}
+.hovbtn.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.useg.wide{width:auto; min-width:180px}
+.useg.wide button{padding:0 10px}
+.treetools{display:flex; flex-direction:column; gap:8px}
+aside .gone{display:none !important}
+/* right-click menus: rows that do not apply are hidden, except the ones marked to stay */
+.pop .kv.off:not(.keep), .pop .grp.off:not(.keep), .pop .row.off:not(.keep){display:none}
 .sidefoot{position:sticky; bottom:0; z-index:4; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; padding:8px 18px; margin-top:0; background:var(--panel); border-top:var(--hair, 1px) solid var(--line)}
 .mrcawrap{position:relative}
 .mrcapop{position:absolute; top:calc(100% + 6px); right:0; z-index:60; width:300px; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:0 12px 30px rgba(20,25,35,.25); padding:8px; display:flex; flex-direction:column; gap:6px}
@@ -454,6 +465,8 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
           <button type="button" role="menuitem" data-fmt="pdf">PDF<span>Vector</span></button>
           <button type="button" role="menuitem" data-fmt="png">PNG<span>Image</span></button>
           <button type="button" role="menuitem" data-fmt="tif">TIFF<span>Image</span></button>
+          <button type="button" role="menuitem" data-fmt="nwk">Newick<span>Tree</span></button>
+          <button type="button" role="menuitem" data-fmt="nex">NEXUS<span>Tree, FigTree colors</span></button>
           <div class="expsize expsep">
             <div class="exprow"><label for="dpiTop">Resolution</label><span class="numwrap"><input class="num boxed" type="number" id="dpiTop" min="36" max="2400" step="1" list="dpiListG"><span>dpi</span></span></div>
             <div class="exprow"><span>Units</span><span class="useg" role="group" aria-label="Size unit"><button type="button" data-u="px">px</button><button type="button" data-u="cm">cm</button><button type="button" data-u="in">in</button></span></div>
@@ -870,14 +883,14 @@ const BGPAL = ['#F6D3C8', '#F7E3B5', '#CDEBE2', '#CFDDEE', '#E2D4EE', '#F5D6E3',
 
 const DEFAULTS = {
   layout: 'rect', useLengths: true, width: 700, spacing: 18, radius: 320, innerRadius: 0, circSpan: 360, fanSpan: 180, rotation: 0, rootStub: 0,
-  lineWidth: 1, lineColor: '#1f1f1f', lineCap: 'round', lineStyle: 'solid', lineDash: 5, lineGap: 3,
+  lineWidth: 1, lineColor: '#1f1f1f', lineCap: 'round', branchAngle: 90, branchRound: 0, lineStyle: 'solid', lineDash: 5, lineGap: 3,
   fossilDagger: true, extinctBranch: 'same', fossilStyle: 'dashed',
   tipDotOn: false, tipDot: 3, nodeDotOn: false, nodeDot: 3, dotColor: '#1f1f1f',
   showTips: true, fontSize: 12, fontFamily: FONTS[0][0], italic: true, openNom: true, bold: false, labelColor: '#1f1f1f', labelOffset: 5, underscores: true,
   align: false, alignStyle: 'dotted', labelsFollowClade: true, showInternal: false,
   showLengths: false, lengthDecimals: 3, lengthSize: 8, lengthColor: '#666666', lengthAlign: 'center', lengthMargin: 0, lengthDy: 2,
-  supportMode: 'none', supportThreshold: 0, supportSize: 9, supportColor: '#6a6a6a', supportAlign: 'left', supportMargin: 3, supAlignV: 2, supportDy: 2,
-  triSlots: 2, triFill: true, triCount: true, cladeOpacity: 0.55, hlStart: 'node', hlEnd: 'tree', hlGradient: 'none', hlRadius: 0,
+  supportMode: 'none', supportScaleDots: false, supportThreshold: 0, supportSize: 9, supportColor: '#6a6a6a', supportAlign: 'left', supportMargin: 3, supAlignV: 2, supportDy: 2,
+  triSlots: 2, triFill: true, triCount: true, cladeOpacity: 0.55, hlStart: 'node', hlEnd: 'tree', hoverInfo: false, hlGradient: 'none', hlRadius: 0,
   barAlign: true, barShowName: true, barTextMode: 'radial', barTextAlign: 'center', labelOrient: 'readable', barWidth: 3, barGap: 6, barTextGap: 6, barFontSize: 13, barBold: true, barItalic: true,
   dotFill: true, dotBorderStyle: 'none', dotBorderColor: '#1f1f1f', dotBorderWidth: 1, dotBorderCount: 12,
   supportScheme: 'threshold', supportLegend: true, projectName: '',
@@ -901,7 +914,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 8, ancLabelColor: '#333333', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 0, supportSource: 'tree', dotOpacity: 100, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 8, ancLabelColor: '#333333', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 0, supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 const freshSettings = (extra) => {
@@ -948,7 +961,7 @@ const plural = (k, one, many) => k === 1 ? '1 ' + one : k + ' ' + many;
 const isRectish = s => s.layout === 'rect' || s.layout === 'slanted';
 const isCirc = s => s.layout === 'circular' || s.layout === 'fan';
 const ALIGN_OPTS = [['left', 'Left'], ['center', 'Center'], ['right', 'Right']];
-const SIDE_OPTS = [['left', 'Left'], ['right', 'Right']];
+const SIDE_OPTS = [['left', 'Left'], ['center', 'Centered on the branch'], ['right', 'Right']];
 const DEC_OPTS = [0, 1, 2, 3, 4, 5, 6].map(x => [x, String(x)]);
 const SECTIONS_RAW = [
   { title: 'Tree', open: true, custom: 'data', items: [
@@ -958,6 +971,7 @@ const SECTIONS_RAW = [
     { k: 'layout', type: 'seg', opts: [['rect', 'Rectangular'], ['circular', 'Circular'], ['fan', 'Fan'], ['unrooted', 'Unrooted']], refit: true, enable: () => !figImages.length },
     { type: 'hint', text: () => figImages.length ? 'While the page has images, the tree shape cannot be changed. Remove the images, change the shape, then add them back.' : '' },
     { k: 'useLengths', type: 'check', label: 'Use branch lengths', refit: true },
+    { type: 'custom', build: treeToolsBox },
     { k: 'width', type: 'range', label: 'Width', min: 80, max: 4000, step: 10, hmax: 20000, unit: 'px', show: isRectish },
     { k: 'spacing', type: 'range', label: 'Tip spacing', min: 3, max: 80, step: 1, hmin: 1, hmax: 400, unit: 'px', show: isRectish },
     { k: 'radius', type: 'range', label: 'Radius', min: 40, max: 3000, step: 10, hmax: 20000, unit: 'px', show: s => !isRectish(s) },
@@ -971,12 +985,15 @@ const SECTIONS_RAW = [
     { k: 'lineWidth', type: 'range', label: 'Line width', min: 1, max: 20, step: 1, hmin: 0.05, hmax: 100, unit: 'px' },
     { k: 'lineColor', type: 'color', label: 'Branch color' },
     { k: 'lineCap', type: 'seg', label: 'Line ends', opts: [['round', 'Round'], ['square', 'Square']] },
+    { k: 'branchAngle', type: 'range', label: 'Branch angle', min: 45, max: 90, step: 1, hmin: 10, hmax: 90, unit: '°', show: s => s.layout === 'rect' },
+    { k: 'branchRound', type: 'range', label: 'Rounded corners', min: 0, max: 30, step: 0.5, hmax: 500, unit: 'px', show: s => s.layout === 'rect' },
+    { type: 'hint', text: s => s.layout === 'rect' && (s.branchAngle < 90 || s.branchRound > 0) ? 'At 90° each branch leaves its node straight up or down. Lower angles make the branches leave on a slant.' : '' },
     { k: 'lineStyle', type: 'seg', label: 'Line style', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] },
     { k: 'lineDash', type: 'range', label: 'Dash length (also fossils)', min: 1, max: 30, step: 1, hmin: 0.1, hmax: 500, unit: 'px', sub: true },
     { k: 'lineGap', type: 'range', label: 'Gap between dashes or dots', min: 1, max: 30, step: 1, hmin: 0.1, hmax: 500, unit: 'px', sub: true },
     { type: 'head', label: 'Color by data' },
-    { k: 'brcTable', type: 'select', label: 'Table', opts: s => [['', 'None'], ...(s.dataTables || []).map(t => [t.id, t.name])] },
-    { k: 'brcCol', type: 'select', label: 'Column', opts: s => { const t = (s.dataTables || []).find(x => x.id === s.brcTable); return t ? numericCols(t).map(c => [c, c]) : [['', '—']]; }, enable: s => !!s.brcTable, sub: true },
+    { k: 'brcTable', type: 'select', label: 'Values from', opts: s => dataSourceOpts(s) },
+    { k: 'brcCol', type: 'select', label: 'Value', opts: s => dataColOpts(s, s.brcTable), enable: s => !!s.brcTable, sub: true },
     { type: 'hint', text: s => (s.dataTables || []).length ? 'Each branch takes the value of the node it leads to. Rows are matched by the names of tips and internal nodes, so a table can hold values such as evolutionary rates for every branch.' : 'Add a table in Attachments, with tips and internal nodes named as in the tree, to color the branches by one of its columns.' },
     { k: 'brcLow', type: 'color', label: 'Low values', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
     { k: 'brcMidOn', type: 'check', label: 'Use a middle color', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
@@ -986,7 +1003,15 @@ const SECTIONS_RAW = [
     { k: 'brcMin', type: 'number', label: 'Lowest value of the scale', min: -1e12, max: 1e12, step: 1, blank: 'Auto', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
     { k: 'brcMax', type: 'number', label: 'Highest value of the scale', min: -1e12, max: 1e12, step: 1, blank: 'Auto', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
     { type: 'hint', text: s => s.brcTable ? 'Leave them empty to use the range of the data. A color given to a branch from its right-click menu still wins over the data.' : '' },
-    { k: 'brcLegend', type: 'check', label: 'Show a color legend', enable: s => !!s.brcTable && !!s.brcCol, sub: true }
+    { k: 'brcLegend', type: 'check', label: 'Show a color legend', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
+    { type: 'head', label: 'Width by data' },
+    { k: 'bwdSrc', type: 'select', label: 'Values from', opts: s => dataSourceOpts(s) },
+    { type: 'hint', text: s => s.bwdSrc ? '' : 'Make the branches thicker where a value is higher, for example a rate or a posterior probability, read from the tree or from an attached table.' },
+    { k: 'bwdCol', type: 'select', label: 'Value', opts: s => dataColOpts(s, s.bwdSrc), enable: s => !!s.bwdSrc, sub: true },
+    { k: 'bwdMin', type: 'range', label: 'Thinnest', min: 0.1, max: 10, step: 0.1, hmin: 0.01, hmax: 100, unit: 'px', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
+    { k: 'bwdMax', type: 'range', label: 'Thickest', min: 0.5, max: 20, step: 0.1, hmin: 0.01, hmax: 200, unit: 'px', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
+    { k: 'bwdLog', type: 'check', label: 'Logarithmic scale', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
+    { k: 'bwdLegend', type: 'check', label: 'Show legend', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
   ]},
   { title: 'Branch values', items: [
     { type: 'head', label: 'Branch lengths' },
@@ -1017,14 +1042,15 @@ const SECTIONS_RAW = [
     { type: 'hint', text: s => piesOnNodes(s) ? 'Circles and categories are not available while the internal nodes show ancestral state pie charts.' : '' },
     { k: 'supportSource', type: 'select', label: 'Values from', opts: [['tree', 'Input tree'], ['attach', 'SIMMAP'], ['boot', 'Bootstrap']], optOff: (s, v) => v === 'tree' ? !!treeSet : v === 'attach' ? !smap : v === 'boot' ? !treeSet : false, enable: s => s.supportMode !== 'none', sub: true },
     { type: 'hint', text: s => ({ attach: 'From the SIMMAP: the percentage of maps that contain the same clade, that is, the same set of tips below the node.', boot: 'From the trees file: the percentage of trees that contain the same clade (bootstrap or posterior support).', tree: treeSet ? '' : 'From the tree: the labels of its internal nodes, or their posterior annotation.' })[supSource()] },
+    { k: 'supportSize', type: 'number', label: 'Size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.supportMode === 'text' || (s.supportMode === 'dots' && s.supportScheme === 'threshold'), sub: true },
+    { k: 'supportColor', type: 'color', label: 'Color', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
+    { k: 'supportScaleDots', type: 'check', label: 'Bigger circles for higher values', enable: s => s.supportMode === 'dots' && s.supportScheme === 'threshold', sub: true },
     { k: 'supportScheme', type: 'seg', label: 'Which values', opts: [['threshold', 'Above a threshold'], ['categories', 'By categories']], enable: s => s.supportMode !== 'none', optOff: (s, v) => v === 'categories' && piesOnNodes(s), sub: true },
     { k: 'supportThreshold', type: 'range', label: 'Only when support ≥', min: 0, max: 100, step: 1, hmax: 1000, enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
     { k: 'supportCats', type: 'cats', enable: s => s.supportMode !== 'none' && s.supportScheme === 'categories', sub: true },
     { k: 'supportLegend', type: 'check', label: 'Show category legend', enable: s => s.supportMode !== 'none' && s.supportScheme === 'categories', sub: true },
-    { k: 'supportSize', type: 'number', label: 'Size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.supportMode === 'text' || (s.supportMode === 'dots' && s.supportScheme === 'threshold'), sub: true },
-    { k: 'supportColor', type: 'color', label: 'Color', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
-    { k: 'supportAlign', type: 'seg', label: 'Side of the node', opts: SIDE_OPTS, enable: s => s.supportMode === 'text', sub: true },
-    { k: 'supportMargin', type: 'number', label: 'Distance from the node', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => s.supportMode === 'text', sub: true },
+    { k: 'supportAlign', type: 'seg', label: 'Position', opts: SIDE_OPTS, enable: s => s.supportMode === 'text', sub: true },
+    { k: 'supportMargin', type: 'number', label: 'Distance from the node', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => s.supportMode === 'text' && s.supportAlign !== 'center', sub: true },
     { k: 'supportDy', type: 'number', label: 'Vertical offset', min: -500, max: 500, step: 1, unit: 'px', enable: s => s.supportMode === 'text', sub: true },
     { type: 'head', label: 'Other node labels' },
     { k: 'nlabSrc', type: 'select', label: 'Show', opts: s => [['', 'None'], ...(hasInnerNames(tree) ? [['names', 'Node names']] : []), ...(smap ? [['anc', 'State probabilities (SIMMAP)']] : []), ...metaKeys(tree).map(k => ['meta:' + k, k])] },
@@ -1032,24 +1058,37 @@ const SECTIONS_RAW = [
     { k: 'ancLabelDec', type: 'select', label: 'Decimals', opts: DEC_OPTS, numeric: true, enable: s => !!nodeLabelSrc(s), sub: true },
     { k: 'ancLabelSize', type: 'number', label: 'Text size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => !!nodeLabelSrc(s), sub: true },
     { k: 'ancLabelColor', type: 'color', label: 'Color', enable: s => !!nodeLabelSrc(s), sub: true },
-    { k: 'ancLabelAlign', type: 'seg', label: 'Side of the node', opts: SIDE_OPTS, enable: s => !!nodeLabelSrc(s), sub: true },
-    { k: 'ancLabelMargin', type: 'number', label: 'Distance from the node', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s), sub: true },
+    { k: 'ancLabelAlign', type: 'seg', label: 'Position', opts: SIDE_OPTS, enable: s => !!nodeLabelSrc(s), sub: true },
+    { k: 'ancLabelMargin', type: 'number', label: 'Distance from the node', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s) && s.ancLabelAlign !== 'center', sub: true },
     { k: 'ancLabelDy', type: 'number', label: 'Vertical offset', min: -500, max: 500, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s), sub: true },
     { type: 'head', label: 'Node bars' },
     { k: 'nbarSrc', type: 'select', label: 'Draw', opts: s => [['', 'None'], ...metaRangeKeys(tree).map(k => ['meta:' + k, k]), ...(treeSet && treeSet.hasLen ? [['kde', `Age density (${treeSet.count} trees)`]] : [])] },
     { type: 'hint', text: s => s.nbarSrc === 'kde' ? 'The density of the age of each node across the trees of the file, smoothed with a Gaussian kernel.' : s.nbarSrc ? 'The range is read as ages above the youngest tip, in branch length units, as in the height intervals of BEAST.' : 'Ranges from the tree annotations, such as height_95%_HPD, or age densities from a file with several dated trees.' },
-    { k: 'nbarH', type: 'range', label: 'Height', min: 1, max: 40, step: 0.5, hmin: 0.2, hmax: 400, unit: 'px', enable: s => !!s.nbarSrc, sub: true },
-    { k: 'nbarColor', type: 'color', label: 'Color', enable: s => !!s.nbarSrc, sub: true },
-    { k: 'nbarOpacity', type: 'range', label: 'Opacity', min: 5, max: 100, step: 5, hmin: 0, hmax: 100, unit: '%', enable: s => !!s.nbarSrc, sub: true },
-    { k: 'nbarBorder', type: 'seg', label: 'Border', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['none', 'None']], enable: s => !!s.nbarSrc, sub: true },
-    { k: 'nbarBorderColor', type: 'color', label: 'Border color', enable: s => !!s.nbarSrc && s.nbarBorder !== 'none', sub: true },
-    { k: 'nbarBorderW', type: 'number', label: 'Border width', min: 0.05, max: 50, step: 0.1, unit: 'px', enable: s => !!s.nbarSrc && s.nbarBorder !== 'none', sub: true },
-    { k: 'nbarMirror', type: 'check', label: 'Mirror the density on both sides of the branch', enable: s => s.nbarSrc === 'kde', sub: true },
-    { k: 'nbarBw', type: 'range', label: 'Smoothing', min: 0.2, max: 3, step: 0.1, hmin: 0.05, hmax: 20, unit: '×', enable: s => s.nbarSrc === 'kde', sub: true },
-    { type: 'hint', text: s => s.nbarSrc === 'kde' ? 'Multiplies the automatic kernel width (Silverman\'s rule): below 1 keeps more detail, such as several peaks, above 1 gives a smoother curve.' : '' },
+    { k: 'nbarStyle', type: 'seg', label: 'Show the ages as', opts: [['violin', 'Violin'], ['bar', 'HPD bar']], show: s => s.nbarSrc === 'kde', sub: true },
+    { type: 'hint', text: s => s.nbarSrc === 'kde' ? (s.nbarStyle === 'bar' ? 'The highest posterior density interval, the shortest range that holds the chosen share of the node ages in the trees.' : 'The shape of the node ages in the trees. The thin dark bar inside is the HPD interval, the short line the median.') : '' },
+    { k: 'nbarH', type: 'range', label: 'Height', min: 1, max: 40, step: 0.5, hmin: 0.2, hmax: 400, unit: 'px', show: s => !!s.nbarSrc, sub: true },
+    { k: 'nbarColor', type: 'color', label: 'Color', show: s => !!s.nbarSrc, sub: true },
+    { k: 'nbarOpacity', type: 'range', label: 'Opacity', min: 5, max: 100, step: 5, hmin: 0, hmax: 100, unit: '%', show: s => !!s.nbarSrc, sub: true },
+    { k: 'nbarBorder', type: 'seg', label: 'Border', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['none', 'None']], show: s => !!s.nbarSrc, sub: true },
+    { k: 'nbarBorderColor', type: 'color', label: 'Border color', show: s => !!s.nbarSrc && s.nbarBorder !== 'none', sub: true },
+    { k: 'nbarBorderW', type: 'number', label: 'Border width', min: 0.05, max: 50, step: 0.1, unit: 'px', show: s => !!s.nbarSrc && s.nbarBorder !== 'none', sub: true },
+    { k: 'nbarMirror', type: 'check', label: 'Mirror the density on both sides of the branch', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar', sub: true },
+    { k: 'nbarBw', type: 'range', label: 'Smoothing', min: 0.2, max: 3, step: 0.1, hmin: 0.05, hmax: 20, unit: '×', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar', sub: true },
+    { type: 'hint', text: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar' ? 'Multiplies the automatic kernel width (Silverman\'s rule): below 1 keeps more detail, such as several peaks, above 1 gives a smoother curve.' : '' },
+    { k: 'nbarHpdIn', type: 'check', label: 'Show the HPD inside the violin', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar', sub: true },
+    { k: 'nbarHpdLevel', type: 'select', label: 'HPD interval', opts: [[90, '90%'], [95, '95%'], [99, '99%']], numeric: true, show: s => s.nbarSrc === 'kde' && (s.nbarStyle === 'bar' || s.nbarHpdIn), sub: true },
+    { k: 'nbarHpdH', type: 'range', label: 'HPD thickness', min: 0.5, max: 20, step: 0.5, hmin: 0.1, hmax: 200, unit: 'px', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar' && s.nbarHpdIn, sub: true },
+    { k: 'nbarHpdColor', type: 'color', label: 'HPD color', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar' && s.nbarHpdIn, sub: true },
+    { k: 'nbarMedian', type: 'check', label: 'Mark the median', show: s => s.nbarSrc === 'kde', sub: true },
+    { k: 'nbarMedW', type: 'number', label: 'Median line width', min: 0.1, max: 20, step: 0.1, unit: 'px', show: s => s.nbarSrc === 'kde' && s.nbarMedian, sub: true },
+    { k: 'nbarMedStyle', type: 'seg', label: 'Median line', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], show: s => s.nbarSrc === 'kde' && s.nbarMedian, sub: true },
+    { k: 'nbarMedColor', type: 'color', label: 'Median color', show: s => s.nbarSrc === 'kde' && s.nbarMedian, sub: true },
   ]},
   { title: 'Tip labels', items: [
     { k: 'showTips', type: 'check', label: 'Show tip names' },
+    { k: 'labelSrcTable', type: 'select', label: 'Names from', opts: s => [['', 'The tree'], ...(s.dataTables || []).map(t => [t.id, t.name])], enable: s => s.showTips },
+    { k: 'labelSrcCol', type: 'select', label: 'Column', opts: s => { const t = (s.dataTables || []).find(x => x.id === s.labelSrcTable); return t ? allCols(t).map(c => [c, c]) : [['', '—']]; }, enable: s => s.showTips && !!s.labelSrcTable, sub: true },
+    { type: 'hint', text: s => s.labelSrcTable ? 'Only the names shown change. The tree keeps its own names, so it still matches your other files. Tips without a value keep their own name.' : '' },
     { k: 'fontSize', type: 'number', label: 'Font size', min: 1, max: 200, step: 0.5, unit: 'px' },
     { k: 'fontFamily', type: 'select', label: 'Typeface', opts: FONTS },
     { k: 'italic', type: 'check', label: 'Italic' },
@@ -1068,7 +1107,8 @@ const SECTIONS_RAW = [
   { title: 'Clades', items: [
     { type: 'head', label: 'Highlights' },
     { k: 'cladeOpacity', type: 'range', label: 'Highlight opacity', min: 0.05, max: 1, step: 0.05, hmin: 0, hmax: 1 },
-    { k: 'hlStart', type: 'seg', label: 'Starts at', opts: [['node', 'The clade node'], ['root', 'The root']] },
+    { k: 'hlStart', type: 'seg', label: 'Starts at', opts: [['root', 'Root'], ['stem', 'Stem'], ['node', 'Crown']] },
+    { type: 'hint', text: s => ({ root: 'From the root of the tree.', stem: 'From the node the clade descends from, so the branch leading to the clade is included.', node: 'From the clade node itself.' })[s.hlStart] || '' },
     { k: 'hlEnd', type: 'seg', label: 'Ends at', opts: [['tree', 'The tree edge'], ['labels', 'The clade labels']] },
     { k: 'hlGradient', type: 'seg', label: 'Gradient', opts: [['none', 'None'], ['right', 'Fade out'], ['left', 'Fade in']] },
     { k: 'hlRadius', type: 'range', label: 'Corner rounding', min: 0, max: 20, step: 1, hmax: 500, unit: 'px', show: s => isRectish(s) },
@@ -1077,6 +1117,7 @@ const SECTIONS_RAW = [
     { k: 'triFill', type: 'check', label: 'Fill collapsed triangles' },
     { k: 'triCount', type: 'check', label: 'Show tip count on collapsed clades' },
     { type: 'head', label: 'Clade name bars' },
+    { type: 'custom', build: cladeFileBox },
     { k: 'barShowName', type: 'check', label: 'Show the names next to the bars' },
     { k: 'barTextMode', type: 'seg', label: 'Names on circular and fan trees', opts: [['radial', 'Radial'], ['curved', 'Curved along the arc']], enable: s => s.barShowName && isCirc(s) },
     { k: 'barTextAlign', type: 'seg', label: 'Position along the arc', opts: [['start', 'Start'], ['center', 'Center'], ['end', 'End']], enable: s => s.barShowName && isCirc(s) && s.barTextMode === 'curved' },
@@ -1216,7 +1257,26 @@ const SECTIONS_RAW = [
     { k: 'catTitleSize', type: 'number', label: 'Title size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => hasCat(s) && isRectish(s) && s.catTitles, sub: true },
     { k: 'catTitleGap', type: 'range', label: 'Title distance', min: 0, max: 40, step: 0.5, hmin: -100, hmax: 500, unit: 'px', enable: s => hasCat(s) && isRectish(s) && s.catTitles, sub: true },
     { k: 'catTitleColor', type: 'color', label: 'Title color', enable: s => hasCat(s) && isRectish(s) && s.catTitles, sub: true },
-    { type: 'hint', text: s => 'Click a shape to select its whole column. Right-click it to rename, recolor or move the column, or to give that one shape its own border.' + (isRectish(s) ? '' : ' Column titles are drawn on rectangular trees only.') }
+    { type: 'hint', text: s => 'Click a shape to select its whole column. Right-click it to rename, recolor or move the column, or to give that one shape its own border.' + (isRectish(s) ? '' : ' Column titles are drawn on rectangular trees only.') },
+    { type: 'head', label: 'Heatmap' },
+    { type: 'custom', build: heatPickerBox },
+    { type: 'hint', text: s => s.layout === 'rect' ? '' : 'The heatmap is drawn on rectangular trees.' },
+    { k: 'heatScale', type: 'seg', label: 'Colour scale', opts: [['column', 'Each column'], ['all', 'All columns']] },
+    { k: 'heatLow', type: 'color', label: 'Low values' },
+    { k: 'heatMidOn', type: 'check', label: 'Use a middle color' },
+    { k: 'heatMid', type: 'color', label: 'Middle values', enable: s => s.heatMidOn, sub: true },
+    { k: 'heatHigh', type: 'color', label: 'High values' },
+    { k: 'heatNAOff', type: 'check', label: 'Leave missing values empty' },
+    { k: 'heatNA', type: 'color', label: 'Missing values', enable: s => !s.heatNAOff, sub: true },
+    { k: 'heatCellW', type: 'range', label: 'Cell width', min: 2, max: 60, step: 1, hmin: 0.5, hmax: 400, unit: 'px' },
+    { k: 'heatH', type: 'range', label: 'Cell height', min: 0.1, max: 1, step: 0.05, unit: '× row' },
+    { k: 'heatColGap', type: 'range', label: 'Space between columns', min: 0, max: 20, step: 0.5, hmax: 200, unit: 'px' },
+    { k: 'heatGap', type: 'range', label: 'Distance from the labels', min: 0, max: 100, step: 1, hmin: -500, hmax: 2000, unit: 'px' },
+    { k: 'heatTitles', type: 'check', label: 'Column titles' },
+    { k: 'heatTitleAngle', type: 'range', label: 'Title angle', min: 0, max: 90, step: 5, unit: '°', enable: s => s.heatTitles, sub: true },
+    { k: 'heatTitleSize', type: 'number', label: 'Title size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.heatTitles, sub: true },
+    { k: 'heatTitleColor', type: 'color', label: 'Title color', enable: s => s.heatTitles, sub: true },
+    { k: 'heatLegend', type: 'check', label: 'Show legend' }
   ]},
   { title: 'Legends', items: [
     { type: 'hint', text: () => 'Hover a legend or the scale bar on the canvas and click its lock to drag it by hand. Right-click a legend to rewrite its title and entries.' },
@@ -1239,30 +1299,30 @@ const SECTIONS_RAW = [
   { title: 'Pages', items: [
     { type: 'hint', text: () => 'Split a long rectangular tree into pages that line up when placed one after another. Every page has the same width.' },
     { type: 'custom', build: pagesBox },
-    { type: 'head', label: 'Look', show: s => s.layout === 'rect' },
-    { k: 'pageColor', type: 'color', label: 'Page box on the canvas', show: s => s.layout === 'rect' },
-    { k: 'pageAxis', type: 'check', label: 'Repeat the time axis under each page', show: s => s.layout === 'rect', enable: s => s.axisOn },
-    { k: 'pageExtras', type: 'check', label: 'Include the title, legends and scale bar', show: s => s.layout === 'rect' },
-    { type: 'hint', text: s => s.layout === 'rect' && s.pageExtras ? 'The first page takes what is above the tree and the last page what is below it.' : '' },
-    { k: 'pageExtL', type: 'range', label: 'Extra width on the left', min: -200, max: 600, step: 1, hmin: -5000, hmax: 10000, unit: 'px', show: s => s.layout === 'rect' },
-    { k: 'pageExtR', type: 'range', label: 'Extra width on the right', min: -200, max: 600, step: 1, hmin: -5000, hmax: 10000, unit: 'px', show: s => s.layout === 'rect' },
-    { type: 'hint', text: s => s.layout === 'rect' ? 'You can also drag the left or right edge of any page on the canvas. Every page keeps the same width.' : '' },
-    { type: 'head', label: 'Tree map', show: s => s.layout === 'rect' },
-    { k: 'pageMiniOn', type: 'check', label: 'Show a map of the whole tree on each page', show: s => s.layout === 'rect' },
-    { k: 'pageMiniW', type: 'range', label: 'Map width', min: 20, max: 300, step: 1, hmin: 5, hmax: 2000, unit: 'px', show: s => s.layout === 'rect', enable: s => s.pageMiniOn },
-    { k: 'pageMiniH', type: 'range', label: 'Map height', min: 20, max: 600, step: 1, hmin: 5, hmax: 4000, unit: 'px', show: s => s.layout === 'rect', enable: s => s.pageMiniOn },
-    { k: 'pageMiniGap', type: 'range', label: 'Space to the tree', min: 0, max: 200, step: 1, hmin: -500, hmax: 2000, unit: 'px', show: s => s.layout === 'rect', enable: s => s.pageMiniOn },
-    { k: 'pageMiniLW', type: 'number', label: 'Line width', min: 0.1, max: 10, step: 0.1, unit: 'px', show: s => s.layout === 'rect', enable: s => s.pageMiniOn },
-    { k: 'pageMiniBase', type: 'color', label: 'Tree color', show: s => s.layout === 'rect', enable: s => s.pageMiniOn },
-    { k: 'pageMiniHi', type: 'color', label: 'Color of the rows on the page', show: s => s.layout === 'rect', enable: s => s.pageMiniOn },
-    { k: 'pageMiniMark', type: 'seg', label: 'Mark the rows on the page with', opts: [['lines', 'Branch color'], ['both', 'Color and background']], show: s => s.layout === 'rect', enable: s => s.pageMiniOn }
+    { type: 'head', label: 'Look', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { k: 'pageColor', type: 'color', label: 'Page box on the canvas', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { k: 'pageAxis', type: 'check', label: 'Repeat the time axis under each page', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.axisOn },
+    { k: 'pageExtras', type: 'check', label: 'Include the title, legends and scale bar', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { type: 'hint', text: s => s.layout === 'rect' && (s.pages || []).length > 0 && s.pageExtras ? 'The first page takes what is above the tree and the last page what is below it.' : '' },
+    { k: 'pageExtL', type: 'range', label: 'Extra width on the left', min: -200, max: 600, step: 1, hmin: -5000, hmax: 10000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { k: 'pageExtR', type: 'range', label: 'Extra width on the right', min: -200, max: 600, step: 1, hmin: -5000, hmax: 10000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { type: 'hint', text: s => s.layout === 'rect' && (s.pages || []).length > 0 ? 'You can also drag the left or right edge of any page on the canvas. Every page keeps the same width.' : '' },
+    { type: 'head', label: 'Tree map', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { k: 'pageMiniOn', type: 'check', label: 'Show a map of the whole tree on each page', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { k: 'pageMiniW', type: 'range', label: 'Map width', min: 20, max: 300, step: 1, hmin: 5, hmax: 2000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniH', type: 'range', label: 'Map height', min: 20, max: 600, step: 1, hmin: 5, hmax: 4000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniGap', type: 'range', label: 'Space to the tree', min: 0, max: 200, step: 1, hmin: -500, hmax: 2000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniLW', type: 'number', label: 'Line width', min: 0.1, max: 10, step: 0.1, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniBase', type: 'color', label: 'Tree color', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniHi', type: 'color', label: 'Color of the rows on the page', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniMark', type: 'seg', label: 'Mark the rows on the page with', opts: [['lines', 'Branch color'], ['both', 'Color and background']], show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn }
   ]},
   { title: 'Images', custom: 'images' },
   { title: 'Page', items: [
     { k: 'bg', type: 'color', label: 'Background color' },
     { type: 'head', label: 'Scale bar' },
-    { k: 'scaleFree', type: 'check', label: 'Move it by hand on the canvas', enable: s => s.scaleBar },
     { k: 'scaleBar', type: 'check', label: 'Show scale bar' },
+    { k: 'scaleFree', type: 'check', label: 'Move it by hand on the canvas', enable: s => s.scaleBar },
     { type: 'hint', text: s => s.axisOn ? 'The time axis replaces the scale bar while it is on.' : !s.useLengths ? 'Needs "Use branch lengths".' : 'Measured in branch length units.' },
     { k: 'scaleMode', type: 'seg', label: 'Length', opts: [['auto', 'Automatic'], ['custom', 'Custom']], enable: s => s.scaleBar, sub: true },
     { k: 'scaleLen', type: 'number', label: 'Bar length', min: 1e-9, max: 1e9, step: 0.01, enable: s => s.scaleBar && s.scaleMode === 'custom', sub: true },
@@ -1277,6 +1337,11 @@ const SECTIONS_RAW = [
     { k: 'scaleFs', type: 'number', label: 'Text size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.scaleBar, sub: true },
     { k: 'scaleTextGap', type: 'range', label: 'Text distance from bar', min: -40, max: 40, step: 1, hmin: -1000, hmax: 1000, unit: 'px', enable: s => s.scaleBar, sub: true },
     { k: 'scaleColor', type: 'color', label: 'Color', enable: s => s.scaleBar, sub: true },
+    { type: 'head', label: 'Colors' },
+    { k: 'paletteName', type: 'select', label: 'Palette', opts: [['default', 'tree2go'], ['okabe', 'Okabe-Ito (color blind safe)'], ['tol', 'Paul Tol bright (color blind safe)'], ['viridis', 'Viridis']] },
+    { type: 'hint', text: () => 'The colors offered in the menus and for new categories. Colors already in use do not change.' },
+    { k: 'cvdSim', type: 'select', label: 'Preview as seen with', opts: [['none', 'Normal vision'], ['deutan', 'Deuteranopia (red-green)'], ['protan', 'Protanopia (red-green)'], ['tritan', 'Tritanopia (blue-yellow)'], ['gray', 'No color (grayscale)']] },
+    { type: 'hint', text: s => s.cvdSim !== 'none' ? 'Only the screen changes (exported files keep the real colors).' : '' },
     { type: 'head', label: 'Plot title' },
     { k: 'title', type: 'text', label: 'Text', sub: true },
     { k: 'titleSize', type: 'number', label: 'Size', min: 4, max: 300, step: 1, unit: 'px', enable: s => !!s.title, sub: true },
@@ -1296,7 +1361,7 @@ const SECTIONS = SECTIONS_RAW;
   const sec = SECTIONS.find(x => x.title === 'Side plots'); if (!sec) return;
   let gate = hasData;
   for (const it of sec.items) {
-    if (it.type === 'head') { gate = /Categor/.test(it.label) ? hasCat : hasData; if (/^(Bars|Categories)$/.test(it.label)) continue; }
+    if (it.type === 'head') { gate = /Heat/.test(it.label) ? hasHeat : /Categor/.test(it.label) ? hasCat : hasData; if (/^(Bars|Categories|Heatmap)$/.test(it.label)) continue; }
     if (it.type === 'custom') continue;   // the table pickers always show
     const g = gate, oldShow = it.show, oldText = it.text;
     it.show = s => g(s) && (oldShow ? oldShow(s) : true);
@@ -1321,7 +1386,7 @@ function buildSide() {
     d.appendChild(body); side.appendChild(d);
   }
   const foot = document.createElement('div'); foot.className = 'sidefoot';
-  foot.innerHTML = '<button type="button" class="btn small" data-all="1" title="Open every section of this panel">Expand all</button><button type="button" class="btn small" data-all="0" title="Close every section of this panel">Collapse all</button>';
+  foot.innerHTML = '<button type="button" class="btn small hovbtn" data-hover title="Show the information of a branch when the mouse is over it" aria-pressed="false">Info on hover</button><button type="button" class="btn small" data-all="1" title="Open every section of this panel">Expand all</button><button type="button" class="btn small" data-all="0" title="Close every section of this panel">Collapse all</button>';
   foot.querySelectorAll('button').forEach(b => b.onclick = () => b.dataset.all === '1' ? expandAllSections() : collapseAllSections()); side.appendChild(foot);
   refreshVisibility();
 }
@@ -1509,8 +1574,9 @@ function refreshVisibility() {
   for (const it of allItems()) {
     const row = document.querySelector(`.row[data-k="${it.k}"]`);
     if (!row) continue;
-    row.hidden = it.show ? !it.show(settings) : false;
     const on = it.enable ? !!it.enable(settings) : true;
+    // an option that depends on another one that is off is hidden, so only what applies is on screen
+    row.hidden = (it.show ? !it.show(settings) : false) || (!on && !KEEP_OFF.has(it.k));
     row.classList.toggle('off', !on);
     const rb = row.querySelector('.rst'); if (rb) rb.classList.toggle('hide', sameVal(settings[it.k], DEFAULTS[it.k]));
     row.querySelectorAll('input,select,button:not(.rst)').forEach(el => el.disabled = !on || el.hasAttribute('data-lock'));
@@ -1521,6 +1587,30 @@ function refreshVisibility() {
     }
     if (it.type === 'select' && it.optOff) row.querySelectorAll('option').forEach(o => { o.disabled = !!it.optOff(settings, o.value); });
     if (it.optOff) row.querySelectorAll('.seg button').forEach(b => { const off = it.optOff(settings, b.dataset.v); if (off) b.disabled = true; b.title = off ? 'Not available while the nodes show ancestral state pies' : ''; });
+  }
+  tidyPanel();
+}
+// Options that stay visible (greyed out) when they do not apply, so the user knows they exist
+const KEEP_OFF = new Set(['layout', 'barTextMode', 'barTextAlign', 'labelOrient', 'axisCircLabels']);
+function tidyPanel() {
+  for (const sec of document.querySelectorAll('aside .sec')) {
+    const kids = [...sec.children];
+    kids.forEach(el => el.classList.remove('gone'));
+    const isOpt = e => !e.classList.contains('hint') && !e.classList.contains('subhead');
+    // a subhead shows only when at least one option of its group is visible
+    kids.forEach((el, i) => {
+      if (!el.classList.contains('subhead')) return;
+      let any = false;
+      for (let k = i + 1; k < kids.length && !kids[k].classList.contains('subhead'); k++) if (isOpt(kids[k]) && !kids[k].hidden) { any = true; break; }
+      if (!any) el.classList.add('gone');
+    });
+    // a hint follows the option right above it, or its subhead
+    let owner = null;
+    for (const el of kids) {
+      if (el.classList.contains('subhead')) { owner = el; continue; }
+      if (el.classList.contains('hint')) { if (owner && (owner.hidden || owner.classList.contains('gone'))) el.classList.add('gone'); continue; }
+      owner = el;
+    }
   }
 }
 function setSetting(k, v) {
@@ -1726,6 +1816,7 @@ function refreshAttach() {
   };
   picker($('barCols'), 'bars');
   picker($('catCols'), 'cats');
+  if ($('heatCols') && $('heatCols')._fill) $('heatCols')._fill();
 }
 function attachPanel() {
   const w = document.createElement('div'); w.style.cssText = 'display:flex;flex-direction:column;gap:10px';
@@ -1925,6 +2016,19 @@ function metaVal(v) {
   return q !== '' && Number.isFinite(n) ? n : q;
 }
 // keys whose values are ranges {low,high} on the internal nodes
+// numeric annotations of the tree (rates, posterior, ...), available for colour or width
+function metaNumKeys(t) { const ks = new Set(); if (t) walkAll(t, x => { if (x.meta) for (const [k, v] of Object.entries(x.meta)) if (typeof v === 'number' && isFinite(v)) ks.add(k); }); return [...ks].sort(); }
+function dataSourceOpts(s) { return [['', 'None'], ...(metaNumKeys(tree).length ? [['meta', 'Tree annotations']] : []), ...(s.dataTables || []).map(t => [t.id, t.name])]; }
+function dataColOpts(s, src) { if (src === 'meta') { const k = metaNumKeys(tree); return k.length ? k.map(c => [c, c]) : [['', '—']]; } const t = (s.dataTables || []).find(x => x.id === src); return t ? numericCols(t).map(c => [c, c]) : [['', '—']]; }
+// one number per node: from the annotations of the tree, or from a table row matched by name
+function nodeValues(S, src, col, positiveOnly) {
+  const val = new Map(); if (!src || !col || !tree) return val;
+  if (src === 'meta') { walkAll(tree, x => { const v = x.meta && x.meta[col]; if (typeof v === 'number' && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, v); }); return val; }
+  const t = (S.dataTables || []).find(x => x.id === src), ci = t ? t.header.indexOf(col) : -1; if (!t || ci < 0) return val;
+  const m = tableIndex(t);
+  walkAll(tree, x => { if (!x.name) return; const r = m.get(normTip(x.name)); const v = r ? cellNum(r[ci], t.delim) : null; if (v != null && (!positiveOnly || v > 0)) val.set(x, v); });
+  return val;
+}
 function metaRangeKeys(t) {
   const ks = new Map();
   if (t) walkAll(t, x => { if (x.meta) for (const [k, v] of Object.entries(x.meta)) if (Array.isArray(v) && v.length === 2 && v.every(Number.isFinite)) ks.set(k, (ks.get(k) || 0) + 1); });
@@ -2094,9 +2198,19 @@ function exportPanel() {
             <button type="button" class="linkbtn" data-es="reset">Use the natural size</button>
           </div>
     <p class="hint" id="dpiNote"></p>
+    <div class="subhead">Tree</div>
+    <div class="btns"><button class="btn" data-fmt="nwk">Save Newick</button><button class="btn" data-fmt="nex">Save NEXUS</button></div>
+    <p class="hint">The tree as it is now, with your names, rooting and order. NEXUS also keeps branch colors for FigTree and the annotations of the tree.</p>
+    <div class="subhead">Style template</div>
+    <div class="btns"><button class="btn" id="styleSave">Save style…</button><button class="btn" id="styleLoad">Apply a style…</button></div>
+    <input type="file" id="styleIn" hidden>
+    <p class="hint">Keeps the look of this figure, without its tree or data, to give other trees the same style.</p>
     <div class="btns"><button class="btn danger" id="resetSet" title="Return the panel and every element to the default look. Names, branch lengths, collapsed clades, clade names, fossils and attached tables are kept.">Reset styles</button></div>`;
   setTimeout(() => {
     w.querySelectorAll('[data-fmt]').forEach(b => b.onclick = () => exportAs(b.dataset.fmt));
+    $('styleSave').onclick = saveStyle;
+    $('styleLoad').onclick = () => $('styleIn').click();
+    $('styleIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => applyStyleText(r.result); r.readAsText(f); } e.target.value = ''; };
     $('dpiSide').value = dpiNow();
     syncDpi();
     $('dpiSide').addEventListener('change', e => setDpi(e.target.value));
@@ -2357,6 +2471,7 @@ const stv = (n, k) => n.st && n.st[k] != null && n.st[k] !== '' ? n.st[k] : null
 // then the drawing is repeated with every radius mirrored, so the tree sits outside and the categories in the middle.
 let lastReach = null;
 function render() {
+  if (PALETTE[0] !== (PALETTES[settings.paletteName] || PALETTES.default)[0]) applyPalette(); else applyCvd();
   radFlip = null;
   const S = settings;
   if (!tree || !isCirc(S) || !S.catInvert || !hasCat(S)) return renderOnce();
@@ -2416,7 +2531,8 @@ function renderOnce() {
 
   const fam = S.fontFamily;
   const tips = vis.filter(n => !n.children.length || n._tri);
-  const tipText = n => n._tri ? (n.name && !isSupport(n.name) ? disp(n.name) + (S.triCount ? ` (${leafCount(n)})` : '') : (S.triCount ? leafCount(n) + ' tips' : '')) : disp(n.name);
+  const altN = altNames(S);
+  const tipText = n => n._tri ? (n.name && !isSupport(n.name) ? disp(n.name) + (S.triCount ? ` (${leafCount(n)})` : '') : (S.triCount ? leafCount(n) + ' tips' : '')) : disp(altN.get(n) ?? n.name);
   let maxLW = 0;
   for (const n of tips) {
     n._fs = stv(n, 'fs') ?? S.fontSize;
@@ -2526,10 +2642,7 @@ function renderOnce() {
   const bgL = [], brL = [], triL = [], alL = [], lbL = [], anL = [], dotL = [], supL = [], hitL = [], ovL = [], valHits = [];
   // Branch colors from a table: each branch takes the value of the node it leads to (tips and named internal nodes)
   const brc = (() => {
-    const t = (S.dataTables || []).find(x => x.id === S.brcTable), ci = t ? t.header.indexOf(S.brcCol) : -1;
-    if (!t || ci < 0) return null;
-    const m = tableIndex(t), val = new Map();
-    walkAll(tree, x => { if (!x.name) return; const r = m.get(normTip(x.name)); const v = r ? cellNum(r[ci], t.delim) : null; if (v != null && (!S.brcLog || v > 0)) val.set(x, v); });
+    const val = nodeValues(S, S.brcTable, S.brcCol, S.brcLog);
     if (!val.size) return null;
     const f = v => S.brcLog ? Math.log10(v) : v, vs = [...val.values()];
     const lo = S.brcMin != null && S.brcMin !== '' && (!S.brcLog || S.brcMin > 0) ? +S.brcMin : Math.min(...vs);
@@ -2541,7 +2654,14 @@ function renderOnce() {
   })();
   // a color given to the branch itself wins, then the data, then the clade color
   const strokeOf = n => stv(n, 'bc') || (brc && brc.colorOf(n)) || n._ec || S.lineColor;
-  const widthOf = n => stv(n, 'bw') ?? LW;
+  // branch width from data: thin for low values, thick for high ones
+  const bwd = (() => {
+    const val = nodeValues(S, S.bwdSrc, S.bwdCol, S.bwdLog); if (!val.size) return null;
+    const f = v => S.bwdLog ? Math.log10(v) : v, vs = [...val.values()], lo = Math.min(...vs), hi = Math.max(...vs), a = f(lo), b = f(hi);
+    const wOf = v => S.bwdMin + (S.bwdMax - S.bwdMin) * (b > a ? clamp((f(v) - a) / (b - a), 0, 1) : 0.5);
+    return { widthOf: n => { const v = val.get(n); return v == null ? null : wOf(v); }, lo, hi, wOf, col: S.bwdCol };
+  })();
+  const widthOf = n => stv(n, 'bw') ?? (bwd && bwd.widthOf(n)) ?? LW;
 
   // Clade highlights: square or rounded, from the node or the root, to the tree edge or the clade labels, flat or fading
   const hlTipEnd = n => {
@@ -2569,13 +2689,13 @@ function renderOnce() {
       bgL.push(`<polygon points="${h.map(p => f2(p[0]) + ',' + f2(p[1])).join(' ')}" fill="${n.bg}" stroke="${n.bg}" stroke-width="${f2(S.fontSize * 1.6)}" stroke-linejoin="round" opacity="${op}"/>`);
     } else if (circ) {
       const a0 = base + n._yMin / N * span, a1 = base + (n._yMax + 1) / N * span;
-      const r0 = from === 'root' ? 0 : Math.max(0, rOf(n._d) - (n.parent ? 4 : 0));
+      const r0 = from === 'root' ? 0 : from === 'stem' && n.parent ? rOf(n.parent._d) : Math.max(0, rOf(n._d) - (n.parent ? 4 : 0));
       const r1 = to === 'labels' ? Math.max(r0 + 4, hlTipEnd(n) + 6) : outerR + 6;
       let fill = n.bg;
       if (gr !== 'none') { const id = 'hg' + n.id, R0 = Math.min(realR(r0), realR(r1)), R1 = Math.max(realR(r0), realR(r1)); gradDefs.push(`<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="${f2(R1)}">${stops(R0 / R1, (gr === 'right') === (radFlip == null))}</radialGradient>`); fill = `url(#${id})`; }
       bgL.push(`<path d="${sector(r0, r1, a0, a1)}" fill="${fill}" opacity="${op}" data-sec="${f2(r0)} ${f2(r1)} ${f2(a0)} ${f2(a1)}"/>`);
     } else {
-      const x0 = from === 'root' ? Math.min(0, -stub) - 4 : n._px - 4;
+      const x0 = from === 'root' ? Math.min(0, -stub) - 4 : from === 'stem' && n.parent ? n.parent._px : n._px - 4;
       const x1 = to === 'labels' ? Math.max(x0 + 4, hlTipEnd(n) + 6) : labelsEnd + 6;
       const y0 = n._yMin * sp - sp / 2, y1 = n._yMax * sp + sp / 2;
       let fill = n.bg;
@@ -2586,12 +2706,27 @@ function renderOnce() {
   if (gradDefs.length) bgL.unshift(`<defs>${gradDefs.join('')}</defs>`);
 
   // Branches: each node owns its incoming branch plus the connector that joins its children
+  const elbow = L === 'rect' && (S.branchAngle < 89.9 || S.branchRound > 0);
   for (const n of vis) {
     const p = n.parent;
     n._tp = null; n._lt = null;
     let d = '';
     const kidsV = n.children.length && !n._tri ? n.children : null;
-    if (L === 'rect') {
+    if (L === 'rect' && elbow) {
+      // each branch leaves its parent node at the chosen angle, bends at the child's height (optionally rounded) and runs to the child
+      if (p) {
+        const ax = p._px, ay = p._py, cx = n._px, cy = n._py, ady = Math.abs(cy - ay), run = Math.max(0, cx - ax);
+        const dx = Math.min(run, S.branchAngle >= 89.9 ? 0 : ady / Math.tan(rad(S.branchAngle)));
+        const bx = ax + dx, by = cy;                        // the bend
+        const seg1 = Math.hypot(bx - ax, by - ay), seg2 = cx - bx;
+        const r = Math.min(S.branchRound, seg1 * 0.9, seg2);
+        if (ady < 1e-6) d = `M${f2(ax)},${f2(ay)}H${f2(cx)}`;
+        else if (r > 0.05 && seg1 > 1e-6) {
+          const ux = (bx - ax) / seg1, uy = (by - ay) / seg1;
+          d = `M${f2(ax)},${f2(ay)}L${f2(bx - ux * r)},${f2(by - uy * r)}Q${f2(bx)},${f2(by)} ${f2(bx + r)},${f2(by)}H${f2(cx)}`;
+        } else d = `M${f2(ax)},${f2(ay)}L${f2(bx)},${f2(by)}H${f2(cx)}`;
+      } else if (stub > 0) d = `M${f2(n._px - stub)},${f2(n._py)}H${f2(n._px)}`;
+    } else if (L === 'rect') {
       if (p) d = `M${f2(p._px)},${f2(n._py)}H${f2(n._px)}`;
       else if (stub > 0) d = `M${f2(n._px - stub)},${f2(n._py)}H${f2(n._px)}`;
       if (kidsV && kidsV.length > 1) d += `M${f2(n._px)},${f2(kidsV[0]._py)}V${f2(kidsV[kidsV.length - 1]._py)}`;
@@ -2615,7 +2750,8 @@ function renderOnce() {
       const bw = stv(n, 'bw');
       const xb = n.ex && !n.children.length ? (stv(n, 'xb') ?? S.extinctBranch) : 'same';
       const bsty = stv(n, 'bs') ?? (xb !== 'same' ? xb : S.lineStyle);
-      brL.push(`<path d="${d}" stroke="${strokeOf(n)}"${bw != null ? ` stroke-width="${bw}"` : ''}${dashFor(bsty, widthOf(n), stv(n, 'bdl') ?? S.lineDash, stv(n, 'bdg') ?? S.lineGap)}/>`);
+      const wv = widthOf(n);
+      brL.push(`<path d="${d}" stroke="${strokeOf(n)}"${wv !== LW ? ` stroke-width="${f2(wv)}"` : ''}${dashFor(bsty, widthOf(n), stv(n, 'bdl') ?? S.lineDash, stv(n, 'bdg') ?? S.lineGap)}/>`);
       hitL.push(`<path class="hit" d="${d}" stroke-width="${Math.max(10, widthOf(n) + 8)}" data-id="${n.id}" data-kind="branch"/>`);
     }
     if (n._tri) {
@@ -2718,7 +2854,8 @@ function renderOnce() {
     const a = ((ang % 360) + 360) % 360; const flip = a > 90 && a < 270; const rot = flip ? a - 180 : a;
     let px, py, anchor;
     if (atNode) {
-      if (align === 'right') { px = x1 + ux * margin; py = y1 + uy * margin; anchor = flip ? 'end' : 'start'; }
+      if (align === 'center') { px = (x0 + x1) / 2; py = (y0 + y1) / 2; anchor = 'middle'; }
+      else if (align === 'right') { px = x1 + ux * margin; py = y1 + uy * margin; anchor = flip ? 'end' : 'start'; }
       else { px = x1 - ux * margin; py = y1 - uy * margin; anchor = flip ? 'start' : 'end'; }
     }
     else if (align === 'left') { px = x0 + ux * margin; py = y0 + uy * margin; anchor = flip ? 'end' : 'start'; }
@@ -2783,7 +2920,7 @@ function renderOnce() {
           border = strokeAttr(cat.stroke, cat.strokeStyle, cat.strokeWidth, r, cat.strokeCount);
         } else {
           const sz = stv(n, 'ss') ?? S.supportSize;
-          r = sz * 0.25 + sz * 0.35 * (v / supMax); fill = stv(n, 'sc') || S.supportColor;
+          r = S.supportScaleDots ? sz * 0.25 + sz * 0.35 * (v / supMax) : sz * 0.5; fill = stv(n, 'sc') || S.supportColor;
         }
         supL.push(`<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(r)}" fill="${fill}"${border}/>`);
         valGeo.set(skey(n.id, 'support'), { cx: n._px, cy: n._py, r });
@@ -2874,7 +3011,7 @@ function renderOnce() {
   }
 
   // Node bars: a range read from the tree's annotations (ages above the youngest tip), or the density of the node's age in a trees file
-  const nbarL = [];
+  const nbarL = [], extraNb = [];
   lastNbar = new Set();
   const nbSrc = S.nbarSrc || '';
   if (nbSrc && useLen && (L === 'rect' || circ)) {
@@ -2883,6 +3020,8 @@ function renderOnce() {
     const dash = (st, w) => st === 'dashed' ? ` stroke-dasharray="${f2(w * 4)} ${f2(w * 3)}"` : st === 'dotted' ? ` stroke-dasharray="0 ${f2(w * 2.2)}" stroke-linecap="round"` : '';
     // a point at age h, off the branch by 'off' px (circular: along the arc)
     const pt = (n, h, off) => { if (!circ) return [posR(h), n._py + off]; const r = posR(h); return polar(r, n._a + off / Math.max(1, realR(r)) * 180 / Math.PI); };
+    // a short line across the branch at age h, len px long, centred 'off' px from the branch
+    var medianMark = (n, h, len, off) => { const [ax, ay] = pt(n, h, off - len / 2), [bx, by] = pt(n, h, off + len / 2), w = Math.max(0.1, S.nbarMedW); return `<path d="M${f2(ax)},${f2(ay)}L${f2(bx)},${f2(by)}" stroke="${S.nbarMedColor}" stroke-width="${f2(w)}"${S.nbarMedStyle === 'solid' ? ' stroke-linecap="round"' : dash(S.nbarMedStyle, w)}/>`; };
     for (const n of internals) {
       if (!(stv(n, 'nbv') ?? true)) continue;
       const H = stv(n, 'nbh') ?? S.nbarH, col = stv(n, 'nbc') || S.nbarColor, op = clamp(stv(n, 'nbo') ?? S.nbarOpacity, 0, 100) / 100;
@@ -2895,12 +3034,27 @@ function renderOnce() {
         if (circ) { const r0 = posR(hi), r1 = posR(lo), rm = realR((r0 + r1) / 2), da = H / 2 / Math.max(1, rm) * 180 / Math.PI; d = sector(Math.min(r0, r1), Math.max(r0, r1), n._a - da, n._a + da); }
         else { const x0 = posR(hi), x1 = posR(lo); d = `M${f2(x0)},${f2(n._py - H / 2)}H${f2(x1)}V${f2(n._py + H / 2)}H${f2(x0)}Z`; }
       } else if (kde) {
-        const c = ancKeys && treeSet.clades.get(ancKeys.get(n)); const pts = c && ageDensity(c.ages, S.nbarBw); if (!pts) continue;
-        const top = pts.map(([h, f]) => pt(n, h, S.nbarMirror ? -f * H / 2 : -f * H));
-        const bot = pts.slice().reverse().map(([h, f]) => pt(n, h, S.nbarMirror ? f * H / 2 : 0));
-        d = 'M' + [...top, ...bot].map(([x, y]) => `${f2(x)},${f2(y)}`).join('L') + 'Z';
+        const c = ancKeys && treeSet.clades.get(ancKeys.get(n)); if (!c || !c.ages || !c.ages.length) continue;
+        const hp = hpdOf(c.ages, (S.nbarHpdLevel || 95) / 100), band = (lo, hi, h, off) => {
+          // a straight band between two ages, h px thick, centred 'off' px from the branch
+          if (circ) { const r0 = posR(hi), r1 = posR(lo), rm = realR((r0 + r1) / 2), da = h / 2 / Math.max(1, rm) * 180 / Math.PI, ao = off / Math.max(1, rm) * 180 / Math.PI; return sector(Math.min(r0, r1), Math.max(r0, r1), n._a + ao - da, n._a + ao + da); }
+          const x0 = posR(hi), x1 = posR(lo); return `M${f2(x0)},${f2(n._py + off - h / 2)}H${f2(x1)}V${f2(n._py + off + h / 2)}H${f2(x0)}Z`;
+        };
+        if (S.nbarStyle === 'bar') {
+          // the HPD interval computed from the trees, drawn as a bar
+          d = band(hp.lo, hp.hi, H, 0);
+          if (S.nbarMedian) extraNb.push(medianMark(n, hp.med, H, 0));
+        } else {
+          const pts = ageDensity(c.ages, S.nbarBw); if (!pts) continue;
+          const top = pts.map(([h, f]) => pt(n, h, -f * H));
+          const bot = pts.slice().reverse().map(([h, f]) => pt(n, h, S.nbarMirror ? f * H : 0));
+          d = 'M' + [...top, ...bot].map(([x, y]) => `${f2(x)},${f2(y)}`).join('L') + 'Z';
+          // inside the violin: the HPD as a thin bar and the median as a short line
+          if (S.nbarHpdIn) { const t = Math.max(0.2, S.nbarHpdH), off = S.nbarMirror ? 0 : -t / 2; extraNb.push(`<path d="${band(hp.lo, hp.hi, t, off)}" fill="${S.nbarHpdColor}" fill-opacity="0.85"/>`); }
+          if (S.nbarMedian) extraNb.push(medianMark(n, hp.med, S.nbarMirror ? H * 1.2 : H * 0.6, S.nbarMirror ? 0 : -H * 0.3));
+        }
       } else continue;
-      nbarL.push(`<path d="${d}" fill="${col}" fill-opacity="${f2(op)}"${border}/>`);
+      nbarL.push(`<path d="${d}" fill="${col}" fill-opacity="${f2(op)}"${border}/>`, ...extraNb.splice(0));
       valHits.push(`<path class="hittri" d="${d}" fill="transparent" data-id="${n.id}" data-kind="nbar"/>`);
       valGeo.set(skey(n.id, 'nbar'), { d });
       lastNbar.add(n.id);
@@ -3091,6 +3245,42 @@ function renderOnce() {
     anL.push(`<g>${catL.join('')}</g>`);
     dataEnd = Math.max(dataEnd, start + catPos.w); if (rows.length) drawnEnd = Math.max(drawnEnd, start + catPos.w);   // only when shapes are drawn
     catLastRing = start + cs[cs.length - 1];
+  }
+
+  // ---- Heatmap: a grid of values next to the tips, one column per variable (rectangular trees)
+  let heatTop = null, heatLeg = null;
+  const hPlot = L === 'rect' ? heatPlot(S) : null;
+  if (hPlot) {
+    const { t, idx, cols } = hPlot, hm = tableIndex(t), rows = [];
+    for (const n of tips) { if (n._tri || !n.name) continue; const r = hm.get(normTip(n.name)); if (r) rows.push([n, idx.map(j => cellNum(r[j], t.delim))]); }
+    if (rows.length) {
+      const start = Math.max(labelsEnd, isFinite(dataEnd) ? dataEnd : -Infinity) + S.heatGap, cw = S.heatCellW, cg = S.heatColGap, ch = sp * clamp(S.heatH, 0.05, 1);
+      const stops = S.heatMidOn ? [S.heatLow, S.heatMid, S.heatHigh] : [S.heatLow, S.heatHigh];
+      const ramp = q => { q = clamp(q, 0, 1) * (stops.length - 1); const i = Math.min(stops.length - 2, Math.floor(q)), u = q - i, c0 = hexRGB(stops[i]), c1 = hexRGB(stops[i + 1]); return rgbHex(c0.map((c, k) => c + (c1[k] - c) * u)); };
+      const rng = cols.map((c, j) => { const v = rows.map(r => r[1][j]).filter(v => v != null); return v.length ? [Math.min(...v), Math.max(...v)] : [0, 1]; });
+      const all = rng.reduce((a, r) => [Math.min(a[0], r[0]), Math.max(a[1], r[1])], [Infinity, -Infinity]);
+      const cells = [];
+      for (const [n, vals] of rows) vals.forEach((v, j) => {
+        if (v == null && S.heatNAOff) return;
+        const [lo, hi] = S.heatScale === 'all' ? all : rng[j];
+        const fill = v == null ? S.heatNA : ramp(hi > lo ? (v - lo) / (hi - lo) : 0.5);
+        cells.push(`<rect x="${f2(start + j * (cw + cg))}" y="${f2(n._py - ch / 2)}" width="${f2(cw)}" height="${f2(ch)}" fill="${fill}"/>`);
+      });
+      anL.push(`<g data-heat="1">${cells.join('')}</g>`);
+      const endX = start + cols.length * (cw + cg) - cg;
+      drawnEnd = Math.max(drawnEnd, endX); dataEnd = Math.max(dataEnd, endX);
+      if (S.heatTitles) {
+        const top = Math.min(...rows.map(r => r[0]._py)) - ch / 2 - 4, ang = clamp(S.heatTitleAngle, 0, 90), tfs = S.heatTitleSize;
+        let reach = 0;
+        cols.forEach((c, j) => {
+          const x = start + j * (cw + cg) + cw / 2, tw = measure(c, tfs, fam, false, false);
+          reach = Math.max(reach, tw * Math.sin(rad(ang)) + tfs * Math.cos(rad(ang)));
+          anL.push(`<text transform="translate(${f2(x)},${f2(top)}) rotate(${f2(-ang)})" text-anchor="${ang > 0 ? 'start' : 'middle'}" font-size="${f2(tfs)}" fill="${S.heatTitleColor}" font-family="${esc(fam)}">${esc(c)}</text>`);
+        });
+        heatTop = top - reach - 2;
+      }
+      heatLeg = { stops, lo: all[0], hi: all[1], labels: S.heatScale === 'all' ? null : ['Low', 'High'], col: cols.length === 1 ? cols[0] : 'Heatmap' };
+    }
   }
 
   // Clade name bars
@@ -3353,7 +3543,8 @@ function renderOnce() {
     }
   }
   if (axisOk && anL.length > axStart) { const parts = anL.splice(axStart); anL.push(`<g id="axisGroup">${parts.join('')}</g>`); }
-  if (cTop != null) minY = Math.min(minY, cTop);   // category titles stand above the first row
+  if (cTop != null) minY = Math.min(minY, cTop);
+  if (heatTop != null) minY = Math.min(minY, heatTop);   // category titles stand above the first row
   // Page box used to place the scale bar and the title
   if (L === 'unrooted') for (const n of tips) maxX = Math.max(maxX, n._lx + (n._lw || 0));
   const boxL = isRectish(S) ? 0 : minX, boxR = isRectish(S) ? Math.max(maxX, labelsEnd, drawnEnd) : maxX;
@@ -3402,6 +3593,12 @@ function renderOnce() {
   if (S.supportMode !== 'none' && S.supportScheme === 'categories' && S.supportLegend && cats.length && sups.length)
     blocks.push({ key: 'support', title: 'Support', entries: cats.map(c => ({ text: catLabel(c, cats, S.supportLowIn !== false), sym: S.supportMode === 'dots' ? { t: 'circle', r: c.size, fill: c.filled ? c.fill : 'none', stroke: strokeAttr(c.stroke, c.strokeStyle, c.strokeWidth, c.size, c.strokeCount) } : { t: 'rect', fill: c.fill } })) });
   if (brc && S.brcLegend) blocks.push({ key: 'brc', title: brc.col + (S.brcLog ? ' (log scale)' : ''), gradient: brc });
+  if (heatLeg && S.heatLegend) blocks.push({ key: 'heat', title: heatLeg.col, gradient: heatLeg });
+  if (bwd && S.bwdLegend) {
+    const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
+    const steps = S.bwdLog ? [bwd.lo, Math.sqrt(bwd.lo * bwd.hi), bwd.hi] : [bwd.lo, (bwd.lo + bwd.hi) / 2, bwd.hi];
+    blocks.push({ key: 'bwd', title: bwd.col + (S.bwdLog ? ' (log scale)' : ''), entries: steps.map(v => ({ text: fmtV(v), sym: { t: 'line', w: bwd.wOf(v), c: S.lineColor } })) });
+  }
   if (anc && S.ancLegend && (S.ancOn || S.ancBranch !== 'none')) {
     const ent = smap.states.map((st, i) => ({ text: 'State ' + st, sym: { t: 'circle', r: 5, fill: ancColor(S, i) } }));
     if (anc.usedOther) ent.push({ text: `Other (below ${S.ancCollapsePct}%)`, sym: { t: 'circle', r: 5, fill: S.ancOtherColor } });
@@ -3423,15 +3620,16 @@ function renderOnce() {
       const fmt = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(4));
       out.push(`<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs><rect x="0" y="${f2(y)}" width="${f2(W)}" height="${f2(H)}" fill="url(#${id})" stroke="#999" stroke-width="0.5"/>`);
       y += H + 3;
-      const lo = lgText(b.key, 'lo', fmt(g.lo)), hi = lgText(b.key, 'hi', fmt(g.hi));
-      legendAuto[b.key].lo = fmt(g.lo); legendAuto[b.key].hi = fmt(g.hi);
+      const autoLo = g.labels ? g.labels[0] : fmt(g.lo), autoHi = g.labels ? g.labels[1] : fmt(g.hi), lo = lgText(b.key, 'lo', autoLo), hi = lgText(b.key, 'hi', autoHi);
+      legendAuto[b.key].lo = autoLo; legendAuto[b.key].hi = autoHi;
       out.push(`<text x="0" y="${f2(y)}" dominant-baseline="hanging" font-size="${f2(lfs * 0.9)}"${ff}>${esc(lo)}</text><text x="${f2(W)}" y="${f2(y)}" dominant-baseline="hanging" text-anchor="end" font-size="${f2(lfs * 0.9)}"${ff}>${esc(hi)}</text>`);
       y += lfs; w = Math.max(w, W);
     } else {
-      const symW = Math.max(...b.entries.map(e => e.sym.t === 'circle' ? 2 * e.sym.r * sc : 10 * sc), 1);
+      const symW = Math.max(...b.entries.map(e => e.sym.t === 'circle' ? 2 * e.sym.r * sc : e.sym.t === 'line' ? 22 * sc : 10 * sc), 1);
       b.entries.forEach((e, i) => {
-        const symH = e.sym.t === 'circle' ? 2 * e.sym.r * sc : 8 * sc, rowH = Math.max(lfs * 1.25, symH), cy = y + rowH / 2, sx0 = symW / 2;
-        if (e.sym.t === 'circle') out.push(`<circle cx="${f2(sx0)}" cy="${f2(cy)}" r="${f2(e.sym.r * sc)}" fill="${e.sym.fill}"${e.sym.stroke || ''}/>`);
+        const symH = e.sym.t === 'circle' ? 2 * e.sym.r * sc : e.sym.t === 'line' ? e.sym.w : 8 * sc, rowH = Math.max(lfs * 1.25, symH), cy = y + rowH / 2, sx0 = symW / 2;
+        if (e.sym.t === 'line') out.push(`<line x1="0" y1="${f2(cy)}" x2="${f2(symW)}" y2="${f2(cy)}" stroke="${e.sym.c}" stroke-width="${f2(e.sym.w)}" stroke-linecap="butt"/>`);
+        else if (e.sym.t === 'circle') out.push(`<circle cx="${f2(sx0)}" cy="${f2(cy)}" r="${f2(e.sym.r * sc)}" fill="${e.sym.fill}"${e.sym.stroke || ''}/>`);
         else out.push(`<rect x="${f2(sx0 - 5 * sc)}" y="${f2(cy - 4 * sc)}" width="${f2(10 * sc)}" height="${f2(8 * sc)}" rx="${f2(2 * sc)}" fill="${e.sym.fill}"/>`);
         const txt = lgText(b.key, i, e.text);
         out.push(`<text x="${f2(symW + gap)}" y="${f2(cy)}" dominant-baseline="central" font-size="${f2(lfs)}"${ff}>${esc(txt)}</text>`);
@@ -3609,6 +3807,15 @@ function arcPath(r, a0, a1) {
   const [x0, y0] = polar0(r, a0), [x1, y1] = polar0(r, a1);
   return `M${f2(x0)},${f2(y0)}A${f2(r)},${f2(r)} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${f2(x1)},${f2(y1)}`;
 }
+function hpdOf(ages, level = 0.95) {
+  const a = ages.filter(Number.isFinite).slice().sort((x, y) => x - y), n = a.length;
+  if (!n) return { lo: 0, hi: 0, med: 0 };
+  const k = Math.max(1, Math.ceil(level * n));
+  let best = 0, w = Infinity;
+  for (let i = 0; i + k - 1 < n; i++) { const d = a[i + k - 1] - a[i]; if (d < w) { w = d; best = i; } }
+  const med = n % 2 ? a[(n - 1) / 2] : (a[n / 2 - 1] + a[n / 2]) / 2;
+  return { lo: a[best], hi: a[Math.min(n - 1, best + k - 1)], med };
+}
 function sector(r0, r1, a0, a1) {
   if (radFlip != null) [r0, r1] = [realR(r1), realR(r0)];
   const polar = polar0;
@@ -3649,6 +3856,8 @@ svg.addEventListener('wheel', e => {
   zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * (e.deltaMode ? 0.05 : 0.0018)));
 }, { passive: false });
 
+// On a Mac, Control-click means right-click: keep it from also counting as a click
+svg.addEventListener('pointerdown', e => { if (e.ctrlKey && e.pointerType === 'mouse' && e.button === 0) e.stopImmediatePropagation(); }, true);
 const ptrs = new Map(); let panMoved = false, downTarget = null, pinch = null, downPos = null, lpTimer = null, lpFired = false, lastCtx = 0;
 const targetInfo = el => el && el.dataset && el.dataset.id ? { id: +el.dataset.id, kind: el.dataset.kind || 'node' } : null;
 svg.addEventListener('pointerdown', e => {
@@ -3940,7 +4149,8 @@ function openEdit(cx, cy, keep) {
   const rs = (k, arr) => `<button type="button" class="rst${T[arr] && T[arr].some(n => stv(n, k) != null) ? '' : ' hide'}" data-rs="${k}" data-rt="${arr}" title="Use the panel setting" aria-label="Use the panel setting">↶</button>`;
   const num = (k, arr, ph, unit, dis) => rs(k, arr) + `<span class="numwrap"><input class="num boxed" type="number" step="any" data-k="${k}" data-t="${arr}" value="${g(arr, k) ?? ''}" placeholder="${ph}"${dis ? ' disabled' : ''}><span class="u">${unit || ''}</span></span>`;
   const ssel = (k, arr, opts, dis) => pselect('data-sk', k, g(arr, k), opts, ` data-t="${arr}"${dis ? ' disabled' : ''}`);
-  const seg = (k, arr, opts = ALIGN_OPTS, dis, def) => { const v = g(arr, k) ?? (def ?? ''); return `<div class="seg" data-seg="${k}" data-t="${arr}">${(def != null ? opts : [['', 'Default'], ...opts]).map(([a, b]) => `<button type="button" data-v="${a}" aria-pressed="${a === v}"${dis ? ' disabled' : ''}>${b}</button>`).join('')}</div>`; };
+  // the value in effect is pressed: the element's own, otherwise the panel's (no separate "Default" button)
+  const seg = (k, arr, opts = ALIGN_OPTS, dis, def) => { const v = g(arr, k) ?? (def ?? ''); return `<div class="seg" data-seg="${k}" data-t="${arr}">${opts.map(([a, b]) => `<button type="button" data-v="${a}" aria-pressed="${a === v}"${dis ? ' disabled' : ''}>${b}</button>`).join('')}</div>`; };
   const sw = (k, arr, cur, pal = PALETTE, dis) => swatches(k, pal, cur, dis).replace('class="sw', `data-t="${arr}" class="sw`);
   const slider = (k, arr, label, def, min, max, unit = 'px', dis) => { const v = g(arr, k) ?? def; const d = dis ? ' disabled' : ''; return `<div class="row${dis ? ' off' : ''}"><label>${label}</label>${rs(k, arr)}<span class="numwrap"><input class="num boxed" type="number" step="any" data-k="${k}" data-t="${arr}" value="${g(arr, k) ?? ''}" placeholder="${def}"${d}><span class="u">${unit || ''}</span></span><input type="range" min="${min}" max="${max}" step="1" value="${clamp(v, min, max)}" data-rk="${k}" data-t="${arr}" aria-label="${label}"${d}></div>`; };
   const every = (arr, f) => T[arr].length && T[arr].every(f);
@@ -3961,7 +4171,7 @@ function openEdit(cx, cy, keep) {
     h += `<div class="grp"><span>${single && !single.children.length ? 'Branch and label color' : 'Clade color'}</span>${sw('color', 'roots', roots[0].color)}</div>`;
     if (single && !isGraft(single)) h += `<div class="grp"><span>Highlight background</span>${sw('bg', 'roots', single.bg, BGPAL)}</div>
       <div class="kv"><span>Highlight opacity</span>${num('bgOp', 'roots', S.cladeOpacity, '', !single.bg)}</div>
-      ${single.bg ? `<div class="kv"><span>Starts at</span>${esel('bgS', 'roots', [['node', 'Node'], ['root', 'Root']], S.hlStart)}</div>
+      ${single.bg ? `<div class="kv"><span>Starts at</span>${esel('bgS', 'roots', [['root', 'Root'], ['stem', 'Stem'], ['node', 'Crown']], S.hlStart)}</div>
       <div class="kv"><span>Ends at</span>${esel('bgE', 'roots', [['tree', 'Tree edge'], ['labels', 'Labels']], S.hlEnd)}</div>
       <div class="kv"><span>Gradient</span>${esel('bgG', 'roots', [['none', 'None'], ['right', 'Fade out'], ['left', 'Fade in']], S.hlGradient)}</div>
       ${isRectish(S) ? `<div class="kv"><span>Corner rounding</span>${num('bgR', 'roots', S.hlRadius, 'px')}</div>` : ''}` : ''}`;
@@ -4031,7 +4241,7 @@ function openEdit(cx, cy, keep) {
     const cur = effLen(T.len[0]) ? '1' : '0';
     parts.push(`<div class="part"><b>${T.len.length === 1 ? 'Branch length label' : 'Branch length labels'}</b>
       <div class="kv"><span>Show</span><select class="psel" data-vis="lv" data-t="len"><option value="1" ${cur === '1' ? 'selected' : ''}>Shown</option><option value="0" ${cur === '0' ? 'selected' : ''}>Hidden</option></select></div>
-      <div class="grp${hidden ? ' off' : ''}"><span>Position on branch</span>${seg('la', 'len', ALIGN_OPTS, hidden)}</div>
+      <div class="grp${hidden ? ' off' : ''}"><span>Position on branch</span>${seg('la', 'len', ALIGN_OPTS, hidden, S.lengthAlign)}</div>
       <div class="kv"><span>Margin from branch end</span>${num('lm', 'len', S.lengthMargin, 'px', hidden || center)}</div>
       <div class="kv"><span>Vertical offset</span>${num('ldy', 'len', S.lengthDy, 'px', hidden)}</div>
       <div class="kv"><span>Text size</span>${num('ls', 'len', S.lengthSize, 'px', hidden)}</div>
@@ -4081,7 +4291,7 @@ function openEdit(cx, cy, keep) {
     const cur = effSup(T.sup[0]);
     parts.push(`<div class="part"><b>${T.sup.length === 1 ? 'Support label' : 'Support labels'}</b>
       <div class="kv"><span>Show as</span><select class="psel" data-vis="svm" data-t="sup">${[['none', 'Hidden'], ['text', 'Number'], ['dots', 'Circles']].map(([a, b]) => `<option value="${a}" ${a === cur ? 'selected' : ''}${a === 'dots' && piesOnNodes(S) ? ' disabled' : ''}>${b}</option>`).join('')}</select></div>
-      <div class="grp${notText ? ' off' : ''}"><span>Side of the node</span>${seg('sa', 'sup', SIDE_OPTS, notText, S.supportAlign)}</div>
+      <div class="grp${notText ? ' off' : ''}"><span>Position</span>${seg('sa', 'sup', SIDE_OPTS, notText, S.supportAlign)}</div>
       <div class="kv"><span>Distance from the node</span>${num('sm', 'sup', S.supportMargin, 'px', notText)}</div>
       <div class="kv"><span>Vertical offset</span>${num('sdy', 'sup', S.supportDy, 'px', notText)}</div>
       <div class="kv"><span>Size</span>${num('ss', 'sup', S.supportSize, 'px', hidden)}</div>
@@ -4104,7 +4314,7 @@ function openEdit(cx, cy, keep) {
     const cur = (stv(T.nlab[0], 'nlv') ?? !!nodeLabelSrc(S)) ? '1' : '0';
     parts.push(`<div class="part"><b>Node label</b>
       <div class="kv"><span>Show</span><select class="psel" data-vis="nlv" data-t="nlab"><option value="1" ${cur === '1' ? 'selected' : ''}>Shown</option><option value="0" ${cur === '0' ? 'selected' : ''}>Hidden</option></select></div>
-      <div class="grp${hidden ? ' off' : ''}"><span>Side of the node</span>${seg('na', 'nlab', SIDE_OPTS, hidden, S.ancLabelAlign)}</div>
+      <div class="grp${hidden ? ' off' : ''}"><span>Position</span>${seg('na', 'nlab', SIDE_OPTS, hidden, S.ancLabelAlign)}</div>
       <div class="kv"><span>Distance from the node</span>${num('nm', 'nlab', S.ancLabelMargin, 'px', hidden)}</div>
       <div class="kv"><span>Vertical offset</span>${num('ndy', 'nlab', S.ancLabelDy, 'px', hidden)}</div>
       <div class="kv"><span>Text size</span>${num('ns', 'nlab', S.ancLabelSize, 'px', hidden)}</div>
@@ -4128,8 +4338,8 @@ function openEdit(cx, cy, keep) {
         const curvedAll = circNow && T.bar.every(n => (stv(n, 'barTM') ?? S.barTextMode) === 'curved');
         const rg = barRange.get(T.bar[0].id) || [0, 0];
         return `${circNow ? '' : '<span class="hint">The options below apply on circular and fan trees.</span>'}
-        <div class="kv${circNow ? '' : ' off'}"><span>Name on the circle</span>${esel('barTM', 'bar', [['radial', 'Radial'], ['curved', 'Curved']], S.barTextMode)}</div>
-        <div class="kv${curvedAll ? '' : ' off'}"><span>Position along the arc</span>${esel('barTA', 'bar', [['start', 'Start'], ['center', 'Center'], ['end', 'End']], S.barTextAlign)}</div>
+        <div class="kv keep${circNow ? '' : ' off'}"><span>Name on the circle</span>${esel('barTM', 'bar', [['radial', 'Radial'], ['curved', 'Curved']], S.barTextMode)}</div>
+        <div class="kv keep${curvedAll ? '' : ' off'}"><span>Position along the arc</span>${esel('barTA', 'bar', [['start', 'Start'], ['center', 'Center'], ['end', 'End']], S.barTextAlign)}</div>
         ${slider('barTD', 'bar', 'Move along the arc', 0, Math.floor(rg[0]), Math.ceil(rg[1]), 'px', !curvedAll || rg[0] === rg[1])}`;
       })()}
       <div class="grp"><span>Bar color</span>${sw('barC', 'bar', g('bar', 'barC'))}</div>
@@ -4296,14 +4506,15 @@ function openEdit(cx, cy, keep) {
 function runSearch() {
   const q = $('search').value.trim().toLowerCase();
   searchHits = [];
-  if (q && tree) for (const l of leaves(tree)) if (l.name.toLowerCase().includes(q) || disp(l.name).toLowerCase().includes(q)) searchHits.push(l);
+  const rx = searchRegex(q);
+  if (q && tree) for (const l of leaves(tree)) if (rx ? rx.test(l.name) || rx.test(disp(l.name)) : l.name.toLowerCase().includes(q) || disp(l.name).toLowerCase().includes(q)) searchHits.push(l);
   const hidden = searchHits.filter(l => { let x = l.parent; while (x) { if (x.collapsed) return true; x = x.parent; } return false; }).length;
   const sc = $('searchCount');
-  sc.textContent = q ? (searchHits.length ? plural(searchHits.length, 'match', 'matches') + (hidden ? `, ${hidden} inside collapsed clades` : '') + (searchHits.length === 1 ? '. Press Enter to select it.' : '. Press Enter to select their clade.') : 'No tips match') : '';
+  sc.textContent = q ? (searchHits.length ? plural(searchHits.length, 'match', 'matches') + (hidden ? `, ${hidden} inside collapsed clades` : '') + (searchHits.length === 1 ? '. Press Enter to select it.' : '. Enter selects them, Shift+Enter selects their clade.') : 'No tips match') : '';
   sc.hidden = !q || !tree;
 }
 $('search').addEventListener('input', () => { runSearch(); render(); });
-$('search').addEventListener('keydown', e => { if (e.key === 'Enter') selectMrca(); });
+$('search').addEventListener('keydown', e => { if (e.key === 'Enter') (e.shiftKey ? selectMrca : selectMatches)(); });
 function selectMrca() {
   if (!searchHits.length) return;
   let m = mrca(searchHits);
@@ -4535,6 +4746,11 @@ function svgToPdf(svgStr, ptW, imgData) {
       else if (C === 'L') { let x = n(), y = n(); if (rel) { x += cx; y += cy; } cx = x; cy = y; ops.push(`${N(x)} ${N(y)} l`); }
       else if (C === 'H') { let x = n(); if (rel) x += cx; cx = x; ops.push(`${N(cx)} ${N(cy)} l`); }
       else if (C === 'V') { let y = n(); if (rel) y += cy; cy = y; ops.push(`${N(cx)} ${N(cy)} l`); }
+      else if (C === 'Q') {
+        // quadratic curve, written as the equivalent cubic
+        let qx = n(), qy = n(), x = n(), y = n(); if (rel) { qx += cx; qy += cy; x += cx; y += cy; }
+        ops.push(`${N(cx + 2 / 3 * (qx - cx))} ${N(cy + 2 / 3 * (qy - cy))} ${N(x + 2 / 3 * (qx - x))} ${N(y + 2 / 3 * (qy - y))} ${N(x)} ${N(y)} c`); cx = x; cy = y;
+      }
       else if (C === 'C') { const v = [n(), n(), n(), n(), n(), n()]; if (rel) for (let j = 0; j < 6; j++) v[j] += j % 2 ? cy : cx; ops.push(`${v.map(N).join(' ')} c`); cx = v[4]; cy = v[5]; }
       else if (C === 'A') {
         const rx = n(), ry = n(), ph = n(), fa = n(), fs = n(); let x = n(), y = n(); if (rel) { x += cx; y += cy; }
@@ -4711,7 +4927,7 @@ async function exportTIFF() {
     saveFile(fname, new Blob([tiffEncode(data, W, H, dpiNow())], { type: 'image/tiff' }));
   });
 }
-function exportAs(fmt) { ({ svg: exportSVG, pdf: exportPDF, png: exportPNG, tif: exportTIFF })[fmt](); }
+function exportAs(fmt) { ({ svg: exportSVG, pdf: exportPDF, png: exportPNG, tif: exportTIFF, nwk: () => exportTree('newick'), nex: () => exportTree('nexus') })[fmt](); }
 
 /* ================= Misc ================= */
 let toastT;
@@ -4726,7 +4942,7 @@ const closeAbout = () => { aboutM.hidden = true; $('aboutBtn').focus(); };
    'https://raw.githubusercontent.com/USER/REPO/main/about.html'
    While it is empty, the app reads about.html from the same folder (handy for local tests).
    Every time the text loads, a copy is kept in the browser, so it still shows without internet. */
-const ABOUT_URL = 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/about.html';
+const ABOUT_URL = 'https://raw.githubusercontent.com/VR-Daniel/tree2go/main/about.html';
 const ABOUT_CACHE = 'tree2go-about';
 function cleanAbout(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -4910,8 +5126,8 @@ const cp = (() => {
   const sv = $e('.cp-sv'), svK = $e('.cp-sv-knob'), hue = $e('.cp-hue'), hueK = $e('.cp-hue-knob');
   const alz = $e('.cp-alpha'), alFill = $e('.cp-alpha-fill'), alK = $e('.cp-alpha-knob'), anum = $e('.cp-anum');
   const hex = $e('.cp-hex'), prev = $e('.cp-prev'), drop = $e('.cp-drop'), rgbIn = [...el.querySelectorAll('.cp-rgb input')];
-  const PAL = [...PALETTE, ...BGPAL, '#FFFFFF', '#D9D9D9', '#A6A6A6', '#6E6E6E', '#3A3A3A', '#000000'];
-  $e('.cp-pal').innerHTML = PAL.map(c => `<button type="button" style="background:${c}" data-c="${c}" title="${c}" aria-label="${c}"></button>`).join('');
+  const buildPal = () => { const PAL = [...PALETTE, ...BGPAL, '#FFFFFF', '#D9D9D9', '#A6A6A6', '#6E6E6E', '#3A3A3A', '#000000']; $e('.cp-pal').innerHTML = PAL.map(c => `<button type="button" style="background:${c}" data-c="${c}" title="${c}" aria-label="${c}"></button>`).join(''); };
+  buildPal();
   if (!window.EyeDropper) drop.style.visibility = 'hidden';
   let target = null, h = 0, sat = 0, val = 0, al = 1, start = null;
   const clamp01 = x => Math.max(0, Math.min(1, x));
@@ -4996,6 +5212,7 @@ const cp = (() => {
     el.style.left = Math.max(8, x) + 'px'; el.style.top = Math.max(8, Math.min(y, innerHeight - hh - 8)) + 'px';
   }
   function open(input) {
+    buildPal();
     if (target === input && !el.hidden) { close(); return; }
     if (!el.hidden) close();
     target = input;
@@ -5495,7 +5712,8 @@ function pageFromClade(n) {
   (function g(x) { const sp = pageRows.spanOf.get(x.id); if (sp) { a = Math.min(a, sp[0]); b = Math.max(b, sp[1]); } if (!x._tri) x.children.forEach(g); if (x.grafts) x.grafts.forEach(g); })(n);
   return isFinite(a) ? [a, b] : null;
 }
-function pagesChanged(msg) { const first = (settings.pages || []).length === 1; render(); if (first) fit(); persist(); refreshPagesBox(); refreshVisibility(); if (msg) toast(msg); }
+function pagesChanged(msg) {
+  setTimeout(refreshVisibility); const first = (settings.pages || []).length === 1; render(); if (first) fit(); persist(); refreshPagesBox(); refreshVisibility(); if (msg) toast(msg); }
 function splitRest() {
   if (!pageRows) return;
   const N = pageRows.N, taken = new Array(N).fill(false);
@@ -5989,6 +6207,214 @@ svg.addEventListener('pointerdown', e => {
   inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); finish(true); } else if (ev.key === 'Escape') { ev.stopPropagation(); finish(false); } });
   inp.addEventListener('blur', () => finish(true));
 }, true);
+
+/* ================= Information on hover (button at the bottom of the panel) ================= */
+function nodeInfo(n) {
+  const title = n.children.length ? (n.name && !isSupport(n.name) ? disp(n.name) : n.parent ? 'Internal node' : 'Root') : disp(n.name || 'Tip');
+  const parts = [n.children.length ? leafCount(n) + ' tips' : 'Tip'];
+  if (n.len != null) parts.push('branch ' + fmtNum(n.len));
+  const sv = n.children.length ? supValue(n) : null;
+  if (sv != null) parts.push('support ' + fmtNum(sv));
+  return { title, meta: parts.join(', ') };
+}
+const hoverTip = document.createElement('div'); hoverTip.className = 'hovertip'; hoverTip.hidden = true; document.body.appendChild(hoverTip);
+let hoverKey = null;
+const hideHover = () => { hoverTip.hidden = true; hoverKey = null; };
+svg.addEventListener('pointermove', e => {
+  if (!settings.hoverInfo || ptrs.size || e.pointerType !== 'mouse') { if (!hoverTip.hidden) hideHover(); return; }
+  const t = e.target.closest && e.target.closest('[data-id][data-kind]');
+  const kind = t && t.dataset.kind, n = t && nodeById.get(+t.dataset.id);
+  if (!n || !/^(branch|node|label|support|length)$/.test(kind)) { if (!hoverTip.hidden) hideHover(); return; }
+  const key = n.id + ':' + kind;
+  if (key !== hoverKey) { const i = nodeInfo(n); hoverTip.innerHTML = `<b>${esc(i.title)}</b><span>${esc(i.meta)}</span>`; hoverKey = key; hoverTip.hidden = false; }
+  const w = hoverTip.offsetWidth, h = hoverTip.offsetHeight;
+  hoverTip.style.left = Math.min(innerWidth - w - 8, e.clientX + 14) + 'px';
+  hoverTip.style.top = Math.min(innerHeight - h - 8, e.clientY + 16) + 'px';
+});
+svg.addEventListener('pointerleave', hideHover);
+svg.addEventListener('pointerdown', hideHover, true);
+svg.addEventListener('wheel', hideHover, { passive: true });
+
+/* ================= Rename tips from a file with two columns: old name, new name ================= */
+function renameFromText(text) {
+  const rows = String(text).split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => l.split(/\t|;|,/).map(c => c.trim().replace(/^"|"$/g, '')));
+  const pairs = rows.filter(r => r.length >= 2 && r[0] && r[1]);
+  if (!pairs.length) return toast('The file needs two columns: the current name and the new name');
+  const norm = v => String(v).replace(/_/g, ' ').trim().toLowerCase();
+  const tips = leaves(tree), byName = new Map(tips.map(n => [norm(n.name || ''), n]));
+  const hits = pairs.filter(([a]) => byName.has(norm(a)));
+  if (!hits.length) return toast('None of the names in the file matched a tip');
+  mutate(() => { for (const [a, b] of hits) byName.get(norm(a)).name = b; });
+  const header = !byName.has(norm(pairs[0][0])) ? 1 : 0;   // an unmatched first row is taken as the column titles
+  const missing = pairs.length - header - hits.length;
+  toast(`${hits.length} ${hits.length === 1 ? 'tip' : 'tips'} renamed${missing ? `, ${missing} ${missing === 1 ? 'name was' : 'names were'} not found` : ''}`);
+}
+function treeToolsBox() {
+  const d = document.createElement('div'); d.className = 'treetools';
+  d.innerHTML = `
+    <div class="row"><label>Order nodes</label><span class="useg wide"><button type="button" data-ord="1">Increasing</button><button type="button" data-ord="0">Decreasing</button></span></div>
+    <div class="btns"><button type="button" class="btn small" id="renBtn">Rename tips from a file…</button></div>
+    <input type="file" id="renIn" hidden>
+    <p class="hint">The file needs two columns, the current name and the new name, separated by a comma, a tab or a semicolon.</p>`;
+  setTimeout(() => {
+    d.querySelectorAll('[data-ord]').forEach(b => b.onclick = () => { if (!tree) return toast('Load a tree first'); mutate(() => ladderize(tree, b.dataset.ord === '1'), b.dataset.ord === '1' ? 'Ordered: increasing' : 'Ordered: decreasing'); });
+    $('renBtn').onclick = () => { if (!tree) return toast('Load a tree first'); $('renIn').click(); };
+    $('renIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => renameFromText(r.result); r.readAsText(f); } e.target.value = ''; };
+  });
+  return d;
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-hover]'); if (!b) return;
+  settings.hoverInfo = !settings.hoverInfo; persist(); syncHoverBtn(); if (!settings.hoverInfo) hideHover();
+  toast(settings.hoverInfo ? 'Info on hover is on' : 'Info on hover is off');
+});
+function syncHoverBtn() { document.querySelectorAll('[data-hover]').forEach(b => { b.setAttribute('aria-pressed', !!settings.hoverInfo); b.classList.toggle('on', !!settings.hoverInfo); }); }
+setTimeout(syncHoverBtn);
+
+/* ================= Heatmap columns ================= */
+function heatTableOf(s) { return (s.dataTables || []).find(t => t.id === s.heatTable) || null; }
+function hasHeat(s) { const t = heatTableOf(s); return !!(t && tableMatches(t) > 0 && (s.heatCols || []).some(c => t.header.indexOf(c) > 0)); }
+function heatPlot(S) { const t = heatTableOf(S); if (!t || !tableMatches(t)) return null; const cols = (S.heatCols || []).filter(c => t.header.indexOf(c) > 0); return cols.length ? { t, cols, idx: cols.map(c => t.header.indexOf(c)) } : null; }
+function heatPickerBox() {
+  const d = document.createElement('div'); d.id = 'heatCols'; d.className = 'tpicker';
+  const fill = () => {
+    const S = settings, ts2 = matchedTables(S), t = ts2.find(x => x.id === S.heatTable) || null, cols = t ? numericCols(t) : [], on = new Set(S.heatCols || []);
+    let h = `<div class="row${ts2.length ? '' : ' off'}"><label for="tsel_heat">Table</label><select id="tsel_heat"${ts2.length ? '' : ' disabled'}><option value="">None</option>${ts2.map(x => `<option value="${esc(x.id)}"${t && x.id === t.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>`;
+    if (!ts2.length) h += (S.dataTables || []).length ? '<p class="hint">None of the attached tables has names that match this tree.</p>' : '<p class="hint">Add a table in Attachments to draw a heatmap.</p>';
+    if (t) h += cols.length ? `<div class="tcols">${cols.map((c, i) => `<div class="tcol"><input type="checkbox" id="tc_heat${i}" data-col="${esc(c)}"${on.has(c) ? ' checked' : ''}><label for="tc_heat${i}">${esc(c)}</label></div>`).join('')}</div>` : '<p class="hint">This table has no numeric columns.</p>';
+    d.innerHTML = h;
+    const sl = d.querySelector('select');
+    if (sl) sl.onchange = () => { const nt = ts2.find(x => x.id === sl.value) || null; settings.heatTable = nt ? nt.id : ''; settings.heatCols = nt ? numericCols(nt) : []; fill(); refreshVisibility(); render(); persist(); };
+    d.querySelectorAll('input[type=checkbox]').forEach(cb => cb.onchange = () => { const set = new Set(settings.heatCols || []); cb.checked ? set.add(cb.dataset.col) : set.delete(cb.dataset.col); settings.heatCols = cols.filter(c => set.has(c)); refreshVisibility(); render(); persist(); });
+  };
+  d._fill = fill; setTimeout(fill);
+  return d;
+}
+
+/* ================= Tip labels from a table column ================= */
+function allCols(t) { return t ? t.header.slice(1) : []; }
+function altNames(S) {
+  const t = (S.dataTables || []).find(x => x.id === S.labelSrcTable), ci = t ? t.header.indexOf(S.labelSrcCol) : -1, out = new Map();
+  if (!t || ci < 1 || !tree) return out;
+  const m = tableIndex(t);
+  for (const n of leaves(tree)) { const r = m.get(normTip(n.name || '')); const v = r && r[ci] != null ? String(r[ci]).trim() : ''; if (v) out.set(n, v); }
+  return out;
+}
+
+/* ================= Clade names from a file: Name={species, species, ...} ================= */
+function cladeNamesFromText(text) {
+  if (!tree) return toast('Load a tree first');
+  const groups = [], re = /([^=\n{}]+?)\s*=\s*(?:\{([^}]*)\}|([^\n]*))/g; let m;
+  while ((m = re.exec(String(text)))) {
+    const name = m[1].trim(), list = (m[2] ?? m[3] ?? '').split(/[,;\t\n]+/).map(x => x.trim().replace(/^"|"$/g, '')).filter(Boolean);
+    if (name && list.length) groups.push([name, list]);
+  }
+  if (!groups.length) return toast('Write one group per line, like Primates={Homo sapiens, Pan troglodytes}');
+  const norm = v => String(v).replace(/_/g, ' ').trim().toLowerCase();
+  const byName = new Map(leaves(tree).map(n => [norm(n.name || ''), n]));
+  const plan = [], missing = [], notMono = [];
+  for (const [name, list] of groups) {
+    const found = list.map(x => byName.get(norm(x))).filter(Boolean);
+    if (!found.length) { missing.push(name); continue; }
+    const node = found.length === 1 ? found[0] : mrca(found);
+    // with a full list, say so when the common ancestor also holds tips that were not listed
+    if (list.length > 2 && leafCount(node) > found.length) notMono.push(name);
+    plan.push([node, name]);
+  }
+  if (!plan.length) return toast('None of the groups matched tips of this tree');
+  mutate(() => { for (const [node, name] of plan) node.cladeLabel = name; });
+  let msg = `${plan.length} ${plan.length === 1 ? 'clade' : 'clades'} named`;
+  if (missing.length) msg += `, not found: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '…' : ''}`;
+  if (notMono.length) msg += `. Not monophyletic, so the name covers the common ancestor: ${notMono.slice(0, 3).join(', ')}${notMono.length > 3 ? '…' : ''}`;
+  toast(msg);
+}
+function cladeFileBox() {
+  const d = document.createElement('div'); d.className = 'treetools';
+  d.innerHTML = `<div class="btns"><button type="button" class="btn small" id="cnBtn">Name clades from a file…</button></div><input type="file" id="cnIn" hidden>
+    <p class="hint">One group per line, for example Primates={Homo sapiens, Pan troglodytes}. Two names mark their most recent common ancestor, a full list also works.</p>`;
+  setTimeout(() => {
+    $('cnBtn').onclick = () => { if (!tree) return toast('Load a tree first'); $('cnIn').click(); };
+    $('cnIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => cladeNamesFromText(r.result); r.readAsText(f); } e.target.value = ''; };
+  });
+  return d;
+}
+
+/* ================= Select tips by name: Enter selects the matches, Shift+Enter their clade ================= */
+function searchRegex(q) {
+  if (!/[*?]/.test(q)) return null;
+  return new RegExp('^' + q.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$', 'i');
+}
+function selectMatches() {
+  if (!searchHits.length) return;
+  sel.clear(); selMode === 'clade' && (selMode = 'element');
+  for (const l of searchHits) sel.set(skey(l.id, 'label'), { id: l.id, kind: 'label' });
+  closePop(); render(); toast(`${searchHits.length} ${searchHits.length === 1 ? 'tip' : 'tips'} selected. Right-click one of them to edit them all.`);
+}
+
+/* ================= Style templates: the look of a figure, without its tree or data ================= */
+const STYLE_SKIP = new Set(['dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
+  'pages', 'legendPos', 'legendText', 'scaleX', 'scaleY', 'scaleFree', 'title', 'projectName', 'exportName', 'exportSizeMode', 'exportWidthVal', 'axisCustom', 'nbarSrc', 'nlabSrc', 'supportSource']);
+async function saveStyle() {
+  const style = Object.fromEntries(Object.entries(settings).filter(([k]) => !STYLE_SKIP.has(k)));
+  const name = await askName((settings.exportName || 'my-style'), { title: 'Save style template', ext: '.tree2go-style.json', ok: 'Save' });
+  if (name == null) return;
+  const clean = name.replace(/\.tree2go-style\.json$/i, '').replace(/[\\/:*?"<>|]+/g, '').trim() || 'style';
+  saveFile(clean + '.tree2go-style.json', JSON.stringify({ format: 'tree2go-style', version: 1, saved: new Date().toISOString(), style }, null, 1));
+}
+function applyStyleText(text) {
+  let o; try { o = JSON.parse(text); } catch (e) { return toast('That file is not a style template'); }
+  const st = o && (o.format === 'tree2go-style' ? o.style : o.format && /project/.test(o.format) ? o.settings : null);
+  if (!st) return toast('That file is not a style template');
+  if (tree) pushUndo(true);
+  for (const [k, v] of Object.entries(st)) if (!STYLE_SKIP.has(k) && k in DEFAULTS) settings[k] = JSON.parse(JSON.stringify(v));
+  applyPalette(); buildSide(); render(); persist();
+  toast('Style applied. Ctrl+Z goes back.');
+}
+
+/* ================= Export the edited tree: Newick, or NEXUS with FigTree colours ================= */
+async function exportTree(kind) {
+  if (!tree) return toast('Load a tree first');
+  const fname = await exportName(kind === 'nexus' ? '.nex' : '.nwk', kind === 'nexus' ? 'tree as NEXUS' : 'tree as Newick'); if (!fname) return;
+  if (kind !== 'nexus') return saveFile(fname, toNewick(tree) + '\n');
+  const q = s => /^[A-Za-z0-9_.\-]+$/.test(s) ? s : `'${String(s).replace(/'/g, "''")}'`;
+  const ann = n => {
+    const parts = [];
+    if (n.meta) for (const [k, v] of Object.entries(n.meta)) { if (typeof v === 'number') parts.push(`${k}=${v}`); else if (Array.isArray(v)) parts.push(`${k}={${v.join(',')}}`); else if (typeof v === 'string') parts.push(`${k}="${v}"`); }
+    const c = (n.st && n.st.bc) || n.color || null;
+    if (c) parts.push(`!color=${String(c).slice(0, 7)}`);
+    return parts.length ? `[&${parts.join(',')}]` : '';
+  };
+  const w = (n, root) => {
+    let s = n.children.length ? '(' + n.children.map(c => w(c, false)).join(',') + ')' : '';
+    if (n.name) s += q(n.name);
+    s += ann(n);
+    if (n.len != null && !root) s += ':' + (+n.len.toPrecision(10));
+    return s;
+  };
+  const tips = leaves(tree).map(n => q(n.name || ''));
+  saveFile(fname, `#NEXUS\nbegin taxa;\n\tdimensions ntax=${tips.length};\n\ttaxlabels\n${tips.map(t => '\t' + t).join('\n')}\n;\nend;\n\nbegin trees;\n\ttree tree_1 = [&R] ${w(tree, true)};\nend;\n`);
+}
+
+/* ================= Palettes, and a preview of how people with colour vision deficiency see the figure ================= */
+const PALETTES = {
+  default: ['#C8553D', '#E0A33A', '#2E8B7A', '#2F5D8C', '#7A4E9A', '#D1729A', '#6C9A3F', '#8C6A4F', '#3D9BC4', '#1F1F1F'],
+  okabe: ['#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7', '#999999', '#000000', '#1F1F1F'],
+  tol: ['#4477AA', '#EE6677', '#228833', '#CCBB44', '#66CCEE', '#AA3377', '#BBBBBB', '#000000', '#88CCEE', '#1F1F1F'],
+  viridis: ['#440154', '#482878', '#3E4989', '#31688E', '#26828E', '#1F9E89', '#35B779', '#6DCD59', '#B4DE2C', '#FDE725']
+};
+function applyPalette() { const p = PALETTES[settings.paletteName] || PALETTES.default; PALETTE.splice(0, PALETTE.length, ...p); applyCvd(); }
+const CVD = {
+  protan: '0.152286 1.052583 -0.204868 0 0  0.114503 0.786281 0.099216 0 0  -0.003882 -0.048116 1.051998 0 0  0 0 0 1 0',
+  deutan: '0.367322 0.860646 -0.227968 0 0  0.280085 0.672501 0.047413 0 0  -0.011820 0.042940 0.968881 0 0  0 0 0 1 0',
+  tritan: '1.255528 -0.076749 -0.178779 0 0  -0.078411 0.930809 0.147602 0 0  0.004733 0.691367 0.303900 0 0  0 0 0 1 0',
+  gray: '0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0'
+};
+function applyCvd() {
+  let defs = document.getElementById('cvdDefs');
+  if (!defs) { defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs'); defs.id = 'cvdDefs'; defs.innerHTML = Object.entries(CVD).map(([k, v]) => `<filter id="cvd-${k}" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values="${v}"/></filter>`).join(''); svg.insertBefore(defs, svg.firstChild); }
+  const k = settings.cvdSim; vp.style.filter = k && CVD[k] ? `url(#cvd-${k})` : '';   // the screen only, exports keep the real colours
+}
 
 /* ================= Start ================= */
 /* ================= Clear session, collapse all, MRCA picker ================= */
