@@ -167,9 +167,6 @@ Support values, other values read from the tree (such as ages or probabilities),
 |:---|:---|:---|:---|:---|
 | `Show as` | How support values are shown on the nodes. | Hidden<br>Number<br>Circles | Hidden |  |
 | `Values from`¹ | Where support values come from. | Input tree<br>SIMMAP<br>Trees file | Input tree | `Show as` is not **Hidden** |
-| `Second value` | A second support, such as posterior next to bootstrap. | List |  | `Show as` is not **Hidden** |
-| `Write it` | Where the second value goes. | Below the branch<br>After the first (a / b) | Below the branch | `Show as` is **Number**, `Second value` is set |
-| `Color of the second value` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show as` is not **Hidden**, `Second value` is set, `Show as` is **Number**, `Write it` is **After the first (a / b)** |
 | `Size` |  | 1 to 100 px | 9 px | `Show as` is **Number** or **Circles**, `Which values` is **Above a threshold** |
 | `Color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show as` is not **Hidden**, `Which values` is **Above a threshold** |
 | `Bigger circles for higher values` | Circle size grows with the support. | On<br>Off | Off | `Show as` is **Circles**, `Which values` is **Above a threshold** |
@@ -188,14 +185,24 @@ Support values, other values read from the tree (such as ages or probabilities),
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Show`¹ | Value written next to each node: names, annotations or summaries of the trees. | List |  |  |
-| `Decimals` |  | 0, 1, 2, 3, 4, 5, 6 | 2 | `Show` is set |
-| `Text size` |  | 1 to 100 px | 8 px | `Show` is set |
-| `Color` |  | Color | <img src="img/colors/333333.svg" alt="#333333" align="absmiddle"> #333333 | `Show` is set |
-| `Position` | Side of the node, or the middle of its branch. | Left<br>Centered on the branch<br>Right | Left | `Show` is set |
-| `Distance from the node` | Space between the node and the label. | −2000 to 2000 px | 3 px | `Show` is set, `Position` is not **Centered on the branch** |
-| `Vertical offset` | Moves the label up (positive) or down (negative). | −500 to 500 px | 0 px | `Show` is set |
+| `Show as` | Writes each value, or draws a circle whose color and size can follow it. | Number<br>Circles | Number | `Show` is set |
+| `Color by the value` | Colors each circle along a scale from its value. | On<br>Off | On | `Show` is set, `Show as` is **Circles** |
+| `Low values` |  | Color | <img src="img/colors/2C7BB6.svg" alt="#2C7BB6" align="absmiddle"> #2C7BB6 | `Show` is set, `Show as` is **Circles**, `Color by the value` is **On** |
+| `High values` |  | Color | <img src="img/colors/D7191C.svg" alt="#D7191C" align="absmiddle"> #D7191C | `Show` is set, `Show as` is **Circles**, `Color by the value` is **On** |
+| `Size by the value` | Makes each circle bigger as its value grows. | On<br>Off | Off | `Show` is set, `Show as` is **Circles** |
+| `Circle size` |  | 0.5 to 15 px | 3.5 px | `Show` is set, `Show as` is **Circles**, `Size by the value` is **Off** |
+| `Smallest` | Size of the circle with the lowest value. | 0.5 to 10 px | 2 px | `Show` is set, `Show as` is **Circles**, `Size by the value` is **On** |
+| `Largest` | Size of the circle with the highest value. | 1 to 20 px | 7 px | `Show` is set, `Show as` is **Circles**, `Size by the value` is **On** |
+| `Show legend` |  | On<br>Off | On | `Show` is set, `Show as` is **Circles** |
+| `Decimals` |  | 0, 1, 2, 3, 4, 5, 6 | 2 | `Show` is set, `Show as` is **Number** |
+| `Text size` |  | 1 to 100 px | 9 px | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
+| `Color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** or `Color by the value` is **Off** |
+| `Position` | Side of the node, or the middle of its branch. | Left<br>Centered on the branch<br>Right | Left | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
+| `Distance from the node` | Space between the node and the label. | −2000 to 2000 px | 3 px | `Show` is set, `Position` is not **Centered on the branch**, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
+| `Vertical offset` | Moves the label up (positive) or down (negative). | −500 to 500 px | 2 px | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
+| `Stack with the support values` | Writes these labels together with the support values. | No<br>Below the branch<br>After the support (a / b) | No | `Show` is set, `Show as` is **Number** |
 
-¹ Load a SIMMAP or a tree with annotations to write values next to the nodes.  
+¹ Load a SIMMAP or a tree with annotations to write values next to the nodes. 
 
 ### › Node bars
 

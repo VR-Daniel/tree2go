@@ -1074,7 +1074,7 @@ const BGPAL = ['#F6D3C8', '#F7E3B5', '#CDEBE2', '#CFDDEE', '#E2D4EE', '#F5D6E3',
    they changed (freshSettings). Names start with the part of the figure they belong to, for example:
      layout, width, spacing, radius ...  shape and size of the tree
      line*, branch*                      branches        tip*, font*, label*   tip labels
-     support*, sup2*                     support values  ancLabel*, nlab*      other node labels
+     support*                            support values  ancLabel*, nlab*      other node labels
      nbar*                               node bars       dot*, nodeDot*        dots on the nodes
      clade*, hl*, bar*                   clade highlights and clade name bars
      axis*, geo*                         time axis and geologic time scale
@@ -1116,7 +1116,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 8, ancLabelColor: '#333333', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 0, supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 // Default settings merged with saved ones, with the migrations that keep older sessions and projects working.
@@ -1125,6 +1125,8 @@ const freshSettings = (extra) => {
   if (extra && !extra.supAlignV) { o.supportAlign = 'left'; o.supAlignV = 2; if (extra.barGap == null) o.barGap = DEFAULTS.barGap; }
   if (!['left', 'center', 'right'].includes(o.supportAlign)) o.supportAlign = 'left';
   // extinct lineages are dashed by default; sessions saved before that change switch once
+  // the second support value moved to Other node labels: an older session keeps what it showed
+  if (extra && extra.sup2Src) { if (!extra.nlabSrc) { o.nlabSrc = extra.sup2Src; o.nlabStack = extra.sup2Pos === 'after' ? 'after' : 'below'; if (extra.sup2Color) o.ancLabelColor = extra.sup2Color; } o.sup2Src = ''; }
   if (extra && !extra.xbDash) { if (o.extinctBranch === 'same') o.extinctBranch = 'dashed'; o.xbDash = true; }
   // older sessions kept the SIMMAP labels in a checkbox; they now live in the Show menu
   if (o.ancLabelOn) { if (!o.nlabSrc) o.nlabSrc = 'anc'; o.ancLabelOn = false; }
@@ -1283,10 +1285,6 @@ const SECTIONS_RAW = [
     { type: 'hint', text: s => piesOnNodes(s) ? 'Circles and categories are not available while the internal nodes show ancestral state pie charts.' : '' },
     { k: 'supportSource', type: 'select', label: 'Values from', opts: [['tree', 'Input tree'], ['attach', 'SIMMAP'], ['boot', 'Trees file']], optOff: (s, v) => v === 'tree' ? !!treeSet : v === 'attach' ? !smap : v === 'boot' ? !treeSet : false, enable: s => s.supportMode !== 'none', sub: true },
     { type: 'hint', text: s => ({ attach: 'From the SIMMAP: the percentage of maps that contain the same clade, that is, the same set of tips below the node.', boot: 'From the trees file: the percentage of trees that contain the same clade, as in bootstrap or posterior support.', tree: treeSet ? '' : 'From the tree: the labels of its internal nodes, or annotations such as posterior, prob or bootstrap.' })[supSource()] },
-    { k: 'sup2Src', type: 'select', label: 'Second value', opts: s => [['', 'None'], ...(hasSplitSupport(tree) ? [['part2', 'Second number (a/b)']] : []), ...metaNumKeys(tree).map(k => ['meta:' + k, k])], enable: s => s.supportMode !== 'none' },
-    { k: 'sup2Pos', type: 'seg', label: 'Write it', opts: [['below', 'Below the branch'], ['after', 'After the first (a / b)']], enable: s => s.supportMode === 'text' && !!s.sup2Src, sub: true },
-    { k: 'sup2Color', type: 'color', label: 'Color of the second value', enable: s => s.supportMode !== 'none' && !!s.sup2Src && !(s.supportMode === 'text' && s.sup2Pos === 'after'), sub: true },
-    { type: 'hint', text: s => s.supportMode !== 'none' && s.sup2Src ? 'For trees with two kinds of support, such as bootstrap and posterior probability: the first value above the branch, the second below it.' : '' },
     { k: 'supportSize', type: 'number', label: 'Size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.supportMode === 'text' || (s.supportMode === 'dots' && s.supportScheme === 'threshold'), sub: true },
     { k: 'supportColor', type: 'color', label: 'Color', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
     { k: 'supportScaleDots', type: 'check', label: 'Bigger circles for higher values', enable: s => s.supportMode === 'dots' && s.supportScheme === 'threshold', sub: true },
@@ -1298,14 +1296,26 @@ const SECTIONS_RAW = [
     { k: 'supportMargin', type: 'number', label: 'Distance from the node', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => s.supportMode === 'text' && s.supportAlign !== 'center', sub: true },
     { k: 'supportDy', type: 'number', label: 'Vertical offset', min: -500, max: 500, step: 1, unit: 'px', enable: s => s.supportMode === 'text', sub: true },
     { type: 'head', label: 'Other node labels' },
-    { k: 'nlabSrc', type: 'select', label: 'Show', opts: s => [['', 'None'], ...(hasInnerNames(tree) ? [['names', 'Node names']] : []), ...(smap ? [['anc', 'State probabilities (SIMMAP)']] : []), ...(treeSet && treeSet.hasLen && !treeSet.unrooted ? [['ts:median', 'Age, median of the trees'], ['ts:mean', 'Age, mean of the trees'], ['ts:hpd', 'Age, 95% HPD of the trees']] : []), ...(treeSet ? [['ts:freq', 'Clade frequency in the trees']] : []), ...metaKeys(tree).map(k => ['meta:' + k, k])] },
+    { k: 'nlabSrc', type: 'select', label: 'Show', opts: s => [['', 'None'], ...(hasSplitSupport(tree) ? [['part2', 'Second number of the labels (a/b)']] : []), ...(hasInnerNames(tree) ? [['names', 'Node names']] : []), ...(smap ? [['anc', 'State probabilities (SIMMAP)']] : []), ...(treeSet && treeSet.hasLen && !treeSet.unrooted ? [['ts:median', 'Age, median of the trees'], ['ts:mean', 'Age, mean of the trees'], ['ts:hpd', 'Age, 95% HPD of the trees']] : []), ...(treeSet ? [['ts:freq', 'Clade frequency in the trees']] : []), ...metaKeys(tree).map(k => ['meta:' + k, k])] },
     { type: 'hint', text: s => nodeLabelSrc(s) === 'anc' ? 'Each internal node gets its probabilities written as {state:probability}.' : nodeLabelSrc(s) ? 'Values read from the annotations of the tree, the [&...] comments of BEAST and similar programs.' : (metaKeys(tree).length || smap ? '' : 'Load a SIMMAP or a tree with annotations to write values next to the nodes.') },
-    { k: 'ancLabelDec', type: 'select', label: 'Decimals', opts: DEC_OPTS, numeric: true, enable: s => !!nodeLabelSrc(s), sub: true },
-    { k: 'ancLabelSize', type: 'number', label: 'Text size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => !!nodeLabelSrc(s), sub: true },
-    { k: 'ancLabelColor', type: 'color', label: 'Color', enable: s => !!nodeLabelSrc(s), sub: true },
-    { k: 'ancLabelAlign', type: 'seg', label: 'Position', opts: SIDE_OPTS, enable: s => !!nodeLabelSrc(s), sub: true },
-    { k: 'ancLabelMargin', type: 'number', label: 'Distance from the node', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s) && s.ancLabelAlign !== 'center', sub: true },
-    { k: 'ancLabelDy', type: 'number', label: 'Vertical offset', min: -500, max: 500, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s), sub: true },
+    { k: 'nlabShow', type: 'seg', label: 'Show as', opts: [['number', 'Number'], ['circles', 'Circles']], enable: s => !!nodeLabelSrc(s), sub: true },
+    { type: 'hint', text: s => nodeLabelSrc(s) && s.nlabShow === 'circles' ? 'Each node gets a circle whose color and size can follow its value. Values that are not single numbers, such as intervals, are left out.' : '' },
+    { k: 'nlabColorBy', type: 'check', label: 'Color by the value', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', sub: true },
+    { k: 'nlabLow', type: 'color', label: 'Low values', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', enable: s => s.nlabColorBy, sub: true },
+    { k: 'nlabHigh', type: 'color', label: 'High values', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', enable: s => s.nlabColorBy, sub: true },
+    { k: 'nlabSizeBy', type: 'check', label: 'Size by the value', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', sub: true },
+    { k: 'nlabDot', type: 'range', label: 'Circle size', min: 0.5, max: 15, step: 0.5, hmax: 100, unit: 'px', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', enable: s => !s.nlabSizeBy, sub: true },
+    { k: 'nlabSizeMin', type: 'range', label: 'Smallest', min: 0.5, max: 10, step: 0.5, hmax: 100, unit: 'px', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', enable: s => s.nlabSizeBy, sub: true },
+    { k: 'nlabSizeMax', type: 'range', label: 'Largest', min: 1, max: 20, step: 0.5, hmax: 200, unit: 'px', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', enable: s => s.nlabSizeBy, sub: true },
+    { k: 'nlabLegend', type: 'check', label: 'Show legend', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', sub: true },
+    { k: 'ancLabelDec', type: 'select', label: 'Decimals', opts: DEC_OPTS, numeric: true, enable: s => !!nodeLabelSrc(s), show: s => s.nlabShow !== 'circles', sub: true },
+    { k: 'ancLabelSize', type: 'number', label: 'Text size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles', sub: true },
+    { k: 'ancLabelColor', type: 'color', label: 'Color', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles' || !s.nlabColorBy, sub: true },
+    { k: 'ancLabelAlign', type: 'seg', label: 'Position', opts: SIDE_OPTS, enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles', sub: true },
+    { k: 'ancLabelMargin', type: 'number', label: 'Distance from the node', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s) && s.ancLabelAlign !== 'center', show: s => s.nlabShow !== 'circles', sub: true },
+    { k: 'ancLabelDy', type: 'number', label: 'Vertical offset', min: -500, max: 500, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles', sub: true },
+    { k: 'nlabStack', type: 'seg', label: 'Stack with the support values', opts: [['none', 'No'], ['below', 'Below the branch'], ['after', 'After the support (a / b)']], enable: s => !!nodeLabelSrc(s), show: s => s.nlabShow !== 'circles', sub: true },
+    { type: 'hint', text: s => !nodeLabelSrc(s) || s.nlabShow === 'circles' ? '' : s.nlabStack === 'below' ? 'These labels go under the branch and the support values above it, each with its own style. Right-click either one to change only that one.' : s.nlabStack === 'after' ? (s.supportMode === 'text' ? 'Written after the support value, as Support / Other value, with the style of the support values.' : 'Needs the support values shown as numbers. Until then, these labels are drawn on their own.') : '' },
     { type: 'head', label: 'Node bars' },
     { k: 'nbarSrc', type: 'select', label: 'Draw', opts: s => [['', 'None'], ...metaRangeKeys(tree).map(k => ['meta:' + k, k]), ...(treeSet && treeSet.hasLen && !treeSet.unrooted ? [['kde', `Age density (${treeSet.count} trees)`]] : [])] },
     { type: 'hint', text: s => s.nbarSrc === 'kde' ? 'The density of the age of each node across the trees of the file, smoothed with a Gaussian kernel.' : s.nbarSrc ? 'The range is read as ages above the youngest tip, in branch length units, as in the height intervals of BEAST.' : 'Ranges from the tree annotations, such as height_95%_HPD, or age densities from a file with several dated trees.' },
@@ -2041,11 +2051,11 @@ function matchInfo(t, withCol = true) {
 function updateMatchCounts() { document.querySelectorAll('#tabList .tabitem').forEach(it => { const t = (settings.dataTables || []).find(x => x.id === it.dataset.id); const m = it.querySelector('.tmeta'); if (t && m) m.textContent = matchInfo(t, false); }); }
 // Redraws and saves after a change in the attached data.
 function dataChanged(msg) { refreshAttach(); refreshVisibility(); render(); persist(); if (msg) toast(msg); }
-// MCMC log of BEAST 2 (.log) or MrBayes (.p): the posterior of every state, matched to the trees by their number
+// MCMC log of BEAST2 (.log) or MrBayes (.p): the posterior of every state, matched to the trees by their number
 let mcmcLog = null;
 // Number at the end of a tree name (STATE_1000, gen.1000), to match it with its MCMC log line.
 const stateNum = name => { const m = /(\d+)\s*$/.exec(String(name || '')); return m ? +m[1] : null; };
-// Reads a BEAST 2 .log or MrBayes .p file: the posterior (or LnL + LnPr) of every state.
+// Reads a BEAST2 .log or MrBayes .p file: the posterior (or LnL + LnPr) of every state.
 function readMcmcLog(text, name) {
   const lines = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim() && !/^\s*[#\[]/.test(l));
   if (lines.length < 2) return null;
@@ -2061,7 +2071,7 @@ function readMcmcLog(text, name) {
   }
   return map.size ? { name, map, col: iPost >= 0 ? 'posterior' : iPr >= 0 ? 'LnL + LnPr' : 'LnL' } : null;
 }
-// Posterior of a sampled tree: written in the trees file (BEAST 1) or taken from the attached log.
+// Posterior of a sampled tree: written in the trees file (BEAST) or taken from the attached log.
 const treePost = t => t._post ?? (mcmcLog && t._name != null ? mcmcLog.map.get(stateNum(t._name)) : undefined) ?? null;
 // Reads an attached file: SIMMAP, MCMC log or data table, recognized from its content.
 function addTableFile(file) {
@@ -2100,7 +2110,7 @@ function refreshAttach() {
   const box = $('tabList');
   if (box) {
     const sm = smap ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(smap.name)}">${esc(smap.name)}</span><button type="button" class="btn small danger" data-delsmap>Remove</button></div><span class="tmeta">SIMMAP, ${plural(smap.nMaps, 'map', 'maps')}</span></div>` : '';
-    // the MCMC log (.log of BEAST 2, .p of MrBayes), with what it is good for
+    // the MCMC log (.log of BEAST2, .p of MrBayes), with what it is good for
     const lgHit = mcmcLog && treeSet && treeSet.trees ? treeSet.trees.filter(t => treePost(t) != null).length : 0;
     const lg = mcmcLog ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(mcmcLog.name)}">${esc(mcmcLog.name)}</span><button type="button" class="btn small danger" data-dellog>Remove</button></div><span class="tmeta">MCMC log, ${plural(mcmcLog.map.size, 'state', 'states')} (${esc(mcmcLog.col)}). ${treeSet && treeSet.trees ? `${lgHit} of ${treeSet.trees.length} trees matched: choose MAP in Tree → Summary tree.` : 'Open the sampled trees (.t of MrBayes, .trees of BEAST) to build the MAP tree, a consensus tree is not enough.'}</span></div>` : '';
     box.innerHTML = sm + lg + (ts.length || mcmcLog ? ts.map(t => `<div class="tabitem" data-id="${esc(t.id)}"><div class="thead"><span class="tname" title="${esc(t.name)}">${esc(t.name)}</span><button type="button" class="btn small danger" data-del>Remove</button></div><span class="tmeta">${esc(matchInfo(t, false))}</span><label class="tidcol"><span>Names in</span><select data-idcol>${t.header.map((h, i) => `<option value="${i}"${i === (t.idCol || 0) ? ' selected' : ''}>${esc(h)}</option>`).join('')}</select></label></div>`).join('') : sm ? '' : '<p class="hint">No tables yet.</p>');
@@ -2160,7 +2170,7 @@ function attachPanel() {
   w.innerHTML = `
     <div class="btns"><button class="btn primary" id="tabAdd">Add table</button></div>
     <input type="file" id="tabIn" multiple hidden>
-    <p class="hint">CSV or TSV files with additional data to plot. Rows can match only the tip names, or the tips and the internal nodes of the tree. SIMMAP files from stochastic character mapping can also be imported, as well as the MCMC log of the trees (.log of BEAST 2 or .p of MrBayes) to build the MAP tree.</p>
+    <p class="hint">CSV or TSV files with additional data to plot. Rows can match only the tip names, or the tips and the internal nodes of the tree. SIMMAP files from stochastic character mapping can also be imported, as well as the MCMC log of the trees (.log of BEAST2 or .p of MrBayes) to build the MAP tree.</p>
     <div id="tabList" class="tablist"></div>`;
   setTimeout(() => {
     $('tabAdd').onclick = () => $('tabIn').click();
@@ -2378,7 +2388,34 @@ function parseTreeFile(txt) {
 function parseMeta(c) {
   const o = {};
   if (/^&&?NHX/i.test(c)) { for (const p of c.replace(/^&&?NHX:?/i, '').split(':')) { const k = p.indexOf('='); if (k > 0) o[p.slice(0, k)] = metaVal(p.slice(k + 1)); } return o; }
-  for (const p of splitTopLevel(c.replace(/^&+/, ''), ',')) { const k = p.indexOf('='); if (k > 0) o[p.slice(0, k).trim()] = metaVal(p.slice(k + 1).trim()); else if (p.trim()) o[p.trim()] = true; }
+  /* Reads key=value pairs one at a time. Keys may hold braces with commas inside, as MrBayes writes them
+     (brlens{1,2,3,4}_mean), so a comma only ends a pair outside braces and quotes. Some programs rewrite those keys
+     badly (brlens{1=true,2=true,4}_mean, or 4}_median cut from the one before); they are repaired when the name can
+     be worked out, and the broken leftovers without a value are dropped. */
+  const t = c.replace(/^&+/, ''), n = t.length; let i = 0, prev = null;
+  const readKey = () => {
+    let d = 0, j = i;
+    for (; j < n; j++) { const ch = t[j]; if (ch === '{') d++; else if (ch === '}') d = Math.max(0, d - 1); else if (d === 0 && (ch === '=' || ch === ',')) break; }
+    if (j >= n && t.indexOf('=', i) > 0) { j = i; while (j < n && t[j] !== '=' && t[j] !== ',') j++; }   // unbalanced braces: they are plain characters
+    const k = t.slice(i, j); i = j; return k;
+  };
+  const readVal = () => {
+    let j = i;
+    if (t[j] === '"' || t[j] === "'") { const q = t[j]; j = t.indexOf(q, j + 1); j = j < 0 ? n : j + 1; }
+    else { let d = 0; for (; j < n; j++) { const ch = t[j]; if (ch === '{') d++; else if (ch === '}') d = Math.max(0, d - 1); else if (ch === ',' && d === 0) break; } }
+    const v = t.slice(i, j); i = j; return v;
+  };
+  while (i < n) {
+    let k = readKey().trim(), v = true;
+    if (t[i] === '=') { i++; v = metaVal(readVal().trim()); }
+    if (t[i] === ',') i++;
+    if (!k) continue;
+    k = k.replace(/\{([^{}]*)\}/g, (m, inner) => '{' + inner.replace(/=true/g, '') + '}');   // {1=true,2=true} -> {1,2}
+    const frag = /^(\d+)\}(.*)$/.exec(k);
+    if (frag && prev && /\{[^{}]*\}/.test(prev)) k = prev.replace(/\{[^{}]*\}.*$/, m => m.slice(0, m.indexOf('}') + 1)) + frag[2];   // 4}_median -> brlens{1,2,3,4}_median
+    if (/\{[^}]*$/.test(k) && (v === true || v === 'true')) continue;   // a broken piece of a key, with no value
+    o[k] = v; if (v !== true) prev = k;
+  }
   return o;
 }
 // Value of one [&...] annotation: number, text, or {a,b} range.
@@ -2513,7 +2550,7 @@ function sampleSummary(kind, heights) {
     else { sc = 0; for (let i = 0; i < r.keys.length; i++) sc += logF[r.keys[i]]; }
     if (sc > best) { best = sc; pick = r; }
   }
-  if (!pick) throw new Error(kind === 'map' ? 'No posterior values for these trees. Attach the .log of BEAST 2 or the .p file of MrBayes.' : 'No tree to choose from.');
+  if (!pick) throw new Error(kind === 'map' ? 'No posterior values for these trees. Attach the .log of BEAST2 or the .p file of MrBayes.' : 'No tree to choose from.');
   const R = treeOfRec(pick);
   if (kind === 'mcc' && T.hasLen) {
     const age = new Map(), keys = treeCladeKeys(R, T.unrooted ? T.ref : null), avg = a => heights === 'mean' ? a.reduce((x, y) => x + y, 0) / a.length : hpdOf(a, 0.95).med;
@@ -2549,7 +2586,7 @@ function refreshTreeSetBox() {
     <p class="hint">The first trees of the file, left out of every summary: summary trees, support values and age densities.</p>
     <div class="row${raw ? '' : ' off'}"><label for="tsIdx">Show tree number</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsIdx" type="number" min="1" max="${treeSet.total ?? treeSet.count}" step="1" value="${treeSet.shown || 1}"${raw ? '' : ' disabled'}><span class="u"></span></span><button class="btn small" id="tsShow"${raw ? '' : ' disabled'}>Show</button></span></div>
     <div class="row${raw ? '' : ' off'}"><label for="tsKind">Summary tree</label><select id="tsKind"${raw ? '' : ' disabled'}>${[['majority', 'Majority rule'], ['strict', 'Strict consensus'], ['allcompat', 'Maximum compatible'], ['mcc', 'MCC'], ['map', 'MAP']].map(([v, l]) => `<option value="${v}"${(treeSet.mode || 'majority') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
-    <p class="hint">${({ majority: 'Keeps the clades found in more than the chosen share of the trees.', strict: 'Keeps only the clades found in every tree.', allcompat: 'The majority-rule tree plus the less frequent clades that do not conflict with it (allcompat in MrBayes).', mcc: 'Maximum clade credibility: the sampled tree whose clades are, together, the most frequent, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.', map: treeSet.trees && treeSet.trees.some(t => treePost(t) != null) ? `Maximum a posteriori: the sampled tree with the highest posterior probability${mcmcLog ? ` (from ${mcmcLog.name})` : ''}.` : 'Maximum a posteriori: needs the posterior of each tree. BEAST 1 writes it in the trees file, for BEAST 2 or MrBayes attach the .log or .p file in Attachments.' })[treeSet.mode || 'majority']}</p>
+    <p class="hint">${({ majority: 'Keeps the clades found in more than the chosen share of the trees.', strict: 'Keeps only the clades found in every tree.', allcompat: 'The majority-rule tree plus the less frequent clades that do not conflict with it (allcompat in MrBayes).', mcc: 'Maximum clade credibility: the sampled tree whose clades are, together, the most frequent, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.', map: treeSet.trees && treeSet.trees.some(t => treePost(t) != null) ? `Maximum a posteriori: the sampled tree with the highest posterior probability${mcmcLog ? ` (from ${mcmcLog.name})` : ''}.` : 'Maximum a posteriori: needs the posterior of each tree. BEAST writes it in the trees file, for BEAST2 or MrBayes attach the .log or .p file in Attachments.' })[treeSet.mode || 'majority']}</p>
     ${(treeSet.mode || 'majority') === 'majority' ? `<div class="row sub"><label for="tsPct">Clades in more than</label><span class="numwrap"><input class="num" id="tsPct" type="number" min="50" max="100" step="1" value="${treeSet.pct ?? 50}"><span>%</span></span></div>` : ''}
     ${treeSet.mode === 'mcc' && treeSet.hasLen ? `<div class="row sub"><label for="tsHeights">Node ages</label><select id="tsHeights"><option value="median"${treeSet.heights !== 'mean' ? ' selected' : ''}>Median</option><option value="mean"${treeSet.heights === 'mean' ? ' selected' : ''}>Mean</option></select></div>` : ''}
     <div class="btns"><button class="btn" id="tsBuild"${raw ? '' : ' disabled'}>Build summary tree</button></div>`;
@@ -2569,7 +2606,7 @@ function refreshTreeSetBox() {
     const m = treeSet.mode || 'majority', pct = m === 'strict' ? 100 : clamp(treeSet.pct ?? 50, 50, 100);
     try {
       treeSet.shown = null;
-      if (m === 'map' && !treeSet.trees.some(t => treePost(t) != null)) { toast('Attach the .log of BEAST 2 or the .p file of MrBayes in Attachments to build the MAP tree.'); return; }
+      if (m === 'map' && !treeSet.trees.some(t => treePost(t) != null)) { toast('Attach the .log of BEAST2 or the .p file of MrBayes in Attachments to build the MAP tree.'); return; }
       if (m === 'mcc' || m === 'map') showFromSet(sampleSummary(m, treeSet.heights || 'median'), m === 'mcc' ? 'Maximum clade credibility tree' : 'Maximum a posteriori tree');
       else if (m === 'allcompat') showFromSet(consensusTree(50, true), 'Maximum compatible tree');
       else showFromSet(consensusTree(pct), pct >= 100 ? 'Strict consensus' : `Majority-rule consensus (>${pct}%)`);
@@ -3418,13 +3455,8 @@ function renderOnce() {
   const supSrc = supSource();
   const supOf = supValue;
   const supTxt = n => supSrc !== 'tree' ? String(Math.round(supOf(n))) : isSupport(n.name) ? String(n.name).split('/')[0] : String(+supOf(n).toFixed(2));
-  // a second support value, from the second number of labels like 98/1.00 or from an annotation
-  const sup2 = n => {
-    const src = S.sup2Src; if (!src || !n.children.length) return null;
-    if (src === 'part2') { const p = isSupport(n.name) ? String(n.name).split('/') : []; return p.length > 1 ? p[1] : null; }
-    const v = n.meta && n.meta[src.slice(5)]; const x = typeof v === 'number' ? v : typeof v === 'string' ? parseFloat(v) : NaN;
-    return Number.isFinite(x) ? String(+x.toPrecision(3)) : null;
-  };
+  // Other node labels stacked with the support values: 'after' writes them in the same text (a / b), 'below' under the branch
+  const stackAfter = S.nlabStack === 'after' && S.supportMode === 'text' && S.nlabShow !== 'circles' && !!nodeLabelSrc(S), stackedNodes = new Set();
 
   const internals = vis.filter(n => n.children.length && !n._tri);
   const sups = internals.map(supOf).filter(v => v != null);
@@ -3442,9 +3474,10 @@ function renderOnce() {
       else if (vp < S.supportThreshold && ov == null) continue;
       if (mode === 'text') {
         const col = stv(n, 'sc') || (cat ? cat.fill : S.supportColor);
-        const s2 = sup2(n), together = s2 != null && S.sup2Pos === 'after';
-        anL.push(branchText(n, 'support', together ? supTxt(n) + ' / ' + s2 : supTxt(n), stv(n, 'sa') ?? S.supportAlign, stv(n, 'sm') ?? S.supportMargin, stv(n, 'sdy') ?? S.supportDy, stv(n, 'ss') ?? S.supportSize, col, true));
-        if (s2 != null && !together) anL.push(branchText(n, 'support2', s2, stv(n, 'sa') ?? S.supportAlign, stv(n, 'sm') ?? S.supportMargin, stv(n, 'sdy') ?? S.supportDy, stv(n, 'ss') ?? S.supportSize, S.sup2Color, true, true));
+        // Other node labels stacked after the support (a / b): written in the same text, with the style of the support
+        const s2 = stackAfter && (stv(n, 'nlv') ?? true) ? nodeLabelText(n, S) : null;
+        if (s2 != null) stackedNodes.add(n.id);
+        anL.push(branchText(n, 'support', s2 != null ? supTxt(n) + ' / ' + s2 : supTxt(n), stv(n, 'sa') ?? S.supportAlign, stv(n, 'sm') ?? S.supportMargin, stv(n, 'sdy') ?? S.supportDy, stv(n, 'ss') ?? S.supportSize, col, true));
       } else {
         let r, fill, border = '';
         if (cat) {
@@ -3458,8 +3491,6 @@ function renderOnce() {
         supL.push(`<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(r)}" fill="${fill}"${border}/>`);
         valGeo.set(skey(n.id, 'support'), { cx: n._px, cy: n._py, r });
         valHits.push(`<circle class="hitpt" cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(Math.max(r, 5))}" data-id="${n.id}" data-kind="support"/>`);
-        // with circles, the second value is written below the branch, next to the node
-        const s2 = sup2(n); if (s2 != null) anL.push(branchText(n, 'support2', s2, 'left', r + 2, 0, Math.max(6, S.fontSize * 0.75), S.sup2Color, true, true));
       }
     } else if (!isS && n.name && !isSupport(n.name) && S.showInternal) {
       anL.push(`<text x="${f2(n._px + 4)}" y="${f2(n._py - 4)}" font-size="${f2(S.fontSize * 0.85)}" fill="${S.labelColor}" font-family="${esc(fam)}">${esc(disp(n.name))}</text>`);
@@ -3477,11 +3508,33 @@ function renderOnce() {
 
   // Other node labels: state probabilities written next to the node, e.g. {0:0.65,1:0.35}
   // each one can be clicked and styled on its own, like the support values (kind 'nlab': node label)
-  if (nodeLabelSrc(S) || internals.some(n => stv(n, 'nlv'))) {
+  let nlabLeg = null;
+  if (S.nlabShow === 'circles' && nodeLabelSrc(S)) {
+    // circles: color and size from the value of each node (numbers only), placed like the labels
+    const pts = [];
+    for (const n of internals) {
+      if ((!n.parent && !(L === 'rect' && stub > 0)) || !(stv(n, 'nlv') ?? true)) continue;
+      const v = parseFloat(nodeLabelText(n, S)); if (Number.isFinite(v)) pts.push([n, v]);
+    }
+    if (pts.length) {
+      const vs = pts.map(q => q[1]), lo = Math.min(...vs), hi = Math.max(...vs), q = v => hi > lo ? (v - lo) / (hi - lo) : 0.5;
+      const ramp = v => { const a = hexRGB(S.nlabLow), b = hexRGB(S.nlabHigh), t = q(v); return rgbHex(a.map((c, i) => c + (b[i] - c) * t)); };
+      const rOf = v => S.nlabSizeBy ? S.nlabSizeMin + (S.nlabSizeMax - S.nlabSizeMin) * q(v) : S.nlabDot;
+      for (const [n, v] of pts) {
+        const r = rOf(v), fill = stv(n, 'nc') || (S.nlabColorBy ? ramp(v) : S.ancLabelColor);
+        const cx = n._px, cy = n._py;   // circles always sit on their node
+        anL.push(`<circle cx="${f2(cx)}" cy="${f2(cy)}" r="${f2(r)}" fill="${fill}"/>`);
+        valHits.push(`<circle class="hitpt" cx="${f2(cx)}" cy="${f2(cy)}" r="${f2(Math.max(r, 5))}" data-id="${n.id}" data-kind="nlab"/>`);
+      }
+      const src = S.nlabSrc || '';
+      nlabLeg = { lo, hi, rOf, title: src.startsWith('meta:') ? src.slice(5) : ({ 'ts:median': 'Age (median)', 'ts:mean': 'Age (mean)', 'ts:freq': 'Clade frequency (%)', part2: 'Second value', names: 'Node value' })[src] || src };
+    }
+  } else if (nodeLabelSrc(S) || internals.some(n => stv(n, 'nlv'))) {
     for (const n of internals) {
       if ((!n.parent && !(L === 'rect' && stub > 0)) || !(stv(n, 'nlv') ?? !!nodeLabelSrc(S))) continue;
+      if (stackedNodes.has(n.id)) continue;   // already written after the support (a / b)
       const txt = nodeLabelText(n, S); if (txt == null) continue;
-      anL.push(branchText(n, 'nlab', txt, stv(n, 'na') ?? S.ancLabelAlign, stv(n, 'nm') ?? S.ancLabelMargin, stv(n, 'ndy') ?? S.ancLabelDy, stv(n, 'ns') ?? S.ancLabelSize, stv(n, 'nc') || S.ancLabelColor, true));
+      anL.push(branchText(n, 'nlab', txt, stv(n, 'na') ?? S.ancLabelAlign, stv(n, 'nm') ?? S.ancLabelMargin, stv(n, 'ndy') ?? S.ancLabelDy, stv(n, 'ns') ?? S.ancLabelSize, stv(n, 'nc') || S.ancLabelColor, true, S.nlabStack === 'below'));
     }
   }
   // Branches colored by the state along them: bins from the parent (0) to the node (1)
@@ -4152,6 +4205,11 @@ function renderOnce() {
     blocks.push({ key: 'support', title: 'Support', entries: cats.map(c => ({ text: catLabel(c, cats, S.supportLowIn !== false), sym: S.supportMode === 'dots' ? { t: 'circle', r: c.size, fill: c.filled ? c.fill : 'none', stroke: strokeAttr(c.stroke, c.strokeStyle, c.strokeWidth, c.size, c.strokeCount) } : { t: 'rect', fill: c.fill } })) });
   if (brc && S.brcLegend) blocks.push({ key: 'brc', title: brc.col + (S.brcLog ? ' (log scale)' : ''), gradient: brc });
   if (heatLeg && S.heatLegend) blocks.push({ key: 'heat', title: heatLeg.col, gradient: heatLeg });
+  if (nlabLeg && S.nlabLegend) {
+    const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
+    if (S.nlabColorBy) blocks.push({ key: 'nlabc', title: nlabLeg.title, gradient: { stops: [S.nlabLow, S.nlabHigh], lo: nlabLeg.lo, hi: nlabLeg.hi } });
+    if (S.nlabSizeBy) blocks.push({ key: 'nlabs', title: S.nlabColorBy ? '' : nlabLeg.title, entries: [nlabLeg.lo, (nlabLeg.lo + nlabLeg.hi) / 2, nlabLeg.hi].map(v => ({ text: fmtV(v), sym: { t: 'circle', r: nlabLeg.rOf(v), fill: S.nlabColorBy ? '#9a9a9a' : S.ancLabelColor } })) });
+  }
   if (dotLeg && S.dotDataLegend) {
     const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
     if (S.dotDataColor) blocks.push({ key: 'dotc', title: dotLeg.col, gradient: { stops: [S.dotLow, S.dotHigh], lo: dotLeg.lo, hi: dotLeg.hi } });
@@ -4608,11 +4666,14 @@ function supValue(n) {
   return c ? 100 * c.n / (src === 'attach' ? smap.nMaps : treeSet.count) : null;
 }
 // text written next to a node under Node values > Other node labels
+// True when Other node labels are written after the support values (a / b), in their style.
+const stackedAfter = s => s.nlabStack === 'after' && s.supportMode === 'text' && s.nlabShow !== 'circles';
 function nodeLabelSrc(S) { const v = S.nlabSrc || ''; return v === 'anc' && !smap ? '' : v; }
 // Text of Other node labels for a node: names, annotations, SIMMAP states or tree set summaries (ages, HPD, frequency).
 function nodeLabelText(n, S = settings) {
   const src = nodeLabelSrc(S); if (!src) return null;
   if (src === 'names') return n.name && !isSupport(n.name) ? disp(n.name) : null;
+  if (src === 'part2') { const p = isSupport(n.name) ? String(n.name).split('/') : []; return p.length > 1 ? p[1] : null; }
   if (src.startsWith('ts:')) {
     const c = treeSet && ancKeys && treeSet.clades.get(ancKeys.get(n)); if (!c) return null;
     const f = x => (+x.toFixed(S.ancLabelDec)).toString(), ag = c.ages || [];
@@ -6821,7 +6882,7 @@ function wireLock(reopen) {
 function openLegendMenu(key, cx, cy, keep) {
   const auto = legendAuto[key]; if (!auto) return;
   const T0 = settings.legendText || {}, keepScroll = keep ? pop.scrollTop : 0;
-  const names = { support: 'Support legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', dots: 'Dot size legend', anc: 'Ancestral states legend', data: 'Data legend' };
+  const names = { support: 'Support legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', dots: 'Dot size legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
   const field = (i, ph, lab) => `<div class="grp"><span>${lab}</span><input type="text" class="lgtext" data-li="${i}" value="${esc(T0[key + ':' + i] ?? '')}" placeholder="${esc(ph || '(none)')}"></div>`;
   pop.innerHTML = `
     <button class="close" aria-label="Close">×</button>
