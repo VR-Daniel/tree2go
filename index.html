@@ -228,11 +228,15 @@ aside .inline input.num.boxed, .pop .inline input.num, aside .cat select{backgro
 .modal .box.about{overflow:hidden; display:flex; flex-direction:column}
 .modal .box.about .aboutBody{flex:1 1 auto; min-height:0; overflow-y:auto; margin-right:-4px; padding-right:34px}
 .modal .box.about .aboutBody.framed{overflow:hidden; padding-right:0}
-.helpsearch{display:flex; align-items:center; gap:6px; margin:2px 0 12px}
-.helpsearch input{flex:1 1 auto; min-width:0; height:30px; padding:0 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); font:inherit; font-size:13.5px}
-.helpsearch input:focus{outline:none; border-color:var(--accent)}
-.helpsearch .hint{min-width:64px; text-align:right; white-space:nowrap}
-.helpsearch .btn{width:28px; padding:0}
+.helphead{display:flex; align-items:flex-start; gap:20px; padding-right:40px; margin-bottom:10px}
+.modal .box.about .helphead h3{flex:1 1 auto; min-width:0; margin:0; padding-right:0}
+.helpsearch{flex:0 0 min(420px,52%); display:flex; align-items:center; gap:6px; margin-top:2px}
+.helpfield{position:relative; flex:1 1 auto; min-width:0}
+.helpfield input{width:100%; height:32px; padding:0 84px 0 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); font:inherit; font-size:13.5px; box-sizing:border-box}
+.helpfield input:focus{outline:none; border-color:var(--accent)}
+.helpfield input::-webkit-search-cancel-button{display:none}   /* the count sits where the browser puts its clear button; Esc clears */
+.helpfield .hint{position:absolute; right:10px; top:50%; transform:translateY(-50%); pointer-events:none; white-space:nowrap; font-size:12px}
+.helpsearch .btn{flex:none; width:34px; height:32px; padding:0; font-size:16px; line-height:1}
 .helpBody mark.find{background:#ffe8b0; color:inherit; border-radius:2px; padding:0}
 .helpBody mark.find.on{background:var(--mustard); box-shadow:0 0 0 1px var(--mustard)}
 .helpbtn{min-width:28px; padding-left:0 !important; padding-right:0 !important}
@@ -612,8 +616,14 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
 <div class="modal" id="helpModal" hidden>
   <div class="box about help" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <button class="close" id="helpClose" aria-label="Close">×</button>
-    <h3 id="helpTitle">Reference</h3>
-    <div class="helpsearch"><input id="helpFind" type="search" placeholder="Search the reference" aria-label="Search the reference" autocomplete="off"><span id="helpCount" class="hint"></span><button type="button" class="btn small" id="helpPrev" title="Previous match (Shift+Enter)" aria-label="Previous match">↑</button><button type="button" class="btn small" id="helpNext" title="Next match (Enter)" aria-label="Next match">↓</button></div>
+    <div class="helphead">
+      <h3 id="helpTitle">Reference</h3>
+      <!-- search box at the height of the title: the count of matches inside it, on the right, and the arrows beside it -->
+      <div class="helpsearch">
+        <div class="helpfield"><input id="helpFind" type="search" placeholder="Search the reference" aria-label="Search the reference" autocomplete="off"><span id="helpCount" class="hint"></span></div>
+        <button type="button" class="btn" id="helpPrev" title="Previous match (Shift+Enter)" aria-label="Previous match">↑</button><button type="button" class="btn" id="helpNext" title="Next match (Enter)" aria-label="Next match">↓</button>
+      </div>
+    </div>
     <div class="aboutBody helpBody" id="helpBody"><p class="hint">Loading…</p></div>
   </div>
 </div>
@@ -2031,11 +2041,11 @@ function matchInfo(t, withCol = true) {
 function updateMatchCounts() { document.querySelectorAll('#tabList .tabitem').forEach(it => { const t = (settings.dataTables || []).find(x => x.id === it.dataset.id); const m = it.querySelector('.tmeta'); if (t && m) m.textContent = matchInfo(t, false); }); }
 // Redraws and saves after a change in the attached data.
 function dataChanged(msg) { refreshAttach(); refreshVisibility(); render(); persist(); if (msg) toast(msg); }
-// MCMC log of BEAST 2 (.log) or MrBayes (.p): the posterior of every state, matched to the trees by their number
+// MCMC log of BEAST2 (.log) or MrBayes (.p): the posterior of every state, matched to the trees by their number
 let mcmcLog = null;
 // Number at the end of a tree name (STATE_1000, gen.1000), to match it with its MCMC log line.
 const stateNum = name => { const m = /(\d+)\s*$/.exec(String(name || '')); return m ? +m[1] : null; };
-// Reads a BEAST 2 .log or MrBayes .p file: the posterior (or LnL + LnPr) of every state.
+// Reads a BEAST2 .log or MrBayes .p file: the posterior (or LnL + LnPr) of every state.
 function readMcmcLog(text, name) {
   const lines = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim() && !/^\s*[#\[]/.test(l));
   if (lines.length < 2) return null;
@@ -2090,7 +2100,7 @@ function refreshAttach() {
   const box = $('tabList');
   if (box) {
     const sm = smap ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(smap.name)}">${esc(smap.name)}</span><button type="button" class="btn small danger" data-delsmap>Remove</button></div><span class="tmeta">SIMMAP, ${plural(smap.nMaps, 'map', 'maps')}</span></div>` : '';
-    // the MCMC log (.log of BEAST 2, .p of MrBayes), with what it is good for
+    // the MCMC log (.log of BEAST2, .p of MrBayes), with what it is good for
     const lgHit = mcmcLog && treeSet && treeSet.trees ? treeSet.trees.filter(t => treePost(t) != null).length : 0;
     const lg = mcmcLog ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(mcmcLog.name)}">${esc(mcmcLog.name)}</span><button type="button" class="btn small danger" data-dellog>Remove</button></div><span class="tmeta">MCMC log, ${plural(mcmcLog.map.size, 'state', 'states')} (${esc(mcmcLog.col)}). ${treeSet && treeSet.trees ? `${lgHit} of ${treeSet.trees.length} trees matched: choose MAP in Tree → Summary tree.` : 'Open the sampled trees (.t of MrBayes, .trees of BEAST) to build the MAP tree, a consensus tree is not enough.'}</span></div>` : '';
     box.innerHTML = sm + lg + (ts.length || mcmcLog ? ts.map(t => `<div class="tabitem" data-id="${esc(t.id)}"><div class="thead"><span class="tname" title="${esc(t.name)}">${esc(t.name)}</span><button type="button" class="btn small danger" data-del>Remove</button></div><span class="tmeta">${esc(matchInfo(t, false))}</span><label class="tidcol"><span>Names in</span><select data-idcol>${t.header.map((h, i) => `<option value="${i}"${i === (t.idCol || 0) ? ' selected' : ''}>${esc(h)}</option>`).join('')}</select></label></div>`).join('') : sm ? '' : '<p class="hint">No tables yet.</p>');
@@ -2150,7 +2160,7 @@ function attachPanel() {
   w.innerHTML = `
     <div class="btns"><button class="btn primary" id="tabAdd">Add table</button></div>
     <input type="file" id="tabIn" multiple hidden>
-    <p class="hint">CSV or TSV files with additional data to plot. Rows can match only the tip names, or the tips and the internal nodes of the tree. SIMMAP files from stochastic character mapping can also be imported.</p>
+    <p class="hint">CSV or TSV files with additional data to plot. Rows can match only the tip names, or the tips and the internal nodes of the tree. SIMMAP files from stochastic character mapping can also be imported, as well as the MCMC log of the trees (.log of BEAST2 or .p of MrBayes) to build the MAP tree.</p>
     <div id="tabList" class="tablist"></div>`;
   setTimeout(() => {
     $('tabAdd').onclick = () => $('tabIn').click();
@@ -2503,7 +2513,7 @@ function sampleSummary(kind, heights) {
     else { sc = 0; for (let i = 0; i < r.keys.length; i++) sc += logF[r.keys[i]]; }
     if (sc > best) { best = sc; pick = r; }
   }
-  if (!pick) throw new Error(kind === 'map' ? 'No posterior values for these trees. Attach the .log of BEAST 2 or the .p file of MrBayes.' : 'No tree to choose from.');
+  if (!pick) throw new Error(kind === 'map' ? 'No posterior values for these trees. Attach the .log of BEAST2 or the .p file of MrBayes.' : 'No tree to choose from.');
   const R = treeOfRec(pick);
   if (kind === 'mcc' && T.hasLen) {
     const age = new Map(), keys = treeCladeKeys(R, T.unrooted ? T.ref : null), avg = a => heights === 'mean' ? a.reduce((x, y) => x + y, 0) / a.length : hpdOf(a, 0.95).med;
@@ -2539,7 +2549,7 @@ function refreshTreeSetBox() {
     <p class="hint">The first trees of the file, left out of every summary: summary trees, support values and age densities.</p>
     <div class="row${raw ? '' : ' off'}"><label for="tsIdx">Show tree number</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsIdx" type="number" min="1" max="${treeSet.total ?? treeSet.count}" step="1" value="${treeSet.shown || 1}"${raw ? '' : ' disabled'}><span class="u"></span></span><button class="btn small" id="tsShow"${raw ? '' : ' disabled'}>Show</button></span></div>
     <div class="row${raw ? '' : ' off'}"><label for="tsKind">Summary tree</label><select id="tsKind"${raw ? '' : ' disabled'}>${[['majority', 'Majority rule'], ['strict', 'Strict consensus'], ['allcompat', 'Maximum compatible'], ['mcc', 'MCC'], ['map', 'MAP']].map(([v, l]) => `<option value="${v}"${(treeSet.mode || 'majority') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
-    <p class="hint">${({ majority: 'Keeps the clades found in more than the chosen share of the trees.', strict: 'Keeps only the clades found in every tree.', allcompat: 'The majority-rule tree plus the less frequent clades that do not conflict with it (allcompat in MrBayes).', mcc: 'Maximum clade credibility: the sampled tree whose clades are, together, the most frequent, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.', map: treeSet.trees && treeSet.trees.some(t => treePost(t) != null) ? `Maximum a posteriori: the sampled tree with the highest posterior probability${mcmcLog ? ` (from ${mcmcLog.name})` : ''}.` : 'Maximum a posteriori: needs the posterior of each tree. BEAST 1 writes it in the trees file, for BEAST 2 or MrBayes attach the .log or .p file in Attachments.' })[treeSet.mode || 'majority']}</p>
+    <p class="hint">${({ majority: 'Keeps the clades found in more than the chosen share of the trees.', strict: 'Keeps only the clades found in every tree.', allcompat: 'The majority-rule tree plus the less frequent clades that do not conflict with it (allcompat in MrBayes).', mcc: 'Maximum clade credibility: the sampled tree whose clades are, together, the most frequent, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.', map: treeSet.trees && treeSet.trees.some(t => treePost(t) != null) ? `Maximum a posteriori: the sampled tree with the highest posterior probability${mcmcLog ? ` (from ${mcmcLog.name})` : ''}.` : 'Maximum a posteriori: needs the posterior of each tree. BEAST 1 writes it in the trees file, for BEAST2 or MrBayes attach the .log or .p file in Attachments.' })[treeSet.mode || 'majority']}</p>
     ${(treeSet.mode || 'majority') === 'majority' ? `<div class="row sub"><label for="tsPct">Clades in more than</label><span class="numwrap"><input class="num" id="tsPct" type="number" min="50" max="100" step="1" value="${treeSet.pct ?? 50}"><span>%</span></span></div>` : ''}
     ${treeSet.mode === 'mcc' && treeSet.hasLen ? `<div class="row sub"><label for="tsHeights">Node ages</label><select id="tsHeights"><option value="median"${treeSet.heights !== 'mean' ? ' selected' : ''}>Median</option><option value="mean"${treeSet.heights === 'mean' ? ' selected' : ''}>Mean</option></select></div>` : ''}
     <div class="btns"><button class="btn" id="tsBuild"${raw ? '' : ' disabled'}>Build summary tree</button></div>`;
@@ -2559,7 +2569,7 @@ function refreshTreeSetBox() {
     const m = treeSet.mode || 'majority', pct = m === 'strict' ? 100 : clamp(treeSet.pct ?? 50, 50, 100);
     try {
       treeSet.shown = null;
-      if (m === 'map' && !treeSet.trees.some(t => treePost(t) != null)) { toast('Attach the .log of BEAST 2 or the .p file of MrBayes in Attachments to build the MAP tree.'); return; }
+      if (m === 'map' && !treeSet.trees.some(t => treePost(t) != null)) { toast('Attach the .log of BEAST2 or the .p file of MrBayes in Attachments to build the MAP tree.'); return; }
       if (m === 'mcc' || m === 'map') showFromSet(sampleSummary(m, treeSet.heights || 'median'), m === 'mcc' ? 'Maximum clade credibility tree' : 'Maximum a posteriori tree');
       else if (m === 'allcompat') showFromSet(consensusTree(50, true), 'Maximum compatible tree');
       else showFromSet(consensusTree(pct), pct >= 100 ? 'Strict consensus' : `Majority-rule consensus (>${pct}%)`);
@@ -5659,7 +5669,7 @@ async function loadAbout() {
     }
   }
   if (cached && cached.html) { box.dataset.loaded = '1'; return; }
-  box.innerHTML = '<p class="hint">tree2go is a free editor for phylogenetic trees. Connect to the internet once to read the full About text.</p>';
+  box.innerHTML = '<p class="hint">tree2go is a free editor for phylogenetic trees, connect to the internet once to read the full About text.</p>';
 }
 $('aboutBtn').onclick = () => { aboutM.hidden = false; $('aboutClose').focus(); loadAbout(); };
 $('aboutClose').onclick = closeAbout;
@@ -7401,7 +7411,7 @@ async function loadHelp() {
     return;
   }
   if (cached && cached.html) { box.dataset.loaded = '1'; return; }
-  box.innerHTML = '<p class="hint">The reference is not available right now. Check your internet connection and open it again.</p>';
+  box.innerHTML = '<p class="hint">The reference is not available right now, check your internet connection and open it again.</p>';
 }
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-help]'); if (!b) return; helpM.hidden = false; $('helpClose').focus(); loadHelp(); });
 $('helpClose').onclick = closeHelp;

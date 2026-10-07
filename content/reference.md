@@ -689,4 +689,4 @@ Save the figure, the tree or a style template.
 | Zoom and move | Mouse wheel to zoom, drag the empty canvas to move, buttons at the bottom right to fit |
 | Tabs | Extract clade (`Right-click` menu of a clade) opens the clade in a new tab, with the same style. Supports, ages and frequencies come from the full tree as they were, and the clade keeps its own branch to show them. Click a tab to switch, double-click it to rename it, the × of the active tab closes it. The tab of the full tree cannot be closed |
 | Undo<br>Redo | `Ctrl+Z`<br>`Ctrl+Shift+Z` (`Cmd+Shift+Z` on a Mac) |
-| Clear the selection | Esc |
+| Clear the selection | `Esc` |
