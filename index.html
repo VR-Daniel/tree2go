@@ -239,12 +239,18 @@ aside .inline input.num.boxed, .pop .inline input.num, aside .cat select{backgro
 .helpsearch .btn{flex:none; width:34px; height:32px; padding:0; font-size:16px; line-height:1}
 .helpBody mark.find{background:#ffe8b0; color:inherit; border-radius:2px; padding:0}
 .helpBody mark.find.on{background:var(--mustard); box-shadow:0 0 0 1px var(--mustard)}
+.nethit{cursor:context-menu; pointer-events:stroke}
+.netpickctl{display:flex; align-items:center; gap:6px}
+.netpickctl .numwrap{width:76px}
+.netpicknote{margin-top:8px !important; margin-bottom:6px !important}
+.nethit[data-netlab]{pointer-events:all}   /* the gamma label answers on its whole box */
 .helpbtn{min-width:28px; padding-left:0 !important; padding-right:0 !important}
 /* bottom of the panel: a little less side margin, so the buttons share one line on most screens */
 .sidefoot{padding-left:12px !important; padding-right:12px !important}
 .sidefoot .btn.small{white-space:nowrap}
 /* Reference window: wider, with tables, code and links */
-.modal .box.about.help{width:min(1060px,96vw); max-height:min(88vh,980px)}
+.modal .box.about.help{width:min(1340px,96vw); max-height:min(88vh,980px)}
+.helpBody td:nth-child(3){white-space:nowrap}   /* Values: each option on one line; lines break only where the file has <br> */
 .helpBody h1,.helpBody h2{font-family:var(--display); font-weight:400; margin:22px 0 6px}
 .helpBody h1{font-size:24px} .helpBody h2{font-size:21px} .helpBody h3{font-size:15px; margin:16px 0 6px}
 .helpBody h1:first-child,.helpBody h2:first-child{margin-top:0}
@@ -748,11 +754,17 @@ function parseNewick(src) {
     while (i < n && !'(),:;['.includes(s[i])) out += s[i++];
     return out.trim();
   }
+  let lastGamma = null, lastSup = null;
+  // 'length', or 'length:support:gamma' as networks write it (any field can be empty: #H7:::0.33)
   function length() {
     skip();
     if (s[i] !== ':') return null;
     i++; skip(); let t = '';
     while (i < n && !'(),;[ \n\r\t'.includes(s[i])) t += s[i++];
+    const parts = t.split(':'); t = parts[0];
+    if (parts.length > 2 && parts[2] !== '' && isFinite(+parts[2])) lastGamma = +parts[2];
+    if (parts.length > 1 && parts[1] !== '' && isFinite(+parts[1])) lastSup = +parts[1];
+    if (t === '') { skip(); return null; }
     const v = parseFloat(t);
     if (isNaN(v)) throw new Error('Invalid branch length near position ' + i + ': "' + t + '".');
     skip();
@@ -774,6 +786,8 @@ function parseNewick(src) {
     }
     node.name = label();
     node.len = length();
+    if (lastGamma != null) { node.gamma = lastGamma; lastGamma = null; }
+    if (lastSup != null) { node.esup = lastSup; lastSup = null; }
     if (pre || pend) { node.meta = { ...(pre || {}), ...(pend || {}) }; pend = null; }
     return node;
   }
@@ -785,7 +799,7 @@ function parseNewick(src) {
   if (s[i] === ',') throw new Error('A comma sits outside the tree parentheses at position ' + i + '.');
   if (i < n && s[i] !== ';') throw new Error('Unexpected text at position ' + i + '.');
   if (!root.children.length) throw new Error('A tree needs at least one pair of parentheses with two tips.');
-  return root;
+  return extractNetwork(root);   // #H, #LGT and #R labels become reticulations
 }
 
 // Writes a name for Newick: quoted when it holds spaces or symbols, as the format requires.
@@ -800,7 +814,16 @@ function toNewick(root) {
     let str = '';
     if (n.children.length) str = '(' + n.children.map(c => w(c, false)).join(',') + ')';
     str += fmtName(n.name);
-    if (n.len != null && !isRoot) str += ':' + (+n.len.toPrecision(10));
+    let len = n.len;
+    const num = x => +x.toPrecision(10), split = t => len == null ? [null, null] : [len * (1 - t), len * t];
+    // a donor point splits the branch: the node below it, and beside it the bare #label with its gamma
+    const annot = m => m && Object.keys(m).length ? '[&' + Object.entries(m).map(([k, v]) => `${k}=${Array.isArray(v) ? '{' + v.join(',') + '}' : typeof v === 'string' ? `"${v}"` : v}`).join(',') + ']' : '';
+    for (const d of n.don || []) { const [lo, hi] = split(d.t ?? 0.5); str = `(${str}${lo != null && !d.nl ? ':' + num(lo) : ''},#${d.k}${annot(d.meta)}:${d.len ?? ''}:${d.sup ?? ''}:${d.g ?? ''})`; len = hi; }
+    // a hybrid point: the node below it, wrapped as (node)#label with the gamma of the main tree
+    let hybTail = '';
+    for (const h of n.hyb || []) { const [lo, hi] = split(h.t ?? 1); str = `(${str}${lo != null && !h.nl ? ':' + num(lo) : ''})#${h.k}${annot(h.meta)}`; hybTail = `:${hi != null && !isRoot ? num(hi) : ''}::${h.g ?? ''}`; len = null; }
+    if (hybTail) return str + hybTail;
+    if (len != null && !isRoot) str += ':' + num(len);
     return str;
   }
   return w(root, true) + ';';
@@ -845,6 +868,8 @@ function serialize(n) {
   if (n.fa != null) o.fa = n.fa;
   if (n.bud != null) o.bu = n.bud;
   if (n.grafts && n.grafts.length) o.gr = n.grafts.map(serialize);
+  if (n.hyb && n.hyb.length) o.hy = n.hyb;
+  if (n.don && n.don.length) o.dn = n.don;
   if (n.children.length) o.k = n.children.map(serialize);
   return o;
 }
@@ -856,6 +881,8 @@ function deserialize(o, parent = null) {
   if (o.bo && !o.k) { n.st = n.st || {}; if (n.st.fw == null) n.st.fw = true; }
   n.ex = !!o.ex; n.noEx = !!o.nx; n.fa = o.fa ?? null; n.bud = o.bu ?? null;
   if (o.m) n.meta = o.m;
+  if (o.hy) n.hyb = JSON.parse(JSON.stringify(o.hy));
+  if (o.dn) n.don = JSON.parse(JSON.stringify(o.dn));
   if (o.gr) n.grafts = o.gr.map(g => markGraft(deserialize(g, null), n));
   if (o.fx) n.grafts = (n.grafts || []).concat(o.fx.map(f => { const G = mk(f.name || 'Fossil'); G.fa = f.age; G.bud = f.bud ?? null; return markGraft(G, n); }));
   if (o.k) n.children = o.k.map(c => deserialize(c, n));
@@ -1116,7 +1143,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 // Default settings merged with saved ones, with the migrations that keep older sessions and projects working.
@@ -1199,6 +1226,10 @@ const SECTIONS_RAW = [
   ]},
   { title: 'Layout', items: [
     { k: 'layout', type: 'seg', opts: [['rect', 'Rectangular'], ['circular', 'Circular'], ['fan', 'Fan'], ['unrooted', 'Unrooted']], refit: true, enable: () => !figImages.length },
+    { k: 'rectOrient', type: 'seg', label: 'Orientation', opts: [['horizontal', 'Horizontal'], ['vertical', 'Vertical']], refit: true, show: s => s.layout === 'rect', sub: true },
+    { k: 'scaleTurn', type: 'seg', label: 'Scale bar on a vertical tree', opts: [['tree', 'Turns with the tree'], ['upright', 'Horizontal']], show: s => s.layout === 'rect' && s.rectOrient === 'vertical' && !s.axisOn && s.scaleBar, sub: true },   // the time axis, which replaces the bar, always turns with the tree
+    { k: 'vertText', type: 'seg', label: 'Text on a vertical tree', opts: [['vertical', 'Vertical'], ['horizontal', 'Horizontal']], show: s => s.layout === 'rect' && s.rectOrient === 'vertical', sub: true },
+    { type: 'hint', text: s => s.layout === 'rect' && s.rectOrient === 'vertical' ? 'The tips go on top and the root at the bottom; the time axis and the scale bar turn with the tree, legends and the title do not. With horizontal text, widen the tip spacing so the names do not overlap.' : '' },
     { type: 'hint', text: () => figImages.length ? 'While the page has images, the tree shape cannot be changed. Remove the images, change the shape, then add them back.' : '' },
     { k: 'useLengths', type: 'check', label: 'Use branch lengths', refit: true },
     { type: 'custom', build: treeToolsBox },
@@ -1404,6 +1435,46 @@ const SECTIONS_RAW = [
     { k: 'extinctBranch', type: 'seg', label: 'Branches of extinct tips', opts: [['same', 'Same'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] },
     { type: 'hint', text: () => 'Grafted fossil lineages are always drawn dashed, using the dash length and gap from Branches.' }
   ]},
+  { title: 'Phylogenetic networks', items: [
+    { type: 'hint', text: s => hasNet() ? '' : 'Open a network in extended Newick (eNewick), as written by PhyloNet, SNaQ or Dendroscope. Reticulations are marked with #H (hybridization), #LGT (lateral gene transfer) or #R (recombination).' },
+    { type: 'custom', build: netListBox },
+    { k: 'netOn', type: 'check', label: 'Show the reticulations', show: s => hasNet() },
+    { type: 'hint', text: s => hasNet() ? 'Dashed lines from the donor lineage to the hybrid node. Gamma (γ) is the share of the genome inherited through each one. Click a line or its value to select it, right-click to change only that one.' : '' },
+    { k: 'netColor', type: 'color', label: 'Hybridization (#H)', show: s => hasNet() && netTypes().has('hyb'), enable: s => s.netOn, sub: true },
+    { k: 'netColorLGT', type: 'color', label: 'Lateral gene transfer (#LGT)', show: s => hasNet() && netTypes().has('lgt'), enable: s => s.netOn, sub: true },
+    { k: 'netColorR', type: 'color', label: 'Recombination (#R)', show: s => hasNet() && netTypes().has('rec'), enable: s => s.netOn, sub: true },
+    { k: 'netWidthBy', type: 'check', label: 'Width from γ', show: s => hasNet() && netHasGamma(), enable: s => s.netOn, sub: true },
+    { k: 'netWidth', type: 'number', label: 'Width', min: 0.1, max: 20, step: 0.1, unit: 'px', show: s => hasNet() && !(s.netWidthBy && netHasGamma()), enable: s => s.netOn, sub: true },
+    { k: 'netWMin', type: 'number', label: 'Thinnest (γ = 0)', min: 0.1, max: 20, step: 0.1, unit: 'px', show: s => hasNet() && netHasGamma() && s.netWidthBy, enable: s => s.netOn, sub: true },
+    { k: 'netWMax', type: 'number', label: 'Thickest (γ = 1)', min: 0.1, max: 30, step: 0.1, unit: 'px', show: s => hasNet() && netHasGamma() && s.netWidthBy, enable: s => s.netOn, sub: true },
+    { type: 'hint', text: s => hasNet() && netHasGamma() && s.netWidthBy ? 'Each line takes a width between these two, proportional to its γ.' : '' },
+    { k: 'netDash', type: 'number', label: 'Dash length', min: 0.5, max: 50, step: 0.5, unit: 'px', show: s => hasNet(), enable: s => s.netOn, sub: true },
+    { k: 'netGap', type: 'number', label: 'Gap between dashes', min: 0.5, max: 50, step: 0.5, unit: 'px', show: s => hasNet(), enable: s => s.netOn, sub: true },
+    { k: 'netStyle', type: 'seg', label: 'Style', opts: [['major', 'Major tree'], ['full', 'Full network']], show: s => hasNet(), enable: s => s.netOn, sub: true },
+    { type: 'hint', text: s => !hasNet() ? '' : s.netStyle === 'full' ? 'Each hybrid node is a point of its own on its line: the major edge curves into it from the parent and the minor edge from the donor, and one branch goes on from there. On rectangular trees with square corners.' : 'The tree of the major edges, with each minor edge drawn from the donor to the hybrid node.' },
+    { k: 'netArrow', type: 'seg', label: 'Arrows', opts: [['none', 'None'], ['end', 'To hybrid'], ['start', 'To donor'], ['both', 'Both']], show: s => hasNet(), enable: s => s.netOn, sub: true },
+    { k: 'netHead', type: 'number', label: 'Arrow head size', min: 1, max: 80, step: 0.5, unit: 'px', show: s => hasNet() && s.netArrow !== 'none', enable: s => s.netOn, sub: true },
+    { k: 'netShape', type: 'seg', label: 'Line', opts: [['straight', 'Straight'], ['curved', 'Curved']], show: s => hasNet() && s.netStyle !== 'full', enable: s => s.netOn, sub: true },
+    { k: 'netCurve', type: 'range', label: 'Curvature', min: 5, max: 100, step: 5, hmax: 300, unit: '%', show: s => hasNet() && s.netShape === 'curved' && s.netStyle !== 'full', enable: s => s.netOn, sub: true },
+    { k: 'netPos', type: 'seg', label: 'Where on the branches', opts: [['center', 'Centered'], ['file', 'Lengths'], ['custom', 'Custom']], show: s => hasNet(), enable: s => s.netOn, sub: true },
+    { type: 'hint', text: s => !hasNet() ? '' : s.netPos === 'file' ? 'Each end sits where the network places it, from the branch lengths of the file. Without lengths, at the middle of the branch.' : s.netPos === 'custom' ? '0% is the parent end of each branch, 100% its node.' : '' },
+    { k: 'netPosT', type: 'range', label: 'Position along the branch', min: 0, max: 100, step: 1, unit: '%', show: s => hasNet() && s.netPos === 'custom', enable: s => s.netOn, sub: true },
+    { k: 'netLabel', type: 'check', label: 'Show a value on each line', show: s => hasNet() && netValueOpts().length > 0, enable: s => s.netOn, sub: true },
+    { k: 'netLabelSrc', type: 'select', label: 'Value', opts: () => netValueOpts().length ? netValueOpts() : [['gamma', 'γ (inheritance)']], show: s => hasNet() && netValueOpts().length > 0 && s.netLabel, enable: s => s.netOn, sub: true },
+    { type: 'hint', text: s => hasNet() && s.netLabel && netValueOpts().length ? 'Values written in the file for each reticulation: γ, its length and support, and any [&…] annotation of its two ends. The minor value is written on the minor edge (the reticulation line).' : '' },
+    { k: 'netLabelDec', type: 'select', label: 'Decimals', opts: [[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4']], numeric: true, show: s => hasNet() && netValueOpts().length > 0 && s.netLabel, enable: s => s.netOn, sub: true },
+    { k: 'netLabelByType', type: 'check', label: 'Color the values like their line', show: s => hasNet() && netValueOpts().length > 0 && s.netLabel, enable: s => s.netOn, sub: true },
+    { type: 'hint', text: s => hasNet() && s.netLabel && s.netLabelByType ? 'The major value takes the color of its reticulation type (#H, #LGT or #R), the minor value a lighter shade of it.' : '' },
+    { k: 'netLabelSize', type: 'number', label: 'Minor value: text size', min: 1, max: 100, step: 0.5, unit: 'px', show: s => hasNet() && netValueOpts().length > 0 && s.netLabel, enable: s => s.netOn, sub: true },
+    { k: 'netLabelColor', type: 'color', label: 'Minor value: color', show: s => hasNet() && netValueOpts().length > 0 && s.netLabel && !s.netLabelByType, enable: s => s.netOn, sub: true },
+    { k: 'netLabelDx', type: 'number', label: 'Minor value: horizontal offset', min: -500, max: 500, step: 1, unit: 'px', show: s => hasNet() && netValueOpts().length > 0 && s.netLabel, enable: s => s.netOn, sub: true },
+    { k: 'netLabelDy', type: 'number', label: 'Minor value: vertical offset', min: -500, max: 500, step: 1, unit: 'px', show: s => hasNet() && netValueOpts().length > 0 && s.netLabel, enable: s => s.netOn, sub: true },
+    { k: 'netLabelMajor', type: 'check', label: 'Also show the γ of the major edge', show: s => hasNet() && s.netLabel && s.netLabelSrc === 'gamma' && netEdges().some(e => (netTargets().get(e.d.k) || {}).h?.g != null), enable: s => s.netOn, sub: true },
+    { k: 'netLabelMajorSize', type: 'number', label: 'Major value: text size', min: 1, max: 100, step: 0.5, unit: 'px', show: s => hasNet() && s.netLabel && s.netLabelSrc === 'gamma' && s.netLabelMajor, enable: s => s.netOn, sub: true },
+    { k: 'netLabelMajorColor', type: 'color', label: 'Major value: color', show: s => hasNet() && s.netLabel && s.netLabelSrc === 'gamma' && s.netLabelMajor && !s.netLabelByType, enable: s => s.netOn, sub: true },
+    { k: 'netLabelMajorDx', type: 'number', label: 'Major value: horizontal offset', min: -500, max: 500, step: 1, unit: 'px', show: s => hasNet() && s.netLabel && s.netLabelSrc === 'gamma' && s.netLabelMajor, enable: s => s.netOn, sub: true },
+    { k: 'netLabelMajorDy', type: 'number', label: 'Major value: vertical offset', min: -500, max: 500, step: 1, unit: 'px', show: s => hasNet() && s.netLabel && s.netLabelSrc === 'gamma' && s.netLabelMajor, enable: s => s.netOn, sub: true },
+  ]},
   { title: 'Time axis', items: [
     { k: 'axisOn', type: 'check', label: 'Show time axis (dated trees)' },
     { type: 'hint', text: s => !hasLengths(tree || { children: [] }) || !s.useLengths ? 'Needs branch lengths in time units and "Use branch lengths" turned on.' : s.layout === 'unrooted' ? 'Not available for unrooted trees.' : 'Ages increase from the youngest tip toward the root (the axis replaces the scale bar).' },
@@ -1520,7 +1591,7 @@ const SECTIONS_RAW = [
     { k: 'catInvert', type: 'check', label: 'Turn circular and fan trees inside out', enable: s => hasCat(s) && isCirc(s), refit: true },
     { type: 'hint', text: s => 'The tree goes to the outside and its labels, bars and categories fill the middle, with the clade name bars around the outside.' + (isCirc(s) ? '' : ' It takes effect when the layout is circular or fan.') },
     { k: 'catTitles', type: 'check', label: 'Show the column titles', enable: s => hasCat(s) && isRectish(s) },
-    { k: 'catTitleAngle', type: 'seg', label: 'Title angle', opts: [['45', '45°'], ['90', 'Vertical']], enable: s => hasCat(s) && isRectish(s) && s.catTitles, sub: true },
+    { k: 'catTitleAngle', type: 'seg', label: 'Title angle', opts: [['45', '45°'], ['90', 'Vertical']], enable: s => hasCat(s) && isRectish(s) && s.catTitles && !isVertical(s), sub: true },   // on a vertical tree the titles are always straight
     { k: 'catTitleFont', type: 'select', label: 'Title typeface', opts: [['', 'Same as the labels'], ...FONTS], enable: s => hasCat(s) && isRectish(s) && s.catTitles, sub: true },
     { k: 'catTitleBold', type: 'check', label: 'Titles in bold', enable: s => hasCat(s) && isRectish(s) && s.catTitles, sub: true },
     { k: 'catTitleItalic', type: 'check', label: 'Titles in italic', enable: s => hasCat(s) && isRectish(s) && s.catTitles, sub: true },
@@ -1543,7 +1614,7 @@ const SECTIONS_RAW = [
     { k: 'heatColGap', type: 'range', label: 'Space between columns', min: 0, max: 20, step: 0.5, hmax: 200, unit: 'px' },
     { k: 'heatGap', type: 'range', label: 'Distance from the labels', min: 0, max: 100, step: 1, hmin: -500, hmax: 2000, unit: 'px' },
     { k: 'heatTitles', type: 'check', label: 'Column titles' },
-    { k: 'heatTitleAngle', type: 'range', label: 'Title angle', min: 0, max: 90, step: 5, unit: '°', enable: s => s.heatTitles, sub: true },
+    { k: 'heatTitleAngle', type: 'range', label: 'Title angle', min: 0, max: 90, step: 5, unit: '°', enable: s => s.heatTitles && !isVertical(s), sub: true },
     { k: 'heatTitleSize', type: 'number', label: 'Title size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.heatTitles, sub: true },
     { k: 'heatTitleColor', type: 'color', label: 'Title color', enable: s => s.heatTitles, sub: true },
     { k: 'heatLegend', type: 'check', label: 'Show legend' }
@@ -1569,23 +1640,23 @@ const SECTIONS_RAW = [
   { title: 'Split into pages', items: [
     { type: 'hint', text: () => 'Split a long rectangular tree into pages that line up when placed one after another. Every page has the same width.' },
     { type: 'custom', build: pagesBox },
-    { type: 'head', label: 'Look', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
-    { k: 'pageColor', type: 'color', label: 'Page box on the canvas', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
-    { k: 'pageAxis', type: 'check', label: 'Repeat the time axis under each page', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.axisOn },
-    { k: 'pageExtras', type: 'check', label: 'Include the title, legends and scale bar', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { type: 'head', label: 'Look', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0 },
+    { k: 'pageColor', type: 'color', label: 'Page box on the canvas', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0 },
+    { k: 'pageAxis', type: 'check', label: 'Repeat the time axis under each page', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.axisOn },
+    { k: 'pageExtras', type: 'check', label: 'Include the title, legends and scale bar', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0 },
     { type: 'hint', text: s => s.layout === 'rect' && (s.pages || []).length > 0 && s.pageExtras ? 'The first page takes what is above the tree and the last page what is below it.' : '' },
-    { k: 'pageExtL', type: 'range', label: 'Extra width on the left', min: -200, max: 600, step: 1, hmin: -5000, hmax: 10000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
-    { k: 'pageExtR', type: 'range', label: 'Extra width on the right', min: -200, max: 600, step: 1, hmin: -5000, hmax: 10000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
+    { k: 'pageExtL', type: 'range', label: 'Extra width on the left', min: -200, max: 600, step: 1, hmin: -5000, hmax: 10000, unit: 'px', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0 },
+    { k: 'pageExtR', type: 'range', label: 'Extra width on the right', min: -200, max: 600, step: 1, hmin: -5000, hmax: 10000, unit: 'px', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0 },
     { type: 'hint', text: s => s.layout === 'rect' && (s.pages || []).length > 0 ? 'You can also drag the left or right edge of any page on the canvas. Every page keeps the same width.' : '' },
-    { type: 'head', label: 'Tree map', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
-    { k: 'pageMiniOn', type: 'check', label: 'Show a map of the whole tree on each page', show: s => s.layout === 'rect' && (s.pages || []).length > 0 },
-    { k: 'pageMiniW', type: 'range', label: 'Map width', min: 20, max: 300, step: 1, hmin: 5, hmax: 2000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
-    { k: 'pageMiniH', type: 'range', label: 'Map height', min: 20, max: 600, step: 1, hmin: 5, hmax: 4000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
-    { k: 'pageMiniGap', type: 'range', label: 'Space to the tree', min: 0, max: 200, step: 1, hmin: -500, hmax: 2000, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
-    { k: 'pageMiniLW', type: 'number', label: 'Line width', min: 0.1, max: 10, step: 0.1, unit: 'px', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
-    { k: 'pageMiniBase', type: 'color', label: 'Tree color', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
-    { k: 'pageMiniHi', type: 'color', label: 'Color of the rows on the page', show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
-    { k: 'pageMiniMark', type: 'seg', label: 'Mark the rows on the page with', opts: [['lines', 'Branch color'], ['both', 'Color and background']], show: s => s.layout === 'rect' && (s.pages || []).length > 0, enable: s => s.pageMiniOn }
+    { type: 'head', label: 'Tree map', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0 },
+    { k: 'pageMiniOn', type: 'check', label: 'Show a map of the whole tree on each page', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0 },
+    { k: 'pageMiniW', type: 'range', label: 'Map width', min: 20, max: 300, step: 1, hmin: 5, hmax: 2000, unit: 'px', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniH', type: 'range', label: 'Map height', min: 20, max: 600, step: 1, hmin: 5, hmax: 4000, unit: 'px', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniGap', type: 'range', label: 'Space to the tree', min: 0, max: 200, step: 1, hmin: -500, hmax: 2000, unit: 'px', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniLW', type: 'number', label: 'Line width', min: 0.1, max: 10, step: 0.1, unit: 'px', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniBase', type: 'color', label: 'Tree color', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniHi', type: 'color', label: 'Color of the rows on the page', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
+    { k: 'pageMiniMark', type: 'seg', label: 'Mark the rows on the page with', opts: [['lines', 'Branch color'], ['both', 'Color and background']], show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn }
   ]},
   { title: 'Images', custom: 'images' },
   { title: 'Page', items: [
@@ -1596,7 +1667,8 @@ const SECTIONS_RAW = [
     { type: 'hint', text: s => s.axisOn ? 'The time axis replaces the scale bar while it is on.' : !s.useLengths ? 'Needs "Use branch lengths".' : 'Measured in branch length units.' },
     { k: 'scaleMode', type: 'seg', label: 'Length', opts: [['auto', 'Automatic'], ['custom', 'Custom']], enable: s => s.scaleBar, sub: true },
     { k: 'scaleLen', type: 'number', label: 'Bar length', min: 1e-9, max: 1e9, step: 0.01, enable: s => s.scaleBar && s.scaleMode === 'custom', sub: true },
-    { k: 'scaleUnit', type: 'text', label: 'Unit', enable: s => s.scaleBar, sub: true },
+    { k: 'scaleUnit', type: 'text', label: 'Unit', ph: 'e.g. Ma or subs./site', enable: s => s.scaleBar, sub: true },
+    { type: 'hint', text: s => s.scaleBar ? 'Written after the number, centred with it on the bar.' : '' },
     { k: 'scaleDecimals', type: 'select', label: 'Decimals', opts: [[-1, 'Automatic'], [0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4']], numeric: true, enable: s => s.scaleBar, sub: true },
     { k: 'scaleV', type: 'seg', label: 'Vertical position', opts: [['top', 'Top'], ['bottom', 'Bottom']], enable: s => s.scaleBar && !s.scaleFree, sub: true },
     { k: 'scaleH', type: 'seg', label: 'Horizontal position', opts: [['left', 'Left'], ['center', 'Center'], ['right', 'Right']], enable: s => s.scaleBar && !s.scaleFree, sub: true },
@@ -1763,7 +1835,7 @@ function control(it) {
     const inp = row.querySelector('select');
     inp.addEventListener('change', () => { settings[it.k] = it.numeric ? +inp.value : inp.value; changed(it); });
   } else if (it.type === 'text') {
-    row.innerHTML = `<label for="${id}">${it.label}</label><input id="${id}" type="text" value="${esc(v)}">`;
+    row.innerHTML = `<label for="${id}">${it.label}</label><input id="${id}" type="text" value="${esc(v)}"${it.ph ? ` placeholder="${esc(it.ph)}"` : ''}>`;   // ph: an example shown while empty
     const inp = row.querySelector('input');
     inp.addEventListener('input', () => { settings[it.k] = inp.value; changed(it); });
   } else if (it.type === 'cats') {
@@ -1852,7 +1924,7 @@ function catLabel(c, cats, lowIn) {
 }
 // Shows, hides or greys out each panel option according to what it depends on.
 function refreshVisibility() {
-  if (typeof refreshPagesBox === 'function' && $('pagesBox') && $('pagesBox').dataset.layout !== settings.layout) { $('pagesBox').dataset.layout = settings.layout; refreshPagesBox(); }
+  if (typeof refreshPagesBox === 'function' && $('pagesBox') && $('pagesBox').dataset.layout !== settings.layout + ':' + settings.rectOrient) { $('pagesBox').dataset.layout = settings.layout + ':' + settings.rectOrient;   /* shape or orientation changed */ refreshPagesBox(); }
   document.querySelectorAll('.dynhint').forEach(el => { if (el._fn) el.textContent = el._fn(settings); });
   document.querySelectorAll('.dynhead').forEach(el => { el.hidden = !el._show(settings); });
   for (const it of allItems()) {
@@ -2789,6 +2861,8 @@ function reindex() { nodeById = new Map(); if (tree) walkAll(tree, n => { nodeBy
 function loadText(txt) {
   const err = $('parseErr');
   txt = (txt || '').trim();
+  if (!txt.startsWith('{') && !/^#NEXUS/i.test(txt) && /#[A-Za-z]+\d+/.test(txt)) { const nets = findNetworks(txt); netList = nets; netIdx = 0; if (nets.length) txt = nets[0].nwk; }
+  else netList = [];
   try {
     if (txt.startsWith('{')) {
       let o; try { o = JSON.parse(txt); } catch (e) { throw new Error('The project file is damaged and could not be read.'); }
@@ -3014,6 +3088,44 @@ function render() {
 }
 // Draws the whole figure: layout, branches, labels, values, side plots, axis, legends, pages, then the click layer. See
 // the comments inside for each step.
+/* Vertical rectangular trees: the tree is drawn as usual and turned 90 degrees, tips on top and the root at the bottom.
+   Its texts turn with it (vertical); with horizontal text, each one is turned back around its own anchor. */
+const isVertical = S => S.layout === 'rect' && S.rectOrient === 'vertical';
+// Texts of the side plots marked data-up stand upright on a vertical tree: column titles end just before their row,
+// axis numbers start right after their tick, and values sit centred above their bar.
+function uprightMarked(svgStr) {
+  const set = (attrs, anchor, base) => attrs.replace(/\s(text-anchor|dominant-baseline)="[^"]*"/g, '') + ` text-anchor="${anchor}" dominant-baseline="${base}"`;
+  const look = { title: ['end', 'central'], axis: ['start', 'central'], val: ['middle', 'auto'] };
+  svgStr = svgStr.replace(/<rect\b([^>]*\bdata-up="(\w+)"[^>]*?)(\/?)>/g, (m, attrs, kind, slash) => {
+    const tm = /transform="translate\(([-\d.]+)[ ,]+([-\d.]+)\)(?: rotate\([-\d.]+\))?"/.exec(attrs); if (!tm) return m;
+    const w = +((/\bwidth="([-\d.]+)"/.exec(attrs) || [])[1] || 0);
+    let a = attrs.replace(tm[0], `transform="translate(${tm[1]},${tm[2]}) rotate(90)"`);
+    if (kind === 'title') a = a.replace(/\bx="[-\d.]+"/, `x="${f2(-w + 3)}"`);
+    return `<rect${a}${slash}>`;
+  });
+  return svgStr.replace(/<text\b([^>]*\bdata-up="(\w+)"[^>]*)>/g, (m, attrs, kind) => {
+    const [anchor, base] = look[kind] || look.axis;
+    const tm = /transform="translate\(([-\d.]+)[ ,]+([-\d.]+)\)(?: rotate\([-\d.]+\))?"/.exec(attrs);
+    if (tm) return `<text${set(attrs.replace(tm[0], `transform="translate(${tm[1]},${tm[2]}) rotate(90)"`), anchor, base)}>`;
+    const x = /\bx="([-\d.]+)"/.exec(attrs), y = /\by="([-\d.]+)"/.exec(attrs);
+    return x && y ? `<text${set(attrs, anchor, base)} transform="rotate(90 ${x[1]} ${y[1]})">` : m;
+  });
+}
+function vertText(svgStr, S, tips) {
+  svgStr = uprightMarked(svgStr);
+  if (S.vertText !== 'horizontal') return svgStr;
+  // texts placed with a transform (tip labels, and their click boxes and highlights): a quarter turn back around their
+  // own point, so each name starts right on its tip and its box stays under it
+  svgStr = svgStr.replace(/<(text|rect)\b([^>]*?)transform="translate\(([-\d.]+)[ ,]+([-\d.]+)\)(?: rotate\(([-\d.]+)\))?"([^>]*?)(\/?)>/g, (m, tag, a, x, y, r, b, slash) => {
+    const attrs = a + b;
+    if (/data-up=/.test(attrs)) return m;
+    const tipName = tag === 'text' ? tips : /data-kind="label"/.test(attrs);   // tip names read at 45 degrees
+    const at = attrs.trim();
+    return `<${tag}${at ? ' ' + at : ''} transform="translate(${x},${y}) rotate(${(+(r || 0)) + (tipName ? 45 : 90)})"${slash}>`;
+  });
+  // texts placed with x and y: a quarter turn back around that point
+  return svgStr.replace(/<text\b(?![^>]*transform=)([^>]*?)\bx="([-\d.]+)"([^>]*?)\by="([-\d.]+)"([^>]*)>/g, (m, a, x, b, y, c) => /data-up=|data-keep=/.test(m) ? m : `<text${a}x="${x}"${b}y="${y}"${c} transform="rotate(90 ${x} ${y})">`);
+}
 function renderOnce() {
   /* Order of the drawing (each step is commented below):
      1. layout: position of every node (computeLayout) for the chosen shape, and the size of every tip label
@@ -3267,6 +3379,11 @@ function renderOnce() {
 
   // Branches: each node owns its incoming branch plus the connector that joins its children
   const elbow = L === 'rect' && (S.branchAngle < 89.9 || S.branchRound > 0);
+  // Full network style (rectangular trees): the major edge runs as a curve from the parent to the hybrid node, a point
+  // on the hybrid's own line; the minor edge arrives at the same point, and one branch goes on from there
+  const netFull = S.netOn && S.netStyle === 'full' && !elbow && hasNet();
+  const hybOf = n => netFull && n.hyb && n.hyb.length ? n.hyb[0] : null;
+  const netMajorDrawn = [];   // major edges drawn, for the selection highlight
   for (const n of vis) {
     const p = n.parent;
     n._tp = null; n._lt = null;
@@ -3287,9 +3404,24 @@ function renderOnce() {
         } else d = `M${f2(ax)},${f2(ay)}L${f2(bx)},${f2(by)}H${f2(cx)}`;
       } else if (stub > 0) d = `M${f2(n._px - stub)},${f2(n._py)}H${f2(n._px)}`;
     } else if (L === 'rect') {
-      if (p) d = `M${f2(p._px)},${f2(n._py)}H${f2(n._px)}`;
+      const hy = p && hybOf(n);
+      if (hy) {
+        // the major edge: a curve from the parent to the hybrid node, in the colour of its type (its own colour if set),
+        // width from its gamma; then the hybrid's own branch, from the hybrid node to the node
+        const hst = netStOf(hy.k), hx = p._px + (n._px - p._px) * netT(hy, 'tt', hst);
+        const majD = `M${f2(p._px)},${f2(p._py)}Q${f2(p._px)},${f2(n._py)} ${f2(hx)},${f2(n._py)}`;
+        const mcol = hst.mc || hst.c || netTypeColor(hy.k), mw = hst.mw ?? netMajorWidth(hy);
+        brL.push(`<path d="${majD}" fill="none" stroke="${mcol}" stroke-width="${f2(mw)}"/>`);
+        hitL.push(`<path class="nethit" d="${majD}" data-netmaj="${esc(hy.k)}" fill="none" stroke="transparent" stroke-width="10"/>`);
+        netMajorDrawn.push({ k: hy.k, d: majD, w: mw });
+        d = `M${f2(hx)},${f2(n._py)}H${f2(n._px)}`;
+      } else if (p) d = `M${f2(p._px)},${f2(n._py)}H${f2(n._px)}`;
       else if (stub > 0) d = `M${f2(n._px - stub)},${f2(n._py)}H${f2(n._px)}`;
-      if (kidsV && kidsV.length > 1) d += `M${f2(n._px)},${f2(kidsV[0]._py)}V${f2(kidsV[kidsV.length - 1]._py)}`;
+      if (kidsV && kidsV.length > 1) {
+        // the vertical line joins the children; a hybrid child is reached by its own curve, from the middle of the node
+        const ys = kidsV.filter(k => !hybOf(k)).map(k => k._py); if (ys.length < kidsV.length) ys.push(n._py);
+        const y0 = Math.min(...ys), y1 = Math.max(...ys); if (y1 - y0 > 1e-6) d += `M${f2(n._px)},${f2(y0)}V${f2(y1)}`;
+      }
     } else if (L === 'slanted' || L === 'unrooted') {
       if (p) d = `M${f2(p._px)},${f2(p._py)}L${f2(n._px)},${f2(n._py)}`;
       else if (stub > 0 && L !== 'unrooted') d = `M${f2(n._px - stub)},${f2(n._py)}H${f2(n._px)}`;
@@ -3425,6 +3557,19 @@ function renderOnce() {
     const tr = Math.abs(rot) > 0.01 ? `translate(${f2(px)},${f2(py)}) rotate(${f2(rot)})` : `translate(${f2(px)},${f2(py)})`;
     const yy = below ? widthOf(n) / 2 + 1 + dy + size * 0.8 : -(widthOf(n) / 2 + 1 + dy);
     const tw = measure(txt, size, fam, false, false);
+    if (isVertical(S) && S.vertText === 'horizontal' && L === 'rect') {
+      // a vertical tree with straight text: the value sits beside the (now vertical) branch, centred on its point:
+      // above the branch becomes its left side, below becomes its right side, at the same distance
+      const off = below ? widthOf(n) / 2 + 1 + dy + 2 : -(widthOf(n) / 2 + 1 + dy + 2), side = off < 0 ? 'end' : 'start';
+      // in the horizontal tree a value ending at the node (anchor end) runs back toward the root, one starting there
+      // (anchor start) runs toward the tips; on the turned tree it keeps that direction, by half of its height
+      const along = anchor === 'end' ? -size * 0.6 : anchor === 'start' ? size * 0.6 : 0;
+      const trv = `translate(${f2(px + ux * along)},${f2(py + off)})`;
+      const geo = { t: trv, x: side === 'end' ? -tw - 2 : -2, y: -size * 0.6, w: tw + 4, h: size * 1.2 };
+      valGeo.set(skey(n.id, kind), geo);
+      valHits.push(`<rect class="hitlabel" transform="${trv}" x="${f2(geo.x)}" y="${f2(geo.y)}" width="${f2(geo.w)}" height="${f2(geo.h)}" data-id="${n.id}" data-kind="${kind}"/>`);
+      return `<text transform="${trv}" text-anchor="${side}" dominant-baseline="central" font-size="${size}" fill="${color}" font-family="${esc(fam)}">${esc(txt)}</text>`;
+    }
     const hx = anchor === 'start' ? -2 : anchor === 'end' ? -tw - 2 : -tw / 2 - 2;
     const geo = { t: tr, x: hx, y: yy - size * 0.9, w: tw + 4, h: size * 1.15 };
     valGeo.set(skey(n.id, kind), geo);
@@ -3503,6 +3648,87 @@ function renderOnce() {
       if (!(stv(n, 'lv') ?? S.showLengths)) continue;
       const bv = S.lengthSrc ? brVals.get(n) : n.len; if (bv == null) continue;
       anL.push(branchText(n, 'length', (+bv).toFixed(S.lengthDecimals), stv(n, 'la') ?? S.lengthAlign, stv(n, 'lm') ?? S.lengthMargin, stv(n, 'ldy') ?? S.lengthDy, stv(n, 'ls') ?? S.lengthSize, stv(n, 'lcol') || S.lengthColor));
+    }
+  }
+
+  // Reticulations of a phylogenetic network: always dashed, from the donor lineage to the hybrid node
+  const netDrawn = [], netLabHits = [];   // what was drawn, for the selection highlight; the gamma labels go on top of the click layer
+  if (S.netOn) {
+    const visSet = new Set(vis), tg = netTargets();
+    const netPt = (n, t) => {   // a point at fraction t of the branch of n, from its parent end (0) to the node (1)
+      const p = n.parent;
+      if (L === 'rect') { const x0 = p ? p._px : n._px - stub; return [x0 + (n._px - x0) * t, n._py]; }
+      if (circ) { const r1 = rOf(n._d), r0 = p ? rOf(p._d) : r1; return polar(r0 + (r1 - r0) * t, n._a); }
+      const x0 = p ? p._px : n._px, y0 = p ? p._py : n._py; return [x0 + (n._px - x0) * t, y0 + (n._py - y0) * t];
+    };
+    for (const { D, d } of netEdges()) {
+      const T = tg.get(d.k); if (!T || !visSet.has(D) || !visSet.has(T.T) || D._px == null || T.T._px == null) continue;
+      const st = d.st || {};
+      let [ax, ay] = netPt(D, netT(d, 'tf')); const [bx, by] = netPt(T.T, netT(T.h, 'tt', st));
+      // full network, centred: the donor point sits halfway between the start of its branch and the hybrid node, so the
+      // minor edge rises into the hybrid node as in PhyloPlots, instead of straight up or down
+      if (S.netStyle === 'full' && L === 'rect' && S.netPos === 'center' && st.tf == null) {
+        const x0 = D.parent ? D.parent._px : D._px - stub; ax = clamp((x0 + bx) / 2, Math.min(x0, D._px), Math.max(x0, D._px));
+      }
+      const col = st.c || netTypeColor(d.k), w = netWidthOf(d), arrow = st.a ?? S.netArrow, shape = st.sh ?? S.netShape, lab = st.lb ?? S.netLabel;
+      let c = null, elbow = null;
+      if (S.netStyle === 'full') {
+        // Full network: the minor edge curves from the donor into the hybrid node, where the major edge arrives too;
+        // on circular trees, a straight line
+        if (L === 'rect' && Math.abs(by - ay) > 0.5) c = [ax, by];
+      } else if (shape === 'curved') {
+        const mx = (ax + bx) / 2, my = (ay + by) / 2, dx = bx - ax, dy = by - ay, L0 = Math.hypot(dx, dy) || 1;
+        let nx = -dy / L0, ny = dx / L0;
+        // the curve bulges toward the root: to the left in rectangular trees
+        if (L === 'rect' ? nx > 0 : nx * ((tree._px ?? 0) - mx) + ny * ((tree._py ?? 0) - my) < 0) { nx = -nx; ny = -ny; }
+        const kk = S.netCurve / 100 * L0 * 0.5; c = [mx + nx * kk, my + ny * kk];
+      }
+      // arrow heads: their own size, at least a little wider than the line; the line stops at the base of each head
+      const hs = st.hs ?? S.netHead, hw = Math.max(hs * 0.5, w * 0.95);
+      const toEnd = arrow === 'end' || arrow === 'both', toStart = arrow === 'start' || arrow === 'both';
+      const [fx, fy] = c || elbow || [ax, ay], [gx, gy] = c || elbow || [bx, by];
+      const unit = (px, py, qx, qy) => { const L1 = Math.hypot(px - qx, py - qy) || 1; return [(px - qx) / L1, (py - qy) / L1]; };
+      const [ue, ve] = unit(bx, by, fx, fy), [us, vs] = unit(ax, ay, gx, gy);
+      const ex = toEnd ? bx - ue * hs * 0.85 : bx, ey = toEnd ? by - ve * hs * 0.85 : by, sx0 = toStart ? ax - us * hs * 0.85 : ax, sy0 = toStart ? ay - vs * hs * 0.85 : ay;
+      const mid = elbow ? `L${f2(elbow[0])},${f2(elbow[1])}` : '';
+      const dd = c ? `M${f2(ax)},${f2(ay)}Q${f2(c[0])},${f2(c[1])} ${f2(bx)},${f2(by)}` : `M${f2(ax)},${f2(ay)}${mid}L${f2(bx)},${f2(by)}`;
+      const ddDraw = c ? `M${f2(sx0)},${f2(sy0)}Q${f2(c[0])},${f2(c[1])} ${f2(ex)},${f2(ey)}` : `M${f2(sx0)},${f2(sy0)}${mid}L${f2(ex)},${f2(ey)}`;
+      // in a full network the major edge takes the colour of the type and the minor edge a lighter shade of it
+      const lcol = S.netStyle === 'full' && L === 'rect' ? netLighter(col) : col;
+      brL.push(`<path d="${ddDraw}" fill="none" stroke="${lcol}" stroke-width="${f2(w)}" stroke-dasharray="${f2(S.netDash)} ${f2(S.netGap)}"/>`);
+      // arrow heads are triangles (not SVG markers), so the PDF writer keeps them
+      const head = (px, py, ux, uy) => `<polygon points="${f2(px)},${f2(py)} ${f2(px - ux * hs - uy * hw)},${f2(py - uy * hs + ux * hw)} ${f2(px - ux * hs + uy * hw)},${f2(py - uy * hs - ux * hw)}" fill="${lcol}"/>`;
+      if (toEnd) brL.push(head(bx, by, ue, ve));
+      if (toStart) brL.push(head(ax, ay, us, vs));
+      let labBox = null;
+      const lv = lab ? netValue(d, T.h) : null;
+      if (lv != null && lv !== '') {
+        const fullR = S.netStyle === 'full' && L === 'rect' && c;
+        const [mx, my] = fullR ? [0.5625 * ax + 0.375 * c[0] + 0.0625 * bx, 0.5625 * ay + 0.375 * c[1] + 0.0625 * by]   // a quarter of the way, near the donor
+          : c ? [0.25 * ax + 0.5 * c[0] + 0.25 * bx, 0.25 * ay + 0.5 * c[1] + 0.25 * by]
+          : elbow ? (Math.abs(bx - ax) > 12 ? [(ax + bx) / 2, ay] : [bx, (ay + by) / 2])   // full tree: on the part across, like a branch label
+          : [(ax + bx) / 2, (ay + by) / 2];
+        const ls = st.ls ?? S.netLabelSize, lc = st.lc || (S.netLabelByType ? netLighter(col) : S.netLabelColor), tx = mx + (st.lx ?? S.netLabelDx), ty = my - (st.ly ?? S.netLabelDy), txt = esc(fmtNetValue(lv));
+        anL.push(`<text x="${f2(tx)}" y="${f2(ty)}" font-size="${f2(ls)}" fill="${lc}" font-family="${esc(fam)}">${txt}</text>`);
+        const tw = measure(txt, ls, fam, false, false); labBox = { x: tx - 2, y: ty - ls * 0.9, w: tw + 4, h: ls * 1.15 };
+        netLabHits.push(`<rect class="nethit" x="${f2(labBox.x)}" y="${f2(labBox.y)}" width="${f2(labBox.w)}" height="${f2(labBox.h)}" data-netlab="${esc(d.k)}" fill="transparent"/>`);
+      }
+      // the gamma of the major edge (the main parent), written on the hybrid node's own branch
+      let mlabBox = null;
+      if (lab && S.netLabelMajor && S.netLabelSrc === 'gamma' && T.h.g != null) {
+        const ls = st.mls ?? S.netLabelMajorSize, gtxt = fmtNetValue(T.h.g), mdx = st.mlx ?? S.netLabelMajorDx, mdy = st.mly ?? S.netLabelMajorDy;
+        let [qx, qy] = netPt(T.T, netT(T.h, 'tt', st) / 2), qyy = qy + ls * 0.8 + 2 - mdy;   // a positive vertical offset moves it up
+        qx += 4;
+        // under the branch, as PhyloPlots writes it, so it does not meet the value of the minor edge above;
+        // in a full network, just before the hybrid node, on the side of its line away from the minor edge
+        if (S.netStyle === 'full' && L === 'rect') { qx = bx - measure(gtxt, ls, fam, false, false) - 6; qyy = (ay < by ? by + ls * 0.8 + 4 : by - 4) - mdy; }   // on the side away from the minor edge
+        const mx0 = qx + mdx, mcolL = st.mlc || (S.netLabelByType ? (st.mc || col) : S.netLabelMajorColor);
+        anL.push(`<text x="${f2(mx0)}" y="${f2(qyy)}" font-size="${f2(ls)}" fill="${mcolL}" font-family="${esc(fam)}">${esc(gtxt)}</text>`);
+        const tw = measure(gtxt, ls, fam, false, false); mlabBox = { x: mx0 - 2, y: qyy - ls * 0.9, w: tw + 4, h: ls * 1.15 };
+        netLabHits.push(`<rect class="nethit" x="${f2(mlabBox.x)}" y="${f2(mlabBox.y)}" width="${f2(mlabBox.w)}" height="${f2(mlabBox.h)}" data-netlab="${esc(d.k)}" data-part="major" fill="transparent"/>`);
+      }
+      valHits.push(`<path class="nethit" d="${dd}" data-net="${esc(d.k)}" fill="none" stroke="transparent" stroke-width="10"/>`);
+      netDrawn.push({ k: d.k, d: dd, w, lab: labBox, mlab: mlabBox });
     }
   }
 
@@ -3774,7 +4000,7 @@ function renderOnce() {
       if (txt) {
         const tw = measure(txt, vfs, fam, false, false);
         if (circ) { const [tx, ty] = polar(a + 3, n._a); const { t, anchor } = lblPlace(tx, ty, n._a, S.labelOrient === 'outward'); dataL.push(`<text transform="${t}" text-anchor="${anchor}" dominant-baseline="central" font-size="${f2(vfs)}" fill="#333" font-family="${esc(fam)}">${esc(txt)}</text>`); }
-        else dataL.push(`<text x="${f2(a + 3)}" y="${f2(n._py)}" dominant-baseline="central" font-size="${f2(vfs)}" fill="#333" font-family="${esc(fam)}">${esc(txt)}</text>`);
+        else dataL.push(`<text data-up="val" x="${f2(a + 3)}" y="${f2(n._py)}" dominant-baseline="central" font-size="${f2(vfs)}" fill="#333" font-family="${esc(fam)}">${esc(txt)}</text>`);
         end = a + 3 + tw;
       }
       n._dxe = end; dataEnd = Math.max(dataEnd, end); barsReach = Math.max(barsReach, end); drawnEnd = Math.max(drawnEnd, end);
@@ -3789,7 +4015,7 @@ function renderOnce() {
       let ax = `M${f2(x0)},${f2(y)}H${f2(xMax)}`, labs = '';
       for (const v of ticks) {
         const x = x0 + v * kx; if (tk > 0) ax += `M${f2(x)},${f2(y)}v${f2(tk)}`;
-        labs += `<text x="${f2(x)}" y="${f2(y + tk + S.dataAxisLabGap)}" text-anchor="middle" dominant-baseline="hanging" font-size="${f2(afs)}" fill="${col}" font-family="${esc(fam)}">${esc(fmtV(v))}</text>`;
+        labs += `<text data-up="axis" x="${f2(x)}" y="${f2(y + tk + S.dataAxisLabGap)}" text-anchor="middle" dominant-baseline="hanging" font-size="${f2(afs)}" fill="${col}" font-family="${esc(fam)}">${esc(fmtV(v))}</text>`;
       }
       dataL.push(`<path d="${ax}" stroke="${col}" stroke-width="${f2(lw)}" fill="none" stroke-linecap="square"/>${labs}`);
       dAxis = { bottom: y + tk + S.dataAxisLabGap + afs + 2 };
@@ -3845,8 +4071,8 @@ function renderOnce() {
           const tfs = S.catTitleSize, ang = S.catTitleAngle === '90' ? 90 : 45, ty = yTop - half - S.catTitleGap;
           const tfam = S.catTitleFont || fam, tb = !!S.catTitleBold, ti = !!S.catTitleItalic;
           const tw = measure(c.label, tfs, tfam, ti, tb), tr = `translate(${f2(cx)},${f2(ty)}) rotate(${-ang})`;
-          catL.push(`<text transform="${tr}" dominant-baseline="central" font-size="${f2(tfs)}"${tb ? ' font-weight="bold"' : ''}${ti ? ' font-style="italic"' : ''} fill="${S.catTitleColor}" font-family="${esc(tfam)}">${esc(c.label)}</text>`);
-          hitL.push(`<rect class="hitlabel" transform="${tr}" x="-2" y="${f2(-tfs * 0.65)}" width="${f2(tw + 4)}" height="${f2(tfs * 1.3)}" data-catcol="${esc(c.name)}"/>`);
+          catL.push(`<text data-up="title" transform="${tr}" dominant-baseline="central" font-size="${f2(tfs)}"${tb ? ' font-weight="bold"' : ''}${ti ? ' font-style="italic"' : ''} fill="${S.catTitleColor}" font-family="${esc(tfam)}">${esc(c.label)}</text>`);
+          hitL.push(`<rect data-up="title" class="hitlabel" transform="${tr}" x="-2" y="${f2(-tfs * 0.65)}" width="${f2(tw + 4)}" height="${f2(tfs * 1.3)}" data-catcol="${esc(c.name)}"/>`);
           const top = ty - tw * Math.sin(rad(ang)) - tfs * 0.6;
           cTop = cTop == null ? top : Math.min(cTop, top);
           catGeo.get(c.name).t = { tr, w: tw + 6, h: tfs * 1.4 };
@@ -3886,7 +4112,7 @@ function renderOnce() {
         cols.forEach((c, j) => {
           const x = start + j * (cw + cg) + cw / 2, tw = measure(c, tfs, fam, false, false);
           reach = Math.max(reach, tw * Math.sin(rad(ang)) + tfs * Math.cos(rad(ang)));
-          anL.push(`<text transform="translate(${f2(x)},${f2(top)}) rotate(${f2(-ang)})" text-anchor="${ang > 0 ? 'start' : 'middle'}" font-size="${f2(tfs)}" fill="${S.heatTitleColor}" font-family="${esc(fam)}">${esc(c)}</text>`);
+          anL.push(`<text data-up="title" transform="translate(${f2(x)},${f2(top)}) rotate(${f2(-ang)})" text-anchor="${ang > 0 ? 'start' : 'middle'}" font-size="${f2(tfs)}" fill="${S.heatTitleColor}" font-family="${esc(fam)}">${esc(c)}</text>`);
         });
         heatTop = top - reach - 2;
       }
@@ -4158,7 +4384,7 @@ function renderOnce() {
   if (heatTop != null) minY = Math.min(minY, heatTop);   // category titles stand above the first row
   // Page box used to place the scale bar and the title
   if (L === 'unrooted') for (const n of tips) maxX = Math.max(maxX, n._lx + (n._lw || 0));
-  const boxL = isRectish(S) ? 0 : minX, boxR = isRectish(S) ? Math.max(maxX, labelsEnd, drawnEnd) : maxX;
+  let boxL = isRectish(S) ? 0 : minX, boxR = isRectish(S) ? Math.max(maxX, labelsEnd, drawnEnd) : maxX;
   let scaleBottom = maxY, scaleTopY = null, legendBottom = null;
   dxRange = {};
   if (catDistLo != null) dxRange.catDist = [catDistLo, Math.max(200, S.catDist)];
@@ -4171,7 +4397,7 @@ function renderOnce() {
     return { left: base + clamp(dx, lo, hi), lo, hi };
   };
   freeBoxes = {};
-  let scaleNatBottom = null;
+  let scaleNatBottom = null, scaleIdx = -1;
   if (S.scaleBar && useLen && !axisDrawn) {
     const ppu = circ ? (S.radius - rIn) / maxD : L === 'unrooted' ? uScale : sx;
     const len = S.scaleMode === 'custom' && S.scaleLen > 0 ? S.scaleLen : niceNum(maxD / 5), w = len * ppu;
@@ -4189,7 +4415,8 @@ function renderOnce() {
       x0 = S.scaleX; y0 = S.scaleY; cx = x0 + w / 2;
     }
     const ticks = tk > 0 ? `M${f2(x0)},${f2(y0 - tk)}V${f2(y0 + tk)}M${f2(x0 + w)},${f2(y0 - tk)}V${f2(y0 + tk)}` : '';
-    anL.push(`<path d="M${f2(x0)},${f2(y0)}H${f2(x0 + w)}${ticks}" stroke="${S.scaleColor}" stroke-width="${S.scaleLineW}" fill="none"/><text x="${f2(cx)}" y="${f2(up ? y0 - tk + tg : y0 + tk + tg)}" text-anchor="middle"${up ? '' : ' dominant-baseline="hanging"'} font-size="${f2(sfs)}" fill="${S.scaleColor}" font-family="${esc(fam)}">${esc(lab)}</text>`);
+    scaleIdx = anL.length;   // where the bar is, in case a vertical tree keeps it horizontal
+    anL.push(`<path d="M${f2(x0)},${f2(y0)}H${f2(x0 + w)}${ticks}" stroke="${S.scaleColor}" stroke-width="${S.scaleLineW}" fill="none"/><text data-keep="1" x="${f2(cx)}" y="${f2(up ? y0 - tk + tg : y0 + tk + tg)}" text-anchor="middle"${up ? '' : ' dominant-baseline="hanging"'} font-size="${f2(sfs)}" fill="${S.scaleColor}" font-family="${esc(fam)}">${esc(lab)}</text>`);
     const top = up ? y0 - tk + tg - textH : y0 - tk, bottom = up ? y0 + tk : y0 + tk + tg + sfs;
     freeBoxes.scale = { x: Math.min(x0, cx - tw / 2), y: top, w: itemW, h: bottom - top };
     if (!S.scaleFree) {
@@ -4200,6 +4427,22 @@ function renderOnce() {
 
   // ---- Legends: each one is a block that can stay with the others or be moved by hand
   const LS = S, lgText = (key, i, auto) => { const v = (LS.legendText || {})[key + ':' + i]; return v != null && v !== '' ? v : auto; };
+  let anTreeEnd = anL.length;   // what comes after (legends, tree maps, title) never turns with a vertical tree
+  if (isVertical(S)) {
+    // legends and the title stay upright next to the turned tree, so they take its bounds once turned:
+    // left and right from its rows, top from the end of the names, bottom from the root
+    const L0 = boxL, R0 = boxR, B0 = Math.max(maxY, scaleBottom, scaleNatBottom ?? -Infinity, dAxis ? dAxis.bottom : -Infinity);
+    boxL = minY; boxR = B0; minY = -R0; maxY = -L0;
+    scaleBottom = maxY; scaleNatBottom = null; scaleTopY = null; dAxis = null;
+    // a horizontal scale bar: taken out of the turned part and set upright under the root, at the left of the tree
+    if (S.scaleTurn === 'upright' && scaleIdx >= 0 && freeBoxes.scale) {
+      const sb = freeBoxes.scale, sStr = anL.splice(scaleIdx, 1)[0]; anTreeEnd--;
+      const tx = S.scaleFree ? sb.x : boxL, ty = S.scaleFree ? sb.y : maxY + 14 + S.scaleDy, dx = tx - sb.x, dy = ty - sb.y;
+      anL.push(`<g transform="translate(${f2(dx)},${f2(dy)})">${sStr}</g>`);
+      freeBoxes.scale = { x: sb.x + dx, y: sb.y + dy, w: sb.w, h: sb.h };
+      if (!S.scaleFree) scaleBottom = scaleNatBottom = ty + sb.h;   // legends go below it
+    }
+  }
   const blocks = [];
   if (S.supportMode !== 'none' && S.supportScheme === 'categories' && S.supportLegend && cats.length && sups.length)
     blocks.push({ key: 'support', title: 'Support', entries: cats.map(c => ({ text: catLabel(c, cats, S.supportLowIn !== false), sym: S.supportMode === 'dots' ? { t: 'circle', r: c.size, fill: c.filled ? c.fill : 'none', stroke: strokeAttr(c.stroke, c.strokeStyle, c.strokeWidth, c.size, c.strokeCount) } : { t: 'rect', fill: c.fill } })) });
@@ -4284,14 +4527,14 @@ function renderOnce() {
   }
   // ---- Page sections (rectangular trees): row ranges exported as separate pages, each with a small map of the whole tree
   pageGeo = []; pageBounds = null; pageSp = sp; pageRows = null;
-  if (L === 'rect') {
+  if (L === 'rect' && !isVertical(S)) {   // pages are bands of rows: horizontal trees only
     // which tip, collapsed clade or fossil owns each row
     const owners = [], spanOf = new Map();
     for (const n of vis) if ((!n.children.length || n._tri) && !n._sa) { const w = n._w || 1, st0 = Math.round(n._y - (w - 1) / 2); for (let q = 0; q < w; q++) owners[st0 + q] = n.id; spanOf.set(n.id, [st0, st0 + w - 1]); }
     for (const x of gNodes) if (!x.children.length) { owners[x._y] = x.id; spanOf.set(x.id, [x._y, x._y]); }
     pageRows = { owners, spanOf, N };
   }
-  if (L === 'rect' && S.pages && S.pages.length) {
+  if (L === 'rect' && !isVertical(S) && S.pages && S.pages.length) {   // the pages wait, kept, while the tree is vertical
     const { spanOf } = pageRows;
     for (const sec of S.pages) {
       let s0 = (spanOf.get(sec.from) || [])[0] ?? sec.s0 ?? 0, s1 = (spanOf.get(sec.to) || [])[1] ?? sec.s1 ?? N - 1;
@@ -4335,9 +4578,11 @@ function renderOnce() {
     anL.push(`<text x="${f2(x)}" y="${f2(y)}" text-anchor="${anchor}" font-size="${S.titleSize}"${S.titleBold ? ' font-weight="bold"' : ''}${S.titleItalic ? ' font-style="italic"' : ''} fill="${S.titleColor}" font-family="${esc(fam)}">${esc(S.title)}</text>`);
   }
 
+  const vert = isVertical(S), anFixed = vert ? anL.splice(anTreeEnd) : [];
   const contentStr = alphaAttrs([
-    `<g>${bgL.join('')}</g>`,
     `<g id="imgBack"></g>`,
+    vert ? '<g transform="rotate(-90)">' : '',
+    `<g>${bgL.join('')}</g>`,
     `<g stroke="${S.lineColor}" stroke-width="0.8" opacity="0.6">${alL.join('')}</g>`,
     `<g fill="none" stroke-width="${LW}" stroke-linecap="${S.lineCap}" stroke-linejoin="round">${brL.join('')}</g>`,
     nbarL.length ? `<g>${nbarL.join('')}</g>` : '',
@@ -4345,8 +4590,9 @@ function renderOnce() {
     `<g>${triL.join('')}</g>`,
     `<g>${dotL.join('')}</g>`,
     supL.length ? `<g>${supL.join('')}</g>` : '',   // support circles above any node dot
-    `<g font-family="${esc(fam)}" font-size="${S.fontSize}"${S.italic ? ' font-style="italic"' : ''}${S.bold ? ' font-weight="bold"' : ''}>${lbL.join('')}</g>`,
-    `<g>${anL.join('')}</g>`,
+    `<g font-family="${esc(fam)}" font-size="${S.fontSize}"${S.italic ? ' font-style="italic"' : ''}${S.bold ? ' font-weight="bold"' : ''}>${vert ? vertText(lbL.join(''), S, true) : lbL.join('')}</g>`,
+    `<g>${vert ? vertText(anL.join(''), S) : anL.join('')}</g>`,
+    vert ? `</g><g>${anFixed.join('')}</g>` : '',
     `<g id="imgFront"></g>`
   ].join(''));
   if (contentStr !== lastContentStr) { content.innerHTML = contentStr; lastContentStr = contentStr; }
@@ -4359,7 +4605,14 @@ function renderOnce() {
     if (n._bd) ovL.push(`<path d="${n._bd}" fill="none" stroke="${hl}" stroke-width="${f2(widthOf(n) + 6)}" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>`);
     if (n._tp) ovL.push(`<polygon points="${n._tp}" fill="none" stroke="${hl}" stroke-width="3" stroke-linejoin="round" opacity=".6"/>`);
   };
-  const hlLabel = n => { if (n._lt) ovL.push(`<rect transform="${n._lt}" x="${f2(n._lrx - 1)}" y="${f2(-n._fs * 0.7)}" width="${f2(n._lw + 6)}" height="${f2(n._fs * 1.4)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.5"/>`); };
+  const hlLabel = n => { if (n._lt) ovL.push(`<rect data-kind="label" transform="${n._lt}" x="${f2(n._lrx - 1)}" y="${f2(-n._fs * 0.7)}" width="${f2(n._lw + 6)}" height="${f2(n._fs * 1.4)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.5"/>`); };
+  // a selected reticulation, or its gamma label
+  if (selNet && selNet.part === 'major') for (const e of netMajorDrawn) if (e.k === selNet.k) ovL.push(`<path d="${e.d}" fill="none" stroke="${hl}" stroke-width="${f2(e.w + 6)}" stroke-linecap="round" opacity=".45"/>`);
+  if (selNet && selNet.part !== 'major') for (const e of netDrawn) if (e.k === selNet.k) {
+    if (selNet.part === 'mlabel' && e.mlab) ovL.push(`<rect x="${f2(e.mlab.x - 1)}" y="${f2(e.mlab.y - 1)}" width="${f2(e.mlab.w + 2)}" height="${f2(e.mlab.h + 2)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.2"/>`);
+    else if (selNet.part === 'label' && e.lab) ovL.push(`<rect x="${f2(e.lab.x - 1)}" y="${f2(e.lab.y - 1)}" width="${f2(e.lab.w + 2)}" height="${f2(e.lab.h + 2)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.2"/>`);
+    else ovL.push(`<path d="${e.d}" fill="none" stroke="${hl}" stroke-width="${f2(e.w + 6)}" stroke-linecap="round" opacity=".45"/>`);
+  }
   const hlNode = n => { const r = Math.max(6, widthOf(n) * 2.5); ovL.push(`<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(r)}" fill="none" stroke="${hl}" stroke-width="2.2"/>`); };
   for (const { id, kind, excl } of sel.values()) {
     const n = nodeById.get(id); if (!n || !visSet.has(n)) continue;
@@ -4388,12 +4641,13 @@ function renderOnce() {
     else ovL.push(`<rect x="${f2(cg.x)}" y="${f2(cg.y)}" width="${f2(cg.w)}" height="${f2(cg.h)}" rx="3" fill="${hl}" fill-opacity=".1" stroke="${hl}" stroke-width="1.5"/>`);
     const cl = selCell && cellGeo.get(selCell);
     if (cl) ovL.push(S.catShape === 'circle' ? `<circle transform="${cl.tr}" r="${f2(cl.h + 3)}" fill="none" stroke="${hl}" stroke-width="2"/>` : `<rect transform="${cl.tr}" x="${f2(-cl.h - 3)}" y="${f2(-cl.h - 3)}" width="${f2(cl.h * 2 + 6)}" height="${f2(cl.h * 2 + 6)}" rx="2" fill="none" stroke="${hl}" stroke-width="2"/>`);
-    if (cg.t) ovL.push(`<rect transform="${cg.t.tr}" x="-3" y="${f2(-cg.t.h / 2)}" width="${f2(cg.t.w)}" height="${f2(cg.t.h)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.3"/>`);
+    if (cg.t) ovL.push(`<rect data-up="title" transform="${cg.t.tr}" x="-3" y="${f2(-cg.t.h / 2)}" width="${f2(cg.t.w)}" height="${f2(cg.t.h)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.3"/>`);
   }
-  overlay.innerHTML = ovL.join('');
+  overlay.innerHTML = isVertical(S) ? `<g transform="rotate(-90)">${vertText(ovL.join(''), S)}</g>` : ovL.join('');
   for (const n of [...vis, ...gNodes]) hitL.push(`<circle class="hitpt" cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(Math.max(6, LW * 2))}" data-id="${n.id}" data-kind="node"/>`);
   const ih = imageHits();
-  const hitsStr = ih.back + hitL.join('') + valHits.join('') + ih.front + '<g id="hitExtra"></g>';
+  const treeHits = hitL.join('') + valHits.join('') + netLabHits.join('');
+  const hitsStr = ih.back + (isVertical(S) ? `<g transform="rotate(-90)">${vertText(treeHits, S)}</g>` : treeHits) + ih.front + '<g id="hitExtra"></g>';
   if (hitsStr !== lastHitsStr) { hits.innerHTML = hitsStr; lastHitsStr = hitsStr; }
   const hitExtra = hits.querySelector('#hitExtra'); hitExtra.innerHTML = '';
   hitExtra.insertAdjacentHTML('beforeend', pageItemsSvg() + freeItemsSvg());
@@ -5083,8 +5337,9 @@ function openEdit(cx, cy, keep) {
   else {
     if (single && single.parent) {
       // rerooting a dated tree breaks its ages; it has to be dated again with the new root
-      const dated = isUltrametric(tree);
-      acts.push(`<button class="btn small" data-a="reroot"${dated ? ' disabled title="Not available on dated (ultrametric) trees"' : ''}>Reroot here</button>`);
+      const dated = isUltrametric(tree), netBlocked = !dated && netBlocksRoot(single);   // a network cannot be rooted on or below a hybrid node
+      acts.push(`<button class="btn small" data-a="reroot"${dated ? ' disabled title="Not available on dated (ultrametric) trees"' : netBlocked ? ' disabled title="Not available on or below a hybrid node"' : ''}>Reroot here</button>`);
+      if (netBlocked) actHint = (`<span class="hint">This branch is on or below a hybrid node: in a network the root cannot go there, since both parents of the hybrid node must stay above it.</span>`);
       if (dated) actHint = (`<span class="hint">Rerooting is not available on dated (ultrametric) trees: moving the root changes the ages of the nodes, so the tree has to be dated again with the new root.</span>`);
     }
     if (single && single.children.length && single.parent) acts.push(`<button class="btn small" data-a="extract" title="Open this clade in a new tab. The full tree stays in its own tab.">Extract clade</button>`);
@@ -5202,7 +5457,8 @@ function openEdit(cx, cy, keep) {
     }
     else if (a === 'barname') { const v = pop.querySelector('#pBarName').value.trim(); if (!v) return act('barremove'); apply(T.bar, x => { x.cladeLabel = v; }); }
     else if (a === 'barremove') { mutate(() => T.bar.forEach(x => { x.cladeLabel = null; BAR_KEYS.forEach(k => setSt(x, k, null)); }), 'Clade name removed'); sel.clear(); closePop(); render(); }
-    else if (a === 'reroot') { if (isUltrametric(tree)) { toast('Dated trees cannot be rerooted'); return; } mutate(() => { tree = reroot(tree, n); }, 'Tree rerooted', true); sel.clear(); closePop(); render(); }
+    else if (a === 'reroot') { if (isUltrametric(tree)) { toast('Dated trees cannot be rerooted'); return; }
+      if (netBlocksRoot(n)) { toast('In a network the root cannot go on or below a hybrid node: its two parents must stay above it.'); return; } mutate(() => { tree = reroot(tree, n); }, 'Tree rerooted', true); sel.clear(); closePop(); render(); }
     else if (a === 'extract') { const sub = deserialize(serialize(n)); sub.len = null; sub.parent = null; openInTab(sub, n.cladeLabel || (n.name && !isSupport(n.name) ? disp(n.name) : `Clade (${leafCount(n)} tips)`), true); toast('The clade opens in a new tab. The full tree stays in its own tab.'); if (false) sel.clear(); closePop(); render(); }
     else if (a === 'prune') { mutate(() => { tree = prune(tree, n); }, n.children.length ? 'Clade deleted' : 'Tip deleted'); sel.clear(); closePop(); render(); }
     else if (a === 'copy') { navigator.clipboard?.writeText(toNewick(n)).then(() => toast('Newick copied'), () => toast('Copying is blocked in this browser')); }
@@ -5675,7 +5931,7 @@ async function exportTIFF() {
 }
 // Exports in a format; with pages, the Export menu saves the pages.
 function exportAs(fmt) {
-  if (/^(svg|pdf|png|tif)$/.test(fmt) && settings.layout === 'rect' && (settings.pages || []).length && settings.exportSplit !== false) return exportPages(fmt);
+  if (/^(svg|pdf|png|tif)$/.test(fmt) && settings.layout === 'rect' && !isVertical(settings) && (settings.pages || []).length && settings.exportSplit !== false) return exportPages(fmt);   // a vertical tree exports whole
   ({ svg: exportSVG, pdf: exportPDF, png: exportPNG, tif: exportTIFF, nwk: () => exportTree('newick'), nex: () => exportTree('nexus') })[fmt](); }
 
 /* ================= Misc ================= */
@@ -5816,13 +6072,13 @@ document.addEventListener('click', e => {
 const expMenu = $('expMenu'), expBtn = $('expMenuBtn');
 // Closes the Export menu.
 const closeExp = () => { expMenu.hidden = true; expBtn.setAttribute('aria-expanded', 'false'); };
-expBtn.onclick = () => { const hasPages = settings.layout === 'rect' && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); const open = expMenu.hidden; expMenu.hidden = !open; expBtn.setAttribute('aria-expanded', String(open)); if (open) syncDpi(); };
+expBtn.onclick = () => { const hasPages = settings.layout === 'rect' && !isVertical(settings) && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); const open = expMenu.hidden; expMenu.hidden = !open; expBtn.setAttribute('aria-expanded', String(open)); if (open) syncDpi(); };
 expMenu.querySelectorAll('[data-fmt]').forEach(b => b.onclick = () => { closeExp(); exportAs(b.dataset.fmt); });
 // Shows whether the Export menu saves the pages split or the whole figure.
 function syncSplit() { document.querySelectorAll('[data-split]').forEach(b => b.setAttribute('aria-pressed', String((settings.exportSplit !== false) === (b.dataset.split === '1')))); }
 document.querySelectorAll('[data-split]').forEach(b => b.onclick = () => { settings.exportSplit = b.dataset.split === '1'; persist(); syncSplit(); });
 // keep the Pages row in step every time the menu opens, whatever else the button does
-$('expMenuBtn').addEventListener('click', () => { const hasPages = settings.layout === 'rect' && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); });
+$('expMenuBtn').addEventListener('click', () => { const hasPages = settings.layout === 'rect' && !isVertical(settings) && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); });
 syncSplit();
 $('dpiTop').addEventListener('change', e => setDpi(e.target.value));
 $('dpiTop').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); setDpi(e.target.value); } });
@@ -5849,7 +6105,7 @@ document.addEventListener('keydown', e => {
   const inField = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !inField) { e.preventDefault(); e.shiftKey ? redo() : undo(); }
   else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y' && !inField) { e.preventDefault(); redo(); }
-  else if (e.key === 'Escape') { sel.clear(); closePop(); render(); }
+  else if (e.key === 'Escape') { sel.clear(); selNet = null; closePop(); render(); }
   else if (!inField && (e.key === 'f' || e.key === 'F')) fit();
   else if (!inField && (e.key === '+' || e.key === '=')) zoomAt(svg.clientWidth / 2, svg.clientHeight / 2, 1.25);
   else if (!inField && e.key === '-') zoomAt(svg.clientWidth / 2, svg.clientHeight / 2, 0.8);
@@ -6118,7 +6374,7 @@ function replaceImageFile(id, file) {
 // Build the <image> nodes once and move them into the freshly drawn slots
 function placeImages() {
   const back = content.querySelector('#imgBack'), front = content.querySelector('#imgFront');
-  for (const id of [...imgEls.keys()]) if (!imgById(id)) imgEls.delete(id);
+  for (const id of [...imgEls.keys()]) if (!imgById(id)) { imgEls.get(id).remove(); imgEls.delete(id); }   // a deleted image leaves the canvas too
   for (const m of figImages) {
     let el = imgEls.get(m.id);
     if (!el) { el = document.createElementNS('http://www.w3.org/2000/svg', 'image'); el.setAttribute('preserveAspectRatio', 'none'); imgEls.set(m.id, el); }
@@ -6636,6 +6892,7 @@ function pagesBox() {
 function refreshPagesBox() {
   const d = $('pagesBox'); if (!d) return;
   if (settings.layout !== 'rect') { d.innerHTML = '<p class="hint">Pages work on rectangular trees. Switch the layout to Rectangular to use them.</p>'; return; }
+  if (isVertical(settings)) { d.innerHTML = '<p class="hint">Pages work on horizontal trees. Set the orientation to Horizontal in Layout to use them.</p>'; return; }
   if (!tree) { d.innerHTML = '<p class="hint">Load a tree first.</p>'; return; }
   const list = PAGE_SORT();
   d.innerHTML = `
@@ -6958,7 +7215,8 @@ function imgAABB(m) {
 }
 // Branch pieces, tip labels and the axis that the distance guides measure to.
 function guideObstacles() {
-  const obs = guideSegs.slice();
+  // branch pieces are kept in the tree's own frame; on a vertical tree they turn with it: (x, y) becomes (y, -x)
+  const obs = isVertical(settings) ? guideSegs.map(o => ({ x0: o.y0, x1: o.y1, y0: -o.x1, y1: -o.x0 })) : guideSegs.slice();
   const inv = vp.getCTM().inverse();
   for (const el of hits.querySelectorAll('.hitlabel[data-kind="label"]')) {
     const b = el.getBBox(), M = inv.multiply(el.getCTM());
@@ -7059,11 +7317,25 @@ let hoverKey = null;
 const hideHover = () => { hoverTip.hidden = true; hoverKey = null; };
 svg.addEventListener('pointermove', e => {
   if (!settings.hoverInfo || ptrs.size || e.pointerType !== 'mouse') { if (!hoverTip.hidden) hideHover(); return; }
+  const nt = e.target.closest && e.target.closest('[data-net], [data-netlab], [data-netmaj]');
+  if (nt && nt.dataset.netmaj) {   // the major edge of a hybrid node
+    const k = nt.dataset.netmaj, key = 'netmaj:' + k;
+    if (key !== hoverKey) { const T = netTargets().get(k), g = T && T.h.g; hoverTip.innerHTML = `<b>Major edge of #${esc(k)}</b><span>${g != null ? `γ ${+g.toFixed(3)}, from the main parent` : 'From the main parent'}</span>`; hoverKey = key; hoverTip.hidden = false; }
+  } else if (nt) {   // a reticulation, or its gamma: what it is and what it passes on
+    const k = nt.dataset.net || nt.dataset.netlab, key = 'net:' + k;
+    if (key !== hoverKey) {
+      const ed = netEdges().find(x => x.d.k === k), T = netTargets().get(k), g = ed && ed.d.g, gh = T && T.h.g;
+      const kind = ({ hyb: 'Hybridization', lgt: 'Lateral gene transfer', rec: 'Recombination' })[netType(k)];
+      const meta = g != null ? `${kind}, γ ${+g.toFixed(3)} through this line${gh != null ? `, ${+gh.toFixed(3)} through its other parent` : ''}` : kind;
+      hoverTip.innerHTML = `<b>Reticulation #${esc(k)}</b><span>${esc(meta)}</span>`; hoverKey = key; hoverTip.hidden = false;
+    }
+  } else {
   const t = e.target.closest && e.target.closest('[data-id][data-kind]');
   const kind = t && t.dataset.kind, n = t && nodeById.get(+t.dataset.id);
   if (!n || !/^(branch|node|label|support|length)$/.test(kind)) { if (!hoverTip.hidden) hideHover(); return; }
   const key = n.id + ':' + kind;
   if (key !== hoverKey) { const i = nodeInfo(n); hoverTip.innerHTML = `<b>${esc(i.title)}</b><span>${esc(i.meta)}</span>`; hoverKey = key; hoverTip.hidden = false; }
+  }
   const w = hoverTip.offsetWidth, h = hoverTip.offsetHeight;
   hoverTip.style.left = Math.min(innerWidth - w - 8, e.clientX + 14) + 'px';
   hoverTip.style.top = Math.min(innerHeight - h - 8, e.clientY + 16) + 'px';
@@ -7481,6 +7753,237 @@ helpM.addEventListener('click', e => {
   if (a) { e.preventDefault(); const t = $('helpBody').querySelector(`[id="${CSS.escape(decodeURIComponent(a.getAttribute('href').slice(1)))}"]`); if (t) t.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
 });
 helpM.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeHelp(); } });
+
+/* ================= Phylogenetic networks (extended Newick) =================
+   In eNewick a node with two parents is written twice with the same label: #H7 (hybridization), #LGT3, #R2...
+   The occurrence that holds a subtree, like (6)#H7, is the hybrid node: it receives. The bare occurrence, #H7, hangs
+   from the lineage that gives (the donor). After 'name:length:support:gamma', gamma is the share inherited that way.
+   tree2go keeps the main tree and stores each reticulation in the two nodes it joins:
+     node.hyb = [{ k, t, g }]   the hybrid end (k: label without #, t: where on the node's branch, 0 parent end to 1
+                                 node, g: gamma of the hybrid side)
+     node.don = [{ k, t, g, st }] the donor end, with the gamma of the reticulation and its own style (st). */
+// Joins the occurrences of every #label into reticulations. Returns the root (it can change).
+function extractNetwork(root) {
+  const re = /^#([A-Za-z]+\d+)$/, occ = new Map();
+  walkAll(root, x => { const m = x.name && re.exec(String(x.name).trim()); if (m) { if (!occ.has(m[1])) occ.set(m[1], []); occ.get(m[1]).push(x); } });
+  if (![...occ.values()].some(l => l.length > 1)) return root;
+  // a node with one child left becomes part of its child's branch; what it carried moves to that point of the branch
+  const mergeUnary = P => {
+    const C = P.children[0], G = P.parent, lp = P.len, lc = C.len;
+    const f = lp == null && lc == null ? 0.5 : lc == null ? 1 : lp == null ? 0 : lp + lc > 0 ? lp / (lp + lc) : 0.5;
+    for (const e of [...(C.don || []), ...(C.hyb || [])]) e.t = f + (e.t ?? 0.5) * (1 - f);
+    // nl: the part below had no length in the file, so it is written back without one
+    for (const e of P.don || []) (C.don = C.don || []).push({ ...e, t: f * (e.t ?? 1), nl: lc == null });
+    for (const e of P.hyb || []) (C.hyb = C.hyb || []).push({ ...e, t: f * (e.t ?? 1), nl: lc == null });
+    C.len = lp == null && lc == null ? null : (lp || 0) + (lc || 0);
+    G.children.splice(G.children.indexOf(P), 1, C); C.parent = G;
+  };
+  for (const [k, list] of occ) {
+    if (list.length < 2) continue;   // a lone #label is just a name
+    const H = list.find(x => x.children.length) || list[0];
+    const gH = Number.isFinite(H.gamma) ? H.gamma : null;
+    H.name = ''; (H.hyb = H.hyb || []).push({ k, t: 1, g: gH, meta: H.meta || null });
+    for (const X of list) {
+      if (X === H) continue;
+      let P = X.parent; if (!P) continue;
+      P.children.splice(P.children.indexOf(X), 1);
+      // written alone in brackets, (#H1), its node is left empty: the reticulation leaves from the node above
+      while (!P.children.length && P.parent) { const G = P.parent; G.children.splice(G.children.indexOf(P), 1); P = G; }
+      const g = Number.isFinite(X.gamma) ? X.gamma : gH != null ? 1 - gH : null;
+      (P.don = P.don || []).push({ k, t: 1, g, st: {}, len: X.len ?? null, sup: X.esup ?? null, meta: X.meta || null });
+      if (P.children.length === 1 && P.parent) mergeUnary(P);
+      else if (P.children.length === 1 && !P.parent) {   // the donor hung from the root: its only child becomes the root
+        const C = P.children[0]; C.parent = null;
+        for (const e of P.don) (C.don = C.don || []).push({ ...e, t: 0 });
+        root = C;
+      }
+    }
+    if (H.children.length === 1 && H.parent) mergeUnary(H);
+  }
+  return root;
+}
+// Kind of reticulation from its label: #LGT (or #HGT) lateral gene transfer, #R recombination, the rest hybridization.
+const netType = k => /^(LGT|HGT)/i.test(k) ? 'lgt' : /^R\d/i.test(k) ? 'rec' : 'hyb';
+const netTypeColor = k => ({ hyb: settings.netColor, lgt: settings.netColorLGT, rec: settings.netColorR })[netType(k)];
+const netTypes = () => new Set(netEdges().map(e => netType(e.d.k)));
+// A lighter shade of a colour, for the value of the minor edge (the major one keeps the colour of its line).
+const netLighter = c => { const a = hexRGB(c); return rgbHex(a.map(v => v + (255 - v) * 0.25)); };
+// A network cannot be rooted on a hybrid node's branch or below it: time flows down from both of its parents.
+function netBlocksRoot(n) {
+  for (const { T } of netTargets().values()) if (n === T || isAnc(T, n)) return true;
+  return false;
+}
+// True when the tree shown has reticulations; netHasGamma when some carry a gamma.
+const netEdges = () => { const out = []; if (tree) walkAll(tree, x => { for (const d of x.don || []) out.push({ D: x, d }); }); return out; };
+const hasNet = () => !!tree && netEdges().length > 0;
+// The own style of the reticulation with this label (where it lives: in the donor entry).
+const netStOf = k => { let st = null; if (tree) walkAll(tree, x => { for (const d of x.don || []) if (d.k === k) st = d.st; }); return st || {}; };
+const netHasGamma = () => netEdges().some(e => e.d.g != null);
+// Values a reticulation can show: gamma, its own length and support, and any [&...] annotation of its two ends.
+function netValueOpts() {
+  const E = netEdges(), tg = netTargets(), o = [];
+  if (E.some(e => e.d.g != null)) o.push(['gamma', 'γ (inheritance)']);
+  if (E.some(e => e.d.len != null)) o.push(['len', 'Length of the reticulation']);
+  if (E.some(e => e.d.sup != null)) o.push(['sup', 'Support of the reticulation']);
+  const ks = new Set(); for (const e of E) { const h = (tg.get(e.d.k) || {}).h; for (const m of [e.d.meta, h && h.meta]) if (m) for (const [k, v] of Object.entries(m)) if (v !== true) ks.add(k); }
+  for (const k of ks) o.push(['meta:' + k, k]);
+  return o;
+}
+function netValue(d, h, src = settings.netLabelSrc) {
+  if (src === 'gamma') return d.g;
+  if (src === 'len') return d.len;
+  if (src === 'sup') return d.sup;
+  if (String(src).startsWith('meta:')) { const k = src.slice(5); return (d.meta && d.meta[k] != null) ? d.meta[k] : h && h.meta ? h.meta[k] : null; }
+  return null;
+}
+function fmtNetValue(v) {
+  const dec = settings.netLabelDec, f = x => typeof x === 'number' ? String(+x.toFixed(dec)) : String(x);
+  return Array.isArray(v) ? `[${v.map(f).join(', ')}]` : f(v);
+}
+// The hybrid end of each reticulation, by its label.
+function netTargets() { const m = new Map(); if (tree) walkAll(tree, x => { for (const h of x.hyb || []) m.set(h.k, { T: x, h }); }); return m; }
+
+// Several networks in one file (PhyloNet, SNaQ): each line with a network is kept, with its score when written.
+let netList = [], netIdx = 0;
+function findNetworks(text) {
+  const out = [], seen = new Set();
+  for (const line of String(text).split(/\r?\n/)) {
+    if (/^\s*Dendroscope:/i.test(line)) continue;   // SNaQ repeats the network without gamma for Dendroscope
+    const a = line.indexOf('('), b = line.indexOf(';', a); if (a < 0 || b < 0) continue;
+    const nwk = line.slice(a, b + 1).trim(); if (!/#[A-Za-z]+\d+/.test(nwk) || seen.has(nwk)) continue;
+    seen.add(nwk);
+    const m = /-?P?loglik\s*=?\s*([-+\d.eE]+)/i.exec(line.slice(b));
+    out.push({ nwk, score: m ? +m[1] : null });
+  }
+  return out;
+}
+function showNetwork(i) {
+  const keep = netList; if (!keep[i]) return;
+  const open = [...document.querySelectorAll('aside details')].filter(d => d.open).map(d => d.querySelector('summary').textContent);
+  loadText(keep[i].nwk); netList = keep; netIdx = i; buildSide();
+  document.querySelectorAll('aside details').forEach(d => { if (open.includes(d.querySelector('summary').textContent)) d.open = true; });   // the panel stays as it was
+}
+// Several networks: a number box, as for a file of trees, so a long list does not become a huge menu.
+function netListBox() {
+  const d = document.createElement('div');
+  const fill = () => {
+    if (netList.length < 2) { d.innerHTML = ''; d.hidden = true; return; }
+    d.hidden = false;
+    const cur = netList[netIdx] || {}, scored = netList.some(x => x.score != null);
+    d.innerHTML = `<div class="row netpick"><label for="netNum">Show network number</label><span class="netpickctl"><span class="numwrap"><input class="num" id="netNum" type="number" min="1" max="${netList.length}" step="1" value="${netIdx + 1}"></span><button class="btn small" id="netShow">Show</button></span></div>
+      <p class="hint netpicknote">The file holds ${netList.length} networks${cur.score != null ? ` (−loglik for #${netIdx + 1}: ${+cur.score.toFixed(2)})` : ''}.</p>`;
+    const go = () => { const v = clamp(Math.round(+d.querySelector('#netNum').value || 1), 1, netList.length); showNetwork(v - 1); };
+    d.querySelector('#netShow').onclick = go;
+    d.querySelector('#netNum').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+  };
+  setTimeout(fill); return d;
+}
+// Right-click menu of one reticulation: its own color, width, arrows, line and position, over the panel settings.
+const NET_SPEC = [
+  { k: 'c', label: 'Color', type: 'color' },
+  { k: 'w', label: 'Width', type: 'num', unit: 'px' },
+  { k: 'a', label: 'Arrows', type: 'sel', opts: [['none', 'None'], ['end', 'To hybrid'], ['start', 'To donor'], ['both', 'Both']] },
+  { k: 'hs', label: 'Arrow head size', type: 'num', unit: 'px' },
+  { k: 'sh', label: 'Line', type: 'sel', opts: [['straight', 'Straight'], ['curved', 'Curved']] },
+  { k: 'tf', label: 'Start along its branch', type: 'num', unit: '%' },
+  { k: 'tt', label: 'End along its branch', type: 'num', unit: '%' },
+  { k: 'lb', label: 'Show its value', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] },
+];
+function openNetMenu(k, cx, cy, keep) {
+  const e = netEdges().find(x => x.d.k === k), T = netTargets().get(k); if (!e || !T) return;
+  const S = settings, st = e.d.st = e.d.st || {}, keepScroll = keep ? pop.scrollTop : 0;
+  const base = { c: netTypeColor(k), w: +netWidthOf(e.d).toFixed(2), hs: S.netHead, a: S.netArrow, sh: S.netShape, tf: 100 * netT(e.d, 'tf'), tt: 100 * netT(T.h, 'tt', st), lb: S.netLabel };
+  const get = key => ({ v: st[key] != null ? (key === 'tf' || key === 'tt' ? Math.round(st[key] * 100) : st[key]) : (key === 'tf' || key === 'tt' ? Math.round(base[key]) : base[key]), own: st[key] != null });
+  const gtxt = e.d.g != null ? `γ = ${+e.d.g.toFixed(3)} through this line${T.h.g != null ? `, ${+T.h.g.toFixed(3)} through the main tree` : ''}` : 'No γ in the file';
+  pop.innerHTML = `
+    <button class="close" aria-label="Close">×</button>
+    <div class="dragh" title="Drag to move"><h3>Reticulation #${esc(k)}</h3><div class="meta">${gtxt}</div></div>
+    <div class="part"><b>This reticulation</b>${ctlRows(NET_SPEC, get)}
+      <div class="btns"><button class="btn small danger" data-netreset>Reset style</button></div></div>`;
+  pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
+  wireCtl(NET_SPEC, (key, v) => {
+    pushUndo();
+    if (v == null) delete st[key]; else st[key] = key === 'tf' || key === 'tt' ? clamp(v, 0, 100) / 100 : v;
+    render(); persist(); openNetMenu(k, cx, cy, true);
+  });
+  pop.querySelector('[data-netreset]').onclick = () => { pushUndo(); e.d.st = {}; render(); persist(); openNetMenu(k, cx, cy, true); };
+  pop.querySelector('.close').onclick = closePop;
+}
+// Where on its branch an end sits: the line's own value, or the panel's choice (lengths, centre or a custom point).
+function netT(entry, key, st) {
+  const own = (st || entry.st || {})[key]; if (own != null) return own;
+  const S = settings; return S.netPos === 'file' ? (entry.t ?? 0.5) : S.netPos === 'custom' ? S.netPosT / 100 : 0.5;
+}
+// Width of the major edge of a hybrid node: from its gamma when widths follow gamma, else the width of the lines.
+function netMajorWidth(h) { const S = settings; return S.netWidthBy && h.g != null ? S.netWMin + (S.netWMax - S.netWMin) * clamp(h.g, 0, 1) : S.netWidth; }
+function netWidthOf(d) {
+  const S = settings; if ((d.st || {}).w != null) return d.st.w;
+  return S.netWidthBy && d.g != null ? S.netWMin + (S.netWMax - S.netWMin) * clamp(d.g, 0, 1) : S.netWidth;
+}
+// The gamma label of a reticulation, as its own element: size, color and position.
+const NETLAB_SPEC = [
+  { k: 'ls', label: 'Text size', type: 'num', unit: 'px' },
+  { k: 'lc', label: 'Color', type: 'color' },
+  { k: 'lx', label: 'Horizontal offset', type: 'num', unit: 'px' },
+  { k: 'ly', label: 'Vertical offset', type: 'num', unit: 'px' },
+];
+// The value of the minor edge (keys ls, lc, lx, ly) or of the major edge (mls, mlc, mlx, mly), each with its own style.
+function openNetLabelMenu(k, cx, cy, keep, major) {
+  const e = netEdges().find(x => x.d.k === k); if (!e) return;
+  const S = settings, st = e.d.st = e.d.st || {}, keepScroll = keep ? pop.scrollTop : 0, pre = major ? 'm' : '';
+  const T = netTargets().get(k), typeCol = st.c || netTypeColor(k);
+  const base = { ls: major ? S.netLabelMajorSize : S.netLabelSize, lx: major ? S.netLabelMajorDx : S.netLabelDx, ly: major ? S.netLabelMajorDy : S.netLabelDy,
+    lc: major ? (S.netLabelByType ? (st.mc || typeCol) : S.netLabelMajorColor) : (S.netLabelByType ? netLighter(typeCol) : S.netLabelColor) };
+  const get = key => ({ v: st[pre + key] ?? base[key], own: st[pre + key] != null });
+  pop.innerHTML = `
+    <button class="close" aria-label="Close">×</button>
+    <div class="dragh" title="Drag to move"><h3>${major ? 'Value of the major edge' : 'Value'} of #${esc(k)}</h3><div class="meta">${major ? `γ ${T && T.h.g != null ? +T.h.g.toFixed(3) : ''}, through the main parent. ` : ''}A positive vertical offset moves it up.</div></div>
+    <div class="part"><b>This label</b>${ctlRows(NETLAB_SPEC, get)}
+      <div class="btns"><button class="btn small danger" data-netlreset>Reset style</button></div></div>`;
+  pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
+  wireCtl(NETLAB_SPEC, (key, v) => { pushUndo(); if (v == null) delete st[pre + key]; else st[pre + key] = v; render(); persist(); openNetLabelMenu(k, cx, cy, true, major); });
+  pop.querySelector('[data-netlreset]').onclick = () => { pushUndo(); for (const key of ['ls', 'lc', 'lx', 'ly']) delete st[pre + key]; render(); persist(); openNetLabelMenu(k, cx, cy, true, major); };
+  pop.querySelector('.close').onclick = closePop;
+}
+// The major edge of a hybrid node (Full network style): its own colour and width.
+const NETMAJ_SPEC = [{ k: 'mc', label: 'Color', type: 'color' }, { k: 'mw', label: 'Width', type: 'num', unit: 'px' }];
+function openNetMajorMenu(k, cx, cy, keep) {
+  const e = netEdges().find(x => x.d.k === k), T = netTargets().get(k); if (!e || !T) return;
+  const S = settings, st = e.d.st = e.d.st || {}, keepScroll = keep ? pop.scrollTop : 0;
+  const base = { mc: st.c || netTypeColor(k), mw: +netMajorWidth(T.h).toFixed(2) };
+  const get = key => ({ v: st[key] ?? base[key], own: st[key] != null });
+  pop.innerHTML = `
+    <button class="close" aria-label="Close">×</button>
+    <div class="dragh" title="Drag to move"><h3>Major edge of #${esc(k)}</h3><div class="meta">${T.h.g != null ? `γ = ${+T.h.g.toFixed(3)}: the share inherited from the main parent` : 'The main parent of the hybrid node'}</div></div>
+    <div class="part"><b>This edge</b>${ctlRows(NETMAJ_SPEC, get)}
+      <div class="btns"><button class="btn small danger" data-netmreset>Reset style</button></div></div>`;
+  pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
+  wireCtl(NETMAJ_SPEC, (key, v) => { pushUndo(); if (v == null) delete st[key]; else st[key] = v; render(); persist(); openNetMajorMenu(k, cx, cy, true); });
+  pop.querySelector('[data-netmreset]').onclick = () => { pushUndo(); delete st.mc; delete st.mw; render(); persist(); openNetMajorMenu(k, cx, cy, true); };
+  pop.querySelector('.close').onclick = closePop;
+}
+// Selecting a reticulation or its gamma label: a click shows it highlighted, a right-click opens its menu.
+let selNet = null;
+const netHit = e => {
+  const t = e.target.closest && e.target.closest('[data-net], [data-netlab], [data-netmaj]'); if (!t) return null;
+  if (t.dataset.netmaj) return { k: t.dataset.netmaj, part: 'major' };
+  return { k: t.dataset.net || t.dataset.netlab, part: t.dataset.netlab ? (t.dataset.part === 'major' ? 'mlabel' : 'label') : 'line' };
+};
+svg.addEventListener('pointerdown', e => {
+  const h = netHit(e);
+  if (!h) { if (selNet && e.button === 0) { selNet = null; render(); } return; }
+  if (e.button !== 0) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  sel.clear(); closePop(); selNet = h; render();
+}, true);
+svg.addEventListener('contextmenu', e => {
+  const h = netHit(e); if (!h) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  sel.clear(); selNet = h; render();
+  if (h.part === 'major') openNetMajorMenu(h.k, e.clientX, e.clientY);
+  else if (h.part === 'label' || h.part === 'mlabel') openNetLabelMenu(h.k, e.clientX, e.clientY, false, h.part === 'mlabel');
+  else openNetMenu(h.k, e.clientX, e.clientY);
+}, true);
 
 /* ================= Start ================= */
 /* ================= Clear session, collapse all, MRCA picker ================= */

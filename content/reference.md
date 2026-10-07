@@ -13,6 +13,7 @@ Every option of the left panel, section by section, in the same order as in the 
 - [Tip labels](#tip-labels)
 - [Clades](#clades)
 - [Fossils](#fossils)
+- [Phylogenetic networks](#phylogenetic-networks)
 - [Time axis](#time-axis)
 - [Ancestral reconstructions](#ancestral-reconstructions)
 - [Attachments](#attachments)
@@ -45,6 +46,9 @@ The shape of the tree and its overall size.
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Shape`¹ | Overall form of the tree. | Rectangular<br>Circular<br>Fan<br>Unrooted | Rectangular |  |
+| `Orientation` | Horizontal, with the tips on the right, or vertical, with the tips on top and the root at the bottom. The time axis, the scale bar and the clade names turn with the tree, legends and the title do not. Split into pages works on horizontal trees only. | Horizontal<br>Vertical | Horizontal | `Shape` is **Rectangular** |
+| `Scale bar on a vertical tree` | Turns with the tree, vertical like the branches it measures, or stays horizontal under the root. Both measure the same, since the figure keeps one scale in both directions. The time axis always turns with the tree. | Turns with the tree<br>Horizontal | Turns with the tree | `Shape` is **Rectangular**, `Orientation` is **Vertical**, `Show scale bar` is **On**, `Show time axis (dated trees)` is **Off** |
+| `Text on a vertical tree` | Vertical: every text reads from bottom to top. Horizontal: the tip names read at 45 degrees and the values of nodes and branches across, beside their branch. The number of the scale bar always follows its bar, and the texts of the side plots (category names, heatmap titles, bar values and bar scale) always stay upright. | Vertical<br>Horizontal | Vertical | `Shape` is **Rectangular**, `Orientation` is **Vertical** |
 | `Use branch lengths` | Draws branches proportional to their lengths, when **Off** the tree is a cladogram. | On<br>Off | On |  |
 | `Order nodes`² | Sorts every node by clade size, once, for the whole tree. | Increasing<br>Decreasing |  |  |
 | `Rename tips from a file…` | Renames many tips at once from a file with two columns: the current name, then the new name. Column headers are optional. | File |  |  |
@@ -325,6 +329,46 @@ Extinct tips and grafted fossils (fossils can be added from the `Right-click` me
 ² `Right-click` the name of one sampled ancestor to move only that one, for example when it overlaps another name.  
 ³ Grafted fossil lineages are always drawn dashed, using the dash length and gap from Branches.  
 
+## Phylogenetic networks
+
+Networks written in extended Newick (eNewick), as PhyloNet, SNaQ or Dendroscope write them. A node with two parents appears twice with the same label: `#H` (hybridization), `#LGT` (lateral gene transfer) or `#R` (recombination). The occurrence with a subtree, like `(6)#H7`, is the hybrid node, the one that receives; the bare `#H7` hangs from the donor lineage. A hybrid node has two parents: the major edge brings most of its genome (γ above 0.5), the minor edge the rest, as in introgression. Without the minor edges, what remains is the major tree, drawn with solid lines. A network cannot be rerooted on or below a hybrid node, since both of its parents must stay above it. Gamma (γ), the last field of `name:length:support:γ`, is the share of the genome inherited through each line. Click a line or its value to select it, and right-click it to change only that one. Save Newick writes the network back in eNewick.
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Show network number` | Shows one of the networks of a file by its number, such as the runs listed by SNaQ, in the order of their score. | Number | 1 | The file holds several networks |
+| `Show the reticulations` | Draws each reticulation as a dashed line from the donor lineage to the hybrid node. | On<br>Off | On | A network is open |
+| `Hybridization (#H)` | Color of the #H reticulations. | Color | <img src="img/colors/C8553D.svg" alt="#C8553D" align="absmiddle"> #C8553D | `Show the reticulations` is **On**, the network has #H reticulations |
+| `Lateral gene transfer (#LGT)` | Color of the #LGT reticulations. | Color | <img src="img/colors/2F5D8C.svg" alt="#2F5D8C" align="absmiddle"> #2F5D8C | `Show the reticulations` is **On**, the network has #LGT reticulations |
+| `Recombination (#R)` | Color of the #R reticulations. | Color | <img src="img/colors/7A4E9A.svg" alt="#7A4E9A" align="absmiddle"> #7A4E9A | `Show the reticulations` is **On**, the network has #R reticulations |
+| `Width from γ` | Thicker lines for a larger share of the genome inherited through them. | On<br>Off | On | `Show the reticulations` is **On**, the network has γ values |
+| `Width` |  | 0.1 to 20 px | 1.5 px | `Show the reticulations` is **On**, `Width from γ` is **Off** |
+| `Thinnest (γ = 0)` | Width of a line with γ = 0. Each line takes a width between this and the thickest, in proportion to its γ. | 0.1 to 20 px | 0.6 px | `Show the reticulations` is **On**, `Width from γ` is **On** |
+| `Thickest (γ = 1)` | Width of a line with γ = 1. With γ = 0.3, a line sits 30% of the way from the thinnest to the thickest. | 0.1 to 30 px | 4 px | `Show the reticulations` is **On**, `Width from γ` is **On** |
+| `Dash length` |  | 0.5 to 50 px | 4 px | `Show the reticulations` is **On** |
+| `Gap between dashes` |  | 0.5 to 50 px | 3 px | `Show the reticulations` is **On** |
+| `Style` | Major tree: the tree of the major edges, with each minor edge drawn from the donor to the hybrid node. Full network: each hybrid node is a point of its own, where the major edge (from its parent, in the color of its type) and the minor edge (from the donor, in a lighter shade) arrive as curves, and one branch goes on from there. | Major tree<br>Full network | Major tree | `Show the reticulations` is **On** |
+| `Arrows` | Arrow heads toward the hybrid (the receiver), toward the donor, at both ends or none. | None<br>To hybrid<br>To donor<br>Both | To hybrid | `Show the reticulations` is **On** |
+| `Arrow head size` | Length of each arrow head. It is always a little wider than the line. | 1 to 80 px | 8 px | `Show the reticulations` is **On**, `Arrows` is not **None** |
+| `Line` |  | Straight<br>Curved | Curved | `Show the reticulations` is **On**, `Style` is **Major tree** |
+| `Curvature` | How far the curve bends toward the root. | 5 to 100% | 40% | `Show the reticulations` is **On**, `Style` is **Major tree**, `Line` is **Curved** |
+| `Where on the branches` | Point of each branch where the lines start and end.¹ | Centered<br>Lengths<br>Custom | Centered | `Show the reticulations` is **On** |
+| `Position along the branch` | 0% is the parent end of each branch, 100% its node. | 0 to 100% | 50% | `Show the reticulations` is **On**, `Where on the branches` is **Custom** |
+| `Show a value on each line` | Writes a value of each reticulation next to its line. | On<br>Off | Off | `Show the reticulations` is **On**, the reticulations carry values |
+| `Value` | γ, the length or the support of each reticulation, or any [&…] annotation of its two ends, as written in the file. The minor value goes on the minor edge (the reticulation line). | List | γ (inheritance) | `Show the reticulations` is **On**, `Show a value on each line` is **On** |
+| `Decimals` |  | 0 to 4 | 2 | `Show the reticulations` is **On**, `Show a value on each line` is **On** |
+| `Color the values like their line` | The major value takes the color of its reticulation type (#H, #LGT or #R), the minor value a lighter shade of it. | On<br>Off | On | `Show the reticulations` is **On**, `Show a value on each line` is **On** |
+| `Minor value: text size` |  | 1 to 100 px | 9 px | `Show the reticulations` is **On**, `Show a value on each line` is **On** |
+| `Minor value: color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show the reticulations` is **On**, `Show a value on each line` is **On**, `Color the values like their line` is **Off** |
+| `Minor value: horizontal offset` | Moves the minor value sideways. | −500 to 500 px | 4 px | `Show the reticulations` is **On**, `Show a value on each line` is **On** |
+| `Minor value: vertical offset` | Moves the minor value up (positive) or down (negative). | −500 to 500 px | 3 px | `Show the reticulations` is **On**, `Show a value on each line` is **On** |
+| `Also show the γ of the major edge` | Writes the γ of the main parent too: under the hybrid node's branch, or just before the hybrid node in a full network. | On<br>Off | Off | `Show the reticulations` is **On**, `Show a value on each line` is **On**, `Value` is **γ (inheritance)** |
+| `Major value: text size` |  | 1 to 100 px | 9 px | `Show the reticulations` is **On**, `Show a value on each line` is **On**, `Also show the γ of the major edge` is **On** |
+| `Major value: color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show the reticulations` is **On**, `Show a value on each line` is **On**, `Also show the γ of the major edge` is **On**, `Color the values like their line` is **Off** |
+| `Major value: horizontal offset` | Moves the major value sideways. | −500 to 500 px | 0 px | `Show the reticulations` is **On**, `Show a value on each line` is **On**, `Also show the γ of the major edge` is **On** |
+| `Major value: vertical offset` | Moves the major value up (positive) or down (negative). | −500 to 500 px | 0 px | `Show the reticulations` is **On**, `Show a value on each line` is **On**, `Also show the γ of the major edge` is **On** |
+
+¹ Centered: the middle of each branch. Lengths: where the network places each end, from the branch lengths of the file (without lengths, the middle). Custom: the point chosen with `Position along the branch`.  
+
 ## Time axis
 
 An axis of ages for dated trees, with the geologic time scale, guide lines and shaded intervals.
@@ -491,7 +535,7 @@ Bars, categories and a heatmap drawn next to the tips, from the attached tables.
 | `Number of dashes or dots` |  | 1 to 60 | 12 | A table is chosen for the categories, `Shape border` is **Dashed** or **Dotted** |
 | `Turn circular and fan trees inside out` | Puts the tree outside and the categories inside the circle. | On<br>Off | Off | A table is chosen for the categories, **Circular** or **Fan** layout |
 | `Show the column titles` |  | On<br>Off | On | A table is chosen for the categories, **Rectangular** layout |
-| `Title angle` |  | 45°<br>Vertical | 45° | A table is chosen for the categories, **Rectangular** layout, `Show the column titles` is **On** |
+| `Title angle` |  | 45°<br>Vertical | 45° | A table is chosen for the categories, **Rectangular** layout, `Show the column titles` is **On**, `Orientation` is not **Vertical** |
 | `Title typeface` |  | Same as the labels |  | A table is chosen for the categories, **Rectangular** layout, `Show the column titles` is **On** |
 | `Titles in bold` |  | On<br>Off | Off | A table is chosen for the categories, **Rectangular** layout, `Show the column titles` is **On** |
 | `Titles in italic` |  | On<br>Off | Off | A table is chosen for the categories, **Rectangular** layout, `Show the column titles` is **On** |
@@ -517,7 +561,7 @@ Bars, categories and a heatmap drawn next to the tips, from the attached tables.
 | `Space between columns` |  | 0 to 20 px | 1 px | A table is chosen for the heatmap |
 | `Distance from the labels` | Space between the labels (or the previous plot) and the heatmap. | 0 to 100 px | 10 px | A table is chosen for the heatmap |
 | `Column titles` |  | On<br>Off | On | A table is chosen for the heatmap |
-| `Title angle` |  | 0 to 90° | 60° | A table is chosen for the heatmap, `Column titles` is **On** |
+| `Title angle` |  | 0 to 90° | 60° | A table is chosen for the heatmap, `Column titles` is **On**, `Orientation` is not **Vertical** |
 | `Title size` |  | 1 to 100 px | 9 px | A table is chosen for the heatmap, `Column titles` is **On** |
 | `Title color` |  | Color | <img src="img/colors/333333.svg" alt="#333333" align="absmiddle"> #333333 | A table is chosen for the heatmap, `Column titles` is **On** |
 | `Show legend` |  | On<br>Off | On | A table is chosen for the heatmap |
@@ -612,7 +656,7 @@ Background, scale bar, palette, color vision preview and plot title.
 | `Move it by hand on the canvas` | Unlocks the bar to drag it anywhere. | On<br>Off | Off | `Show scale bar` is **On** |
 | `Length` | Automatic picks a round length, custom uses your own. | Automatic<br>Custom | Automatic | `Show scale bar` is **On** |
 | `Bar length` |  | 10⁻⁹ to 10⁹ | 0.1 | `Show scale bar` is **On**, `Length` is **Custom** |
-| `Unit` |  | Text |  | `Show scale bar` is **On** |
+| `Unit` | Written after the number, centred with it on the bar: Ma, subs./site or any text. | Text |  | `Show scale bar` is **On** |
 | `Decimals` |  | Auto, 0, 1, 2, 3, 4 | Automatic | `Show scale bar` is **On** |
 | `Vertical position` |  | Top<br>Bottom | Bottom | `Show scale bar` is **On**, `Move it by hand on the canvas` is **Off** |
 | `Horizontal position` |  | Left<br>Center<br>Right | Left | `Show scale bar` is **On**, `Move it by hand on the canvas` is **Off** |
@@ -682,6 +726,10 @@ Save the figure, the tree or a style template.
 | Scale bar | Length, unit, sizes, color, alignment |
 | Page box | Rows of the page, look of its tree map, alignment |
 | Image | Position, size, opacity, rotation, mirror, layer, alignment |
+| Reticulation | Color, width, arrows and their size, straight or curved line, where it starts and ends along its branches, show its value |
+| Value of a reticulation | Text size, color, horizontal and vertical offset |
+| Major edge (Full network) | Color, width |
+| Value of the major edge | Text size, color, horizontal and vertical offset |
 | Any element | Copy style, paste style, reset style |
 
 ## On the canvas
