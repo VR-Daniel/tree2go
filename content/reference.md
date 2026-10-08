@@ -20,7 +20,7 @@ Every option of the left panel, section by section, in the same order as in the 
 - [Side plots](#side-plots)
 - [Legends](#legends)
 - [Split into pages](#split-into-pages)
-- [Images](#images)
+- [Images and visual elements](#images-and-visual-elements)
 - [Page](#page)
 - [Export](#export)
 - [Right-click menus](#right-click-menus)
@@ -34,10 +34,16 @@ Load or paste a tree (Newick and NEXUS are recognized from their content, whatev
 |:---|:---|:---|:---|:---|
 | `Burn-in` | Share of the first trees of the chain left out of every summary. | 0 to 99% | 0% | A file with several trees is open |
 | `Show tree number` | Shows one sampled tree of the file, by its position. | Number | 1 | A file with several trees is open |
-| `Summary tree` | How the trees of the file are summarized into one. | Majority rule<br>Strict consensus<br>Maximum compatible<br>MCC<br>MAP | Majority rule | A file with several trees is open, **MAP** needs the posterior of each tree in the file (as a `.p` or `. log` file in Attachments) |
+| `Summary tree` | How the trees of the file are summarized into one. | Majority rule¹<br>Strict consensus²<br>Maximum compatible³<br>MCC⁴<br>MAP⁵ | Majority rule | A file with several trees is open, **MAP** needs the posterior of each tree in the file (as a `.p` or `. log` file in Attachments) |
 | `Clades in more than` | Clades must be found in more than this share of the trees to be kept. | 50 to 100% | 50% | `Summary tree` is **Majority rule** |
 | `Node ages` | How the MCC tree gets its node ages from all the trees. | Median<br>Mean | Median | `Summary tree` is **MCC** |
 | `Build summary tree` | Builds and shows the chosen summary tree. |  |  | A file with several trees is open |
+
+¹ Majority rule: keeps every clade found in more than the chosen share of the trees (more than half by default), and gives each one that share as its support.  
+² Strict consensus: keeps only the clades found in every tree. Where the trees disagree, the branches join in a polytomy.  
+³ Maximum compatible: the majority-rule tree plus the less frequent clades that do not conflict with it, added from the most to the least frequent (allcompat in MrBayes).  
+⁴ MCC (maximum clade credibility): the sampled tree whose clades have the highest product of their frequencies, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.  
+⁵ MAP (maximum a posteriori): the sampled tree with the highest posterior probability, read from the trees file (BEAST) or from the attached log (`.log` of BEAST2, `.p` of MrBayes).  
 
 ## Layout
 
@@ -331,7 +337,7 @@ Extinct tips and grafted fossils (fossils can be added from the `Right-click` me
 
 ## Phylogenetic networks
 
-Networks written in extended Newick (eNewick), as PhyloNet, SNaQ or Dendroscope write them. A node with two parents appears twice with the same label: `#H` (hybridization), `#LGT` (lateral gene transfer) or `#R` (recombination). The occurrence with a subtree, like `(6)#H7`, is the hybrid node, the one that receives; the bare `#H7` hangs from the donor lineage. A hybrid node has two parents: the major edge brings most of its genome (γ above 0.5), the minor edge the rest, as in introgression. Without the minor edges, what remains is the major tree, drawn with solid lines. A network cannot be rerooted on or below a hybrid node, since both of its parents must stay above it. Gamma (γ), the last field of `name:length:support:γ`, is the share of the genome inherited through each line. Click a line or its value to select it, and right-click it to change only that one. Save Newick writes the network back in eNewick.
+Networks written in extended Newick (eNewick), as PhyloNet, SNaQ or Dendroscope write them. A node with two parents appears twice with the same label: `#H` (hybridization), `#LGT` (lateral gene transfer) or `#R` (recombination). The occurrence with a subtree, like `(6)#H7`, is the hybrid node, the one that receives, and the bare `#H7` hangs from the donor lineage. A hybrid node has two parents: the major edge brings most of its genome (γ above 0.5), the minor edge the rest, as in introgression. Without the minor edges, what remains is the major tree, drawn with solid lines. A network cannot be rerooted on or below a hybrid node, since both of its parents must stay above it. Gamma (γ), the last field of `name:length:support:γ`, is the share of the genome inherited through each line. Click a line or its value to select it, and right-click it to change only that one. Save Newick writes the network back in eNewick.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -480,7 +486,7 @@ Tables (CSV or TSV) and other files that add data to the tree. Rows are matched 
 |:---|:---|:---|:---|:---|
 | `Add table` | Adds data tables to the tree: CSV, TSV or text files whose first column holds the names. | File |  |  |
 | `Table list` | The attached tables, with how many names of each one match the tree and a button to remove it. | List |  | A table is added |
-| `MCMC log` | Posterior of each sampled tree, needed for the MAP tree: the `.log` of BEAST 2 or the `.p` file of MrBayes. | File |  | A trees file is open |
+| `MCMC log` | Posterior of each sampled tree, needed for the MAP tree: the `.log` of BEAST2 or the `.p` file of MrBayes. | File |  | A trees file is open |
 
 ## Side plots
 
@@ -627,13 +633,16 @@ Split a long rectangular tree into pages of the same width, each with a small ma
 | `Color of the rows on the page` |  | Color | <img src="img/colors/C8553D.svg" alt="#C8553D" align="absmiddle"> #C8553D | **Rectangular** layout, the tree has pages, `Show a map of the whole tree on each page` is **On** |
 | `Mark the rows on the page with` | How the rows of the page stand out on the map. | Branch color<br>Color and background | `Color of the rows on the page` | **Rectangular** layout, the tree has pages, `Show a map of the whole tree on each page` is **On** |
 
-## Images
+## Images and visual elements
 
 Pictures (PNG or JPG) placed on the page¹.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Add image` | Places a PNG or JPG on the page, for example a silhouette. |  |  |  |
+| `Add label` | A text you can place anywhere, for example a name inside the tree. It moves, aligns with branches, labels and clades, shows distance guides and takes arrows like an image, and is exported as text. `Right-click` it to write it and choose its size, color, bold, italic and typeface. |  |  | A tree is loaded |
+| `Add density plot` | A density plot of a value of the tree or of a table, such as rates, drawn by the app as an image that moves, resizes and aligns like the others. Its fill can follow the color scale of the branches or of the dots. `Right-click` it to choose the values and its look. |  |  | A tree is loaded |
+| `Draw arrow` | An arrow to point at something. Drag it by its body, or drag an end onto a node or one of the nine points of an image to anchor it there: when they move, the arrow follows. `Right-click` it for its look. |  |  | A tree is loaded |
 | `Image list` | Click a row to select its image. |  |  | An image is added |
 | `Replace` | Swaps the picture, keeping its place and width. |  |  | An image is added |
 | `Remove` |  |  |  | An image is added |
@@ -714,7 +723,7 @@ Save the figure, the tree or a style template.
 
 `Right-click` any element (on a Mac: `Control-click`) to edit just that element, or everything selected. Values set here win over the panel, the small ↶ next to a field returns it to the left-panel value. The left-panel shows how many elements use their own value, with a button to undo them all.
 
-| Element | What you can change |
+| Element&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | What you can change&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |---|---|
 | Branch | Color, width, line style, branch length label, grafting a fossil, reroot here, extract clade, make a page, copy Newick, delete |
 | Clade | Clade color, highlight background (opacity, start at root, stem or crown, end, gradient, corners), collapse, rotate, ladderize, height and fill when collapsed, clade name bar |
@@ -726,6 +735,9 @@ Save the figure, the tree or a style template.
 | Scale bar | Length, unit, sizes, color, alignment |
 | Page box | Rows of the page, look of its tree map, alignment |
 | Image | Position, size, opacity, rotation, mirror, layer, alignment |
+| Label | Text, size, color, bold, italic, typeface, opacity, rotation, mirror, layer, alignment |
+| Density plot | Values and logarithmic scale, smoothing, one color or the colors of the branches or dots, fill and opacity, line color, width and style, axis with its color, width, text size, spacing and title |
+| Arrow | Color, width, opacity, line style, arrow heads and their size, curvature, space from the anchor at each end, free an anchored end, delete |
 | Reticulation | Color, width, arrows and their size, straight or curved line, where it starts and ends along its branches, show its value |
 | Value of a reticulation | Text size, color, horizontal and vertical offset |
 | Major edge (Full network) | Color, width |
@@ -734,7 +746,7 @@ Save the figure, the tree or a style template.
 
 ## On the canvas
 
-| Action | How |
+| Action&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | How&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |---|---|
 | Select | Click an element (`Shift-click` to add more) |
 | Select mode | Element (single)<br>Clade (`Shift-click` extends the selection to the most recent common ancestor)<br>MRCA (pick two tips) |

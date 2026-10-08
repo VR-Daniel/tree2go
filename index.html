@@ -240,6 +240,8 @@ aside .inline input.num.boxed, .pop .inline input.num, aside .cat select{backgro
 .helpBody mark.find{background:#ffe8b0; color:inherit; border-radius:2px; padding:0}
 .helpBody mark.find.on{background:var(--mustard); box-shadow:0 0 0 1px var(--mustard)}
 .nethit{cursor:context-menu; pointer-events:stroke}
+.arrowhit{cursor:move; pointer-events:stroke}
+.arrowend{cursor:crosshair; pointer-events:all}
 .netpickctl{display:flex; align-items:center; gap:6px}
 .netpickctl .numwrap{width:76px}
 .netpicknote{margin-top:8px !important; margin-bottom:6px !important}
@@ -1143,7 +1145,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 // Default settings merged with saved ones, with the migrations that keep older sessions and projects working.
@@ -1658,7 +1660,7 @@ const SECTIONS_RAW = [
     { k: 'pageMiniHi', type: 'color', label: 'Color of the rows on the page', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
     { k: 'pageMiniMark', type: 'seg', label: 'Mark the rows on the page with', opts: [['lines', 'Branch color'], ['both', 'Color and background']], show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn }
   ]},
-  { title: 'Images', custom: 'images' },
+  { title: 'Images and visual elements', custom: 'images' },
   { title: 'Page', items: [
     { k: 'bg', type: 'color', label: 'Background color' },
     { type: 'head', label: 'Scale bar' },
@@ -4578,7 +4580,7 @@ function renderOnce() {
     anL.push(`<text x="${f2(x)}" y="${f2(y)}" text-anchor="${anchor}" font-size="${S.titleSize}"${S.titleBold ? ' font-weight="bold"' : ''}${S.titleItalic ? ' font-style="italic"' : ''} fill="${S.titleColor}" font-family="${esc(fam)}">${esc(S.title)}</text>`);
   }
 
-  const vert = isVertical(S), anFixed = vert ? anL.splice(anTreeEnd) : [];
+  const vert = isVertical(S), anFixed = vert ? anL.splice(anTreeEnd) : [], arrowsNow = arrowsSvg();
   const contentStr = alphaAttrs([
     `<g id="imgBack"></g>`,
     vert ? '<g transform="rotate(-90)">' : '',
@@ -4593,7 +4595,8 @@ function renderOnce() {
     `<g font-family="${esc(fam)}" font-size="${S.fontSize}"${S.italic ? ' font-style="italic"' : ''}${S.bold ? ' font-weight="bold"' : ''}>${vert ? vertText(lbL.join(''), S, true) : lbL.join('')}</g>`,
     `<g>${vert ? vertText(anL.join(''), S) : anL.join('')}</g>`,
     vert ? `</g><g>${anFixed.join('')}</g>` : '',
-    `<g id="imgFront"></g>`
+    `<g id="imgFront"></g>`,
+    `<g id="arrows">${arrowsNow.svg}</g>`
   ].join(''));
   if (contentStr !== lastContentStr) { content.innerHTML = contentStr; lastContentStr = contentStr; }
   placeImages();
@@ -4643,11 +4646,11 @@ function renderOnce() {
     if (cl) ovL.push(S.catShape === 'circle' ? `<circle transform="${cl.tr}" r="${f2(cl.h + 3)}" fill="none" stroke="${hl}" stroke-width="2"/>` : `<rect transform="${cl.tr}" x="${f2(-cl.h - 3)}" y="${f2(-cl.h - 3)}" width="${f2(cl.h * 2 + 6)}" height="${f2(cl.h * 2 + 6)}" rx="2" fill="none" stroke="${hl}" stroke-width="2"/>`);
     if (cg.t) ovL.push(`<rect data-up="title" transform="${cg.t.tr}" x="-3" y="${f2(-cg.t.h / 2)}" width="${f2(cg.t.w)}" height="${f2(cg.t.h)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.3"/>`);
   }
-  overlay.innerHTML = isVertical(S) ? `<g transform="rotate(-90)">${vertText(ovL.join(''), S)}</g>` : ovL.join('');
+  overlay.innerHTML = (isVertical(S) ? `<g transform="rotate(-90)">${vertText(ovL.join(''), S)}</g>` : ovL.join('')) + arrowsNow.hl;
   for (const n of [...vis, ...gNodes]) hitL.push(`<circle class="hitpt" cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(Math.max(6, LW * 2))}" data-id="${n.id}" data-kind="node"/>`);
   const ih = imageHits();
   const treeHits = hitL.join('') + valHits.join('') + netLabHits.join('');
-  const hitsStr = ih.back + (isVertical(S) ? `<g transform="rotate(-90)">${vertText(treeHits, S)}</g>` : treeHits) + ih.front + '<g id="hitExtra"></g>';
+  const hitsStr = ih.back + (isVertical(S) ? `<g transform="rotate(-90)">${vertText(treeHits, S)}</g>` : treeHits) + ih.front + arrowsNow.hits + '<g id="hitExtra"></g>';
   if (hitsStr !== lastHitsStr) { hits.innerHTML = hitsStr; lastHitsStr = hitsStr; }
   const hitExtra = hits.querySelector('#hitExtra'); hitExtra.innerHTML = '';
   hitExtra.insertAdjacentHTML('beforeend', pageItemsSvg() + freeItemsSvg());
@@ -4817,6 +4820,19 @@ function contextOn(target, cx, cy) {
 
 /* ================= Popups ================= */
 const pop = $('pop');
+/* When a value is changed in a right-click menu (typing, or turning the mouse wheel over a number), the menu is often
+   built again to show the new values. Its scroll position and the field in use are remembered just before, and given
+   back right after, so the menu does not jump to the top and the wheel keeps working on the same field. */
+let popKeep = null;
+const fieldKey = el => { if (!el || !/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) return null; const a = [...el.attributes].find(x => /^data-/.test(x.name) || x.name === 'id'); return a ? `${el.tagName.toLowerCase()}[${a.name}="${CSS.escape(a.value)}"]` : null; };
+['input', 'change', 'wheel', 'keydown'].forEach(ev => pop.addEventListener(ev, e => { popKeep = { scroll: pop.scrollTop, field: fieldKey(document.activeElement && pop.contains(document.activeElement) ? document.activeElement : e.target), t: Date.now() }; }, true));
+new MutationObserver(() => {
+  if (!popKeep || Date.now() - popKeep.t > 1500 || !pop.classList.contains('on')) return;
+  const k = popKeep; pop.scrollTop = k.scroll;
+  const el = k.field && pop.querySelector(k.field);
+  if (el && document.activeElement !== el) { el.focus({ preventScroll: true }); if (el.select && el.type !== 'number' && el.tagName === 'INPUT') { } }
+  pop.scrollTop = k.scroll;
+}).observe(pop, { childList: true });
 let popPos = null, popPinned = false;
 // Closes the right-click menu.
 function closePop() { pop.classList.remove('on'); pop.innerHTML = ''; if (!popPinned) popPos = null; }
@@ -5543,7 +5559,7 @@ function fallbackDownload(name, data) {
 function buildSVG() {
   const bb = content.getBBox(); const pad = 24;
   const x = bb.x - pad, y = bb.y - pad, w = bb.width + pad * 2, h = bb.height + pad * 2;
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f2(x)} ${f2(y)} ${f2(w)} ${f2(h)}" width="${Math.ceil(w)}" height="${Math.ceil(h)}"><rect x="${f2(x)}" y="${f2(y)}" width="${f2(w)}" height="${f2(h)}" fill="${settings.bg}"/>${content.innerHTML}</svg>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f2(x)} ${f2(y)} ${f2(w)} ${f2(h)}" width="${Math.ceil(w)}" height="${Math.ceil(h)}"><rect x="${f2(x)}" y="${f2(y)}" width="${f2(w)}" height="${f2(h)}" fill="${settings.bg}"/>${inlineKdes(content.innerHTML)}</svg>`;   // density plots go in as drawing
 }
 // Exports the figure as SVG.
 async function exportSVG() {
@@ -6105,7 +6121,7 @@ document.addEventListener('keydown', e => {
   const inField = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !inField) { e.preventDefault(); e.shiftKey ? redo() : undo(); }
   else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y' && !inField) { e.preventDefault(); redo(); }
-  else if (e.key === 'Escape') { sel.clear(); selNet = null; closePop(); render(); }
+  else if (e.key === 'Escape') { sel.clear(); selNet = null; selArrow = null; closePop(); render(); }
   else if (!inField && (e.key === 'f' || e.key === 'F')) fit();
   else if (!inField && (e.key === '+' || e.key === '=')) zoomAt(svg.clientWidth / 2, svg.clientHeight / 2, 1.25);
   else if (!inField && e.key === '-') zoomAt(svg.clientWidth / 2, svg.clientHeight / 2, 0.8);
@@ -6373,6 +6389,7 @@ function replaceImageFile(id, file) {
 }
 // Build the <image> nodes once and move them into the freshly drawn slots
 function placeImages() {
+  refreshKdes();   // density plots follow the current values and colours
   const back = content.querySelector('#imgBack'), front = content.querySelector('#imgFront');
   for (const id of [...imgEls.keys()]) if (!imgById(id)) { imgEls.get(id).remove(); imgEls.delete(id); }   // a deleted image leaves the canvas too
   for (const m of figImages) {
@@ -6671,6 +6688,37 @@ function openImage(cx, cy, keep) {
     else if (a === 'dup') { if (tree) pushUndo(); const c = { ...m, id: ++imgUid, x: m.x + 20, y: m.y + 20 }; figImages.push(c); selImg = c.id; imgChanged('Image duplicated'); openImage(0, 0, true); }
     else if (a === 'del') { if (tree) pushUndo(); figImages = figImages.filter(x => x !== m); selImg = null; closePop(); imgChanged('Image deleted'); }
   });
+  if (m.txt || m.kde) {   // items the app draws: a title that says what they are
+    const h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta');
+    if (h3) h3.textContent = m.txt ? `Label: ${m.txt.text || ''}` : `Density plot${m.kde.col ? ' of ' + m.kde.col : ''}`;
+    if (meta) meta.textContent = m.txt ? 'A text you can place anywhere and align with the tree.' : `${[...nodeValues(settings, m.kde.src, m.kde.col, m.kde.log).values()].filter(Number.isFinite).length} values from ${m.kde.src === 'meta' ? 'the tree annotations' : 'the table'}.`;
+  }
+  if (m.txt) {   // a text label: its text and look first; its size comes from the text size
+    const ps = [...pop.querySelectorAll('.part')].find(p => (p.querySelector('b') || {}).textContent === 'Position and size'); if (ps) ps.remove();
+    const kp = txtMenuPart(m), first = pop.querySelector('.part');
+    first.insertAdjacentHTML('beforebegin', kp.html);
+    wireCtl(kp.spec, (key, v) => { pushUndo(); kp.set(key, v); imgChanged(); openImage(cx, cy, true); });
+    const ti = pop.querySelector('[data-txttext]');
+    ti.addEventListener('input', () => { m.txt.text = ti.value; m.name = ti.value || 'Label'; refreshKdes(); render(); });   // live, as you type
+    ti.addEventListener('change', () => { pushUndo(); imgChanged(); });
+    ti.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ti.blur(); } });
+    if (m.txt.text === TXT_DEF.text && !keep) setTimeout(() => { ti.focus(); ti.select(); });
+  }
+  if (m.kde) {   // a density plot: its values and look, before the other parts; of position and size, only the size
+    pop.querySelectorAll('[data-im="x"], [data-im="y"]').forEach(inp => inp.closest('.kv').remove());
+    const ps = [...pop.querySelectorAll('.part > b')].find(b => b.textContent === 'Position and size'); if (ps) ps.textContent = 'Size';
+    const kp = kdeMenuPart(m), first = pop.querySelector('.part');
+    first.insertAdjacentHTML('beforebegin', kp.html);
+    // the colours of the branches or of the dots are offered only when they are coloured by data (greyed out otherwise)
+    const ms = pop.querySelector('select[data-ck="mode"]');
+    if (ms) for (const o of ms.options) if ((o.value === 'branches' || o.value === 'dots') && !kdeScale(o.value)) {
+      o.disabled = true; o.textContent += o.value === 'branches' ? ' (branches not colored by data)' : ' (dots not colored by data)';
+    }
+    wireCtl(kp.spec, (key, v) => { pushUndo(); kp.set(key, v); imgChanged(); openImage(cx, cy, true); });
+    const ti = pop.querySelector('[data-kdetitle]');
+    ti.addEventListener('change', () => { pushUndo(); m.kde.title = ti.value; imgChanged(); });
+    ti.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ti.blur(); } });
+  }
 }
 // Updates the list of images in the panel.
 function refreshImageList() {
@@ -6684,17 +6732,20 @@ function refreshImageList() {
     it.querySelector('[data-del]').onclick = () => { if (tree) pushUndo(); figImages = figImages.filter(x => x.id !== id); if (selImg === id) selImg = null; closePop(); imgChanged('Image removed'); };
   });
 }
-// Builds the Images section of the panel.
+// Builds the Images and visual elements section of the panel.
 function imagesPanel() {
   const w = document.createElement('div'); w.style.cssText = 'display:flex;flex-direction:column;gap:10px';
   w.innerHTML = `
-    <div class="btns"><button class="btn primary" id="imgAdd">Add image</button></div>
+    <div class="btns"><button class="btn primary" id="imgAdd">Add image</button><button class="btn" id="txtAdd" title="A text you can place anywhere and align with the tree">Add label</button><button class="btn" id="kdeAdd" title="A density plot of a value of the tree, such as rates">Add density plot</button><button class="btn" id="arrowAdd" title="An arrow you can anchor to nodes and images">Draw arrow</button></div>
     <input type="file" id="imgIn" accept="image/png,image/jpeg" multiple hidden>
     <input type="file" id="imgRep" accept="image/png,image/jpeg" hidden>
     <div id="imgList" class="imglist"></div>
     <p class="hint">PNG or JPG: drag an image to move it and drag a corner to resize it. Right-click it for more options. To align it, select the image, shift-click a branch, label or clade, and right-click the image for more options. Alignment works better with rectangular views.</p>`;
   setTimeout(() => {
     $('imgAdd').onclick = () => $('imgIn').click();
+    $('kdeAdd').onclick = () => { if (!tree) return toast('Open a tree first'); addKdePlot(); };
+    $('txtAdd').onclick = () => { if (!tree) return toast('Open a tree first'); addLabel(); };
+    $('arrowAdd').onclick = () => { if (!tree) return toast('Open a tree first'); addArrow(); };
     $('imgIn').onchange = e => { [...e.target.files].forEach(addImageFile); e.target.value = ''; };
     $('imgRep').onchange = e => { const f = e.target.files[0]; if (f && replaceTarget != null) replaceImageFile(replaceTarget, f); e.target.value = ''; };
     refreshImageList();
@@ -6914,7 +6965,7 @@ function pageSvgList() {
   if (!tree || settings.layout !== 'rect' || !pageGeo.length || !pageBounds) { toast('Make at least one page first'); return null; }
   const axis = content.querySelector('#axisGroup');
   const axisStr = settings.pageAxis && axis ? axis.outerHTML : '', axisH = axisStr ? (() => { const b = axis.getBBox(); return b.y + b.height - pageBounds.treeBottom; })() : 0;
-  const inner = content.innerHTML, x0 = pageBounds.x0, w = pageBounds.x1 - pageBounds.x0;
+  const inner = inlineKdes(content.innerHTML), x0 = pageBounds.x0, w = pageBounds.x1 - pageBounds.x0;
   const tmp = document.createElement('div'); tmp.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
   const minis = new Map([...tmp.querySelectorAll('[data-mini]')].map(el => [el.getAttribute('data-mini'), el.outerHTML]));
   tmp.querySelectorAll('[data-mini]').forEach(el => el.remove());
@@ -7470,7 +7521,7 @@ function selectMatches() {
 }
 
 /* ================= Style templates: the look of a figure, without its tree or data ================= */
-const STYLE_SKIP = new Set(['dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
+const STYLE_SKIP = new Set(['arrows', 'dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
   'pages', 'legendPos', 'legendText', 'scaleX', 'scaleY', 'scaleFree', 'title', 'projectName', 'exportName', 'exportSizeMode', 'exportWidthVal', 'axisCustom', 'nbarSrc', 'nlabSrc', 'supportSource']);
 // Saves a style template: every setting except the tree and its data.
 async function saveStyle() {
@@ -7984,6 +8035,283 @@ svg.addEventListener('contextmenu', e => {
   else if (h.part === 'label' || h.part === 'mlabel') openNetLabelMenu(h.k, e.clientX, e.clientY, false, h.part === 'mlabel');
   else openNetMenu(h.k, e.clientX, e.clientY);
 }, true);
+
+/* ================= Density plots, arrows and labels (Images and visual elements section) =================
+   A density plot is an image the app draws itself from values of the tree (m.kde holds its settings), so it moves,
+   resizes, aligns and shows distance guides like any image. Arrows live in settings.arrows: each end is free or
+   anchored to a node (found by its tips, so it survives undo and saving) or to one of nine points of an image. */
+const KDE_DEF = { src: '', col: '', smooth: 1, log: false, mode: 'single', fill: '#5B8DEF', fillOp: 0.35, line: '#2F5D8C', lw: 1.5, dash: 'solid',
+  axis: true, axisColor: '#333333', axisW: 1, axisFs: 10, axisGap: 6, title: '' };
+// The colour scale of the branches or of the dots (low, middle, high), so a density plot can be painted with it.
+function kdeScale(mode) {
+  const S = settings;
+  if (mode === 'branches' && S.brcTable && S.brcCol) {
+    const val = nodeValues(S, S.brcTable, S.brcCol, S.brcLog); if (!val.size) return null;
+    const vs = [...val.values()], f = v => S.brcLog ? Math.log10(v) : v;
+    const lo = S.brcMin != null && S.brcMin !== '' ? +S.brcMin : Math.min(...vs), hi = S.brcMax != null && S.brcMax !== '' ? +S.brcMax : Math.max(...vs);
+    return { stops: S.brcMidOn ? [S.brcLow, S.brcMid, S.brcHigh] : [S.brcLow, S.brcHigh], a: f(lo), b: f(hi), f };
+  }
+  if (mode === 'dots' && S.dotDataSrc && S.dotDataCol) {
+    const val = nodeValues(S, S.dotDataSrc, S.dotDataCol); if (!val.size) return null;
+    const vs = [...val.values()]; return { stops: [S.dotLow, S.dotHigh], a: Math.min(...vs), b: Math.max(...vs), f: v => v };
+  }
+  return null;
+}
+const rampOf = (stops, q) => { q = clamp(q, 0, 1) * (stops.length - 1); const i = Math.min(stops.length - 2, Math.floor(q)), u = q - i, c0 = hexRGB(stops[i]), c1 = hexRGB(stops[i + 1]); return rgbHex(c0.map((c, j) => c + (c1[j] - c) * u)); };
+const dashOf = (kind, w) => kind === 'dashed' ? ` stroke-dasharray="${f2(w * 3.5)} ${f2(w * 2.2)}"` : kind === 'dotted' ? ` stroke-dasharray="0.01 ${f2(w * 2.2)}" stroke-linecap="round"` : '';
+// The SVG of a density plot: Gaussian kernel with Silverman's bandwidth (times the smoothing), and an axis under it.
+function kdeSvg(k) {
+  const S = settings, W = 320, H = 180, fam = 'Helvetica, Arial, sans-serif';
+  const raw = [...nodeValues(S, k.src, k.col, k.log).values()].filter(Number.isFinite);
+  const xs = k.log ? raw.filter(v => v > 0).map(Math.log10) : raw;
+  const head = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+  if (xs.length < 2) return head + `<rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="6" fill="none" stroke="#bbb" stroke-dasharray="4 3"/><text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-size="12" fill="#888" font-family="${fam}">Choose values with at least two numbers</text></svg>`;
+  const n = xs.length, mean = xs.reduce((a, b) => a + b, 0) / n, sd = Math.sqrt(xs.reduce((a, v) => a + (v - mean) ** 2, 0) / (n - 1)) || 1;
+  const sorted = xs.slice().sort((a, b) => a - b), q = p => sorted[Math.min(n - 1, Math.floor(p * (n - 1)))], iqr = q(0.75) - q(0.25);
+  const h = Math.max(1e-12, 0.9 * Math.min(sd, iqr > 0 ? iqr / 1.34 : sd) * Math.pow(n, -0.2) * (k.smooth > 0 ? k.smooth : 1));
+  const lo = sorted[0] - 3 * h, hi = sorted[n - 1] + 3 * h, G = 160, grid = [];
+  let maxD = 0;
+  for (let i = 0; i <= G; i++) { const x = lo + (hi - lo) * i / G; let d = 0; for (const v of xs) d += Math.exp(-0.5 * ((x - v) / h) ** 2); d /= n * h * Math.sqrt(2 * Math.PI); grid.push([x, d]); if (d > maxD) maxD = d; }
+  const padL = 10, padR = 10, padT = 8, tick = 4;
+  const axisH = k.axis ? k.axisGap + tick + k.axisFs * 1.3 + (k.title ? k.axisFs * 1.4 : 0) : 0, base = H - 4 - axisH;
+  const X = v => padL + (v - lo) / (hi - lo) * (W - padL - padR), Y = d => padT + (base - padT) * (1 - d / maxD);
+  const line = grid.map(([x, d], i) => `${i ? 'L' : 'M'}${f2(X(x))},${f2(Y(d))}`).join('');
+  const area = line + `L${f2(X(hi))},${f2(base)}L${f2(X(lo))},${f2(base)}Z`;
+  let areaSvg = `<path d="${area}" fill="${k.fill}" fill-opacity="${k.fillOp}" stroke="none"/>`;
+  const sc = k.mode !== 'single' && kdeScale(k.mode);
+  if (sc) {   // the fill follows the colour of each value, as the branches or dots do: thin strips, each in its colour
+    // each colour is mixed with the page background by the fill opacity, so the strips are solid and leave no seams
+    const bgc = hexRGB(/^#[0-9a-f]{6}$/i.test(S.bg || '') ? S.bg : '#ffffff');
+    const col = v => { const vv = k.log ? 10 ** v : v, c = hexRGB(rampOf(sc.stops, sc.b > sc.a ? (sc.f(vv) - sc.a) / (sc.b - sc.a) : 0.5)); return rgbHex(c.map((x, j) => bgc[j] + (x - bgc[j]) * k.fillOp)); };
+    let strips = '';
+    for (let i = 0; i < G; i++) {
+      const [x0, d0] = grid[i], [x1, d1] = grid[i + 1];
+      strips += `<path d="M${f2(X(x0))},${f2(base)}L${f2(X(x0))},${f2(Y(d0))}L${f2(X(x1) + 0.35)},${f2(Y(d1))}L${f2(X(x1) + 0.35)},${f2(base)}Z" fill="${col((x0 + x1) / 2)}"/>`;
+    }
+    areaSvg = `<g>${strips}</g>`;
+  }
+  let ax = '';
+  if (k.axis) {
+    const y0 = base + k.axisGap, step = niceNum((hi - lo) / 4), ticks = [];
+    for (let t = Math.ceil(lo / step) * step; t <= hi + 1e-9; t += step) ticks.push(t);
+    const lab = t => { const v = k.log ? 10 ** t : t; return Math.abs(v) >= 1e4 || (Math.abs(v) < 1e-3 && v !== 0) ? v.toExponential(1) : String(+v.toPrecision(3)); };
+    ax = `<path d="M${f2(X(lo))},${f2(y0)}H${f2(X(hi))}${ticks.map(t => `M${f2(X(t))},${f2(y0)}v${tick}`).join('')}" stroke="${k.axisColor}" stroke-width="${k.axisW}" fill="none"/>`
+      + ticks.map(t => `<text x="${f2(X(t))}" y="${f2(y0 + tick + k.axisFs)}" text-anchor="middle" font-size="${k.axisFs}" fill="${k.axisColor}" font-family="${fam}">${esc(lab(t))}</text>`).join('')
+      + (k.title ? `<text x="${f2(W / 2)}" y="${f2(y0 + tick + k.axisFs * 2.3)}" text-anchor="middle" font-size="${k.axisFs}" fill="${k.axisColor}" font-family="${fam}">${esc(k.title)}</text>` : '');
+  }
+  return head + areaSvg + `<path d="${line}" fill="none" stroke="${k.line}" stroke-width="${k.lw}"${dashOf(k.dash, k.lw)}/>` + ax + '</svg>';
+}
+// Redraws every density plot from the current values and colours (called before the images are placed).
+// ---- free text labels: an image the app writes from m.txt, so they move, align and show guides like any image
+const TXT_DEF = { text: 'Label', size: 14, color: '#1f1f1f', bold: false, italic: false, font: '' };
+function txtSvg(t) {
+  const fam = t.font || settings.fontFamily, w = Math.max(4, measure(t.text || ' ', t.size, fam, t.italic, t.bold)) + 4, h = t.size * 1.3;
+  return { w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${f2(w)}" height="${f2(h)}" viewBox="0 0 ${f2(w)} ${f2(h)}"><text x="2" y="${f2(h * 0.5)}" dominant-baseline="central" font-size="${t.size}" font-family="${esc(fam)}" fill="${t.color}"${t.bold ? ' font-weight="bold"' : ''}${t.italic ? ' font-style="italic"' : ''}>${esc(t.text || '')}</text></svg>` };
+}
+// The drawing of an item the app makes itself: a density plot or a text label.
+const itemSvg = m => m.kde ? kdeSvg(m.kde) : m.txt ? txtSvg(m.txt).svg : null;
+function addLabel() {
+  const t = { ...TXT_DEF }, d = txtSvg(t), sid = 's' + (++imgUid) + 't'; imgStore.set(sid, '');
+  const cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k;
+  if (tree) pushUndo();
+  const m = { id: ++imgUid, sid, name: t.text, x: cx - d.w / 2, y: cy - d.h / 2, w: d.w, h: d.h, nw: d.w, nh: d.h, op: 1, rot: 0, layer: 'front', txt: t };
+  figImages.push(m); selImg = m.id; refreshKdes();
+  imgChanged('Label added. Right-click it to write its text; drag it to place it.');
+  const r = svg.getBoundingClientRect(); openImage(r.left + r.width / 2 + 40, r.top + r.height / 2 - 40);
+}
+// The part of the image menu for a text label.
+function txtMenuPart(m) {
+  const t = m.txt;
+  const spec = [
+    { k: 'size', label: 'Text size', type: 'num', unit: 'px' }, { k: 'color', label: 'Color', type: 'color' },
+    { k: 'bold', label: 'Bold', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] }, { k: 'italic', label: 'Italic', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] },
+    { k: 'font', label: 'Typeface', type: 'sel', opts: [['', 'Same as the tip names'], ...FONTS] },
+  ];
+  return { spec, html: `<div class="part"><b>Label</b><div class="kv"><span>Text</span><input type="text" class="lgtext" data-txttext value="${esc(t.text || '')}" placeholder="Write the text"></div>${ctlRows(spec, k => ({ v: t[k], own: false }))}
+    <p class="hint">Drag the label to place it. To align it with the tree, select it, shift-click a branch, label or clade, and use Align below.</p></div>`,
+    set: (k, v) => { t[k] = v; } };
+}
+// In an export, each density plot is written as drawing (vector), placed and sized like its image.
+function inlineKdes(str) {
+  for (const m of figImages) if (m.kde || m.txt) {
+    const src = imgStore.get(m.sid); if (!src) continue;
+    const body = itemSvg(m).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, ''), cx = m.x + m.w / 2, cy = m.y + m.h / 2, tf = [];
+    if (m.rot) tf.push(`rotate(${f2(m.rot)} ${f2(cx)} ${f2(cy)})`);
+    if (m.fx || m.fy) tf.push(`translate(${f2(cx)} ${f2(cy)}) scale(${m.fx ? -1 : 1} ${m.fy ? -1 : 1}) translate(${f2(-cx)} ${f2(-cy)})`);
+    tf.push(`translate(${f2(m.x)} ${f2(m.y)}) scale(${(m.w / m.nw).toFixed(5)} ${(m.h / m.nh).toFixed(5)})`);
+    const g = `<g transform="${tf.join(' ')}"${m.op < 1 ? ` opacity="${m.op}"` : ''}>${body}</g>`;
+    const esc0 = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    str = str.replace(new RegExp(`<image[^>]*href="${esc0}"[^>]*>(</image>)?`), () => g);
+  }
+  return str;
+}
+function refreshKdes() {
+  for (const m of figImages) if (m.txt) {
+    const d = txtSvg(m.txt), sc = m.nw ? m.w / m.nw : 1;
+    if (Math.abs(d.w - m.nw) > 0.01 || Math.abs(d.h - m.nh) > 0.01) { m.nw = d.w; m.nh = d.h; m.w = d.w * sc; m.h = d.h * sc; }
+    const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(d.svg)));
+    if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
+  }
+  for (const m of figImages) if (m.kde) {
+    const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(kdeSvg(m.kde))));
+    if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
+  }
+}
+function addKdePlot() {
+  const S = settings, src0 = S.brcTable && S.brcCol ? S.brcTable : (dataSourceOpts(S).find(o => o[0]) || [''])[0];
+  const col0 = S.brcTable && S.brcCol ? S.brcCol : ((dataColOpts(S, src0) || [])[0] || [''])[0];
+  const kde = { ...KDE_DEF, src: src0, col: col0, log: !!(S.brcTable && S.brcCol && S.brcLog) };
+  const sid = 's' + (++imgUid) + 'k'; imgStore.set(sid, '');
+  const w = 240, h = 135, cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k;
+  if (tree) pushUndo();
+  const m = { id: ++imgUid, sid, name: 'Density' + (col0 ? ' of ' + col0 : ''), x: cx - w / 2, y: cy - h / 2, w, h, nw: 320, nh: 180, op: 1, rot: 0, layer: 'front', kde };
+  figImages.push(m); selImg = m.id; refreshKdes();
+  imgChanged('Density plot added. Right-click it to choose the values and its look.');
+}
+// The part of the image menu for a density plot.
+function kdeMenuPart(m) {
+  const k = m.kde, S = settings;
+  const spec = [
+    { k: 'src', label: 'Values from', type: 'sel', opts: dataSourceOpts(S) },
+    { k: 'col', label: 'Value', type: 'sel', opts: dataColOpts(S, k.src) },
+    { k: 'log', label: 'Logarithmic scale', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] },
+    { k: 'smooth', label: 'Smoothing', type: 'num', unit: '×' },
+    { k: 'mode', label: 'Color', type: 'sel', opts: [['single', 'One color'], ['branches', 'Like the branches'], ['dots', 'Like the dots']] },
+    { k: 'fill', label: 'Fill', type: 'color' }, { k: 'fillOp', label: 'Fill opacity', type: 'num', unit: '%' },
+    { k: 'line', label: 'Line color', type: 'color' }, { k: 'lw', label: 'Line width', type: 'num', unit: 'px' },
+    { k: 'dash', label: 'Line style', type: 'sel', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] },
+    { k: 'axis', label: 'Axis', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] },
+    { k: 'axisColor', label: 'Axis color', type: 'color' }, { k: 'axisW', label: 'Axis width', type: 'num', unit: 'px' },
+    { k: 'axisFs', label: 'Axis text size', type: 'num', unit: 'px' }, { k: 'axisGap', label: 'Space to the axis', type: 'num', unit: 'px' },
+  ];
+  const get = key => ({ v: key === 'fillOp' ? Math.round(k.fillOp * 100) : k[key], own: false });
+  return { spec, html: `<div class="part"><b>Density plot</b>${ctlRows(spec, get)}<div class="kv"><span>Axis title</span><input type="text" class="lgtext" data-kdetitle value="${esc(k.title || '')}" placeholder="e.g. Rate (subs./site/Myr)"></div>
+    <p class="hint">${k.mode !== 'single' && !kdeScale(k.mode) ? `The ${k.mode === 'branches' ? 'branches are' : 'dots are'} not colored by data any more, so the plot uses its own fill color.` : 'Gaussian kernel density; smoothing multiplies the bandwidth. To take the colors of the branches or the dots, color them by data first.'}</p></div>`,
+    set: (key, v) => { if (key === 'fillOp') v = clamp(v, 0, 100) / 100; if (key === 'src') { k.col = (dataColOpts(S, v)[0] || [''])[0]; } k[key] = v; if (key === 'col' || key === 'src') m.name = 'Density' + (k.col ? ' of ' + k.col : ''); } };
+}
+
+// ---- arrows
+let selArrow = null, arrowSnap = null;
+const ARROW_DEF = { color: '#333333', w: 1.5, op: 100, dash: 'solid', head: 'end', hs: 9, curve: 0, gapA: 0, gapB: 0 };
+const arrowById = id => (settings.arrows || []).find(a => a.id === id);
+const imgAnchorPts = m => ({ nw: [m.x, m.y], n: [m.x + m.w / 2, m.y], ne: [m.x + m.w, m.y], e: [m.x + m.w, m.y + m.h / 2], se: [m.x + m.w, m.y + m.h], s: [m.x + m.w / 2, m.y + m.h], sw: [m.x, m.y + m.h], w: [m.x, m.y + m.h / 2], c: [m.x + m.w / 2, m.y + m.h / 2] });
+const nodeFigPt = n => isVertical(settings) ? [n._py, -n._px] : [n._px, n._py];   // where a node is drawn, also on a vertical tree
+// A node is anchored by its tips (its name for a tip), so the anchor survives undo, reloading and rerooting.
+const nodeKey = n => n.children.length ? 'c:' + leaves(n).map(l => l.name).sort().join('|') : 't:' + n.name;
+function arrowEndPt(E, keys) {
+  if (E.an && E.an.t === 'node') { const n = keys.get(E.an.key); if (n && n._px != null) [E.x, E.y] = nodeFigPt(n); }
+  else if (E.an && E.an.t === 'img') { const m = imgById(E.an.id), p = m && imgAnchorPts(m)[E.an.p]; if (p) [E.x, E.y] = p; else delete E.an; }
+  return [E.x, E.y];
+}
+// Drawn last, over the figure and its images (never turned with a vertical tree). Returns the drawing and its click areas.
+function arrowsSvg() {
+  const S = settings, list = S.arrows || []; if (!list.length) return { svg: '', hits: '', hl: '' };
+  const keys = new Map(); if (tree) for (const n of nodeById.values()) keys.set(nodeKey(n), n);
+  let out = '', hits = '', hl = '';
+  for (const A of list) {
+    let [ax, ay] = arrowEndPt(A.a, keys), [bx, by] = arrowEndPt(A.b, keys);
+    const L0 = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / L0, uy = (by - ay) / L0;
+    ax += ux * (A.gapA || 0); ay += uy * (A.gapA || 0); bx -= ux * (A.gapB || 0); by -= uy * (A.gapB || 0);   // room from the anchors
+    const c = A.curve ? [(ax + bx) / 2 - uy * A.curve / 100 * L0 * 0.5, (ay + by) / 2 + ux * A.curve / 100 * L0 * 0.5] : null;
+    const hs = A.hs, hw = Math.max(hs * 0.5, A.w * 0.95), toEnd = A.head === 'end' || A.head === 'both', toStart = A.head === 'start' || A.head === 'both';
+    const unit = (px, py, qx, qy) => { const l = Math.hypot(px - qx, py - qy) || 1; return [(px - qx) / l, (py - qy) / l]; };
+    const [fx, fy] = c || [ax, ay], [gx, gy] = c || [bx, by], [ue, ve] = unit(bx, by, fx, fy), [us, vs] = unit(ax, ay, gx, gy);
+    const ex = toEnd ? bx - ue * hs * 0.85 : bx, ey = toEnd ? by - ve * hs * 0.85 : by, sx = toStart ? ax - us * hs * 0.85 : ax, sy = toStart ? ay - vs * hs * 0.85 : ay;
+    const d = c ? `M${f2(ax)},${f2(ay)}Q${f2(c[0])},${f2(c[1])} ${f2(bx)},${f2(by)}` : `M${f2(ax)},${f2(ay)}L${f2(bx)},${f2(by)}`;
+    const dd = c ? `M${f2(sx)},${f2(sy)}Q${f2(c[0])},${f2(c[1])} ${f2(ex)},${f2(ey)}` : `M${f2(sx)},${f2(sy)}L${f2(ex)},${f2(ey)}`;
+    const head = (px, py, u, v) => `<polygon points="${f2(px)},${f2(py)} ${f2(px - u * hs - v * hw)},${f2(py - v * hs + u * hw)} ${f2(px - u * hs + v * hw)},${f2(py - v * hs - u * hw)}" fill="${A.color}"/>`;
+    out += `<g${A.op < 100 ? ` opacity="${A.op / 100}"` : ''}><path d="${dd}" fill="none" stroke="${A.color}" stroke-width="${f2(A.w)}"${dashOf(A.dash, A.w)}/>${toEnd ? head(bx, by, ue, ve) : ''}${toStart ? head(ax, ay, us, vs) : ''}</g>`;
+    hits += `<path class="arrowhit" d="${d}" data-arrow="${A.id}" fill="none" stroke="transparent" stroke-width="${f2(Math.max(12, A.w + 8) / view.k)}"/>`;
+    if (A.id === selArrow) {
+      const hl0 = '#27408B', r = 5 / view.k;
+      hl += `<path d="${d}" fill="none" stroke="${hl0}" stroke-width="${f2(A.w + 6)}" opacity=".3" stroke-linecap="round"/>`;
+      for (const [w, x, y, E] of [['a', ax, ay, A.a], ['b', bx, by, A.b]])
+        hits += `<circle class="arrowend" cx="${f2(x)}" cy="${f2(y)}" r="${f2(r)}" data-arrowend="${A.id}:${w}" fill="${E.an ? hl0 : '#fff'}" stroke="${hl0}" stroke-width="${f2(1.5 / view.k)}"/>`;
+    }
+  }
+  if (selArrow != null) {   // the points of the images an end can be anchored to, as in a slide editor
+    const r = 3.2 / view.k;
+    for (const m of figImages) for (const [k, [x, y]] of Object.entries(imgAnchorPts(m))) hl += `<circle cx="${f2(x)}" cy="${f2(y)}" r="${f2(r)}" fill="#fff" stroke="#27408B" stroke-width="${f2(1 / view.k)}"/>`;
+    if (arrowSnap) hl += `<circle cx="${f2(arrowSnap.x)}" cy="${f2(arrowSnap.y)}" r="${f2(7 / view.k)}" fill="#27408B" fill-opacity=".25" stroke="#27408B" stroke-width="${f2(1.5 / view.k)}"/>`;
+  }
+  return { svg: out, hits, hl };
+}
+// The anchor closest to a point, within a few screen pixels: a point of an image, or a node of the tree.
+function arrowSnapAt(p) {
+  const lim = 12 / view.k; let best = null, bd = lim;
+  for (const m of figImages) for (const [k, q] of Object.entries(imgAnchorPts(m))) { const dd = Math.hypot(q[0] - p[0], q[1] - p[1]); if (dd < bd) { bd = dd; best = { an: { t: 'img', id: m.id, p: k }, x: q[0], y: q[1] }; } }
+  if (tree) for (const n of nodeById.values()) if (n._px != null) { const q = nodeFigPt(n), dd = Math.hypot(q[0] - p[0], q[1] - p[1]); if (dd < bd) { bd = dd; best = { an: { t: 'node', key: nodeKey(n) }, x: q[0], y: q[1] }; } }
+  return best;
+}
+function addArrow() {
+  const cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k, L = 80 / view.k;
+  pushUndo(true);
+  const A = { id: Date.now(), ...ARROW_DEF, a: { x: cx - L, y: cy }, b: { x: cx + L, y: cy } };
+  settings.arrows = [...(settings.arrows || []), A]; selArrow = A.id; selImg = null; sel.clear();
+  render(); persist(); toast('Arrow added. Drag it, or drag an end onto a node or an image point to anchor it.');
+}
+svg.addEventListener('pointerdown', e => {
+  const t = e.target.closest && e.target.closest('[data-arrow], [data-arrowend]');
+  if (!t) { if (selArrow != null && e.button === 0) { selArrow = null; render(); } return; }
+  if (e.button !== 0) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const [id, which] = t.dataset.arrowend ? [+t.dataset.arrowend.split(':')[0], t.dataset.arrowend.split(':')[1]] : [+t.dataset.arrow, 'body'];
+  const A = arrowById(id); if (!A) return;
+  sel.clear(); selImg = null; closePop(); selArrow = A.id; render();
+  const r = svg.getBoundingClientRect(), P = ev => [(ev.clientX - r.left - view.tx) / view.k, (ev.clientY - r.top - view.ty) / view.k];
+  const p0 = P(e), a0 = [A.a.x, A.a.y], b0 = [A.b.x, A.b.y]; let moved = false;
+  const move = ev => {
+    const p = P(ev), dx = p[0] - p0[0], dy = p[1] - p0[1];
+    if (!moved && Math.hypot(dx, dy) * view.k < 3) return;
+    if (!moved) pushUndo(true); moved = true;
+    if (which === 'body') { if (!A.a.an) { A.a.x = a0[0] + dx; A.a.y = a0[1] + dy; } if (!A.b.an) { A.b.x = b0[0] + dx; A.b.y = b0[1] + dy; } }
+    else { const E = A[which]; delete E.an; arrowSnap = arrowSnapAt(p); [E.x, E.y] = arrowSnap ? [arrowSnap.x, arrowSnap.y] : p; }
+    render();
+  };
+  const up = () => {
+    window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
+    if (moved && which !== 'body' && arrowSnap) A[which].an = arrowSnap.an;
+    arrowSnap = null; render(); if (moved) persist();
+  };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+}, true);
+// Right-click menu of an arrow.
+const ARROW_SPEC = [
+  { k: 'color', label: 'Color', type: 'color' }, { k: 'w', label: 'Width', type: 'num', unit: 'px' }, { k: 'op', label: 'Opacity', type: 'num', unit: '%' },
+  { k: 'dash', label: 'Line style', type: 'sel', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] },
+  { k: 'head', label: 'Arrow heads', type: 'sel', opts: [['end', 'At the end'], ['start', 'At the start'], ['both', 'Both'], ['none', 'None']] },
+  { k: 'hs', label: 'Head size', type: 'num', unit: 'px' }, { k: 'curve', label: 'Curvature', type: 'num', unit: '%' },
+  { k: 'gapA', label: 'Space at the start', type: 'num', unit: 'px' }, { k: 'gapB', label: 'Space at the end', type: 'num', unit: 'px' },
+];
+function openArrowMenu(id, cx, cy, keep) {
+  const A = arrowById(id); if (!A) return;
+  const keepScroll = keep ? pop.scrollTop : 0;
+  const where = E => !E.an ? 'free' : E.an.t === 'img' ? `anchored to the image “${esc((imgById(E.an.id) || {}).name || 'image')}”` : `anchored to ${E.an.key.startsWith('t:') ? esc(disp(E.an.key.slice(2))) : 'a node'}`;
+  pop.innerHTML = `<button class="close" aria-label="Close">×</button>
+    <div class="dragh" title="Drag to move"><h3>Arrow</h3><div class="meta">Start ${where(A.a)}, end ${where(A.b)}. Drag an end onto a node or an image point to anchor it.</div></div>
+    <div class="part"><b>This arrow</b>${ctlRows(ARROW_SPEC, k => ({ v: A[k], own: false }))}
+      <p class="hint">A positive curvature bends it to the left of its direction, a negative one to the right. The spaces keep an anchored end a little away from its anchor.</p>
+      <div class="btns">${A.a.an ? '<button class="btn small" data-aa="freeA">Free the start</button>' : ''}${A.b.an ? '<button class="btn small" data-aa="freeB">Free the end</button>' : ''}<button class="btn small danger" data-aa="del">Delete arrow</button></div></div>`;
+  pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
+  wireCtl(ARROW_SPEC, (k, v) => { pushUndo(true); A[k] = v == null ? ARROW_DEF[k] : v; render(); persist(); openArrowMenu(id, cx, cy, true); });
+  pop.querySelectorAll('[data-aa]').forEach(b => b.onclick = () => {
+    pushUndo(true);
+    if (b.dataset.aa === 'del') { settings.arrows = settings.arrows.filter(x => x.id !== id); selArrow = null; closePop(); }
+    else { delete A[b.dataset.aa === 'freeA' ? 'a' : 'b'].an; openArrowMenu(id, cx, cy, true); }
+    render(); persist();
+  });
+  pop.querySelector('.close').onclick = closePop;
+}
+svg.addEventListener('contextmenu', e => {
+  const t = e.target.closest && e.target.closest('[data-arrow], [data-arrowend]'); if (!t) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const id = t.dataset.arrowend ? +t.dataset.arrowend.split(':')[0] : +t.dataset.arrow;
+  selArrow = id; sel.clear(); selImg = null; render(); openArrowMenu(id, e.clientX, e.clientY);
+}, true);
+document.addEventListener('keydown', e => {
+  if (selArrow == null || !/^(Delete|Backspace)$/.test(e.key) || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return;
+  e.preventDefault(); pushUndo(true); settings.arrows = (settings.arrows || []).filter(x => x.id !== selArrow); selArrow = null; closePop(); render(); persist();
+});
 
 /* ================= Start ================= */
 /* ================= Clear session, collapse all, MRCA picker ================= */
