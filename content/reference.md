@@ -14,6 +14,7 @@ Every option of the left panel, section by section, in the same order as in the 
 - [Clades](#clades)
 - [Fossils](#fossils)
 - [Phylogenetic networks](#phylogenetic-networks)
+- [Scale bar](#scale-bar)
 - [Time axis](#time-axis)
 - [Ancestral reconstructions](#ancestral-reconstructions)
 - [Attachments](#attachments)
@@ -21,7 +22,7 @@ Every option of the left panel, section by section, in the same order as in the 
 - [Legends](#legends)
 - [Split into pages](#split-into-pages)
 - [Images and visual elements](#images-and-visual-elements)
-- [Page](#page)
+- [Page settings](#page-settings)
 - [Export](#export)
 - [Right-click menus](#right-click-menus)
 - [On the canvas](#on-the-canvas)
@@ -34,7 +35,7 @@ Load or paste a tree (Newick and NEXUS are recognized from their content, whatev
 |:---|:---|:---|:---|:---|
 | `Burn-in` | Share of the first trees of the chain left out of every summary. | 0 to 99% | 0% | A file with several trees is open |
 | `Show tree number` | Shows one sampled tree of the file, by its position. | Number | 1 | A file with several trees is open |
-| `Summary tree` | How the trees of the file are summarized into one. | Majority rule¹<br>Strict consensus²<br>Maximum compatible³<br>MCC⁴<br>MAP⁵ | Majority rule | A file with several trees is open, **MAP** needs the posterior of each tree in the file (as a `.p` or `. log` file in Attachments) |
+| `Summary tree` | How the trees of the file are summarized into one. | Majority rule¹<br>Strict consensus²<br>Maximum compatible³<br>Maximum clade credibility (MCC)⁴<br>Maximum a posteriori (MAP)⁵ | Majority rule | A file with several trees is open, **MAP** needs the posterior of each tree in the file (as a `.p` or `. log` file in Attachments) |
 | `Clades in more than` | Clades must be found in more than this share of the trees to be kept. | 50 to 100% | 50% | `Summary tree` is **Majority rule** |
 | `Node ages` | How the MCC tree gets its node ages from all the trees. | Median<br>Mean | Median | `Summary tree` is **MCC** |
 | `Build summary tree` | Builds and shows the chosen summary tree. |  |  | A file with several trees is open |
@@ -44,6 +45,8 @@ Load or paste a tree (Newick and NEXUS are recognized from their content, whatev
 ³ Maximum compatible: the majority-rule tree plus the less frequent clades that do not conflict with it, added from the most to the least frequent (allcompat in MrBayes).  
 ⁴ MCC (maximum clade credibility): the sampled tree whose clades have the highest product of their frequencies, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.  
 ⁵ MAP (maximum a posteriori): the sampled tree with the highest posterior probability, read from the trees file (BEAST) or from the attached log (`.log` of BEAST2, `.p` of MrBayes).  
+
+With unrooted trees (no clock), the branch lengths of the majority-rule, strict and maximum compatible trees are the mean length of each branch over the trees that contain it, as in MrBayes.  
 
 ## Layout
 
@@ -59,7 +62,7 @@ The shape of the tree and its overall size.
 | `Order nodes`² | Sorts every node by clade size, once, for the whole tree. | Increasing<br>Decreasing |  |  |
 | `Rename tips from a file…` | Renames many tips at once from a file with two columns: the current name, then the new name. Column headers are optional. | File |  |  |
 | `Width` | Horizontal size of the tree, without labels. | 80 to 4000 px | 700 px | **Rectangular** layout |
-| `Tip spacing` | Vertical distance between neighboring tips. | 3 to 80 px | 18 px | **Rectangular** layout |
+| `Height` | Vertical distance between neighboring tips. | 3 to 80 px | 18 px | **Rectangular** layout |
 | `Radius` |  | 40 to 3000 px | 320 px | **Circular**, **Fan** or **Unrooted** layout |
 | `Inner radius (center gap)` | Empty circle left at the center. | 0 to 1500 px | 0 px | `Shape` is **Circular** or **Fan** |
 | `Total angle` | How much of the circle the tree fills. | 20 to 360° | 360° | `Shape` is **Circular** |
@@ -89,13 +92,15 @@ Width, color and line style of every branch (a value given to a branch from its 
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Values from` | Where the values come from: tree annotations or an attached table. | List | None |  |
-| `Value`¹ | Annotation or column that sets the colors. | List | None | `Values from` is set |
-| `Low values` |  | Color | <img src="img/colors/2C7BB6.svg" alt="#2C7BB6" align="absmiddle"> #2C7BB6 | `Value` is set |
-| `Use a middle color` | Adds a third color for values in the middle of the range. | On<br>Off | On | `Value` is set |
-| `Middle values` |  | Color | <img src="img/colors/FFFFBF.svg" alt="#FFFFBF" align="absmiddle"> #FFFFBF | `Value` is set, `Use a middle color` is **On** |
-| `High values` |  | Color | <img src="img/colors/D7191C.svg" alt="#D7191C" align="absmiddle"> #D7191C | `Value` is set |
-| `Logarithmic scale` | Spreads values that differ by orders of magnitude, like rates. | On<br>Off | Off | `Value` is set |
+| `Value`¹ | The annotation of the tree or the column of a table that sets the colors. One list: the branch length (raw) first, then every annotation of the tree and every column of the tables (with the table name). | List | None |  |
+| `Palette` | The colors of the scale: your own, or a standard palette such as Viridis or Inferno. Those marked ✓ stay distinguishable with the common forms of color blindness. | Custom colors<br>tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Custom colors | `Value` is set |
+| `Reverse the colors` | Runs the palette the other way, low values taking the colors of the high ones. | On<br>Off | Off | `Value` is set |
+| `Hue shift` | Turns the hue of every color of the palette. | −180 to 180° | 0° | `Value` is set |
+| `Low values` |  | Color | <img src="img/colors/2C7BB6.svg" alt="#2C7BB6" align="absmiddle"> #2C7BB6 | `Value` is set, `Palette` is **Custom colors** |
+| `Use a middle color` | Adds a third color for values in the middle of the range. | On<br>Off | On | `Value` is set, `Palette` is **Custom colors** |
+| `Middle values` |  | Color | <img src="img/colors/FFFFBF.svg" alt="#FFFFBF" align="absmiddle"> #FFFFBF | `Value` is set, `Use a middle color` is **On**, `Palette` is **Custom colors** |
+| `High values` |  | Color | <img src="img/colors/D7191C.svg" alt="#D7191C" align="absmiddle"> #D7191C | `Value` is set, `Palette` is **Custom colors** |
+| `Logarithmic scale (log₁₀)` | Uses the base-10 logarithm of the values for the colors, so each tenfold step gets the same share. The legend shows the values themselves. | On<br>Off | Off | `Value` is set |
 | `Lowest value of the scale` | Fixes the start of the scale, empty uses the lowest value found. | −10¹² to 10¹² |  | `Value` is set |
 | `Highest value of the scale` | Fixes the end of the scale, empty uses the highest value found. | −10¹² to 10¹² |  | `Value` is set |
 | `Show a color legend` |  | On<br>Off | On | `Value` is set |
@@ -106,11 +111,10 @@ Width, color and line style of every branch (a value given to a branch from its 
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Values from`¹ | Where the values come from: tree annotations or an attached table. | Number |  |  |
-| `Value` | Annotation or column that sets the widths. | Number |  | `Values from` is set |
+| `Value`¹ | The annotation of the tree or the column of a table that sets the widths. One list: the branch length (raw) first, then every annotation of the tree and every column of the tables (with the table name). | List | None |  |
 | `Thinnest` | Width of the branch with the lowest value. | 0.1 to 10 px | 0.5 px | `Value` is set |
 | `Thickest` | Width of the branch with the highest value. | 0.5 to 20 px | 5 px | `Value` is set |
-| `Logarithmic scale` | Spreads values that differ by orders of magnitude. | On<br>Off | Off | `Value` is set |
+| `Logarithmic scale (log₁₀)` | Uses the base-10 logarithm of the values for the widths, so each tenfold step gets the same share. The legend shows the values themselves. | On<br>Off | Off | `Value` is set |
 | `Show legend` |  | On<br>Off | On | `Value` is set |
 
 ¹ Make the branches thicker where a value is higher, for example a rate or a posterior probability, read from the tree or from an attached table.  
@@ -124,11 +128,14 @@ Labels with the length or annotations for each branch.
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Show a value on each branch` | Writes a number on every branch. | On<br>Off | Off |  |
-| `Values from` | Branch length, a tree annotation or a table column. | List |  | `Show a value on each branch` is **On** |
-| `Value` |  | List |  | `Values from` is set |
+| `Value` | One list: the branch length (raw) first, then every annotation of the tree and every column of the tables (with the table name). | List | Branch length | `Show a value on each branch` is **On** |
 | `Decimals` |  | 0, 1, 2, 3, 4, 5, 6 | 3 | `Show a value on each branch` is **On** |
 | `Text size` |  | 1 to 100 px | 8 px | `Show a value on each branch` is **On** |
-| `Color` |  | Color | <img src="img/colors/666666.svg" alt="#666666" align="absmiddle"> #666666 | `Show a value on each branch` is **On** |
+| `Color of the values` | One color for all, or the color of each branch: its color by data, a clade color or the line color, or a color from a parameter of its own, whatever the color of the branches. | One color<br>Like their branch<br>By data | One color | `Show a value on each branch` is **On** |
+| `Colored by` | The parameter that gives the colors: branch length (raw), an annotation of the tree or a column of a table. | List | Branch length (raw) | `Show a value on each branch` is **On**, `Color of the values` is **By data** |
+| `Palette` | Colors of the scale. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show a value on each branch` is **On**, `Color of the values` is **By data** |
+| `Reverse the colors` |  | On<br>Off | Off | `Show a value on each branch` is **On**, `Color of the values` is **By data** |
+| `Color` |  | Color | <img src="img/colors/666666.svg" alt="#666666" align="absmiddle"> #666666 | `Show a value on each branch` is **On**, `Color of the values` is **One color** |
 | `Position on branch` | Where along the branch the value is written. | Left<br>Center<br>Right | Center | `Show a value on each branch` is **On** |
 | `Margin from branch end` | Distance from the end of the branch, for left and right positions. | −2000 to 2000 px | 0 px | `Show a value on each branch` is **On**, `Position on branch` is not **Center** |
 | `Vertical offset` | Moves the value up (positive) or down (negative). | −500 to 500 px | 2 px | `Show a value on each branch` is **On** |
@@ -140,8 +147,10 @@ Dots on tips and internal nodes.
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Dots on tips` |  | On<br>Off | Off |  |
+| `Tip dot shape` | Shape of the dots on the tips. Any dot can take its own shape from its right-click menu. | Circle<br>Square<br>Triangle<br>Diamond<br>Star | Circle | `Dots on tips` is **On** |
 | `Tip dot size` |  | 0.5 to 12 px | 3 px | `Dots on tips` is **On** |
 | `Dots on internal nodes` |  | On<br>Off | Off |  |
+| `Node dot shape` | Shape of the dots on the internal nodes. | Circle<br>Square<br>Triangle<br>Diamond<br>Star | Circle | `Dots on internal nodes` is **On** |
 | `Node dot size` |  | 0.5 to 12 px | 3 px | `Dots on internal nodes` is **On** |
 | `Dot opacity` |  | 5 to 100% | 100% | `Dots on tips` is **On**, `Dots on internal nodes` is **On** |
 | `Fill dots` |  | On<br>Off | On | `Dots on tips` is **On**, `Dots on internal nodes` is **On** |
@@ -155,11 +164,13 @@ Dots on tips and internal nodes.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Values from`¹ | Where the values come from: tree annotations or an attached table. | List |  |  |
-| `Value` | Annotation or column that sets the dots. | List |  | `Values from` is set |
+| `Value`¹ | The annotation of the tree or the column of a table that sets the dots. One list: the branch length (raw) first, then every annotation of the tree and every column of the tables (with the table name). | List | None |  |
+| `Palette` | The colors of the scale: your own, or a standard palette such as Viridis or Inferno. Those marked ✓ stay distinguishable with the common forms of color blindness. | Custom colors<br>tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Custom colors | `Value` is set, `Color by the value` is **On** |
+| `Reverse the colors` | Runs the palette the other way, low values taking the colors of the high ones. | On<br>Off | Off | `Value` is set, `Color by the value` is **On** |
+| `Hue shift` | Turns the hue of every color of the palette. | −180 to 180° | 0° | `Value` is set, `Color by the value` is **On** |
 | `Color by the value` | Colors each dot along a scale from its value. | On<br>Off | On | `Value` is set |
-| `Low values` |  | Color | <img src="img/colors/2C7BB6.svg" alt="#2C7BB6" align="absmiddle"> #2C7BB6 | `Value` is set, `Color by the value` is **On** |
-| `High values` |  | Color | <img src="img/colors/D7191C.svg" alt="#D7191C" align="absmiddle"> #D7191C | `Value` is set, `Color by the value` is **On** |
+| `Low values` |  | Color | <img src="img/colors/2C7BB6.svg" alt="#2C7BB6" align="absmiddle"> #2C7BB6 | `Value` is set, `Color by the value` is **On**, `Palette` is **Custom colors** |
+| `High values` |  | Color | <img src="img/colors/D7191C.svg" alt="#D7191C" align="absmiddle"> #D7191C | `Value` is set, `Color by the value` is **On**, `Palette` is **Custom colors** |
 | `Size by the value` | Makes each dot bigger as its value grows. | On<br>Off | Off | `Value` is set |
 | `Smallest` | Size of the dot with the lowest value. | 0.5 to 10 px | 2 px | `Value` is set, `Size by the value` is **On** |
 | `Largest` | Size of the dot with the highest value. | 1 to 20 px | 7 px | `Value` is set, `Size by the value` is **On** |
@@ -177,8 +188,13 @@ Support values, other values read from the tree (such as ages or probabilities),
 |:---|:---|:---|:---|:---|
 | `Show as` | How support values are shown on the nodes. | Hidden<br>Number<br>Circles | Hidden |  |
 | `Values from`¹ | Where support values come from. | Input tree<br>SIMMAP<br>Trees file | Input tree | `Show as` is not **Hidden** |
+| `Decimals` | Decimals of the numbers written, or as they are written in the file. | As written<br>0, 1, 2, 3 | As written | `Show as` is **Number** |
 | `Size` |  | 1 to 100 px | 9 px | `Show as` is **Number** or **Circles**, `Which values` is **Above a threshold** |
-| `Color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show as` is not **Hidden**, `Which values` is **Above a threshold** |
+| `Color of the values` | One color for all, or the color of the branch leading to each node, or a color from a parameter of its own, whatever the color of the branches. | One color<br>Like their branch<br>By data | One color | `Show as` is **Number** |
+| `Colored by` | The parameter that gives the colors: branch length (raw), an annotation of the tree or a column of a table. | List | Branch length (raw) | `Show as` is **Number**, `Color of the values` is **By data** |
+| `Palette` | Colors of the scale. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show as` is **Number**, `Color of the values` is **By data** |
+| `Reverse the colors` |  | On<br>Off | Off | `Show as` is **Number**, `Color of the values` is **By data** |
+| `Color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show as` is not **Hidden**, `Which values` is **Above a threshold**, `Color of the values` is **One color** |
 | `Bigger circles for higher values` | Circle size grows with the support. | On<br>Off | Off | `Show as` is **Circles**, `Which values` is **Above a threshold** |
 | `Which values` | Show the values above a threshold, or style them by ranges. | Above a threshold<br>By categories | Above a threshold | `Show as` is not **Hidden** |
 | `Only when support ≥` | Values below this are not shown. | 0 to 100 | 0 | `Show as` is not **Hidden**, `Which values` is **Above a threshold** |
@@ -206,7 +222,11 @@ Support values, other values read from the tree (such as ages or probabilities),
 | `Show legend` |  | On<br>Off | On | `Show` is set, `Show as` is **Circles** |
 | `Decimals` |  | 0, 1, 2, 3, 4, 5, 6 | 2 | `Show` is set, `Show as` is **Number** |
 | `Text size` |  | 1 to 100 px | 9 px | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
-| `Color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** or `Color by the value` is **Off** |
+| `Color of the values` | One color for all, or the color of the branch leading to each node, or a color from a parameter of its own, whatever the color of the branches. | One color<br>Like their branch<br>By data | One color | `Show` is set, `Show as` is **Number** |
+| `Colored by` | The parameter that gives the colors: branch length (raw), an annotation of the tree or a column of a table. | List | Branch length (raw) | `Show` is set, `Show as` is **Number**, `Color of the values` is **By data** |
+| `Palette` | Colors of the scale. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show` is set, `Show as` is **Number**, `Color of the values` is **By data** |
+| `Reverse the colors` |  | On<br>Off | Off | `Show` is set, `Show as` is **Number**, `Color of the values` is **By data** |
+| `Color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** or `Color by the value` is **Off**, `Color of the values` is **One color** |
 | `Position` | Side of the node, or the middle of its branch. | Left<br>Centered on the branch<br>Right | Left | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
 | `Distance from the node` | Space between the node and the label. | −2000 to 2000 px | 3 px | `Show` is set, `Position` is not **Centered on the branch**, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
 | `Vertical offset` | Moves the label up (positive) or down (negative). | −500 to 500 px | 2 px | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
@@ -236,6 +256,10 @@ Support values, other values read from the tree (such as ages or probabilities),
 | `Median line width` |  | 0.1 to 20 px | 1.5 px | `Draw` is set, `Mark the median` is **On** |
 | `Median line` |  | Solid<br>Dashed<br>Dotted | Solid | `Draw` is set, `Mark the median` is **On** |
 | `Median color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Draw` is set, `Mark the median` is **On** |
+| `Mark the mean` | A short line at the mean age, next to or instead of the median. | On<br>Off | Off | `Draw` is set |
+| `Mean line width` |  | 0.1 to 20 px | 1.2 px | `Draw` is set, `Mark the mean` is **On** |
+| `Mean line` |  | Solid<br>Dashed<br>Dotted | Dashed | `Draw` is set, `Mark the mean` is **On** |
+| `Mean color` |  | Color | <img src="img/colors/C8553D.svg" alt="#C8553D" align="absmiddle"> #C8553D | `Draw` is set, `Mark the mean` is **On** |
 
 ¹ Ranges from the tree annotations, such as height_95%_HPD, or age densities from a file with several dated trees.  
 
@@ -246,8 +270,9 @@ The names at the tips: font, size, style, color, and where the names come from.
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Show tip names` |  | On<br>Off | On |  |
-| `Names from` | Shows another column of a table instead of the tip names. | List |  | `Show tip names` is **On** |
-| `Column` | Column whose values are shown as tip names. | List |  | `Show tip names` is **On**, `Names from` is set |
+| `Show` | What the tips show: their names, or any value in one list (branch length, age, the annotations of the tips such as height or rate, and the columns of the tables). | List | The names in the tree | `Show tip names` is **On** |
+| `Keep the name, with the value after it` |  | On<br>Off | Off | `Show` is not **The names in the tree** |
+| `Decimals` |  | 0 to 4 | 2 | `Show` is not **The names in the tree** |
 | `Font size` |  | 1 to 200 px | 12 px |  |
 | `Typeface` |  | Helvetica / Arial<br>Verdana<br>Trebuchet<br>Georgia<br>Times<br>Courier | Helvetica / Arial |  |
 | `Italic` |  | On<br>Off | On |  |
@@ -374,6 +399,29 @@ Networks written in extended Newick (eNewick), as PhyloNet, SNaQ or Dendroscope 
 | `Major value: vertical offset` | Moves the major value up (positive) or down (negative). | −500 to 500 px | 0 px | `Show the reticulations` is **On**, `Show a value on each line` is **On**, `Also show the γ of the major edge` is **On** |
 
 ¹ Centered: the middle of each branch. Lengths: where the network places each end, from the branch lengths of the file (without lengths, the middle). Custom: the point chosen with `Position along the branch`.  
+
+## Scale bar
+
+The bar that gives the scale of the branch lengths, for trees without a time axis.
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Show scale bar`¹ | A bar showing a length in branch units. | On<br>Off | On |  |
+| `Length` | Automatic picks a round length, custom uses your own. | Automatic<br>Custom | Automatic | `Show scale bar` is **On** |
+| `Bar length` |  | 10⁻⁹ to 10⁹ | 0.1 | `Show scale bar` is **On**, `Length` is **Custom** |
+| `Unit` | Written after the number, centred with it on the bar: Ma, subs./site or any text. | Text |  | `Show scale bar` is **On** |
+| `Decimals` |  | Auto, 0, 1, 2, 3, 4 | Automatic | `Show scale bar` is **On** |
+| `Vertical position` |  | Top<br>Bottom | Bottom | `Show scale bar` is **On**, the bar is locked on the canvas |
+| `Horizontal position` |  | Left<br>Center<br>Right | Left | `Show scale bar` is **On**, the bar is locked on the canvas |
+| `Move sideways` |  | −400 to 400 px | 0 px | `Show scale bar` is **On**, the bar is locked on the canvas |
+| `Move up or down` |  | −400 to 400 px | 0 px | `Show scale bar` is **On**, the bar is locked on the canvas |
+| `Line width` |  | 0.1 to 20 px | 1.2 px | `Show scale bar` is **On** |
+| `End tick height` | Height of the small marks at both ends. | 0 to 20 px | 4 px | `Show scale bar` is **On** |
+| `Text size` |  | 1 to 100 px | 10 px | `Show scale bar` is **On** |
+| `Text distance from bar` |  | −40 to 40 px | 4 px | `Show scale bar` is **On** |
+| `Color` |  | Color | <img src="img/colors/333333.svg" alt="#333333" align="absmiddle"> #333333 | `Show scale bar` is **On** |
+
+¹ Measured in branch length units.  
 
 ## Time axis
 
@@ -641,7 +689,7 @@ Pictures (PNG or JPG) placed on the page¹.
 |:---|:---|:---|:---|:---|
 | `Add image` | Places a PNG or JPG on the page, for example a silhouette. |  |  |  |
 | `Add label` | A text you can place anywhere, for example a name inside the tree. It moves, aligns with branches, labels and clades, shows distance guides and takes arrows like an image, and is exported as text. `Right-click` it to write it and choose its size, color, bold, italic and typeface. |  |  | A tree is loaded |
-| `Add density plot` | A density plot of a value of the tree or of a table, such as rates, drawn by the app as an image that moves, resizes and aligns like the others. Its fill can follow the color scale of the branches or of the dots. `Right-click` it to choose the values and its look. |  |  | A tree is loaded |
+| `Add density plot` | A density plot (or histogram) of a value of the tree or of a table, drawn by the app as an image that moves, resizes and aligns like the others. `Right-click` it to choose the values and its look. `Values from` picks the origin: **From tree** (branch lengths and Support values when the nodes have them), **Tree annotations** (such as rates or HPD) or **Attached files** (a column of a table). Its fill can follow the color scale of the branches or of the dots. |  |  | A tree is loaded |
 | `Draw arrow` | An arrow to point at something. Drag it by its body, or drag an end onto a node or one of the nine points of an image to anchor it there: when they move, the arrow follows. `Right-click` it for its look. |  |  | A tree is loaded |
 | `Image list` | Click a row to select its image. |  |  | An image is added |
 | `Replace` | Swaps the picture, keeping its place and width. |  |  | An image is added |
@@ -649,41 +697,21 @@ Pictures (PNG or JPG) placed on the page¹.
 
 ¹ Drag an image to move it, drag a corner to resize it (proportions are kept), or just outside a corner to rotate it. `Right-click` it for position, size, opacity, rotation, mirror, layer and alignment. On rectangular trees, dotted guides show the distance to the nearest branch, tip label or axis, click a number to type an exact distance. Arrow keys move it 1 px (10 px with Shift). To align it, select the image, `Shift-click` a branch, label or clade, and `Right-click` the image for more options. Alignment works better with rectangular views.
 
-## Page
+## Page settings
 
-Background, scale bar, palette, color vision preview and plot title.
+In the **Page settings** menu of the header, next to Export.
+
+Background, palette, color vision preview and plot title.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Background color` |  | Color | <img src="img/colors/FFFFFF.svg" alt="#FFFFFF" align="absmiddle"> #FFFFFF |  |
 
-### › Scale bar
-
-| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
-|:---|:---|:---|:---|:---|
-| `Show scale bar`¹ | A bar showing a length in branch units. | On<br>Off | On |  |
-| `Move it by hand on the canvas` | Unlocks the bar to drag it anywhere. | On<br>Off | Off | `Show scale bar` is **On** |
-| `Length` | Automatic picks a round length, custom uses your own. | Automatic<br>Custom | Automatic | `Show scale bar` is **On** |
-| `Bar length` |  | 10⁻⁹ to 10⁹ | 0.1 | `Show scale bar` is **On**, `Length` is **Custom** |
-| `Unit` | Written after the number, centred with it on the bar: Ma, subs./site or any text. | Text |  | `Show scale bar` is **On** |
-| `Decimals` |  | Auto, 0, 1, 2, 3, 4 | Automatic | `Show scale bar` is **On** |
-| `Vertical position` |  | Top<br>Bottom | Bottom | `Show scale bar` is **On**, `Move it by hand on the canvas` is **Off** |
-| `Horizontal position` |  | Left<br>Center<br>Right | Left | `Show scale bar` is **On**, `Move it by hand on the canvas` is **Off** |
-| `Move sideways` |  | −400 to 400 px | 0 px | `Show scale bar` is **On**, `Move it by hand on the canvas` is **Off** |
-| `Move up or down` |  | −400 to 400 px | 0 px | `Show scale bar` is **On**, `Move it by hand on the canvas` is **Off** |
-| `Line width` |  | 0.1 to 20 px | 1.2 px | `Show scale bar` is **On** |
-| `End tick height` | Height of the small marks at both ends. | 0 to 20 px | 4 px | `Show scale bar` is **On** |
-| `Text size` |  | 1 to 100 px | 10 px | `Show scale bar` is **On** |
-| `Text distance from bar` |  | −40 to 40 px | 4 px | `Show scale bar` is **On** |
-| `Color` |  | Color | <img src="img/colors/333333.svg" alt="#333333" align="absmiddle"> #333333 | `Show scale bar` is **On** |
-
-¹ Measured in branch length units.  
-
 ### › Colors
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Palette`¹ | Colors offered in the menus and for new categories. | Tree2go<br>Okabe-Ito (color blind safe)<br>Paul Tol bright (color blind safe)<br>Viridis | Tree2go |  |
+| `Palette`¹ | Colors offered in the menus and for new categories. | Tree2go<br>Okabe-Ito (color blind safe)<br>Paul Tol bright (color blind safe)<br>Viridis (color blind safe)<br>Inferno (color blind safe)<br>Magma (color blind safe)<br>Plasma (color blind safe)<br>Cividis (color blind safe)<br>Turbo<br>Spectral<br>Blue to red (color blind safe) | Tree2go |  |
 | `Preview as seen with` | Shows the figure as seen with a color vision deficiency, on screen only. | Normal vision<br>Deuteranopia (red-green)<br>Protanopia (red-green)<br>Tritanopia (blue-yellow)<br>No color (grayscale) | Normal vision |  |
 
 ¹ The colors offered in the menus and for new categories (colors already in use do not change).  
@@ -703,6 +731,8 @@ Background, scale bar, palette, color vision preview and plot title.
 | `Color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Text` is set |
 
 ## Export
+
+In the **Export** menu of the header.
 
 Save the figure, the tree or a style template.
 
@@ -728,7 +758,7 @@ Save the figure, the tree or a style template.
 | Branch | Color, width, line style, branch length label, grafting a fossil, reroot here, extract clade, make a page, copy Newick, delete |
 | Clade | Clade color, highlight background (opacity, start at root, stem or crown, end, gradient, corners), collapse, rotate, ladderize, height and fill when collapsed, clade name bar |
 | Tip label | Font size, color, style, weight, open nomenclature qualifiers (cf., aff., sp.), extinct tip |
-| Node | Dot size, fill, color and border, support label, other node labels, node bars |
+| Node | Dot size, shape, fill, color and border, support label, other node labels, node bars |
 | Grafted fossil | Ages, split the lineage, add fossils to a split, delete |
 | Clade name bar | Name, color, sizes, on circular trees, the name along the arc |
 | Legend | Title and entry texts, look of that legend, alignment with a selection |
@@ -736,7 +766,7 @@ Save the figure, the tree or a style template.
 | Page box | Rows of the page, look of its tree map, alignment |
 | Image | Position, size, opacity, rotation, mirror, layer, alignment |
 | Label | Text, size, color, bold, italic, typeface, opacity, rotation, mirror, layer, alignment |
-| Density plot | Values and logarithmic scale, smoothing, one color or the colors of the branches or dots, fill and opacity, line color, width and style, axis with its color, width, text size, spacing and title |
+| Density plot | Values from (From tree, Tree annotations or Attached files) and Value, logarithmic scale (base 10), cut below and above (where the curve stops, since a density spills past the data, density curve shown or hidden, histogram with its bin width (empty for automatic, in log₁₀ units with the logarithmic scale), color and opacity, smoothing, one color or the colors of the branches or dots (offered only when they are colored by the same values the plot shows, and also applied to the histogram), fill and opacity, line color, width and style, axis with its color, width, text size, spacing and title |
 | Arrow | Color, width, opacity, line style, arrow heads and their size, curvature, space from the anchor at each end, free an anchored end, delete |
 | Reticulation | Color, width, arrows and their size, straight or curved line, where it starts and ends along its branches, show its value |
 | Value of a reticulation | Text size, color, horizontal and vertical offset |

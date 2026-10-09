@@ -237,6 +237,7 @@ aside .inline input.num.boxed, .pop .inline input.num, aside .cat select{backgro
 .helpfield input::-webkit-search-cancel-button{display:none}   /* the count sits where the browser puts its clear button; Esc clears */
 .helpfield .hint{position:absolute; right:10px; top:50%; transform:translateY(-50%); pointer-events:none; white-space:nowrap; font-size:12px}
 .helpsearch .btn{flex:none; width:34px; height:32px; padding:0; font-size:16px; line-height:1}
+.helpsearch .btn.helppdf{width:auto; padding:0 12px; font-size:13px; display:inline-flex; align-items:center; text-decoration:none; white-space:nowrap; color:inherit}
 .helpBody mark.find{background:#ffe8b0; color:inherit; border-radius:2px; padding:0}
 .helpBody mark.find.on{background:var(--mustard); box-shadow:0 0 0 1px var(--mustard)}
 .nethit{cursor:context-menu; pointer-events:stroke}
@@ -374,7 +375,13 @@ body.hastabs .status{top:50px}
 .sw input[type=color]{width:22px; height:22px}
 /* Short message at the bottom of the screen. */
 .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--panel); padding:8px 14px; border-radius:8px; font-size:13px; opacity:0; transition:opacity .2s, transform .2s; pointer-events:none; z-index:50}
-.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto}
+.toast{display:flex; align-items:center; gap:10px}
+.toast .tclose{background:none; border:0; color:inherit; opacity:.7; font-size:16px; line-height:1; padding:0 2px; cursor:pointer}
+.toast .tclose:hover{opacity:1}
+.pagesheet{position:fixed; width:min(380px, 92vw); max-height:min(80vh, 780px); overflow-y:auto; overscroll-behavior:contain; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:12px; box-shadow:0 14px 36px rgba(0,0,0,.2); z-index:60; text-align:left}
+.pagesheet .gone{display:none !important}
+.pagesheet .sheetsec{padding-top:14px; padding-bottom:10px}
 
 @media (max-width: 860px){
   aside{position:fixed; margin-left:0 !important; z-index:30; left:0; top:0; bottom:0; width:min(380px,90vw); transform:translateX(-102%); transition:transform .2s; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); box-shadow:0 0 30px rgba(0,0,0,.25)}
@@ -560,6 +567,9 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
           <p class="expnote" id="dpiNoteTop"></p>
         </div>
       </div>
+      <!-- Page settings: the sections of the page (size, colours, title) and of the pages, out of the panel of the tree -->
+      <div class="expwrap pagewrap hide-sm"><button class="btn" id="pageBtn" aria-haspopup="true" aria-expanded="false">Page settings <span aria-hidden="true">▾</span></button><div class="pagesheet" id="pageSheet" hidden><div id="pageSheetBody"></div></div></div>
+      <button class="btn" id="manualBtn" data-help title="Every option of the panel, explained">User guide</button>
     </div>
     <!-- Selection mode (Element, Clade, MRCA picker) and the tip search box (patterns with * and ?). -->
     <div class="search">
@@ -620,7 +630,7 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
 <div class="toast" id="toast"></div>
 <datalist id="dpiListG"><option value="150"><option value="300"><option value="600"><option value="1200"></datalist>
 <!-- About window: its text is read from about.html (online copy, local file or the copy kept in the browser). -->
-<!-- Reference window: content/reference.md, opened with the ? button at the bottom of the panel. -->
+<!-- Reference window: content/reference.md, opened with the Manual button of the header. -->
 <div class="modal" id="helpModal" hidden>
   <!-- no close button: a click outside the window or Esc closes it -->
   <div class="box about help" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
@@ -629,7 +639,7 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
       <!-- search box at the height of the title: the count of matches inside it, on the right, and the arrows beside it -->
       <div class="helpsearch">
         <div class="helpfield"><input id="helpFind" type="search" placeholder="Search the reference" aria-label="Search the reference" autocomplete="off"><span id="helpCount" class="hint"></span></div>
-        <button type="button" class="btn" id="helpPrev" title="Previous match (Shift+Enter)" aria-label="Previous match">↑</button><button type="button" class="btn" id="helpNext" title="Next match (Enter)" aria-label="Next match">↓</button>
+        <button type="button" class="btn" id="helpPrev" title="Previous match (Shift+Enter)" aria-label="Previous match">↑</button><button type="button" class="btn" id="helpNext" title="Next match (Enter)" aria-label="Next match">↓</button><a class="btn helppdf" id="helpPdf" download="tree2go-manual.pdf" title="Download the manual as a PDF">Download PDF</a>
       </div>
     </div>
     <div class="aboutBody helpBody" id="helpBody"><p class="hint">Loading…</p></div>
@@ -1112,6 +1122,46 @@ const BGPAL = ['#F6D3C8', '#F7E3B5', '#CDEBE2', '#CFDDEE', '#E2D4EE', '#F5D6E3',
      scale*, legend*, title*             scale bar, legends and plot title
      page*                               split into pages       sa*, fossil*, extinct*   fossils
      export*                             size of the exports    palette*, cvd*           colors */
+/* Colour palettes for colouring by data: the usual perceptual ones, or the user's own low (middle) high colours.
+   They can be reversed, and their hue turned. */
+const DATA_PALETTES = {
+  viridis: ['#440154', '#482878', '#3E4A89', '#31688E', '#26828E', '#1F9E89', '#35B779', '#6DCD59', '#B4DE2C', '#FDE725'],
+  inferno: ['#000004', '#1B0C41', '#4A0C6B', '#781C6D', '#A52C60', '#CF4446', '#ED6925', '#FB9B06', '#F7D13D', '#FCFFA4'],
+  magma: ['#000004', '#180F3D', '#440F76', '#721F81', '#9E2F7F', '#CD4071', '#F1605D', '#FD9668', '#FECA8D', '#FCFDBF'],
+  plasma: ['#0D0887', '#47039F', '#7301A8', '#9C179E', '#BD3786', '#D8576B', '#ED7953', '#FA9E3B', '#FDC926', '#F0F921'],
+  cividis: ['#00224E', '#123570', '#3B496C', '#575D6D', '#707173', '#8A8779', '#A69D75', '#C4B56C', '#E4CF5B', '#FEE838'],
+  turbo: ['#30123B', '#4662D7', '#36AAF9', '#1AE4B6', '#72FE5E', '#C8EF34', '#FABA39', '#F66B19', '#CA2A04', '#7A0403'],
+  spectral: ['#5E4FA2', '#3288BD', '#66C2A5', '#ABDDA4', '#E6F598', '#FEE08B', '#FDAE61', '#F46D43', '#D53E4F', '#9E0142'],
+  bluered: ['#2166AC', '#4393C3', '#92C5DE', '#D1E5F0', '#FDDBC7', '#F4A582', '#D6604D', '#B2182B'],
+};
+const PALETTE_OPTS = [['custom', 'Custom colors'], ['default', 'tree2go'], ['okabe', 'Okabe-Ito (color blind safe)'], ['tol', 'Paul Tol bright (color blind safe)'],
+  ['viridis', 'Viridis (color blind safe)'], ['inferno', 'Inferno (color blind safe)'], ['magma', 'Magma (color blind safe)'], ['plasma', 'Plasma (color blind safe)'],
+  ['cividis', 'Cividis (color blind safe)'], ['turbo', 'Turbo'], ['spectral', 'Spectral'], ['bluered', 'Blue to red (color blind safe)']];
+// Shapes a dot can take.
+const SHAPE_OPTS = [['circle', 'Circle'], ['square', 'Square'], ['triangle', 'Triangle'], ['diamond', 'Diamond'], ['star', 'Star']];
+// A dot of a given shape, centred on (x, y), about as big as a circle of radius r; attrs: fill, border, opacity.
+function shapeSvg(x, y, r, shape, attrs) {
+  const P = pts => `<polygon points="${pts.map(([a, b]) => `${f2(a)},${f2(b)}`).join(' ')}"${attrs}/>`;
+  if (shape === 'square') { const h = r * 0.89; return `<rect x="${f2(x - h)}" y="${f2(y - h)}" width="${f2(2 * h)}" height="${f2(2 * h)}"${attrs}/>`; }
+  if (shape === 'diamond') { const h = r * 1.25; return P([[x, y - h], [x + h, y], [x, y + h], [x - h, y]]); }
+  if (shape === 'triangle') { const R = r * 1.35; return P([0, 1, 2].map(i => [x + R * Math.sin(i * 2 * Math.PI / 3), y - R * Math.cos(i * 2 * Math.PI / 3) + R * 0.18])); }
+  if (shape === 'star') { const R = r * 1.75, q = R * 0.46; return P([...Array(10)].map((_, i) => { const rr = i % 2 ? q : R, t = i * Math.PI / 5; return [x + rr * Math.sin(t), y - rr * Math.cos(t) + R * 0.08]; })); }
+  return `<circle cx="${f2(x)}" cy="${f2(y)}" r="${f2(r)}"${attrs}/>`;
+}
+function hueShift(hex, deg) {
+  if (!deg) return hex;
+  let [r, g, b] = hexRGB(hex).map(v => v / 255); const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return hex;
+  const sat = d / (1 - Math.abs(2 * l - 1));
+  let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + deg + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * sat, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const [r1, g1, b1] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return rgbHex([r1, g1, b1].map(v => (v + m) * 255));
+}
+const palStops = (name, custom, rev, hue) => { const pal = name && name !== 'custom' && (DATA_PALETTES[name] || (typeof PALETTES !== 'undefined' && PALETTES[name])), base = pal || custom; return (rev ? base.slice().reverse() : base).map(c => hueShift(c, hue || 0)); };
+// The colours of the branches and of the dots coloured by data.
+const brcStops = S => palStops(S.brcPalette, S.brcMidOn ? [S.brcLow, S.brcMid, S.brcHigh] : [S.brcLow, S.brcHigh], S.brcRev, S.brcHue);
+const dotStops = S => palStops(S.dotPalette, [S.dotLow, S.dotHigh], S.dotRev, S.dotHue);
 const DEFAULTS = {
   layout: 'rect', useLengths: true, width: 700, spacing: 18, radius: 320, innerRadius: 0, circSpan: 360, fanSpan: 180, rotation: 0, rootStub: 0,
   lineWidth: 1, lineColor: '#1f1f1f', lineCap: 'round', branchAngle: 90, branchRound: 0, lineStyle: 'solid', lineDash: 5, lineGap: 3,
@@ -1145,7 +1195,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 // Default settings merged with saved ones, with the migrations that keep older sessions and projects working.
@@ -1236,7 +1286,7 @@ const SECTIONS_RAW = [
     { k: 'useLengths', type: 'check', label: 'Use branch lengths', refit: true },
     { type: 'custom', build: treeToolsBox },
     { k: 'width', type: 'range', label: 'Width', min: 80, max: 4000, step: 10, hmax: 20000, unit: 'px', show: isRectish },
-    { k: 'spacing', type: 'range', label: 'Tip spacing', min: 3, max: 80, step: 1, hmin: 1, hmax: 400, unit: 'px', show: isRectish },
+    { k: 'spacing', type: 'range', label: 'Height', min: 3, max: 80, step: 1, hmin: 1, hmax: 400, unit: 'px', show: isRectish },
     { k: 'radius', type: 'range', label: 'Radius', min: 40, max: 3000, step: 10, hmax: 20000, unit: 'px', show: s => !isRectish(s) },
     { k: 'innerRadius', type: 'range', label: 'Inner radius (center gap)', min: 0, max: 1500, step: 5, hmax: 10000, unit: 'px', show: isCirc },
     { k: 'circSpan', type: 'range', label: 'Total angle', min: 20, max: 360, step: 1, hmin: 1, hmax: 360, unit: '°', show: s => s.layout === 'circular' },
@@ -1255,43 +1305,50 @@ const SECTIONS_RAW = [
     { k: 'lineDash', type: 'range', label: 'Dash length (also fossils)', min: 1, max: 30, step: 1, hmin: 0.1, hmax: 500, unit: 'px', sub: true },
     { k: 'lineGap', type: 'range', label: 'Gap between dashes or dots', min: 1, max: 30, step: 1, hmin: 0.1, hmax: 500, unit: 'px', sub: true },
     { type: 'head', label: 'Color by data' },
-    { k: 'brcTable', type: 'select', label: 'Values from', opts: s => dataSourceOpts(s) },
-    { k: 'brcCol', type: 'select', label: 'Value', opts: s => dataColOpts(s, s.brcTable), enable: s => !!s.brcTable, sub: true },
+    { k: 'brcTable', type: 'srcpick', srcK: 'brcTable', colK: 'brcCol', label: 'Value', none: 'None' },
     { type: 'hint', text: s => s.brcTable ? 'Each branch takes the value of the node it leads to. In a table, rows are matched by the names of tips and internal nodes.' : 'Color the branches by a value read from the tree, such as a rate or a posterior annotation, or from a table in Attachments with tips and internal nodes named as in the tree.' },
-    { k: 'brcLow', type: 'color', label: 'Low values', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
-    { k: 'brcMidOn', type: 'check', label: 'Use a middle color', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
-    { k: 'brcMid', type: 'color', label: 'Middle values', enable: s => !!s.brcTable && !!s.brcCol && s.brcMidOn, sub: true },
-    { k: 'brcHigh', type: 'color', label: 'High values', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
-    { k: 'brcLog', type: 'check', label: 'Logarithmic scale', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
+    { k: 'brcPalette', type: 'select', label: 'Palette', opts: PALETTE_OPTS, enable: s => !!s.brcTable && !!s.brcCol, sub: true },
+    { k: 'brcRev', type: 'check', label: 'Reverse the colors', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
+    { k: 'brcHue', type: 'range', label: 'Hue shift', min: -180, max: 180, step: 5, unit: '°', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
+    { k: 'brcLow', type: 'color', label: 'Low values', enable: s => !!s.brcTable && !!s.brcCol && (s.brcPalette || 'custom') === 'custom', sub: true },
+    { k: 'brcMidOn', type: 'check', label: 'Use a middle color', enable: s => !!s.brcTable && !!s.brcCol && (s.brcPalette || 'custom') === 'custom', sub: true },
+    { k: 'brcMid', type: 'color', label: 'Middle values', enable: s => !!s.brcTable && !!s.brcCol && (s.brcPalette || 'custom') === 'custom' && s.brcMidOn, sub: true },
+    { k: 'brcHigh', type: 'color', label: 'High values', enable: s => !!s.brcTable && !!s.brcCol && (s.brcPalette || 'custom') === 'custom', sub: true },
+    { k: 'brcLog', type: 'check', label: 'Logarithmic scale (log₁₀)', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
     { k: 'brcMin', type: 'number', label: 'Lowest value of the scale', min: -1e12, max: 1e12, step: 1, blank: 'Auto', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
     { k: 'brcMax', type: 'number', label: 'Highest value of the scale', min: -1e12, max: 1e12, step: 1, blank: 'Auto', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
     { type: 'hint', text: s => s.brcTable ? 'Leave them empty to use the range of the data. A color given to a branch from its right-click menu still wins over the data.' : '' },
     { k: 'brcLegend', type: 'check', label: 'Show a color legend', enable: s => !!s.brcTable && !!s.brcCol, sub: true },
     { type: 'head', label: 'Width by data' },
-    { k: 'bwdSrc', type: 'select', label: 'Values from', opts: s => dataSourceOpts(s) },
+    { k: 'bwdSrc', type: 'srcpick', srcK: 'bwdSrc', colK: 'bwdCol', label: 'Value', none: 'None' },
     { type: 'hint', text: s => s.bwdSrc ? '' : 'Make the branches thicker where a value is higher, for example a rate or a posterior probability, read from the tree or from an attached table.' },
-    { k: 'bwdCol', type: 'select', label: 'Value', opts: s => dataColOpts(s, s.bwdSrc), enable: s => !!s.bwdSrc, sub: true },
     { k: 'bwdMin', type: 'range', label: 'Thinnest', min: 0.1, max: 10, step: 0.1, hmin: 0.01, hmax: 100, unit: 'px', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
     { k: 'bwdMax', type: 'range', label: 'Thickest', min: 0.5, max: 20, step: 0.1, hmin: 0.01, hmax: 200, unit: 'px', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
-    { k: 'bwdLog', type: 'check', label: 'Logarithmic scale', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
+    { k: 'bwdLog', type: 'check', label: 'Logarithmic scale (log₁₀)', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
     { k: 'bwdLegend', type: 'check', label: 'Show legend', enable: s => !!s.bwdSrc && !!s.bwdCol, sub: true },
   ]},
   { title: 'Branch values', items: [
     { type: 'head', label: 'Values on the branches' },
     { k: 'showLengths', type: 'check', label: 'Show a value on each branch' },
-    { k: 'lengthSrc', type: 'select', label: 'Values from', opts: s => [['', 'Branch length'], ...dataSourceOpts(s).slice(1)], enable: s => s.showLengths, sub: true },
-    { k: 'lengthCol', type: 'select', label: 'Value', opts: s => dataColOpts(s, s.lengthSrc), enable: s => s.showLengths && !!s.lengthSrc, sub: true },
+    { k: 'lengthSrc', type: 'srcpick', srcK: 'lengthSrc', colK: 'lengthCol', label: 'Value', lenOpt: true, enable: s => s.showLengths, sub: true },
     { k: 'lengthDecimals', type: 'select', label: 'Decimals', opts: DEC_OPTS, numeric: true, enable: s => s.showLengths, sub: true },
     { k: 'lengthSize', type: 'number', label: 'Text size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.showLengths, sub: true },
-    { k: 'lengthColor', type: 'color', label: 'Color', enable: s => s.showLengths, sub: true },
+    { k: 'lengthColorBy', type: 'seg', label: 'Color of the values', opts: [['fixed', 'One color'], ['branch', 'Like their branch'], ['data', 'By data']], enable: s => s.showLengths, sub: true },
+    { k: 'lengthVSrc', type: 'srcpick', srcK: 'lengthVSrc', colK: 'lengthVCol', label: 'Colored by', show: s => s.lengthColorBy === 'data', enable: s => s.showLengths, sub: true },
+    { k: 'lengthVPal', type: 'select', label: 'Palette', opts: PALETTE_OPTS.filter(o => o[0] !== 'custom'), show: s => s.lengthColorBy === 'data', enable: s => s.showLengths, sub: true },
+    { k: 'lengthVRev', type: 'check', label: 'Reverse the colors', show: s => s.lengthColorBy === 'data', enable: s => s.showLengths, sub: true },
+    { k: 'lengthColor', type: 'color', label: 'Color', enable: s => s.showLengths && s.lengthColorBy === 'fixed', sub: true },
+    { type: 'hint', text: s => !s.showLengths ? '' : s.lengthColorBy === 'branch' ? 'Each value takes the color of its branch: the colors by data, a clade color or the line color.' : s.lengthColorBy === 'data' ? 'Each value takes a color from the parameter chosen, whatever the color of the branches.' : '' },
     { k: 'lengthAlign', type: 'seg', label: 'Position on branch', opts: ALIGN_OPTS, enable: s => s.showLengths, sub: true },
     { k: 'lengthMargin', type: 'number', label: 'Margin from branch end', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => s.showLengths && s.lengthAlign !== 'center', sub: true },
     { k: 'lengthDy', type: 'number', label: 'Vertical offset', min: -500, max: 500, step: 1, unit: 'px', enable: s => s.showLengths, sub: true }
   ]},
   { title: 'Nodes', items: [
     { k: 'tipDotOn', type: 'check', label: 'Dots on tips' },
+    { k: 'tipDotShape', type: 'select', label: 'Tip dot shape', opts: SHAPE_OPTS, enable: s => s.tipDotOn, sub: true },
     { k: 'tipDot', type: 'range', label: 'Tip dot size', min: 0.5, max: 12, step: 0.5, hmin: 0.1, hmax: 100, unit: 'px', enable: s => s.tipDotOn, sub: true },
     { k: 'nodeDotOn', type: 'check', label: 'Dots on internal nodes' },
+    { k: 'nodeDotShape', type: 'select', label: 'Node dot shape', opts: SHAPE_OPTS, enable: s => s.nodeDotOn, sub: true },
     { k: 'nodeDot', type: 'range', label: 'Node dot size', min: 0.5, max: 12, step: 0.5, hmin: 0.1, hmax: 100, unit: 'px', enable: s => s.nodeDotOn, sub: true },
     { k: 'dotOpacity', type: 'range', label: 'Dot opacity', min: 5, max: 100, step: 5, hmin: 0, hmax: 100, unit: '%', enable: s => s.tipDotOn || s.nodeDotOn },
     { k: 'dotFill', type: 'check', label: 'Fill dots', enable: s => s.tipDotOn || s.nodeDotOn },
@@ -1301,12 +1358,14 @@ const SECTIONS_RAW = [
     { k: 'dotBorderWidth', type: 'number', label: 'Border width', min: 0.05, max: 50, step: 0.5, unit: 'px', enable: s => (s.tipDotOn || s.nodeDotOn) && s.dotBorderStyle !== 'none', sub: true },
     { k: 'dotBorderCount', type: 'range', label: 'Number of dashes or dots', min: 1, max: 60, step: 1, hmax: 500, enable: s => (s.tipDotOn || s.nodeDotOn) && (s.dotBorderStyle === 'dashed' || s.dotBorderStyle === 'dotted'), sub: true },
     { type: 'head', label: 'Dots by data' },
-    { k: 'dotDataSrc', type: 'select', label: 'Values from', opts: s => dataSourceOpts(s) },
+    { k: 'dotDataSrc', type: 'srcpick', srcK: 'dotDataSrc', colK: 'dotDataCol', label: 'Value', none: 'None' },
     { type: 'hint', text: s => s.dotDataSrc ? '' : 'Give the dots a color or a size from a value, for example the posterior or a rate read from the tree, or a column of a table. Nodes with a value always get a dot.' },
-    { k: 'dotDataCol', type: 'select', label: 'Value', opts: s => dataColOpts(s, s.dotDataSrc), enable: s => !!s.dotDataSrc, sub: true },
     { k: 'dotDataColor', type: 'check', label: 'Color by the value', enable: s => !!s.dotDataSrc && !!s.dotDataCol, sub: true },
-    { k: 'dotLow', type: 'color', label: 'Low values', enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataColor, sub: true },
-    { k: 'dotHigh', type: 'color', label: 'High values', enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataColor, sub: true },
+    { k: 'dotPalette', type: 'select', label: 'Palette', opts: PALETTE_OPTS, enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataColor, sub: true },
+    { k: 'dotRev', type: 'check', label: 'Reverse the colors', enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataColor, sub: true },
+    { k: 'dotHue', type: 'range', label: 'Hue shift', min: -180, max: 180, step: 5, unit: '°', enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataColor, sub: true },
+    { k: 'dotLow', type: 'color', label: 'Low values', enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataColor && (s.dotPalette || 'custom') === 'custom', sub: true },
+    { k: 'dotHigh', type: 'color', label: 'High values', enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataColor && (s.dotPalette || 'custom') === 'custom', sub: true },
     { k: 'dotDataSize', type: 'check', label: 'Size by the value', enable: s => !!s.dotDataSrc && !!s.dotDataCol, sub: true },
     { k: 'dotSizeMin', type: 'range', label: 'Smallest', min: 0.5, max: 10, step: 0.5, hmax: 100, unit: 'px', enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataSize, sub: true },
     { k: 'dotSizeMax', type: 'range', label: 'Largest', min: 1, max: 20, step: 0.5, hmax: 200, unit: 'px', enable: s => !!s.dotDataSrc && !!s.dotDataCol && s.dotDataSize, sub: true },
@@ -1318,8 +1377,13 @@ const SECTIONS_RAW = [
     { type: 'hint', text: s => piesOnNodes(s) ? 'Circles and categories are not available while the internal nodes show ancestral state pie charts.' : '' },
     { k: 'supportSource', type: 'select', label: 'Values from', opts: [['tree', 'Input tree'], ['attach', 'SIMMAP'], ['boot', 'Trees file']], optOff: (s, v) => v === 'tree' ? !!treeSet : v === 'attach' ? !smap : v === 'boot' ? !treeSet : false, enable: s => s.supportMode !== 'none', sub: true },
     { type: 'hint', text: s => ({ attach: 'From the SIMMAP: the percentage of maps that contain the same clade, that is, the same set of tips below the node.', boot: 'From the trees file: the percentage of trees that contain the same clade, as in bootstrap or posterior support.', tree: treeSet ? '' : 'From the tree: the labels of its internal nodes, or annotations such as posterior, prob or bootstrap.' })[supSource()] },
+    { k: 'supportDec', type: 'select', label: 'Decimals', opts: [['auto', 'As written'], ['0', '0'], ['1', '1'], ['2', '2'], ['3', '3']], enable: s => s.supportMode === 'text', sub: true },
     { k: 'supportSize', type: 'number', label: 'Size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.supportMode === 'text' || (s.supportMode === 'dots' && s.supportScheme === 'threshold'), sub: true },
-    { k: 'supportColor', type: 'color', label: 'Color', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
+    { k: 'supportColorBy', type: 'seg', label: 'Color of the values', opts: [['fixed', 'One color'], ['branch', 'Like their branch'], ['data', 'By data']], enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
+    { k: 'supportVSrc', type: 'srcpick', srcK: 'supportVSrc', colK: 'supportVCol', label: 'Colored by', show: s => s.supportColorBy === 'data', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
+    { k: 'supportVPal', type: 'select', label: 'Palette', opts: PALETTE_OPTS.filter(o => o[0] !== 'custom'), show: s => s.supportColorBy === 'data', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
+    { k: 'supportVRev', type: 'check', label: 'Reverse the colors', show: s => s.supportColorBy === 'data', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
+    { k: 'supportColor', type: 'color', label: 'Color', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold' && s.supportColorBy === 'fixed', sub: true },
     { k: 'supportScaleDots', type: 'check', label: 'Bigger circles for higher values', enable: s => s.supportMode === 'dots' && s.supportScheme === 'threshold', sub: true },
     { k: 'supportScheme', type: 'seg', label: 'Which values', opts: [['threshold', 'Above a threshold'], ['categories', 'By categories']], enable: s => s.supportMode !== 'none', optOff: (s, v) => v === 'categories' && piesOnNodes(s), sub: true },
     { k: 'supportThreshold', type: 'range', label: 'Only when support ≥', min: 0, max: 100, step: 1, hmax: 1000, enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
@@ -1343,39 +1407,51 @@ const SECTIONS_RAW = [
     { k: 'nlabLegend', type: 'check', label: 'Show legend', show: s => !!nodeLabelSrc(s) && s.nlabShow === 'circles', sub: true },
     { k: 'ancLabelDec', type: 'select', label: 'Decimals', opts: DEC_OPTS, numeric: true, enable: s => !!nodeLabelSrc(s), show: s => s.nlabShow !== 'circles', sub: true },
     { k: 'ancLabelSize', type: 'number', label: 'Text size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles', sub: true },
-    { k: 'ancLabelColor', type: 'color', label: 'Color', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles' || !s.nlabColorBy, sub: true },
+    { k: 'ancLabelColorBy', type: 'seg', label: 'Color of the values', opts: [['fixed', 'One color'], ['branch', 'Like their branch'], ['data', 'By data']], enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles', sub: true },
+    { k: 'ancLabelVSrc', type: 'srcpick', srcK: 'ancLabelVSrc', colK: 'ancLabelVCol', label: 'Colored by', show: s => s.nlabShow !== 'circles' && s.ancLabelColorBy === 'data', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), sub: true },
+    { k: 'ancLabelVPal', type: 'select', label: 'Palette', opts: PALETTE_OPTS.filter(o => o[0] !== 'custom'), show: s => s.nlabShow !== 'circles' && s.ancLabelColorBy === 'data', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), sub: true },
+    { k: 'ancLabelVRev', type: 'check', label: 'Reverse the colors', show: s => s.nlabShow !== 'circles' && s.ancLabelColorBy === 'data', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), sub: true },
+    { k: 'ancLabelColor', type: 'color', label: 'Color', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s) && (s.nlabShow === 'circles' || s.ancLabelColorBy === 'fixed'), show: s => s.nlabShow !== 'circles' || !s.nlabColorBy, sub: true },
     { k: 'ancLabelAlign', type: 'seg', label: 'Position', opts: SIDE_OPTS, enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles', sub: true },
     { k: 'ancLabelMargin', type: 'number', label: 'Distance from the node', min: -2000, max: 2000, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s) && s.ancLabelAlign !== 'center', show: s => s.nlabShow !== 'circles', sub: true },
     { k: 'ancLabelDy', type: 'number', label: 'Vertical offset', min: -500, max: 500, step: 1, unit: 'px', enable: s => !!nodeLabelSrc(s) && !stackedAfter(s), show: s => s.nlabShow !== 'circles', sub: true },
     { k: 'nlabStack', type: 'seg', label: 'Stack with the support values', opts: [['none', 'No'], ['below', 'Below the branch'], ['after', 'After the support (a / b)']], enable: s => !!nodeLabelSrc(s), show: s => s.nlabShow !== 'circles', sub: true },
     { type: 'hint', text: s => !nodeLabelSrc(s) || s.nlabShow === 'circles' ? '' : s.nlabStack === 'below' ? 'These labels go under the branch and the support values above it, each with its own style. Right-click either one to change only that one.' : s.nlabStack === 'after' ? (s.supportMode === 'text' ? 'Written after the support value, as Support / Other value, with the style of the support values.' : 'Needs the support values shown as numbers. Until then, these labels are drawn on their own.') : '' },
     { type: 'head', label: 'Node bars' },
-    { k: 'nbarSrc', type: 'select', label: 'Draw', opts: s => [['', 'None'], ...metaRangeKeys(tree).map(k => ['meta:' + k, k]), ...(treeSet && treeSet.hasLen && !treeSet.unrooted ? [['kde', `Age density (${treeSet.count} trees)`]] : [])] },
-    { type: 'hint', text: s => s.nbarSrc === 'kde' ? 'The density of the age of each node across the trees of the file, smoothed with a Gaussian kernel.' : s.nbarSrc ? 'The range is read as ages above the youngest tip, in branch length units, as in the height intervals of BEAST.' : 'Ranges from the tree annotations, such as height_95%_HPD, or age densities from a file with several dated trees.' },
-    { k: 'nbarStyle', type: 'seg', label: 'Show the ages as', opts: [['violin', 'Violin'], ['bar', 'HPD bar']], show: s => s.nbarSrc === 'kde', sub: true },
-    { type: 'hint', text: s => s.nbarSrc === 'kde' ? (s.nbarStyle === 'bar' ? 'The highest posterior density interval, the shortest range that holds the chosen share of the node ages in the trees.' : 'The shape of the node ages in the trees. The thin dark bar inside is the HPD interval, the short line the median.') : '' },
+    { k: 'nbarSrc', type: 'select', label: 'Draw', opts: s => [['', 'None'], ...metaRangeKeys(tree).map(k => ['meta:' + k, k]),
+      ...(treeSet && treeSet.hasLen && !treeSet.unrooted ? [['kde', `Age density (${treeSet.count} trees)`]] : [])] },
+    { type: 'hint', text: s => nbDens(s) ? 'The density of the age of each node across the trees of the file, smoothed with a Gaussian kernel.' : s.nbarSrc ? 'The range is read as ages above the youngest tip, in branch length units, as in the height intervals of BEAST.' : 'Ranges from the tree annotations, such as height_95%_HPD, or age densities from a file with several dated trees.' },
+    { k: 'nbarStyle', type: 'seg', label: 'Show the ages as', opts: [['violin', 'Violin'], ['bar', 'HPD bar']], show: s => nbDens(s), sub: true },
+    { type: 'hint', text: s => nbDens(s) ? (s.nbarStyle === 'bar' ? 'The highest posterior density interval, the shortest range that holds the chosen share of the node ages in the trees.' : 'The shape of the node ages in the trees. The thin dark bar inside is the HPD interval, the short line the median.') : '' },
     { k: 'nbarH', type: 'range', label: 'Height', min: 1, max: 40, step: 0.5, hmin: 0.2, hmax: 400, unit: 'px', show: s => !!s.nbarSrc, sub: true },
     { k: 'nbarColor', type: 'color', label: 'Color', show: s => !!s.nbarSrc, sub: true },
     { k: 'nbarOpacity', type: 'range', label: 'Opacity', min: 5, max: 100, step: 5, hmin: 0, hmax: 100, unit: '%', show: s => !!s.nbarSrc, sub: true },
     { k: 'nbarBorder', type: 'seg', label: 'Border', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['none', 'None']], show: s => !!s.nbarSrc, sub: true },
     { k: 'nbarBorderColor', type: 'color', label: 'Border color', show: s => !!s.nbarSrc && s.nbarBorder !== 'none', sub: true },
     { k: 'nbarBorderW', type: 'number', label: 'Border width', min: 0.05, max: 50, step: 0.1, unit: 'px', show: s => !!s.nbarSrc && s.nbarBorder !== 'none', sub: true },
-    { k: 'nbarMirror', type: 'check', label: 'Mirror the density on both sides of the branch', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar', sub: true },
-    { k: 'nbarBw', type: 'range', label: 'Smoothing', min: 0.2, max: 3, step: 0.1, hmin: 0.05, hmax: 20, unit: '×', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar', sub: true },
-    { type: 'hint', text: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar' ? 'Multiplies the automatic kernel width (Silverman\'s rule): below 1 keeps more detail, such as several peaks, above 1 gives a smoother curve.' : '' },
-    { k: 'nbarHpdIn', type: 'check', label: 'Show the HPD inside the violin', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar', sub: true },
-    { k: 'nbarHpdLevel', type: 'select', label: 'HPD interval', opts: [[90, '90%'], [95, '95%'], [99, '99%']], numeric: true, show: s => s.nbarSrc === 'kde' && (s.nbarStyle === 'bar' || s.nbarHpdIn), sub: true },
-    { k: 'nbarHpdH', type: 'range', label: 'HPD thickness', min: 0.5, max: 20, step: 0.5, hmin: 0.1, hmax: 200, unit: 'px', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar' && s.nbarHpdIn, sub: true },
-    { k: 'nbarHpdColor', type: 'color', label: 'HPD color', show: s => s.nbarSrc === 'kde' && s.nbarStyle !== 'bar' && s.nbarHpdIn, sub: true },
-    { k: 'nbarMedian', type: 'check', label: 'Mark the median', show: s => s.nbarSrc === 'kde', sub: true },
-    { k: 'nbarMedW', type: 'number', label: 'Median line width', min: 0.1, max: 20, step: 0.1, unit: 'px', show: s => s.nbarSrc === 'kde' && s.nbarMedian, sub: true },
-    { k: 'nbarMedStyle', type: 'seg', label: 'Median line', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], show: s => s.nbarSrc === 'kde' && s.nbarMedian, sub: true },
-    { k: 'nbarMedColor', type: 'color', label: 'Median color', show: s => s.nbarSrc === 'kde' && s.nbarMedian, sub: true },
+    { k: 'nbarMirror', type: 'check', label: 'Mirror the density on both sides of the branch', show: s => nbDens(s) && s.nbarStyle !== 'bar', sub: true },
+    { k: 'nbarBw', type: 'range', label: 'Smoothing', min: 0.2, max: 3, step: 0.1, hmin: 0.05, hmax: 20, unit: '×', show: s => nbDens(s) && s.nbarStyle !== 'bar', sub: true },
+    { type: 'hint', text: s => nbDens(s) && s.nbarStyle !== 'bar' ? 'Multiplies the automatic kernel width (Silverman\'s rule): below 1 keeps more detail, such as several peaks, above 1 gives a smoother curve.' : '' },
+    { k: 'nbarHpdIn', type: 'check', label: 'Show the HPD inside the violin', show: s => nbDens(s) && s.nbarStyle !== 'bar', sub: true },
+    { k: 'nbarHpdLevel', type: 'select', label: 'HPD interval', opts: [[90, '90%'], [95, '95%'], [99, '99%']], numeric: true, show: s => nbDens(s) && (s.nbarStyle === 'bar' || s.nbarHpdIn), sub: true },
+    { k: 'nbarHpdH', type: 'range', label: 'HPD thickness', min: 0.5, max: 20, step: 0.5, hmin: 0.1, hmax: 200, unit: 'px', show: s => nbDens(s) && s.nbarStyle !== 'bar' && s.nbarHpdIn, sub: true },
+    { k: 'nbarHpdColor', type: 'color', label: 'HPD color', show: s => nbDens(s) && s.nbarStyle !== 'bar' && s.nbarHpdIn, sub: true },
+    { k: 'nbarMedian', type: 'check', label: 'Mark the median', show: s => nbDens(s), sub: true },
+    { k: 'nbarMedW', type: 'number', label: 'Median line width', min: 0.1, max: 20, step: 0.1, unit: 'px', show: s => nbDens(s) && s.nbarMedian, sub: true },
+    { k: 'nbarMedStyle', type: 'seg', label: 'Median line', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], show: s => nbDens(s) && s.nbarMedian, sub: true },
+    { k: 'nbarMedColor', type: 'color', label: 'Median color', show: s => nbDens(s) && s.nbarMedian, sub: true },
+    { k: 'nbarMean', type: 'check', label: 'Mark the mean', show: s => nbDens(s), sub: true },
+    { k: 'nbarMeanW', type: 'number', label: 'Mean line width', min: 0.1, max: 20, step: 0.1, unit: 'px', show: s => nbDens(s) && s.nbarMean, sub: true },
+    { k: 'nbarMeanStyle', type: 'seg', label: 'Mean line', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], show: s => nbDens(s) && s.nbarMean, sub: true },
+    { k: 'nbarMeanColor', type: 'color', label: 'Mean color', show: s => nbDens(s) && s.nbarMean, sub: true },
   ]},
   { title: 'Tip labels', items: [
     { k: 'showTips', type: 'check', label: 'Show tip names' },
-    { k: 'labelSrcTable', type: 'select', label: 'Names from', opts: s => [['', 'The tree'], ...(s.dataTables || []).map(t => [t.id, t.name])], enable: s => s.showTips },
-    { k: 'labelSrcCol', type: 'select', label: 'Column', opts: s => { const t = (s.dataTables || []).find(x => x.id === s.labelSrcTable); return t ? allCols(t).map(c => [c, c]) : [['', '—']]; }, enable: s => s.showTips && !!s.labelSrcTable, sub: true },
+    { k: 'labelSrcTable', type: 'srcpick', srcK: 'labelSrcTable', colK: 'labelSrcCol', label: 'Show', none: 'The names in the tree', enable: s => s.showTips,
+      list: (S, SEP) => [['calc' + SEP + 'len', 'Branch length (raw)'], ['calc' + SEP + 'age', 'Age'], ...tipMetaKeys().map(k => ['meta' + SEP + k, k]),
+        ...(S.dataTables || []).flatMap(t => allCols(t).map(c => [t.id + SEP + c, `${c} (${t.name})`]))] },
+    { k: 'labelSrcBoth', type: 'check', label: 'Keep the name, with the value after it', enable: s => s.showTips && !!s.labelSrcTable, sub: true },
+    { k: 'labelSrcDec', type: 'select', label: 'Decimals', opts: [[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4']], numeric: true, enable: s => s.showTips && !!s.labelSrcTable && s.labelSrcTable !== '' , show: s => s.labelSrcTable === 'meta' || s.labelSrcTable === 'calc', sub: true },
     { type: 'hint', text: s => s.labelSrcTable ? 'Only the names shown change. The tree keeps its own names, so it still matches your other files. Tips without a value keep their own name.' : '' },
     { k: 'fontSize', type: 'number', label: 'Font size', min: 1, max: 200, step: 0.5, unit: 'px' },
     { k: 'fontFamily', type: 'select', label: 'Typeface', opts: FONTS },
@@ -1476,6 +1552,24 @@ const SECTIONS_RAW = [
     { k: 'netLabelMajorColor', type: 'color', label: 'Major value: color', show: s => hasNet() && s.netLabel && s.netLabelSrc === 'gamma' && s.netLabelMajor && !s.netLabelByType, enable: s => s.netOn, sub: true },
     { k: 'netLabelMajorDx', type: 'number', label: 'Major value: horizontal offset', min: -500, max: 500, step: 1, unit: 'px', show: s => hasNet() && s.netLabel && s.netLabelSrc === 'gamma' && s.netLabelMajor, enable: s => s.netOn, sub: true },
     { k: 'netLabelMajorDy', type: 'number', label: 'Major value: vertical offset', min: -500, max: 500, step: 1, unit: 'px', show: s => hasNet() && s.netLabel && s.netLabelSrc === 'gamma' && s.netLabelMajor, enable: s => s.netOn, sub: true },
+  ]},
+  { title: 'Scale bar', items: [
+    { k: 'scaleBar', type: 'check', label: 'Show scale bar' },
+    { type: 'hint', text: s => s.axisOn ? 'The time axis replaces the scale bar while it is on.' : !s.useLengths ? 'Needs "Use branch lengths".' : 'Measured in branch length units.' },
+    { k: 'scaleMode', type: 'seg', label: 'Length', opts: [['auto', 'Automatic'], ['custom', 'Custom']], enable: s => s.scaleBar, sub: true },
+    { k: 'scaleLen', type: 'number', label: 'Bar length', min: 1e-9, max: 1e9, step: 0.01, enable: s => s.scaleBar && s.scaleMode === 'custom', sub: true },
+    { k: 'scaleUnit', type: 'text', label: 'Unit', ph: 'e.g. Ma or subs./site', enable: s => s.scaleBar, sub: true },
+    { type: 'hint', text: s => s.scaleBar ? 'Written after the number, centred with it on the bar.' : '' },
+    { k: 'scaleDecimals', type: 'select', label: 'Decimals', opts: [[-1, 'Automatic'], [0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4']], numeric: true, enable: s => s.scaleBar, sub: true },
+    { k: 'scaleV', type: 'seg', label: 'Vertical position', opts: [['top', 'Top'], ['bottom', 'Bottom']], enable: s => s.scaleBar && !s.scaleFree, sub: true },
+    { k: 'scaleH', type: 'seg', label: 'Horizontal position', opts: [['left', 'Left'], ['center', 'Center'], ['right', 'Right']], enable: s => s.scaleBar && !s.scaleFree, sub: true },
+    { k: 'scaleDx', type: 'range', label: 'Move sideways', min: -400, max: 400, step: 1, hmin: -10000, hmax: 10000, unit: 'px', enable: s => s.scaleBar && !s.scaleFree, sub: true },
+    { k: 'scaleDy', type: 'range', label: 'Move up or down', min: -400, max: 400, step: 1, hmin: -10000, hmax: 10000, unit: 'px', enable: s => s.scaleBar && !s.scaleFree, sub: true },
+    { k: 'scaleLineW', type: 'number', label: 'Line width', min: 0.1, max: 20, step: 0.5, unit: 'px', enable: s => s.scaleBar, sub: true },
+    { k: 'scaleTick', type: 'range', label: 'End tick height', min: 0, max: 20, step: 1, hmax: 200, unit: 'px', enable: s => s.scaleBar, sub: true },
+    { k: 'scaleFs', type: 'number', label: 'Text size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.scaleBar, sub: true },
+    { k: 'scaleTextGap', type: 'range', label: 'Text distance from bar', min: -40, max: 40, step: 1, hmin: -1000, hmax: 1000, unit: 'px', enable: s => s.scaleBar, sub: true },
+    { k: 'scaleColor', type: 'color', label: 'Color', enable: s => s.scaleBar, sub: true },
   ]},
   { title: 'Time axis', items: [
     { k: 'axisOn', type: 'check', label: 'Show time axis (dated trees)' },
@@ -1661,28 +1755,10 @@ const SECTIONS_RAW = [
     { k: 'pageMiniMark', type: 'seg', label: 'Mark the rows on the page with', opts: [['lines', 'Branch color'], ['both', 'Color and background']], show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn }
   ]},
   { title: 'Images and visual elements', custom: 'images' },
-  { title: 'Page', items: [
+  { title: 'Page', where: 'page', open: true, items: [
     { k: 'bg', type: 'color', label: 'Background color' },
-    { type: 'head', label: 'Scale bar' },
-    { k: 'scaleBar', type: 'check', label: 'Show scale bar' },
-    { k: 'scaleFree', type: 'check', label: 'Move it by hand on the canvas', enable: s => s.scaleBar },
-    { type: 'hint', text: s => s.axisOn ? 'The time axis replaces the scale bar while it is on.' : !s.useLengths ? 'Needs "Use branch lengths".' : 'Measured in branch length units.' },
-    { k: 'scaleMode', type: 'seg', label: 'Length', opts: [['auto', 'Automatic'], ['custom', 'Custom']], enable: s => s.scaleBar, sub: true },
-    { k: 'scaleLen', type: 'number', label: 'Bar length', min: 1e-9, max: 1e9, step: 0.01, enable: s => s.scaleBar && s.scaleMode === 'custom', sub: true },
-    { k: 'scaleUnit', type: 'text', label: 'Unit', ph: 'e.g. Ma or subs./site', enable: s => s.scaleBar, sub: true },
-    { type: 'hint', text: s => s.scaleBar ? 'Written after the number, centred with it on the bar.' : '' },
-    { k: 'scaleDecimals', type: 'select', label: 'Decimals', opts: [[-1, 'Automatic'], [0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4']], numeric: true, enable: s => s.scaleBar, sub: true },
-    { k: 'scaleV', type: 'seg', label: 'Vertical position', opts: [['top', 'Top'], ['bottom', 'Bottom']], enable: s => s.scaleBar && !s.scaleFree, sub: true },
-    { k: 'scaleH', type: 'seg', label: 'Horizontal position', opts: [['left', 'Left'], ['center', 'Center'], ['right', 'Right']], enable: s => s.scaleBar && !s.scaleFree, sub: true },
-    { k: 'scaleDx', type: 'range', label: 'Move sideways', min: -400, max: 400, step: 1, hmin: -10000, hmax: 10000, unit: 'px', enable: s => s.scaleBar && !s.scaleFree, sub: true },
-    { k: 'scaleDy', type: 'range', label: 'Move up or down', min: -400, max: 400, step: 1, hmin: -10000, hmax: 10000, unit: 'px', enable: s => s.scaleBar && !s.scaleFree, sub: true },
-    { k: 'scaleLineW', type: 'number', label: 'Line width', min: 0.1, max: 20, step: 0.5, unit: 'px', enable: s => s.scaleBar, sub: true },
-    { k: 'scaleTick', type: 'range', label: 'End tick height', min: 0, max: 20, step: 1, hmax: 200, unit: 'px', enable: s => s.scaleBar, sub: true },
-    { k: 'scaleFs', type: 'number', label: 'Text size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.scaleBar, sub: true },
-    { k: 'scaleTextGap', type: 'range', label: 'Text distance from bar', min: -40, max: 40, step: 1, hmin: -1000, hmax: 1000, unit: 'px', enable: s => s.scaleBar, sub: true },
-    { k: 'scaleColor', type: 'color', label: 'Color', enable: s => s.scaleBar, sub: true },
     { type: 'head', label: 'Colors' },
-    { k: 'paletteName', type: 'select', label: 'Palette', opts: [['default', 'tree2go'], ['okabe', 'Okabe-Ito (color blind safe)'], ['tol', 'Paul Tol bright (color blind safe)'], ['viridis', 'Viridis']] },
+    { k: 'paletteName', type: 'select', label: 'Palette', opts: PALETTE_OPTS.filter(o => o[0] !== 'custom') },
     { type: 'hint', text: () => 'The colors offered in the menus and for new categories. Colors already in use do not change.' },
     { k: 'cvdSim', type: 'select', label: 'Preview as seen with', opts: [['none', 'Normal vision'], ['deutan', 'Deuteranopia (red-green)'], ['protan', 'Protanopia (red-green)'], ['tritan', 'Tritanopia (blue-yellow)'], ['gray', 'No color (grayscale)']] },
     { type: 'hint', text: s => s.cvdSim !== 'none' ? 'Only the screen changes (exported files keep the real colors).' : '' },
@@ -1696,8 +1772,7 @@ const SECTIONS_RAW = [
     { k: 'titleBold', type: 'check', label: 'Bold', enable: s => !!s.title, sub: true },
     { k: 'titleItalic', type: 'check', label: 'Italic', enable: s => !!s.title, sub: true },
     { k: 'titleColor', type: 'color', label: 'Color', enable: s => !!s.title, sub: true }
-  ]},
-  { title: 'Export', custom: 'export' }
+  ]}
 ];
 // Side plot options appear only once a table with matching names is chosen
 const SECTIONS = SECTIONS_RAW;
@@ -1717,8 +1792,9 @@ const allItems = () => SECTIONS.flatMap(s => s.items || []).filter(i => i.k);
 
 // Builds the whole left panel from the SECTIONS definition.
 function buildSide() {
-  const side = $('side'); side.innerHTML = '';
+  const side0 = $('side'), sheet = $('pageSheetBody'); side0.innerHTML = ''; if (sheet) sheet.innerHTML = '';
   for (const sec of SECTIONS) {
+    const side = sec.where === 'page' && sheet ? sheet : side0;   // the page sections live in the Page settings menu
     if (side.lastChild) { const sep = document.createElement('div'); sep.className = 'secsep'; side.appendChild(sep); }
     const d = document.createElement('details'); if (sec.open) d.open = true;
     d.innerHTML = `<summary>${sec.title}</summary>`;
@@ -1729,11 +1805,12 @@ function buildSide() {
     if (sec.custom === 'tools') body.appendChild(toolsPanel());
     if (sec.custom === 'export') body.appendChild(exportPanel());
     if (sec.custom === 'images') body.appendChild(imagesPanel());
+    if (sec.where === 'page') { body.classList.add('sheetsec'); side.appendChild(body); continue; }   // in its own menu: the options, with no title to fold
     d.appendChild(body); side.appendChild(d);
   }
   const foot = document.createElement('div'); foot.className = 'sidefoot';
-  foot.innerHTML = '<button type="button" class="btn small helpbtn" data-help title="Reference: what every option does" aria-label="Open the reference">?</button><button type="button" class="btn small hovbtn" data-hover title="Show the information of a branch when the mouse is over it" aria-pressed="false">Info on hover</button><button type="button" class="btn small" data-all="1" title="Open every section of this panel">Expand</button><button type="button" class="btn small" data-all="0" title="Close every section of this panel">Collapse</button>';
-  foot.querySelectorAll('button').forEach(b => b.onclick = () => b.dataset.all === '1' ? expandAllSections() : collapseAllSections()); side.appendChild(foot);
+  foot.innerHTML = '<button type="button" class="btn small hovbtn" data-hover title="Show the information of a branch when the mouse is over it" aria-pressed="false">Info on hover</button><button type="button" class="btn small" data-all="1" title="Open every section of this panel">Expand</button><button type="button" class="btn small" data-all="0" title="Close every section of this panel">Collapse</button>';
+  foot.querySelectorAll('button').forEach(b => b.onclick = () => b.dataset.all === '1' ? expandAllSections() : collapseAllSections()); side0.appendChild(foot);
   refreshVisibility();
 }
 
@@ -1836,6 +1913,29 @@ function control(it) {
     row.innerHTML = `<label for="${id}">${it.label}</label><select id="${id}">${opts.map(([a, b]) => `<option value="${esc(a)}" ${String(a) === String(v) ? 'selected' : ''}>${b}</option>`).join('')}</select>`;
     const inp = row.querySelector('select');
     inp.addEventListener('change', () => { settings[it.k] = it.numeric ? +inp.value : inp.value; changed(it); });
+  } else if (it.type === 'srcpick') {
+    // one list for where the values come from and which one: branch length, every tree annotation, and the columns
+    // of each attached table, grouped. It sets the two settings it stands for (srcK and colK).
+    row._pick = () => {
+      const S = settings, SEP = '\u001f';
+      // [value, label]: a plain list, the branch length first, then the annotations, then the columns of each table
+      const list = it.list ? it.list(S, SEP) : [
+        [it.lenOpt ? SEP : '__len' + SEP + 'Branch length', 'Branch length (raw)'],
+        ...(dataColOpts(S, 'meta') || []).filter(c => c[0] !== '' && metaNumKeys(tree).length).map(([c, cl]) => ['meta' + SEP + c, cl]),
+        ...(S.dataTables || []).flatMap(t => (dataColOpts(S, t.id) || []).filter(c => c[0] !== '').map(([c, cl]) => [t.id + SEP + c, `${cl} (${t.name})`])),
+      ];
+      const groups = [['', list]];
+      const cur = S[it.srcK] ? S[it.srcK] + SEP + (S[it.colK] || '') : (it.lenOpt ? SEP : '');
+      const sig = JSON.stringify([groups, cur]); if (row.dataset.sig === sig) return; row.dataset.sig = sig;
+      const opt = ([v, l]) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`;
+      row.innerHTML = `<label for="${id}">${it.label}</label><select id="${id}">${it.none ? `<option value=""${cur === '' ? ' selected' : ''}>${esc(it.none)}</option>` : ''}${groups.map(([g, os]) => g ? `<optgroup label="${esc(g)}">${os.map(opt).join('')}</optgroup>` : os.map(opt).join('')).join('')}</select>`;
+      row.querySelector('select').addEventListener('change', e => {
+        const v = e.target.value, i = v.indexOf(SEP);
+        if (i < 0) { S[it.srcK] = ''; S[it.colK] = ''; } else { S[it.srcK] = v.slice(0, i); S[it.colK] = v.slice(i + 1); }
+        changed({ k: it.srcK + ':pick', refit: it.refit });
+      });
+    };
+    row._pick();
   } else if (it.type === 'text') {
     row.innerHTML = `<label for="${id}">${it.label}</label><input id="${id}" type="text" value="${esc(v)}"${it.ph ? ` placeholder="${esc(it.ph)}"` : ''}>`;   // ph: an example shown while empty
     const inp = row.querySelector('input');
@@ -1943,6 +2043,7 @@ function refreshVisibility() {
       if (sl.dataset.sig !== sig) { sl.innerHTML = o.map(([a, b]) => `<option value="${esc(a)}">${b}</option>`).join(''); sl.dataset.sig = sig; }
       sl.value = String(settings[it.k]);
     }
+    if (it.type === 'srcpick' && row._pick) { row._pick(); row.querySelectorAll('select').forEach(el => el.disabled = !on); }   // new annotations or tables, or another value
     if (it.type === 'select' && it.optOff) row.querySelectorAll('option').forEach(o => { o.disabled = !!it.optOff(settings, o.value); });
     if (it.optOff) row.querySelectorAll('.seg button').forEach(b => { const off = it.optOff(settings, b.dataset.v); if (off) b.disabled = true; b.title = off ? 'Not available while the nodes show ancestral state pies' : ''; });
   }
@@ -1952,7 +2053,7 @@ function refreshVisibility() {
 const KEEP_OFF = new Set(['layout', 'barTextMode', 'barTextAlign', 'labelOrient', 'axisCircLabels']);
 // Hides hints of hidden options and subheads whose group has nothing visible.
 function tidyPanel() {
-  for (const sec of document.querySelectorAll('aside .sec')) {
+  for (const sec of document.querySelectorAll('aside .sec, #pageSheet .sec')) {
     const kids = [...sec.children];
     kids.forEach(el => el.classList.remove('gone'));
     const isOpt = e => !e.classList.contains('hint') && !e.classList.contains('subhead');
@@ -2502,12 +2603,46 @@ function metaVal(v) {
 // numeric annotations of the tree (rates, posterior, ...), available for colour or width
 function metaNumKeys(t) { const ks = new Set(); if (t) walkAll(t, x => { if (x.meta) for (const [k, v] of Object.entries(x.meta)) if (typeof v === 'number' && isFinite(v)) ks.add(k); }); return [...ks].sort(); }
 // Choices of "Values from": tree annotations and attached tables.
+// Any tree with branch lengths always offers them; support values when the nodes have them.
+const treeHasLens = t => { let k = 0; if (t) walkAll(t, x => { if (x.parent && typeof x.len === 'number' && isFinite(x.len)) k++; }); return k > 1; };
+// support as the Node values section shows it: the tree's own, or computed from a trees file or a SIMMAP
+const treeHasSups = t => { let k = 0; if (t) walkAll(t, x => { if (x.children.length && x.parent && supValue(x) != null) k++; }); return k > 1; };
 function dataSourceOpts(s) { return [['', 'None'], ...(metaNumKeys(tree).length ? [['meta', 'Tree annotations']] : []), ...(s.dataTables || []).map(t => [t.id, t.name])]; }
 // Choices of "Value" for a source: numeric annotations, or numeric columns of a table.
-function dataColOpts(s, src) { if (src === 'meta') { const k = metaNumKeys(tree); return k.length ? k.map(c => [c, c]) : [['', '—']]; } const t = (s.dataTables || []).find(x => x.id === src); return t ? numericCols(t).map(c => [c, c]) : [['', '—']]; }
+function dataColOpts(s, src) { if (src === '__len') return [['Branch length (raw)', 'Branch length (raw)']]; if (src === '__sup') return [['Support', 'Support']]; if (src === 'meta') { const k = metaNumKeys(tree); return k.length ? k.map(c => [c, c]) : [['', '—']]; } const t = (s.dataTables || []).find(x => x.id === src); return t ? numericCols(t).map(c => [c, c]) : [['', '—']]; }
 // one number per node: from the annotations of the tree, or from a table row matched by name
+const KSEP = '\u001f';
+function kdeSrcOpts(S) {
+  return [['', 'None'], ...(treeHasLens(tree) || treeHasSups(tree) ? [['tree', 'From tree']] : []), ...(metaNumKeys(tree).length ? [['meta', 'Tree annotations']] : []),
+    ...((S.dataTables || []).some(t => numericCols(t).length) ? [['files', 'Attached files']] : [])];
+}
+function kdeColOpts(S, src) {
+  let o = [];
+  if (src === 'tree') o = [...(treeHasLens(tree) ? [['__len', 'Branch lengths (raw)']] : []), ...(treeHasSups(tree) ? [['__sup', 'Support values']] : [])];
+  else if (src === 'meta') o = metaNumKeys(tree).map(c => [c, c]);
+  else if (src === 'files') { const ts = (S.dataTables || []).filter(t => numericCols(t).length); o = ts.flatMap(t => numericCols(t).map(c => [t.id + KSEP + c, ts.length > 1 ? `${c} (${t.name})` : c])); }
+  return o.length ? o : [['', '—']];
+}
+// The plot can take the colors of the branches or the dots only when it shows the same values they are colored by.
+const valKey = (src, col) => src === '__len' || src === '__sup' ? src : src + KSEP + col;
+function kdeValKey(k) { if (k.src === 'tree') return valKey(k.col, k.col); if (k.src === 'files') { const [id, c] = String(k.col).split(KSEP); return valKey(id, c); } return valKey(k.src, k.col); }
+function kdeModes(S, k) {
+  const key = kdeValKey(k), out = [['single', 'One color']];
+  if (S.brcTable && S.brcCol && valKey(S.brcTable, S.brcCol) === key) out.push(['branches', 'Like the branches']);
+  if (S.dotDataSrc && S.dotDataCol && S.dotDataColor && valKey(S.dotDataSrc, S.dotDataCol) === key) out.push(['dots', 'Like the dots']);
+  return out;
+}
+const kdeColLabel = (S, src, col) => (kdeColOpts(S, src).find(o => o[0] === col) || [, col])[1] || '';
+// values for a density plot; plots saved before keep working (sources '__len', '__sup' or a table id)
+function kdeValues(S, k, positiveOnly) {
+  if (k.src === 'tree') return nodeValues(S, k.col, k.col, positiveOnly);
+  if (k.src === 'files') { const [id, c] = String(k.col).split(KSEP); return nodeValues(S, id, c, positiveOnly); }
+  return nodeValues(S, k.src, k.col, positiveOnly);
+}
 function nodeValues(S, src, col, positiveOnly) {
   const val = new Map(); if (!src || !col || !tree) return val;
+  if (src === '__len') { walkAll(tree, x => { if (x.parent && typeof x.len === 'number' && isFinite(x.len) && (!positiveOnly || x.len > 0)) val.set(x, x.len); }); return val; }   // the branch lengths themselves
+  if (src === '__sup') { walkAll(tree, x => { const v = x.children.length && x.parent ? supValue(x) : null; if (v != null && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, v); }); return val; }   // the support of every internal node
   if (src === 'meta') { walkAll(tree, x => { const v = x.meta && x.meta[col]; if (typeof v === 'number' && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, v); }); return val; }
   const t = (S.dataTables || []).find(x => x.id === src), ci = t ? t.header.indexOf(col) : -1; if (!t || ci < 0) return val;
   const m = tableIndex(t);
@@ -2521,6 +2656,9 @@ function metaRangeKeys(t) {
   return [...ks.keys()];
 }
 
+// the three densities a tree set can give, and whether the set holds that value
+const nbDens = s => /^kde/.test(s.nbarSrc || '');
+const setHas = f => !!(treeSet && [...treeSet.clades.values()].some(o => o[f] && o[f].length > 1));
 let treeSet = null;   // { name, count, hasLen, clades: Map(key -> { n, ages: [] }), trees?: [roots], tips?: Map(key -> names) }
 // Height of every node above the youngest tip (its age), when the tree has lengths.
 function nodeHeights(t) {   // height of every node above the youngest tip, if the tree has lengths
@@ -2541,10 +2679,11 @@ function compactTrees(all) {
   const tot = (() => { let a = 0, b = 0; const L = leaves(all[0]); for (const l of L) { const h = tipHash(l.name); a = (a + h[0]) >>> 0; b = (b + h[1]) >>> 0; } return [a, b, L.length]; })();
   for (const t of all) {
     const keys = treeCladeKeys(t, ref, tot), H = nodeHeights(t); if (!H) hasLen = false;
-    const ks = new Int32Array(keys.size), ag = H ? new Float32Array(keys.size) : null; let i = 0, allTips = null;
-    const seen = new Set();   // in an unrooted tree drawn with two root branches, both give the same split: count it once
+    const ks = new Int32Array(keys.size), ag = H ? new Float32Array(keys.size) : null, ln = new Float32Array(keys.size).fill(NaN), sp = new Float32Array(keys.size).fill(NaN); let i = 0, allTips = null;
+    const seen = new Map();   // in an unrooted tree drawn with two root branches, both give the same split: count it once, with both lengths
     for (const [x, k] of keys) {
-      if (seen.has(k)) continue; seen.add(k);
+      if (seen.has(k)) { const q = seen.get(k); if (x.len != null) ln[q] = (Number.isFinite(ln[q]) ? ln[q] : 0) + x.len; continue; }
+      seen.set(k, i);
       let j = keyIdx.get(k);
       if (j == null) {
         j = keyList.length; keyList.push(k); keyIdx.set(k, j);
@@ -2552,9 +2691,12 @@ function compactTrees(all) {
         if (unrooted && nm.some(n => normTip(n) === normTip(ref))) { allTips = allTips || leaves(t).map(l => l.name); if (nm.length < allTips.length) { const inn = new Set(nm); tipsOf.set(k, allTips.filter(n => !inn.has(n))); } else tipsOf.set(k, nm); }
         else tipsOf.set(k, nm);
       }
-      ks[i] = j; if (ag) ag[i] = H.get(x); i++;
+      ks[i] = j; if (ag) ag[i] = H.get(x);
+      if (x.parent && x.len != null) ln[i] = x.len;
+      if (x.children.length && x.parent) { const v = treeSup(x); if (v != null) sp[i] = v; }
+      i++;
     }
-    recs.push({ nwk: toNewick(t), _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null });
+    recs.push({ nwk: toNewick(t), _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i) });
   }
   return { recs, keyList, tipsOf, unrooted, ref, hasLen, tot };
 }
@@ -2564,8 +2706,10 @@ function aggregateTrees(C, name, burnin = 0) {
   for (let t = skip; t < all.length; t++) {
     const r = all[t];
     for (let i = 0; i < r.keys.length; i++) {
-      const k = C.keyList[r.keys[i]]; let o = clades.get(k); if (!o) { o = { n: 0, ages: [] }; clades.set(k, o); }
+      const k = C.keyList[r.keys[i]]; let o = clades.get(k); if (!o) { o = { n: 0, ages: [], lens: [], sups: [] }; clades.set(k, o); }
       o.n++; if (C.hasLen) o.ages.push(+r.ages[i].toPrecision(6));
+      if (r.lens && Number.isFinite(r.lens[i])) o.lens.push(+r.lens[i].toPrecision(6));
+      if (r.sups && Number.isFinite(r.sups[i])) o.sups.push(+r.sups[i].toPrecision(6));
     }
   }
   return { name, count: all.length - skip, total: all.length, burnin, skip, hasLen: C.hasLen, clades, trees: all, tips: C.tipsOf, unrooted: C.unrooted, ref: C.ref, tot: C.tot, C };
@@ -2575,9 +2719,9 @@ const summarizeTrees = (all, name, burnin = 0) => aggregateTrees(compactTrees(al
 // Rebuilds one sampled tree from its compact record.
 const treeOfRec = r => parseNewick(r.nwk);
 // The summary of a tree set as plain data, to keep it between sessions.
-const treeSetRecord = () => treeSet && { name: treeSet.name, count: treeSet.count, total: treeSet.total, burnin: treeSet.burnin, hasLen: treeSet.hasLen, unrooted: !!treeSet.unrooted, ref: treeSet.ref || null, tot: treeSet.tot || null, clades: [...treeSet.clades].map(([k, o]) => [k, o.n, o.ages]) };
+const treeSetRecord = () => treeSet && { name: treeSet.name, count: treeSet.count, total: treeSet.total, burnin: treeSet.burnin, hasLen: treeSet.hasLen, unrooted: !!treeSet.unrooted, ref: treeSet.ref || null, tot: treeSet.tot || null, clades: [...treeSet.clades].map(([k, o]) => [k, o.n, o.ages, o.lens || [], o.sups || []]) };
 // Rebuilds a tree set summary from saved data.
-const treeSetRevive = r => r && r.clades ? { name: r.name, count: r.count, total: r.total ?? r.count, burnin: r.burnin || 0, hasLen: r.hasLen, unrooted: !!r.unrooted, ref: r.ref || null, tot: r.tot || null, clades: new Map(r.clades.map(([k, n, ages]) => [k, { n, ages }])) } : null;
+const treeSetRevive = r => r && r.clades ? { name: r.name, count: r.count, total: r.total ?? r.count, burnin: r.burnin || 0, hasLen: r.hasLen, unrooted: !!r.unrooted, ref: r.ref || null, tot: r.tot || null, clades: new Map(r.clades.map(([k, n, ages, lens, sups]) => [k, { n, ages, lens: lens || [], sups: sups || [] }])) } : null;
 // Keeps the tree set summary in the browser.
 function persistTreeSet() { try { if (treeSet) localStorage.setItem('tree2go-trees', JSON.stringify(treeSetRecord())); else localStorage.removeItem('tree2go-trees'); } catch (e) { toast('The summary of the trees is too large to be kept between sessions, save a project to keep it.'); } }
 // Loads the tree set summary kept in the browser.
@@ -2609,7 +2753,8 @@ function consensusTree(pct, compat) {
     const P = owner.get(t), L = mk(t); L.parent = P; P.children.push(L);
     const tk = cladeKey(...tipHash(t), 1), o = T.clades.get(tk); L._age = o ? mean(o.ages) : 0;
   }
-  if (T.hasLen) walkAll(R, x => { if (x.parent) x.len = Math.max(0, (x.parent._age ?? 0) - (x._age ?? 0)); });
+  if (T.hasLen && !T.unrooted) walkAll(R, x => { if (x.parent) x.len = Math.max(0, (x.parent._age ?? 0) - (x._age ?? 0)); });
+  else if (T.hasLen) { const keysR = treeCladeKeys(R, T.ref, T.tot); for (const [x, k] of keysR) if (x.parent) { const o = T.clades.get(k); x.len = o && o.lens && o.lens.length ? mean(o.lens) : 0; } }
   walkAll(R, x => { delete x._age; });
   return R;
 }
@@ -2628,7 +2773,11 @@ function sampleSummary(kind, heights) {
   const R = treeOfRec(pick);
   if (kind === 'mcc' && T.hasLen) {
     const age = new Map(), keys = treeCladeKeys(R, T.unrooted ? T.ref : null), avg = a => heights === 'mean' ? a.reduce((x, y) => x + y, 0) / a.length : hpdOf(a, 0.95).med;
+    // sampled ancestors (tips on a zero-length branch in the chosen tree) stay sampled ancestors, as in TreeAnnotator:
+    // the node they sit on takes their age, so their branch stays at zero
+    const sa = []; walkAll(R, x => { if (!x.children.length && x.parent && x.len != null && x.len <= 1e-9) sa.push(x); });
     for (const [x, k] of keys) { const o = T.clades.get(k); age.set(x, o && o.ages.length ? avg(o.ages) : 0); }
+    for (const x of sa) age.set(x.parent, age.get(x));
     walkAll(R, x => { if (x.parent) x.len = Math.max(0, age.get(x.parent) - age.get(x)); });
   }
   // clade frequency as the support of each node
@@ -2659,7 +2808,7 @@ function refreshTreeSetBox() {
     <div class="row${raw ? '' : ' off'}"><label for="tsBurn">Burn-in</label><span class="numwrap"><input class="num" id="tsBurn" type="number" min="0" max="99" step="1" value="${treeSet.burnin || 0}"${raw ? '' : ' disabled'}><span class="u">%</span></span></div>
     <p class="hint">The first trees of the file, left out of every summary: summary trees, support values and age densities.</p>
     <div class="row${raw ? '' : ' off'}"><label for="tsIdx">Show tree number</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsIdx" type="number" min="1" max="${treeSet.total ?? treeSet.count}" step="1" value="${treeSet.shown || 1}"${raw ? '' : ' disabled'}><span class="u"></span></span><button class="btn small" id="tsShow"${raw ? '' : ' disabled'}>Show</button></span></div>
-    <div class="row${raw ? '' : ' off'}"><label for="tsKind">Summary tree</label><select id="tsKind"${raw ? '' : ' disabled'}>${[['majority', 'Majority rule'], ['strict', 'Strict consensus'], ['allcompat', 'Maximum compatible'], ['mcc', 'MCC'], ['map', 'MAP']].map(([v, l]) => `<option value="${v}"${(treeSet.mode || 'majority') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+    <div class="row${raw ? '' : ' off'}"><label for="tsKind">Summary tree</label><select id="tsKind"${raw ? '' : ' disabled'}>${[['majority', 'Majority rule'], ['strict', 'Strict consensus'], ['allcompat', 'Maximum compatible'], ['mcc', 'Maximum clade credibility (MCC)'], ['map', 'Maximum a posteriori (MAP)']].map(([v, l]) => `<option value="${v}"${(treeSet.mode || 'majority') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
     <p class="hint">${({ majority: 'Keeps the clades found in more than the chosen share of the trees.', strict: 'Keeps only the clades found in every tree.', allcompat: 'The majority-rule tree plus the less frequent clades that do not conflict with it (allcompat in MrBayes).', mcc: 'Maximum clade credibility: the sampled tree whose clades are, together, the most frequent, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.', map: treeSet.trees && treeSet.trees.some(t => treePost(t) != null) ? `Maximum a posteriori: the sampled tree with the highest posterior probability${mcmcLog ? ` (from ${mcmcLog.name})` : ''}.` : 'Maximum a posteriori: needs the posterior of each tree. BEAST writes it in the trees file, for BEAST2 or MrBayes attach the .log or .p file in Attachments.' })[treeSet.mode || 'majority']}</p>
     ${(treeSet.mode || 'majority') === 'majority' ? `<div class="row sub"><label for="tsPct">Clades in more than</label><span class="numwrap"><input class="num" id="tsPct" type="number" min="50" max="100" step="1" value="${treeSet.pct ?? 50}"><span>%</span></span></div>` : ''}
     ${treeSet.mode === 'mcc' && treeSet.hasLen ? `<div class="row sub"><label for="tsHeights">Node ages</label><select id="tsHeights"><option value="median"${treeSet.heights !== 'mean' ? ' selected' : ''}>Median</option><option value="mean"${treeSet.heights === 'mean' ? ' selected' : ''}>Mean</option></select></div>` : ''}
@@ -2713,13 +2862,23 @@ function loadTreesText(txt, name) {
   }
 }
 // Gaussian kernel density of the node ages, Silverman's bandwidth times a factor
+// Kept per sample and smoothing, so redrawing (zoom, any change) does not recompute thousands of kernels per node.
+const _densCache = new WeakMap();
 function ageDensity(ages, factor) {
+  let byF = _densCache.get(ages); if (!byF) { byF = new Map(); _densCache.set(ages, byF); }
+  const key = String(factor); if (byF.has(key)) return byF.get(key);
+  const r = ageDensity0(ages, factor); byF.set(key, r); return r;
+}
+function ageDensity0(ages, factor) {
   const n = ages.length; if (n < 2) return null;
   const m = ages.reduce((a, b) => a + b, 0) / n, sd = Math.sqrt(ages.reduce((a, b) => a + (b - m) ** 2, 0) / (n - 1));
   if (!(sd > 0)) return null;
   const bw = 1.06 * sd * Math.pow(n, -0.2) * Math.max(0.05, factor), lo = Math.min(...ages) - 3 * bw, hi = Math.max(...ages) + 3 * bw, G = 64, pts = [];
   let mx = 0;
-  for (let i = 0; i <= G; i++) { const x = lo + (hi - lo) * i / G; let d = 0; for (const a of ages) { const z = (x - a) / bw; d += Math.exp(-0.5 * z * z); } pts.push([x, d]); mx = Math.max(mx, d); }
+  // with many trees, the ages are first counted in 512 thin bins: the curve is the same and costs a fixed amount
+  let src = ages.map(a => [a, 1]);
+  if (n > 512) { const B = 512, w = (hi - lo) / B, cnt = new Float64Array(B); for (const a of ages) cnt[Math.min(B - 1, Math.max(0, Math.floor((a - lo) / w)))]++; src = []; for (let j = 0; j < B; j++) if (cnt[j]) src.push([lo + (j + 0.5) * w, cnt[j]]); }
+  for (let i = 0; i <= G; i++) { const x = lo + (hi - lo) * i / G; let d = 0; for (const [a, c] of src) { const z = (x - a) / bw; d += c * Math.exp(-0.5 * z * z); } pts.push([x, d]); mx = Math.max(mx, d); }
   return pts.map(([x, d]) => [x, d / mx]);
 }
 
@@ -3315,13 +3474,22 @@ function renderOnce() {
     const f = v => S.brcLog ? Math.log10(v) : v, vs = [...val.values()];
     const lo = S.brcMin != null && S.brcMin !== '' && (!S.brcLog || S.brcMin > 0) ? +S.brcMin : Math.min(...vs);
     const hi = S.brcMax != null && S.brcMax !== '' && (!S.brcLog || S.brcMax > 0) ? +S.brcMax : Math.max(...vs);
-    const a = f(lo), b = f(hi), stops = S.brcMidOn ? [S.brcLow, S.brcMid, S.brcHigh] : [S.brcLow, S.brcHigh];
+    const a = f(lo), b = f(hi), stops = brcStops(S);
     const ramp = q => { q = clamp(q, 0, 1) * (stops.length - 1); const i = Math.min(stops.length - 2, Math.floor(q)), u = q - i, c0 = hexRGB(stops[i]), c1 = hexRGB(stops[i + 1]); return rgbHex(c0.map((c, k) => c + (c1[k] - c) * u)); };
     const colorOf = n => { const v = val.get(n); return v == null ? null : ramp(b > a ? (f(v) - a) / (b - a) : 0.5); };
     return { colorOf, lo, hi, stops, ramp, col: S.brcCol };
   })();
   // a color given to the branch itself wins, then the data, then the clade color
   const strokeOf = n => stv(n, 'bc') || (brc && brc.colorOf(n)) || n._ec || S.lineColor;
+  // values written on the tree can take their colour from a parameter of their own (By data), independent of the branches
+  const valColorer = (src, col, pal, rev) => {
+    const val = src && col ? nodeValues(S, src, col) : null; if (!val || !val.size) return () => null;
+    const vs = [...val.values()], lo = Math.min(...vs), hi = Math.max(...vs), st = palStops(pal || 'viridis', ['#2C7BB6', '#FFFFBF', '#D7191C'], rev, 0);
+    return n => { const v = val.get(n); return v == null ? null : rampOf(st, hi > lo ? (v - lo) / (hi - lo) : 0.5); };
+  };
+  const lenVC = S.lengthColorBy === 'data' ? valColorer(S.lengthVSrc, S.lengthVCol, S.lengthVPal, S.lengthVRev) : null;
+  const supVC = S.supportColorBy === 'data' ? valColorer(S.supportVSrc, S.supportVCol, S.supportVPal, S.supportVRev) : null;
+  const nlabVC = S.ancLabelColorBy === 'data' ? valColorer(S.ancLabelVSrc, S.ancLabelVCol, S.ancLabelVPal, S.ancLabelVRev) : null;
   // branch width from data: thin for low values, thick for high ones
   const bwd = (() => {
     const val = nodeValues(S, S.bwdSrc, S.bwdCol, S.bwdLog); if (!val.size) return null;
@@ -3601,7 +3769,8 @@ function renderOnce() {
   // Support values: from the tree's labels, or the share of maps that contain each clade
   const supSrc = supSource();
   const supOf = supValue;
-  const supTxt = n => supSrc !== 'tree' ? String(Math.round(supOf(n))) : isSupport(n.name) ? String(n.name).split('/')[0] : String(+supOf(n).toFixed(2));
+  const supTxt = n => S.supportDec !== 'auto' && S.supportDec != null && Number.isFinite(supOf(n)) ? supOf(n).toFixed(+S.supportDec)   // the decimals chosen
+    : supSrc !== 'tree' ? String(Math.round(supOf(n))) : isSupport(n.name) ? String(n.name).split('/')[0] : String(+supOf(n).toFixed(2));
   // Other node labels stacked with the support values: 'after' writes them in the same text (a / b), 'below' under the branch
   const stackAfter = S.nlabStack === 'after' && S.supportMode === 'text' && S.nlabShow !== 'circles' && !!nodeLabelSrc(S), stackedNodes = new Set();
 
@@ -3620,7 +3789,7 @@ function renderOnce() {
       if (S.supportScheme === 'categories') { cat = catFor(vp, cats, S.supportLowIn !== false); if (!cat && ov == null) continue; }
       else if (vp < S.supportThreshold && ov == null) continue;
       if (mode === 'text') {
-        const col = stv(n, 'sc') || (cat ? cat.fill : S.supportColor);
+        const col = stv(n, 'sc') || (cat ? cat.fill : S.supportColorBy === 'branch' ? strokeOf(n) : supVC ? supVC(n) || S.supportColor : S.supportColor);
         // Other node labels stacked after the support (a / b): written in the same text, with the style of the support
         const s2 = stackAfter && (stv(n, 'nlv') ?? true) ? nodeLabelText(n, S) : null;
         if (s2 != null) stackedNodes.add(n.id);
@@ -3649,7 +3818,7 @@ function renderOnce() {
       if (!n.parent) continue;
       if (!(stv(n, 'lv') ?? S.showLengths)) continue;
       const bv = S.lengthSrc ? brVals.get(n) : n.len; if (bv == null) continue;
-      anL.push(branchText(n, 'length', (+bv).toFixed(S.lengthDecimals), stv(n, 'la') ?? S.lengthAlign, stv(n, 'lm') ?? S.lengthMargin, stv(n, 'ldy') ?? S.lengthDy, stv(n, 'ls') ?? S.lengthSize, stv(n, 'lcol') || S.lengthColor));
+      anL.push(branchText(n, 'length', (+bv).toFixed(S.lengthDecimals), stv(n, 'la') ?? S.lengthAlign, stv(n, 'lm') ?? S.lengthMargin, stv(n, 'ldy') ?? S.lengthDy, stv(n, 'ls') ?? S.lengthSize, stv(n, 'lcol') || (S.lengthColorBy === 'branch' ? strokeOf(n) : lenVC ? lenVC(n) || S.lengthColor : S.lengthColor)));
     }
   }
 
@@ -3762,7 +3931,7 @@ function renderOnce() {
       if ((!n.parent && !(L === 'rect' && stub > 0)) || !(stv(n, 'nlv') ?? !!nodeLabelSrc(S))) continue;
       if (stackedNodes.has(n.id)) continue;   // already written after the support (a / b)
       const txt = nodeLabelText(n, S); if (txt == null) continue;
-      anL.push(branchText(n, 'nlab', txt, stv(n, 'na') ?? S.ancLabelAlign, stv(n, 'nm') ?? S.ancLabelMargin, stv(n, 'ndy') ?? S.ancLabelDy, stv(n, 'ns') ?? S.ancLabelSize, stv(n, 'nc') || S.ancLabelColor, true, S.nlabStack === 'below'));
+      anL.push(branchText(n, 'nlab', txt, stv(n, 'na') ?? S.ancLabelAlign, stv(n, 'nm') ?? S.ancLabelMargin, stv(n, 'ndy') ?? S.ancLabelDy, stv(n, 'ns') ?? S.ancLabelSize, stv(n, 'nc') || (S.ancLabelColorBy === 'branch' ? strokeOf(n) : nlabVC ? nlabVC(n) || S.ancLabelColor : S.ancLabelColor), true, S.nlabStack === 'below'));
     }
   }
   // Branches colored by the state along them: bins from the parent (0) to the node (1)
@@ -3833,13 +4002,23 @@ function renderOnce() {
   lastNbar = new Set();
   const nbSrc = S.nbarSrc || '';
   if (nbSrc && useLen && (L === 'rect' || circ)) {
-    const key = nbSrc.startsWith('meta:') ? nbSrc.slice(5) : null, kde = nbSrc === 'kde' && treeSet && treeSet.hasLen;
-    const posR = h => circ ? rOf(maxD - h) : (maxD - h) * sx;   // position of an age
+    const key = nbSrc.startsWith('meta:') ? nbSrc.slice(5) : null;
+    const field = { kde: 'ages', kdeLen: 'lens', kdeSup: 'sups' }[nbSrc], kde = !!field && !!treeSet && (field !== 'ages' || treeSet.hasLen);
+    const supMax = field === 'sups' ? Math.max(1, ...[...treeSet.clades.values()].flatMap(o => o.sups || [])) <= 1 ? 1 : 100 : 1;
+    // where a value falls on the tree, as a depth from the root: an age counts back from the youngest tip,
+    // a branch length runs from the parent node, a support runs on a short scale that ends at the node
+    let curN = null;
+    const depthOf = v => field === 'lens' ? curN.parent._d + v : field === 'sups' ? curN._d - (1 - clamp(v / supMax, 0, 1)) * S.nbarSupW / (circ ? (S.radius - rIn) / maxD : sx) : maxD - v;
+    const posR = h => { const d = key ? maxD - h : depthOf(h); return circ ? rOf(d) : d * sx; };
     const dash = (st, w) => st === 'dashed' ? ` stroke-dasharray="${f2(w * 4)} ${f2(w * 3)}"` : st === 'dotted' ? ` stroke-dasharray="0 ${f2(w * 2.2)}" stroke-linecap="round"` : '';
     // a point at age h, off the branch by 'off' px (circular: along the arc)
     const pt = (n, h, off) => { if (!circ) return [posR(h), n._py + off]; const r = posR(h); return polar(r, n._a + off / Math.max(1, realR(r)) * 180 / Math.PI); };
     // a short line across the branch at age h, len px long, centred 'off' px from the branch
-    var medianMark = (n, h, len, off) => { const [ax, ay] = pt(n, h, off - len / 2), [bx, by] = pt(n, h, off + len / 2), w = Math.max(0.1, S.nbarMedW); return `<path d="M${f2(ax)},${f2(ay)}L${f2(bx)},${f2(by)}" stroke="${S.nbarMedColor}" stroke-width="${f2(w)}"${S.nbarMedStyle === 'solid' ? ' stroke-linecap="round"' : dash(S.nbarMedStyle, w)}/>`; };
+    // a short line across the bar at an age: the median, or the mean (each with its own width, style and colour)
+    var lineMark = (n, h, len, off, w0, style, color) => { const [ax, ay] = pt(n, h, off - len / 2), [bx, by] = pt(n, h, off + len / 2), w = Math.max(0.1, w0); return `<path d="M${f2(ax)},${f2(ay)}L${f2(bx)},${f2(by)}" stroke="${color}" stroke-width="${f2(w)}"${style === 'solid' ? ' stroke-linecap="round"' : dash(style, w)}/>`; };
+    var medianMark = (n, h, len, off) => lineMark(n, h, len, off, S.nbarMedW, S.nbarMedStyle, S.nbarMedColor);
+    var meanMark = (n, h, len, off) => lineMark(n, h, len, off, S.nbarMeanW, S.nbarMeanStyle, S.nbarMeanColor);
+    var meanOf = a => a.reduce((x, y) => x + y, 0) / a.length;
     for (const n of internals) {
       if (!(stv(n, 'nbv') ?? true)) continue;
       const H = stv(n, 'nbh') ?? S.nbarH, col = stv(n, 'nbc') || S.nbarColor, op = clamp(stv(n, 'nbo') ?? S.nbarOpacity, 0, 100) / 100;
@@ -3852,7 +4031,9 @@ function renderOnce() {
         if (circ) { const r0 = posR(hi), r1 = posR(lo), rm = realR((r0 + r1) / 2), da = H / 2 / Math.max(1, rm) * 180 / Math.PI; d = sector(Math.min(r0, r1), Math.max(r0, r1), n._a - da, n._a + da); }
         else { const x0 = posR(hi), x1 = posR(lo); d = `M${f2(x0)},${f2(n._py - H / 2)}H${f2(x1)}V${f2(n._py + H / 2)}H${f2(x0)}Z`; }
       } else if (kde) {
-        const c = ancKeys && treeSet.clades.get(ancKeys.get(n)); if (!c || !c.ages || !c.ages.length) continue;
+        const c0 = ancKeys && treeSet.clades.get(ancKeys.get(n)), vals = c0 && c0[field];
+        if (!vals || !vals.length || (field === 'lens' && !n.parent)) continue;
+        curN = n; const c = { ages: vals };   // the same drawing for ages, lengths and supports
         const hp = hpdOf(c.ages, (S.nbarHpdLevel || 95) / 100), band = (lo, hi, h, off) => {
           // a straight band between two ages, h px thick, centred 'off' px from the branch
           if (circ) { const r0 = posR(hi), r1 = posR(lo), rm = realR((r0 + r1) / 2), da = h / 2 / Math.max(1, rm) * 180 / Math.PI, ao = off / Math.max(1, rm) * 180 / Math.PI; return sector(Math.min(r0, r1), Math.max(r0, r1), n._a + ao - da, n._a + ao + da); }
@@ -3862,6 +4043,7 @@ function renderOnce() {
           // the HPD interval computed from the trees, drawn as a bar
           d = band(hp.lo, hp.hi, H, 0);
           if (S.nbarMedian) extraNb.push(medianMark(n, hp.med, H, 0));
+          if (S.nbarMean) extraNb.push(meanMark(n, meanOf(c.ages), H, 0));
         } else {
           const pts = ageDensity(c.ages, S.nbarBw); if (!pts) continue;
           const top = pts.map(([h, f]) => pt(n, h, -f * H));
@@ -3870,6 +4052,7 @@ function renderOnce() {
           // inside the violin: the HPD as a thin bar and the median as a short line
           if (S.nbarHpdIn) { const t = Math.max(0.2, S.nbarHpdH), off = S.nbarMirror ? 0 : -t / 2; extraNb.push(`<path d="${band(hp.lo, hp.hi, t, off)}" fill="${S.nbarHpdColor}" fill-opacity="0.85"/>`); }
           if (S.nbarMedian) extraNb.push(medianMark(n, hp.med, S.nbarMirror ? H * 1.2 : H * 0.6, S.nbarMirror ? 0 : -H * 0.3));
+          if (S.nbarMean) extraNb.push(meanMark(n, meanOf(c.ages), S.nbarMirror ? H * 1.2 : H * 0.6, S.nbarMirror ? 0 : -H * 0.3));
         }
       } else continue;
       nbarL.push(`<path d="${d}" fill="${col}" fill-opacity="${f2(op)}"${border}/>`, ...extraNb.splice(0));
@@ -3894,14 +4077,14 @@ function renderOnce() {
       }
       return `<g${op}>${body}<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${r}" fill="none"${border}/></g>`;
     }
-    return `<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${r}" fill="${fill}"${border}${op}/>`;
+    return shapeSvg(n._px, n._py, r, stv(n, 'dsh') ?? (n.children.length ? S.nodeDotShape : S.tipDotShape), ` fill="${fill}"${border}${op}`);
   };
   const dv = S.dotDataSrc && S.dotDataCol ? nodeValues(S, S.dotDataSrc, S.dotDataCol, false) : null;
   let dotLeg = null;
   const dotData = (() => {
     if (!dv || !dv.size) return null;
     const vs = [...dv.values()], lo = Math.min(...vs), hi = Math.max(...vs), q = v => hi > lo ? (v - lo) / (hi - lo) : 0.5;
-    const ramp = v => { const a = hexRGB(S.dotLow), b = hexRGB(S.dotHigh), t = q(v); return rgbHex(a.map((c, i) => c + (b[i] - c) * t)); };
+    const ramp = v => rampOf(dotStops(S), q(v));
     dotLeg = { lo, hi, col: S.dotDataCol };
     return { has: n => dv.has(n), fill: n => S.dotDataColor ? ramp(dv.get(n)) : null, r: n => S.dotDataSize ? S.dotSizeMin + (S.dotSizeMax - S.dotSizeMin) * q(dv.get(n)) : null, rOf: v => S.dotSizeMin + (S.dotSizeMax - S.dotSizeMin) * q(v) };
   })();
@@ -3916,7 +4099,7 @@ function renderOnce() {
       const r = stv(n, 'dot') ?? S.saDot, fillOn = stv(n, 'df') ?? true, col = stv(n, 'dc') || S.saColor;
       const bs = stv(n, 'dbs') ?? (fillOn ? 'none' : 'solid');   // an empty dot keeps a ring so it stays visible
       const border = bs === 'none' ? '' : strokeAttr(stv(n, 'dbc') || col, bs, stv(n, 'dbw') ?? S.dotBorderWidth, r, stv(n, 'dbn') ?? S.dotBorderCount);
-      if (r > 0) dotL.push(`<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(r)}" fill="${fillOn ? col : 'none'}"${border}/>`);
+      if (r > 0) dotL.push(shapeSvg(n._px, n._py, r, stv(n, 'dsh') ?? 'circle', ` fill="${fillOn ? col : 'none'}"${border}`));
       continue;
     }
     const [r, f] = dataDot(n, stv(n, 'dot') ?? (S.tipDotOn ? S.tipDot : 0), n.labelColor || n._ec || S.dotColor);
@@ -4448,7 +4631,7 @@ function renderOnce() {
   const blocks = [];
   if (S.supportMode !== 'none' && S.supportScheme === 'categories' && S.supportLegend && cats.length && sups.length)
     blocks.push({ key: 'support', title: 'Support', entries: cats.map(c => ({ text: catLabel(c, cats, S.supportLowIn !== false), sym: S.supportMode === 'dots' ? { t: 'circle', r: c.size, fill: c.filled ? c.fill : 'none', stroke: strokeAttr(c.stroke, c.strokeStyle, c.strokeWidth, c.size, c.strokeCount) } : { t: 'rect', fill: c.fill } })) });
-  if (brc && S.brcLegend) blocks.push({ key: 'brc', title: brc.col + (S.brcLog ? ' (log scale)' : ''), gradient: brc });
+  if (brc && S.brcLegend) blocks.push({ key: 'brc', title: brc.col + (S.brcLog ? ' (log₁₀ scale)' : ''), gradient: brc });
   if (heatLeg && S.heatLegend) blocks.push({ key: 'heat', title: heatLeg.col, gradient: heatLeg });
   if (nlabLeg && S.nlabLegend) {
     const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
@@ -4457,13 +4640,13 @@ function renderOnce() {
   }
   if (dotLeg && S.dotDataLegend) {
     const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
-    if (S.dotDataColor) blocks.push({ key: 'dotc', title: dotLeg.col, gradient: { stops: [S.dotLow, S.dotHigh], lo: dotLeg.lo, hi: dotLeg.hi } });
+    if (S.dotDataColor) blocks.push({ key: 'dotc', title: dotLeg.col, gradient: { stops: dotStops(S), lo: dotLeg.lo, hi: dotLeg.hi } });
     if (S.dotDataSize) blocks.push({ key: 'dots', title: S.dotDataColor ? '' : dotLeg.col, entries: [dotLeg.lo, (dotLeg.lo + dotLeg.hi) / 2, dotLeg.hi].map(v => ({ text: fmtV(v), sym: { t: 'circle', r: dotData.rOf(v), fill: S.dotDataColor ? '#9a9a9a' : S.dotColor } })) });
   }
   if (bwd && S.bwdLegend) {
     const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
     const steps = S.bwdLog ? [bwd.lo, Math.sqrt(bwd.lo * bwd.hi), bwd.hi] : [bwd.lo, (bwd.lo + bwd.hi) / 2, bwd.hi];
-    blocks.push({ key: 'bwd', title: bwd.col + (S.bwdLog ? ' (log scale)' : ''), entries: steps.map(v => ({ text: fmtV(v), sym: { t: 'line', w: bwd.wOf(v), c: S.lineColor } })) });
+    blocks.push({ key: 'bwd', title: bwd.col + (S.bwdLog ? ' (log₁₀ scale)' : ''), entries: steps.map(v => ({ text: fmtV(v), sym: { t: 'line', w: bwd.wOf(v), c: S.lineColor } })) });
   }
   if (anc && S.ancLegend && (S.ancOn || S.ancBranch !== 'none')) {
     const ent = smap.states.map((st, i) => ({ text: 'State ' + st, sym: { t: 'circle', r: 5, fill: ancColor(S, i) } }));
@@ -4695,7 +4878,13 @@ function arcPath(r, a0, a1) {
   return `M${f2(x0)},${f2(y0)}A${f2(r)},${f2(r)} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${f2(x1)},${f2(y1)}`;
 }
 // Highest posterior density interval: the shortest interval holding the given share of the values, plus the median.
+const _hpdCache = new WeakMap();
 function hpdOf(ages, level = 0.95) {
+  let byL = _hpdCache.get(ages); if (!byL) { byL = new Map(); _hpdCache.set(ages, byL); }
+  if (byL.has(level)) return byL.get(level);
+  const r = hpdOf0(ages, level); byL.set(level, r); return r;
+}
+function hpdOf0(ages, level = 0.95) {
   const a = ages.filter(Number.isFinite).slice().sort((x, y) => x - y), n = a.length;
   if (!n) return { lo: 0, hi: 0, med: 0 };
   const k = Math.max(1, Math.ceil(level * n));
@@ -4897,7 +5086,7 @@ function swatches(key, pal, cur, dis) {
      clade    bgOp opacity, bgS start, bgE end, bgG gradient, bgR corners, triH / triF height and fill when collapsed
      bar      barW, barC, barFs, barNH, barTM, barTA, barTD, barTO, barTC, barOff, barI, barB: clade name bars */
 const BR_KEYS = ['bc', 'bw', 'bs', 'bdl', 'bdg'], LEN_KEYS = ['lv', 'la', 'lm', 'ldy', 'ls', 'lcol'], TIP_KEYS = ['fs', 'it', 'fw', 'onq', 'dg', 'xb'],
-  DOT_KEYS = ['dot', 'df', 'dc', 'dbs', 'dbc', 'dbw', 'dbn'], SUP_KEYS = ['svm', 'sa', 'sm', 'sdy', 'ss', 'sc'], NLAB_KEYS = ['nlv', 'na', 'nm', 'ndy', 'ns', 'nc'], NBAR_KEYS = ['nbv', 'nbh', 'nbc', 'nbo', 'nbbc', 'nbbw'], CLADE_KEYS = ['bgOp', 'triF', 'triH', 'bgS', 'bgE', 'bgG', 'bgR'],
+  DOT_KEYS = ['dot', 'dsh', 'df', 'dc', 'dbs', 'dbc', 'dbw', 'dbn'], SUP_KEYS = ['svm', 'sa', 'sm', 'sdy', 'ss', 'sc'], NLAB_KEYS = ['nlv', 'na', 'nm', 'ndy', 'ns', 'nc'], NBAR_KEYS = ['nbv', 'nbh', 'nbc', 'nbo', 'nbbc', 'nbbw'], CLADE_KEYS = ['bgOp', 'triF', 'triH', 'bgS', 'bgE', 'bgG', 'bgR'],
   BAR_KEYS = ['barC', 'barTC', 'barOff', 'barTO', 'barW', 'barFs', 'barB', 'barI', 'barNH', 'barTM', 'barTA', 'barTD'], DATA_KEYS = ['dtc', 'dto'];
 // Short name of a node for messages (its name, or its tips).
 const nodeLabel = n => (n.name && !(n.children.length && isSupport(n.name))) ? disp(n.name) : (n.parent ? 'internal node' : 'root');
@@ -5045,11 +5234,13 @@ function copyStyleFor(e, n) {
   if (!same(br, 'branch')) return { why: 'The branches in this clade do not all look the same.' };
   if (!same(nodes, 'node')) return { why: 'The nodes in this clade do not all look the same.' };
   if (!same(tips, 'label')) return { why: 'The tip labels in this clade do not all look the same.' };
-  return { clip: { kind: 'clade', branch: br.length ? styleOf('branch', br[0]) : null, node: styleOf('node', nodes[0]), label: tips.length ? styleOf('label', tips[0]) : null } };
+  // the clade itself: its colour, its highlight and the look of its name bar (not the name)
+  const clade = { color: n.color ?? null, bg: n.bg ?? null, ...Object.fromEntries(['bgOp', 'bgS', 'bgE', 'bgG', 'bgR', 'triH', 'triF', ...BAR_KEYS].map(k => [k, stv(n, k)])) };
+  return { clip: { kind: 'clade', clade, branch: br.length ? styleOf('branch', br[0]) : null, node: styleOf('node', nodes[0]), label: tips.length ? styleOf('label', tips[0]) : null } };
 }
 // Groups the selection by kind of element, to paste a style on each.
 function pasteGroups(clip, T) {
-  if (clip.kind === 'clade') return [['branch', T.branch, clip.branch], ['node', T.node, clip.node], ['label', T.tip, clip.label]].filter(g => g[2]);
+  if (clip.kind === 'clade') return [['cladeRoot', (T.roots || []).filter(Boolean), clip.clade], ['branch', T.branch, clip.branch], ['node', T.node, clip.node], ['label', T.tip, clip.label]].filter(g => g[2]);
   const map = { branch: T.branch, node: T.node, label: T.tip, length: T.len, support: T.sup, bar: T.bar, data: T.data, nlab: T.nlab, nbar: T.nbar };
   return [[clip.kind, map[clip.kind] || [], clip.data]];
 }
@@ -5058,6 +5249,7 @@ function applyStyleData(n, kind, data) {
   n.st = n.st || {};
   for (const [k, v] of Object.entries(data)) {
     if (kind === 'branch' && isGraft(n) && (k === 'bs' || k === 'bdl' || k === 'bdg')) continue;   // fossil branches stay dashed
+    if (kind === 'cladeRoot' && (k === 'color' || k === 'bg')) { if (v == null) delete n[k]; else n[k] = v; continue; }   // properties of the clade itself
     if (k === 'lc') n.labelColor = v; else if (k === 'bold') n.bold = v; else n.st[k] = v;
   }
   for (const k in n.st) if (n.st[k] == null || n.st[k] === '') delete n.st[k];
@@ -5267,6 +5459,7 @@ function openEdit(cx, cy, keep) {
     const n1 = T.node[0];
     parts.push(`<div class="part"><b>${T.node.length === 1 ? 'Node dot' : 'Node dots'}</b>
       <div class="kv"><span>Size (0 hides it)</span>${num('dot', 'node', n1._sa ? S.saDot : !n1.children.length ? (S.tipDotOn ? S.tipDot : 0) : (S.nodeDotOn ? S.nodeDot : 0), 'px')}</div>
+      <div class="kv"><span>Shape</span>${esel('dsh', 'node', SHAPE_OPTS, n1._sa ? 'circle' : n1.children.length ? S.nodeDotShape : S.tipDotShape)}</div>
       <div class="kv"><span>Fill</span>${esel('df', 'node', [['1', 'Filled'], ['0', 'Empty']], n1._sa ? true : S.dotFill)}</div>
       <div class="grp${noFill ? ' off' : ''}"><span>Fill color</span>${sw('dc', 'node', g('node', 'dc'), PALETTE, noFill)}</div>
       <div class="kv"><span>Border</span>${esel('dbs', 'node', [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['none', 'None']], S.dotBorderStyle)}</div>
@@ -5953,7 +6146,11 @@ function exportAs(fmt) {
 /* ================= Misc ================= */
 let toastT;
 // Short message at the bottom of the screen.
-function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400); }
+function toast(m) {
+  const t = $('toast'); t.innerHTML = `<span>${esc(String(m))}</span><button type="button" class="tclose" aria-label="Close">×</button>`;
+  t.querySelector('.tclose').onclick = () => { clearTimeout(toastT); t.classList.remove('on'); };
+  t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), Math.min(5000, Math.max(3000, String(m).length * 50)));   // up to 5 seconds, or closed with ×
+}
 
 $('openBtn').onclick = () => $('projIn').click();
 const aboutM = $('aboutModal');
@@ -6094,6 +6291,12 @@ expMenu.querySelectorAll('[data-fmt]').forEach(b => b.onclick = () => { closeExp
 function syncSplit() { document.querySelectorAll('[data-split]').forEach(b => b.setAttribute('aria-pressed', String((settings.exportSplit !== false) === (b.dataset.split === '1')))); }
 document.querySelectorAll('[data-split]').forEach(b => b.onclick = () => { settings.exportSplit = b.dataset.split === '1'; persist(); syncSplit(); });
 // keep the Pages row in step every time the menu opens, whatever else the button does
+// Page settings: opens under its button, closes with a click elsewhere or Esc.
+document.body.appendChild($('pageSheet'));   // out of the dark header, so its buttons and texts look like the panel's
+$('pageBtn').addEventListener('click', e => { e.stopPropagation(); const sh = $('pageSheet'), open = sh.hidden; sh.hidden = !open;
+  if (open) { const r = $('pageBtn').getBoundingClientRect(); sh.style.top = (r.bottom + 6) + 'px'; sh.style.left = Math.max(8, Math.min(r.left, innerWidth - sh.offsetWidth - 8)) + 'px'; } $('pageBtn').setAttribute('aria-expanded', String(open)); if (open) refreshVisibility(); });
+document.addEventListener('pointerdown', e => { const sh = $('pageSheet'); if (!sh.hidden && !sh.contains(e.target) && !$('pageBtn').contains(e.target) && !$('pop').contains(e.target)) { sh.hidden = true; $('pageBtn').setAttribute('aria-expanded', 'false'); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('pageSheet').hidden) { $('pageSheet').hidden = true; $('pageBtn').setAttribute('aria-expanded', 'false'); } });
 $('expMenuBtn').addEventListener('click', () => { const hasPages = settings.layout === 'rect' && !isVertical(settings) && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); });
 syncSplit();
 $('dpiTop').addEventListener('change', e => setDpi(e.target.value));
@@ -6690,8 +6893,8 @@ function openImage(cx, cy, keep) {
   });
   if (m.txt || m.kde) {   // items the app draws: a title that says what they are
     const h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta');
-    if (h3) h3.textContent = m.txt ? `Label: ${m.txt.text || ''}` : `Density plot${m.kde.col ? ' of ' + m.kde.col : ''}`;
-    if (meta) meta.textContent = m.txt ? 'A text you can place anywhere and align with the tree.' : `${[...nodeValues(settings, m.kde.src, m.kde.col, m.kde.log).values()].filter(Number.isFinite).length} values from ${m.kde.src === 'meta' ? 'the tree annotations' : 'the table'}.`;
+    if (h3) h3.textContent = m.txt ? `Label: ${m.txt.text || ''}` : `Density plot${m.kde.col ? ' of ' + kdeColLabel(settings, m.kde.src, m.kde.col) : ''}`;
+    if (meta) meta.textContent = m.txt ? 'A text you can place anywhere and align with the tree.' : `${[...kdeValues(settings, m.kde, m.kde.log).values()].filter(Number.isFinite).length} values from ${m.kde.src === 'meta' ? 'the tree annotations' : 'the table'}.`;
   }
   if (m.txt) {   // a text label: its text and look first; its size comes from the text size
     const ps = [...pop.querySelectorAll('.part')].find(p => (p.querySelector('b') || {}).textContent === 'Position and size'); if (ps) ps.remove();
@@ -6833,6 +7036,7 @@ function splitRest() {
 }
 // Splits the tree into N pages of about the same number of rows.
 function splitEqual(k) {
+  if (!pageRows || !pageRows.N) render();   // the rows of the tree, in case they were not worked out yet
   if (!pageRows) return;
   const N = pageRows.N; k = clamp(Math.round(k) || 1, 1, N);
   if (tree) pushUndo(true);
@@ -7128,6 +7332,7 @@ function ctlRows(spec, get) {
     const rs = `<button type="button" class="rst${own ? '' : ' hide'}" data-crs="${o.k}" title="Use the panel setting" aria-label="Use the panel setting">↶</button>`;
     if (o.type === 'color') return `<div class="kv"><span>${o.label}</span>${rs}<input type="color" data-ck="${o.k}" ${colorAttrs(v)} aria-label="${o.label}"></div>`;
     if (o.type === 'sel') return `<div class="kv"><span>${o.label}</span>${rs}<select class="psel" data-ck="${o.k}" aria-label="${o.label}">${o.opts.map(([a, b]) => `<option value="${a}" ${String(a) === String(v) ? 'selected' : ''}>${b}</option>`).join('')}</select></div>`;
+    if (o.type === 'numb') return `<div class="kv"><span>${o.label}</span>${rs}<span class="numwrap"><input class="num boxed" type="number" step="any" data-ck="${o.k}" value="${v ?? ''}" placeholder="${o.ph || ''}" aria-label="${o.label}"><span>${o.unit || ''}</span></span></div>`;
     return `<div class="kv"><span>${o.label}</span>${rs}<span class="numwrap"><input class="num boxed" type="number" step="any" data-ck="${o.k}" value="${v}" aria-label="${o.label}"><span>${o.unit || ''}</span></span></div>`;
   }).join('');
 }
@@ -7140,6 +7345,7 @@ function wireCtl(spec, set) {
       let v;
       if (t === 'color') v = colorVal(el);
       else if (t === 'sel') { v = el.value; if (v === 'true' || v === 'false') v = v === 'true'; else if (v !== '' && !isNaN(+v) && /^-?[\d.]+$/.test(v)) v = +v; }
+      else if (t === 'numb') { if (el.value.trim() === '') v = null; else { v = parseFloat(el.value); if (isNaN(v)) return; } }
       else { v = parseFloat(el.value); if (isNaN(v)) return; }
       set(k, v);
     };
@@ -7460,11 +7666,25 @@ function heatPickerBox() {
 /* ================= Tip labels from a table column ================= */
 function allCols(t) { return t ? t.header.slice(1) : []; }
 // Names shown for the tips, taken from a column of a table (the tree keeps its own names).
+// What the tips show instead of (or after) their names: a table column, an annotation of the tips (age, height,
+// rate...), or a value worked out from the tree (the age of each tip, or the length of its branch).
+const tipMetaKeys = () => { const ks = new Set(); if (tree) for (const n of leaves(tree)) if (n.meta) for (const [k, v] of Object.entries(n.meta)) if (v !== true) ks.add(k); return [...ks]; };
 function altNames(S) {
-  const t = (S.dataTables || []).find(x => x.id === S.labelSrcTable), ci = t ? t.header.indexOf(S.labelSrcCol) : -1, out = new Map();
-  if (!t || ci < 1 || !tree) return out;
-  const m = tableIndex(t);
-  for (const n of leaves(tree)) { const r = m.get(normTip(n.name || '')); const v = r && r[ci] != null ? String(r[ci]).trim() : ''; if (v) out.set(n, v); }
+  const out = new Map(); if (!tree || !S.labelSrcTable) return out;
+  const dec = S.labelSrcDec ?? 3, fmt = v => v !== '' && v != null && isFinite(+v) ? String(+(+v).toFixed(dec)) : String(v).trim();
+  if (S.labelSrcTable === 'meta') {
+    for (const n of leaves(tree)) { const v = n.meta && n.meta[S.labelSrcCol]; if (v != null && v !== true && v !== '') out.set(n, Array.isArray(v) ? `[${v.map(fmt).join(', ')}]` : fmt(v)); }
+  } else if (S.labelSrcTable === 'calc') {
+    const d = new Map(); let H = 0;
+    (function g(x, acc) { d.set(x, acc); if (!x.children.length) H = Math.max(H, acc); x.children.forEach(c => g(c, acc + (c.len || 0))); })(tree, 0);
+    for (const n of leaves(tree)) { const v = S.labelSrcCol === 'len' ? n.len : H - d.get(n); if (v != null && isFinite(v)) out.set(n, fmt(Math.abs(v) < 1e-9 ? 0 : v)); }
+  } else {
+    const t = (S.dataTables || []).find(x => x.id === S.labelSrcTable), ci = t ? t.header.indexOf(S.labelSrcCol) : -1;
+    if (!t || ci < 1) return out;
+    const m = tableIndex(t);
+    for (const n of leaves(tree)) { const r = m.get(normTip(n.name || '')); const v = r && r[ci] != null ? String(r[ci]).trim() : ''; if (v) out.set(n, v); }
+  }
+  if (S.labelSrcBoth) for (const [n, v] of out) out.set(n, `${disp(n.name || '')}  ${v}`);   // the name, then the value
   return out;
 }
 
@@ -7573,6 +7793,7 @@ const PALETTES = {
   tol: ['#4477AA', '#EE6677', '#228833', '#CCBB44', '#66CCEE', '#AA3377', '#BBBBBB', '#000000', '#88CCEE', '#1F1F1F'],
   viridis: ['#440154', '#482878', '#3E4989', '#31688E', '#26828E', '#1F9E89', '#35B779', '#6DCD59', '#B4DE2C', '#FDE725']
 };
+for (const [k, v] of Object.entries(DATA_PALETTES)) if (!PALETTES[k]) PALETTES[k] = v;   // the palettes for colouring by data, offered here too
 // Sets the palette offered by the menus.
 function applyPalette() { const p = PALETTES[settings.paletteName] || PALETTES.default; PALETTE.splice(0, PALETTE.length, ...p); applyCvd(); }
 const CVD = {
@@ -7730,10 +7951,13 @@ async function fetchFirst(urls) {
   return null;
 }
 
-/* ================= Reference window (the ? button at the bottom of the panel) =================
+/* ================= Reference window (the Manual button of the header) =================
    Reads content/reference.md next to the app, or the online copy, and keeps a copy for use without internet. */
 const REF_URL = 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/reference.md';
 const REF_CACHE = 'tree2go-reference';
+// The manual as a PDF: content/tree2go-manual.pdf next to the app, or the copy in the repository
+const PDF_URL = 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/tree2go-manual.pdf';
+$('helpPdf').href = /^https?:/.test(location.protocol) ? 'content/tree2go-manual.pdf' : PDF_URL;
 const helpM = $('helpModal');
 // Closes the Reference window.
 const closeHelp = () => { helpM.hidden = true; };
@@ -8040,7 +8264,7 @@ svg.addEventListener('contextmenu', e => {
    A density plot is an image the app draws itself from values of the tree (m.kde holds its settings), so it moves,
    resizes, aligns and shows distance guides like any image. Arrows live in settings.arrows: each end is free or
    anchored to a node (found by its tips, so it survives undo and saving) or to one of nine points of an image. */
-const KDE_DEF = { src: '', col: '', smooth: 1, log: false, mode: 'single', fill: '#5B8DEF', fillOp: 0.35, line: '#2F5D8C', lw: 1.5, dash: 'solid',
+const KDE_DEF = { src: '', col: '', smooth: 1, log: false, capLo: null, capHi: null, curve: true, hist: false, binW: null, histFill: '#9DB7E8', histOp: 0.6, mode: 'single', fill: '#5B8DEF', fillOp: 0.35, line: '#2F5D8C', lw: 1.5, dash: 'solid',
   axis: true, axisColor: '#333333', axisW: 1, axisFs: 10, axisGap: 6, title: '' };
 // The colour scale of the branches or of the dots (low, middle, high), so a density plot can be painted with it.
 function kdeScale(mode) {
@@ -8049,11 +8273,11 @@ function kdeScale(mode) {
     const val = nodeValues(S, S.brcTable, S.brcCol, S.brcLog); if (!val.size) return null;
     const vs = [...val.values()], f = v => S.brcLog ? Math.log10(v) : v;
     const lo = S.brcMin != null && S.brcMin !== '' ? +S.brcMin : Math.min(...vs), hi = S.brcMax != null && S.brcMax !== '' ? +S.brcMax : Math.max(...vs);
-    return { stops: S.brcMidOn ? [S.brcLow, S.brcMid, S.brcHigh] : [S.brcLow, S.brcHigh], a: f(lo), b: f(hi), f };
+    return { stops: brcStops(S), a: f(lo), b: f(hi), f };
   }
   if (mode === 'dots' && S.dotDataSrc && S.dotDataCol) {
     const val = nodeValues(S, S.dotDataSrc, S.dotDataCol); if (!val.size) return null;
-    const vs = [...val.values()]; return { stops: [S.dotLow, S.dotHigh], a: Math.min(...vs), b: Math.max(...vs), f: v => v };
+    const vs = [...val.values()]; return { stops: dotStops(S), a: Math.min(...vs), b: Math.max(...vs), f: v => v };
   }
   return null;
 }
@@ -8062,23 +8286,44 @@ const dashOf = (kind, w) => kind === 'dashed' ? ` stroke-dasharray="${f2(w * 3.5
 // The SVG of a density plot: Gaussian kernel with Silverman's bandwidth (times the smoothing), and an axis under it.
 function kdeSvg(k) {
   const S = settings, W = 320, H = 180, fam = 'Helvetica, Arial, sans-serif';
-  const raw = [...nodeValues(S, k.src, k.col, k.log).values()].filter(Number.isFinite);
+  const raw = [...kdeValues(S, k, k.log).values()].filter(Number.isFinite);
   const xs = k.log ? raw.filter(v => v > 0).map(Math.log10) : raw;
   const head = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
   if (xs.length < 2) return head + `<rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="6" fill="none" stroke="#bbb" stroke-dasharray="4 3"/><text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-size="12" fill="#888" font-family="${fam}">Choose values with at least two numbers</text></svg>`;
   const n = xs.length, mean = xs.reduce((a, b) => a + b, 0) / n, sd = Math.sqrt(xs.reduce((a, v) => a + (v - mean) ** 2, 0) / (n - 1)) || 1;
   const sorted = xs.slice().sort((a, b) => a - b), q = p => sorted[Math.min(n - 1, Math.floor(p * (n - 1)))], iqr = q(0.75) - q(0.25);
   const h = Math.max(1e-12, 0.9 * Math.min(sd, iqr > 0 ? iqr / 1.34 : sd) * Math.pow(n, -0.2) * (k.smooth > 0 ? k.smooth : 1));
-  const lo = sorted[0] - 3 * h, hi = sorted[n - 1] + 3 * h, G = 160, grid = [];
+  // a kernel density spills past the data (support above 100, negative lengths...): the curve can be cut at chosen values
+  const cutT = v => v == null || v === '' || !isFinite(v) ? null : k.log ? (v > 0 ? Math.log10(v) : null) : +v;
+  const cLo = cutT(k.capLo), cHi = cutT(k.capHi);
+  let lo = sorted[0] - 3 * h, hi = sorted[n - 1] + 3 * h;
+  if (cLo != null && cLo < hi) lo = Math.max(lo, cLo);
+  if (cHi != null && cHi > lo) hi = Math.min(hi, cHi);
+  const G = 160, grid = [];
   let maxD = 0;
-  for (let i = 0; i <= G; i++) { const x = lo + (hi - lo) * i / G; let d = 0; for (const v of xs) d += Math.exp(-0.5 * ((x - v) / h) ** 2); d /= n * h * Math.sqrt(2 * Math.PI); grid.push([x, d]); if (d > maxD) maxD = d; }
+  for (let i = 0; i <= G; i++) { const x = lo + (hi - lo) * i / G; let d = 0; for (const v of xs) d += Math.exp(-0.5 * ((x - v) / h) ** 2); d /= n * h * Math.sqrt(2 * Math.PI); grid.push([x, d]); if (k.curve !== false && d > maxD) maxD = d; }
+  // histogram on the same scale as the curve (count / (n · bin width)); automatic width by the Freedman-Diaconis rule
+  const bins = [];
+  if (k.hist) {
+    const bw = k.binW > 0 ? (k.log ? k.binW : +k.binW) : Math.max(1e-12, (iqr > 0 ? 2 * iqr * Math.pow(n, -1 / 3) : (sorted[n - 1] - sorted[0]) / 20 || 1));
+    const b0 = Math.floor(Math.max(lo, sorted[0]) / bw) * bw;
+    for (let x = b0, guard = 0; x < Math.min(hi, sorted[n - 1] + bw) && guard < 2000; x += bw, guard++) {
+      const a = Math.max(x, lo), b = Math.min(x + bw, hi); if (b <= a) continue;
+      const c = xs.filter(v => v >= x && (v < x + bw || (v === sorted[n - 1] && v <= x + bw))).length, d = c / (n * bw);
+      bins.push([a, b, d]); if (d > maxD) maxD = d;
+    }
+  }
+  if (!(maxD > 0)) maxD = 1;
   const padL = 10, padR = 10, padT = 8, tick = 4;
   const axisH = k.axis ? k.axisGap + tick + k.axisFs * 1.3 + (k.title ? k.axisFs * 1.4 : 0) : 0, base = H - 4 - axisH;
   const X = v => padL + (v - lo) / (hi - lo) * (W - padL - padR), Y = d => padT + (base - padT) * (1 - d / maxD);
   const line = grid.map(([x, d], i) => `${i ? 'L' : 'M'}${f2(X(x))},${f2(Y(d))}`).join('');
   const area = line + `L${f2(X(hi))},${f2(base)}L${f2(X(lo))},${f2(base)}Z`;
   let areaSvg = `<path d="${area}" fill="${k.fill}" fill-opacity="${k.fillOp}" stroke="none"/>`;
-  const sc = k.mode !== 'single' && kdeScale(k.mode);
+  const scH = k.mode !== 'single' && kdeModes(S, k).some(o => o[0] === k.mode) && kdeScale(k.mode);
+  const barCol = v => { if (!scH) return k.histFill; const vv = k.log ? 10 ** v : v; return rampOf(scH.stops, scH.b > scH.a ? (scH.f(vv) - scH.a) / (scH.b - scH.a) : 0.5); };
+  const histSvg = bins.map(([a, b, d]) => `<rect x="${f2(X(a))}" y="${f2(Y(d))}" width="${f2(Math.max(0, X(b) - X(a) - 0.6))}" height="${f2(base - Y(d))}" fill="${barCol((a + b) / 2)}" fill-opacity="${k.histOp}"/>`).join('');
+  const sc = k.mode !== 'single' && kdeModes(S, k).some(o => o[0] === k.mode) && kdeScale(k.mode);
   if (sc) {   // the fill follows the colour of each value, as the branches or dots do: thin strips, each in its colour
     // each colour is mixed with the page background by the fill opacity, so the strips are solid and leave no seams
     const bgc = hexRGB(/^#[0-9a-f]{6}$/i.test(S.bg || '') ? S.bg : '#ffffff');
@@ -8099,7 +8344,8 @@ function kdeSvg(k) {
       + ticks.map(t => `<text x="${f2(X(t))}" y="${f2(y0 + tick + k.axisFs)}" text-anchor="middle" font-size="${k.axisFs}" fill="${k.axisColor}" font-family="${fam}">${esc(lab(t))}</text>`).join('')
       + (k.title ? `<text x="${f2(W / 2)}" y="${f2(y0 + tick + k.axisFs * 2.3)}" text-anchor="middle" font-size="${k.axisFs}" fill="${k.axisColor}" font-family="${fam}">${esc(k.title)}</text>` : '');
   }
-  return head + areaSvg + `<path d="${line}" fill="none" stroke="${k.line}" stroke-width="${k.lw}"${dashOf(k.dash, k.lw)}/>` + ax + '</svg>';
+  const curveSvg = k.curve === false ? '' : areaSvg + `<path d="${line}" fill="none" stroke="${k.line}" stroke-width="${k.lw}"${dashOf(k.dash, k.lw)}/>`;
+  return head + histSvg + curveSvg + ax + '</svg>';
 }
 // Redraws every density plot from the current values and colours (called before the images are placed).
 // ---- free text labels: an image the app writes from m.txt, so they move, align and show guides like any image
@@ -8158,13 +8404,14 @@ function refreshKdes() {
   }
 }
 function addKdePlot() {
-  const S = settings, src0 = S.brcTable && S.brcCol ? S.brcTable : (dataSourceOpts(S).find(o => o[0]) || [''])[0];
-  const col0 = S.brcTable && S.brcCol ? S.brcCol : ((dataColOpts(S, src0) || [])[0] || [''])[0];
+  const S = settings, byBr = S.brcTable && S.brcCol && (S.dataTables || []).some(t => t.id === S.brcTable);
+  const src0 = byBr ? 'files' : (kdeSrcOpts(S).find(o => o[0]) || [''])[0];
+  const col0 = byBr ? S.brcTable + KSEP + S.brcCol : (kdeColOpts(S, src0)[0] || [''])[0];
   const kde = { ...KDE_DEF, src: src0, col: col0, log: !!(S.brcTable && S.brcCol && S.brcLog) };
   const sid = 's' + (++imgUid) + 'k'; imgStore.set(sid, '');
   const w = 240, h = 135, cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k;
   if (tree) pushUndo();
-  const m = { id: ++imgUid, sid, name: 'Density' + (col0 ? ' of ' + col0 : ''), x: cx - w / 2, y: cy - h / 2, w, h, nw: 320, nh: 180, op: 1, rot: 0, layer: 'front', kde };
+  const m = { id: ++imgUid, sid, name: 'Density' + (col0 ? ' of ' + kdeColLabel(S, src0, col0) : ''), x: cx - w / 2, y: cy - h / 2, w, h, nw: 320, nh: 180, op: 1, rot: 0, layer: 'front', kde };
   figImages.push(m); selImg = m.id; refreshKdes();
   imgChanged('Density plot added. Right-click it to choose the values and its look.');
 }
@@ -8172,11 +8419,16 @@ function addKdePlot() {
 function kdeMenuPart(m) {
   const k = m.kde, S = settings;
   const spec = [
-    { k: 'src', label: 'Values from', type: 'sel', opts: dataSourceOpts(S) },
-    { k: 'col', label: 'Value', type: 'sel', opts: dataColOpts(S, k.src) },
-    { k: 'log', label: 'Logarithmic scale', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] },
+    { k: 'src', label: 'Values from', type: 'sel', opts: kdeSrcOpts(S) },
+    { k: 'col', label: 'Value', type: 'sel', opts: kdeColOpts(S, k.src) },
+    { k: 'log', label: 'Logarithmic scale (log₁₀)', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] },
     { k: 'smooth', label: 'Smoothing', type: 'num', unit: '×' },
-    { k: 'mode', label: 'Color', type: 'sel', opts: [['single', 'One color'], ['branches', 'Like the branches'], ['dots', 'Like the dots']] },
+    { k: 'capLo', label: 'Cut below', type: 'numb', ph: 'None' }, { k: 'capHi', label: 'Cut above', type: 'numb', ph: 'None' },
+    { k: 'curve', label: 'Density curve', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] },
+    { k: 'hist', label: 'Histogram', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] },
+    { k: 'binW', label: k.log ? 'Bin width (log₁₀)' : 'Bin width', type: 'numb', ph: 'Auto' },
+    { k: 'histFill', label: 'Histogram color', type: 'color' }, { k: 'histOp', label: 'Histogram opacity', type: 'num', unit: '%' },
+    ...(kdeModes(S, k).length > 1 ? [{ k: 'mode', label: 'Color', type: 'sel', opts: kdeModes(S, k) }] : []),
     { k: 'fill', label: 'Fill', type: 'color' }, { k: 'fillOp', label: 'Fill opacity', type: 'num', unit: '%' },
     { k: 'line', label: 'Line color', type: 'color' }, { k: 'lw', label: 'Line width', type: 'num', unit: 'px' },
     { k: 'dash', label: 'Line style', type: 'sel', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] },
@@ -8184,10 +8436,10 @@ function kdeMenuPart(m) {
     { k: 'axisColor', label: 'Axis color', type: 'color' }, { k: 'axisW', label: 'Axis width', type: 'num', unit: 'px' },
     { k: 'axisFs', label: 'Axis text size', type: 'num', unit: 'px' }, { k: 'axisGap', label: 'Space to the axis', type: 'num', unit: 'px' },
   ];
-  const get = key => ({ v: key === 'fillOp' ? Math.round(k.fillOp * 100) : k[key], own: false });
+  const get = key => ({ v: key === 'fillOp' ? Math.round(k.fillOp * 100) : key === 'histOp' ? Math.round((k.histOp ?? 0.6) * 100) : k[key] ?? KDE_DEF[key], own: false });
   return { spec, html: `<div class="part"><b>Density plot</b>${ctlRows(spec, get)}<div class="kv"><span>Axis title</span><input type="text" class="lgtext" data-kdetitle value="${esc(k.title || '')}" placeholder="e.g. Rate (subs./site/Myr)"></div>
-    <p class="hint">${k.mode !== 'single' && !kdeScale(k.mode) ? `The ${k.mode === 'branches' ? 'branches are' : 'dots are'} not colored by data any more, so the plot uses its own fill color.` : 'Gaussian kernel density; smoothing multiplies the bandwidth. To take the colors of the branches or the dots, color them by data first.'}</p></div>`,
-    set: (key, v) => { if (key === 'fillOp') v = clamp(v, 0, 100) / 100; if (key === 'src') { k.col = (dataColOpts(S, v)[0] || [''])[0]; } k[key] = v; if (key === 'col' || key === 'src') m.name = 'Density' + (k.col ? ' of ' + k.col : ''); } };
+    <p class="hint">${k.mode !== 'single' && !(kdeModes(S, k).some(o => o[0] === k.mode) && kdeScale(k.mode)) ? `The ${k.mode === 'branches' ? 'branches are' : 'dots are'} not colored by these values, so the plot uses its own fill color.` : `Gaussian kernel density; smoothing multiplies the bandwidth. A density spills past the data, so it can be cut at chosen values, for example 100 for support. Leave the bin width empty for an automatic one.${k.log ? ' With the logarithmic scale the curve is drawn over the base-10 logarithm of the values, and the axis shows the values themselves. The bin width is then in log₁₀ units: 0.1 makes each bin span a factor of about 1.26.' : ''} To take the colors of the branches or the dots, color them by these same values first.`}</p></div>`,
+    set: (key, v) => { if (key === 'fillOp' || key === 'histOp') v = clamp(v, 0, 100) / 100; if (key === 'binW' && v != null && !(v > 0)) v = null; if (key === 'src') { k.col = (kdeColOpts(S, v)[0] || [''])[0]; } k[key] = v; if (key === 'col' || key === 'src') m.name = 'Density' + (k.col ? ' of ' + kdeColLabel(S, k.src, k.col) : ''); } };
 }
 
 // ---- arrows
