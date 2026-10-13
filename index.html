@@ -230,13 +230,19 @@ aside .inline input.num.boxed, .pop .inline input.num, aside .cat select{backgro
 .modal .box.about .aboutBody.framed{overflow:hidden; padding-right:0}
 .helphead{display:flex; align-items:flex-start; gap:20px; margin-bottom:10px}
 .modal .box.about .helphead h3{flex:1 1 auto; min-width:0; margin:0; padding-right:0}
-.helpsearch{flex:0 0 min(420px,52%); display:flex; align-items:center; gap:6px; margin-top:2px}
-.helpfield{position:relative; flex:1 1 auto; min-width:0}
+.helpsearch{flex:1 1 auto; display:flex; align-items:center; justify-content:flex-end; gap:6px; margin-top:2px; min-width:0}   /* the free room right of the title */
+.helpfield{position:relative; flex:0 1 420px; min-width:220px}
 .helpfield input{width:100%; height:32px; padding:0 84px 0 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); font:inherit; font-size:13.5px; box-sizing:border-box}
 .helpfield input:focus{outline:none; border-color:var(--accent)}
 .helpfield input::-webkit-search-cancel-button{display:none}   /* the count sits where the browser puts its clear button; Esc clears */
 .helpfield .hint{position:absolute; right:10px; top:50%; transform:translateY(-50%); pointer-events:none; white-space:nowrap; font-size:12px}
 .helpsearch .btn{flex:none; width:34px; height:32px; padding:0; font-size:16px; line-height:1}
+.refpage > :not(#helpModal):not(script):not(style){display:none !important}
+.refpage #helpModal{position:static; inset:auto; background:none; padding:24px 16px; display:block}
+.refpage #helpModal .box{max-width:min(1340px, 96vw); width:auto; height:auto; max-height:none; margin:0 auto; box-shadow:none; overflow:visible}
+html:has(body.refpage), body.refpage{height:auto; overflow:auto}   /* on its own page, the page scrolls */
+.refpage #helpModal .box > *{overflow:visible; max-height:none; flex:none}
+.refpage #helpTab{display:none}
 .helpsearch .btn.helppdf{width:auto; padding:0 12px; font-size:13px; display:inline-flex; align-items:center; text-decoration:none; white-space:nowrap; color:inherit}
 .helpBody mark.find{background:#ffe8b0; color:inherit; border-radius:2px; padding:0}
 .helpBody mark.find.on{background:var(--mustard); box-shadow:0 0 0 1px var(--mustard)}
@@ -295,6 +301,11 @@ textarea{width:100%; min-height:120px; resize:vertical; padding:8px; border:1px 
 .inline select{padding:5px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg)}
 /* Subtitles inside a panel section ("› Ages"), with a fading separator line. */
 .subhead{font-size:13.5px; font-weight:600; color:var(--ink); margin:8px 0 -2px; padding-top:10px; border-top:1px solid var(--line)}
+.subhead.fold{cursor:pointer; user-select:none}
+.subhead.fold::before{transition:transform .15s}
+.subhead.fold.open::before{transform:rotate(45deg)}   /* the chevron points down when open */
+.subshut{display:none !important}
+.layeroff{opacity:.45; pointer-events:none}
 /* Separadores internos: más cortos que los principales y con degradado en los extremos.
    --sub-gap = hueco transparente a cada lado; --sub-fade = largo del degradado tras ese hueco. */
 .subhead{--sub-gap:10%; --sub-fade:20%; border-top-width:var(--hair, 1px);
@@ -660,7 +671,7 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
       <!-- search box at the height of the title: the count of matches inside it, on the right, and the arrows beside it -->
       <div class="helpsearch">
         <div class="helpfield"><input id="helpFind" type="search" placeholder="Search the reference" aria-label="Search the reference" autocomplete="off"><span id="helpCount" class="hint"></span></div>
-        <button type="button" class="btn" id="helpPrev" title="Previous match (Shift+Enter)" aria-label="Previous match">↑</button><button type="button" class="btn" id="helpNext" title="Next match (Enter)" aria-label="Next match">↓</button><a class="btn helppdf" id="helpPdf" download="tree2go-manual.pdf" title="Download the manual as a PDF">Download PDF</a>
+        <button type="button" class="btn" id="helpPrev" title="Previous match (Shift+Enter)" aria-label="Previous match">↑</button><button type="button" class="btn" id="helpNext" title="Next match (Enter)" aria-label="Next match">↓</button><a class="btn helppdf" id="helpPdf" download="tree2go-manual.pdf" title="Download the manual as a PDF">Download PDF</a><a class="btn helppdf" id="helpTab" href="#reference" target="_blank" rel="noopener" title="Open the reference in a tab of its own, to keep it next to the app">Open in a new tab</a>
       </div>
     </div>
     <div class="aboutBody helpBody" id="helpBody"><p class="hint">Loading…</p></div>
@@ -1769,38 +1780,37 @@ const SECTIONS_RAW = [
     { k: 'heatLegend', type: 'check', label: 'Show legend' },
     { type: 'head', label: 'Alignment' },
     { type: 'custom', build: () => { const d = document.createElement('div'); d.className = 'tpicker'; if (!alnSets.length) d.innerHTML = '<p class="hint">Load a FASTA alignment in Attachments to show it here.</p>'; return d; } },   // keeps the Alignment head in view, as the table pickers do
-    { k: 'alnOn', type: 'check', label: 'Show the alignment next to the tips', enable: s => !!alnData && s.layout === 'rect' },
-    { type: 'hint', text: s => !alnData || !s.alnOn ? (alnData && s.layout !== 'rect' ? 'Shown on rectangular trees.' : '') : (() => { const from = clamp(Math.round(s.alnFrom || 1), 1, alnData.len), to = clamp(Math.round(s.alnTo || alnData.len), from, alnData.len), n = to - from + 1, fit = Math.floor(Math.max(10, s.alnWidth) / Math.max(1, s.spacing * (s.alnCell || 100) / 100)); return n <= fit ? `Sites ${from} to ${to} as squares (${fit} fit in this width).` : `Sites ${from} to ${to} do not fit as squares (${fit} would), so they are shown as a barcode: each column compared with its most common residue.`; })() },
-    { k: 'alnPick', type: 'select', label: 'Alignment', opts: () => alnSets.map(a => [a.name, a.name]), show: () => alnSets.length > 1, enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnFrom', type: 'number', label: 'From site', min: 1, max: 1000000, step: 1, enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnTo', type: 'number', label: 'To site', min: 1, max: 1000000, step: 1, enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnWidth', type: 'range', label: 'Width', min: 20, max: 2000, step: 10, unit: 'px', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnCell', type: 'range', label: 'Cell size (% of the row)', min: 20, max: 100, step: 5, unit: '%', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnGap', type: 'range', label: 'Distance from the previous element', min: 0, max: 200, step: 1, unit: 'px', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnRuler', type: 'check', label: 'Site numbers', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnRulerPos', type: 'seg', label: 'Place', opts: [['top', 'Above'], ['bottom', 'Below']], enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
-    { k: 'alnRulerStep', type: 'number', label: 'Every (sites, 0 for automatic)', min: 0, max: 100000, step: 1, enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
-    { k: 'alnRulerFs', type: 'number', label: 'Text size', min: 4, max: 40, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
-    { k: 'alnRulerGap', type: 'number', label: 'Space between numbers and ticks', min: 0, max: 40, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
-    { k: 'alnRulerTick', type: 'number', label: 'Tick length', min: 0, max: 30, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
-    { k: 'alnRulerColor', type: 'color', label: 'Color of numbers and ticks', enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
-    { k: 'alnLetters', type: 'check', label: 'Letters in the cells (when large enough)', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnColA', type: 'color', label: 'Adenine (A)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnColC', type: 'color', label: 'Cytosine (C)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnColG', type: 'color', label: 'Guanine (G)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnColT', type: 'color', label: 'Thymine (T) or uracil (U)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnAaHyd', type: 'color', label: 'Hydrophobic (A, I, L, M, F, W, V)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnAaPos', type: 'color', label: 'Positive (K, R)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnAaNeg', type: 'color', label: 'Negative (D, E)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnAaPol', type: 'color', label: 'Polar (N, Q, S, T)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnAaCys', type: 'color', label: 'Cysteine (C)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnAaGly', type: 'color', label: 'Glycine (G)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnAaPro', type: 'color', label: 'Proline (P)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnAaAro', type: 'color', label: 'Aromatic (H, Y)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnColN', type: 'color', label: 'Other or ambiguous', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnColGap', type: 'color', label: 'Gaps and missing data', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnSame', type: 'color', label: 'Barcode: as the most common', enable: s => !!alnData && s.alnOn, sub: true },
-    { k: 'alnDiff', type: 'color', label: 'Barcode: different', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnPick', type: 'select', label: 'Alignment', opts: () => [['', 'None'], ...alnSets.map(a => [a.name, a.name])] },
+    { type: 'hint', text: s => !alnData ? '' : s.layout !== 'rect' ? 'Shown on rectangular trees.' : (() => { const from = clamp(Math.round(s.alnFrom || 1), 1, alnData.len), to = clamp(Math.round(s.alnTo || alnData.len), from, alnData.len), n = to - from + 1, fit = Math.floor(Math.max(10, s.alnWidth) / Math.max(1, s.spacing * (s.alnCell || 100) / 100)); return n <= fit ? `Sites ${from} to ${to} as squares (${fit} fit in this width).` : `Sites ${from} to ${to} do not fit as squares (${fit} would), so they are shown as a barcode: each column compared with its most common residue.`; })() },
+    { k: 'alnFrom', type: 'number', label: 'From site', min: 1, max: 1000000, step: 1, enable: s => !!alnData, sub: true },
+    { k: 'alnTo', type: 'number', label: 'To site', min: 1, max: 1000000, step: 1, enable: s => !!alnData, sub: true },
+    { k: 'alnWidth', type: 'range', label: 'Width', min: 20, max: 2000, step: 10, unit: 'px', enable: s => !!alnData, sub: true },
+    { k: 'alnCell', type: 'range', label: 'Cell size (% of the row)', min: 20, max: 100, step: 5, unit: '%', enable: s => !!alnData, sub: true },
+    { k: 'alnGap', type: 'range', label: 'Distance from the previous element', min: 0, max: 200, step: 1, unit: 'px', enable: s => !!alnData, sub: true },
+    { k: 'alnRuler', type: 'check', label: 'Site numbers', enable: s => !!alnData, sub: true },
+    { k: 'alnRulerPos', type: 'seg', label: 'Place', opts: [['top', 'Above'], ['bottom', 'Below']], enable: s => !!alnData && s.alnRuler, sub: true },
+    { k: 'alnRulerStep', type: 'number', label: 'Every (sites, 0 for automatic)', min: 0, max: 100000, step: 1, enable: s => !!alnData && s.alnRuler, sub: true },
+    { k: 'alnRulerFs', type: 'number', label: 'Text size', min: 4, max: 40, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnRuler, sub: true },
+    { k: 'alnRulerGap', type: 'number', label: 'Space between numbers and ticks', min: 0, max: 40, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnRuler, sub: true },
+    { k: 'alnRulerTick', type: 'number', label: 'Tick length', min: 0, max: 30, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnRuler, sub: true },
+    { k: 'alnRulerColor', type: 'color', label: 'Color of numbers and ticks', enable: s => !!alnData && s.alnRuler, sub: true },
+    { k: 'alnLetters', type: 'check', label: 'Letters in the cells (when large enough)', enable: s => !!alnData, sub: true },
+    { k: 'alnColA', type: 'color', label: 'Adenine (A)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData, sub: true },
+    { k: 'alnColC', type: 'color', label: 'Cytosine (C)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData, sub: true },
+    { k: 'alnColG', type: 'color', label: 'Guanine (G)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData, sub: true },
+    { k: 'alnColT', type: 'color', label: 'Thymine (T) or uracil (U)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData, sub: true },
+    { k: 'alnAaHyd', type: 'color', label: 'Hydrophobic (A, I, L, M, F, W, V)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData, sub: true },
+    { k: 'alnAaPos', type: 'color', label: 'Positive (K, R)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData, sub: true },
+    { k: 'alnAaNeg', type: 'color', label: 'Negative (D, E)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData, sub: true },
+    { k: 'alnAaPol', type: 'color', label: 'Polar (N, Q, S, T)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData, sub: true },
+    { k: 'alnAaCys', type: 'color', label: 'Cysteine (C)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData, sub: true },
+    { k: 'alnAaGly', type: 'color', label: 'Glycine (G)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData, sub: true },
+    { k: 'alnAaPro', type: 'color', label: 'Proline (P)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData, sub: true },
+    { k: 'alnAaAro', type: 'color', label: 'Aromatic (H, Y)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData, sub: true },
+    { k: 'alnColN', type: 'color', label: 'Other or ambiguous', enable: s => !!alnData, sub: true },
+    { k: 'alnColGap', type: 'color', label: 'Gaps and missing data', enable: s => !!alnData, sub: true },
+    { k: 'alnSame', type: 'color', label: 'Barcode: as the most common', enable: s => !!alnData, sub: true },
+    { k: 'alnDiff', type: 'color', label: 'Barcode: different', enable: s => !!alnData, sub: true },
   ]},
   { title: 'Legends', items: [
     { type: 'hint', text: () => 'Hover a legend or the scale bar on the canvas and click its lock to drag it by hand. Right-click a legend to rewrite its title and entries.' },
@@ -2119,6 +2129,7 @@ function catLabel(c, cats, lowIn) {
 }
 // Shows, hides or greys out each panel option according to what it depends on.
 function refreshVisibility() {
+  alnSync();   // the alignment chosen, before its options are enabled
   const sl = document.querySelector('.sidelayers'); if (sl && sl._refresh) sl._refresh();   // which layers are in use
   if (typeof refreshPagesBox === 'function' && $('pagesBox') && $('pagesBox').dataset.layout !== settings.layout + ':' + settings.rectOrient) { $('pagesBox').dataset.layout = settings.layout + ':' + settings.rectOrient;   /* shape or orientation changed */ refreshPagesBox(); }
   document.querySelectorAll('.dynhint').forEach(el => { if (el._fn) el.textContent = el._fn(settings); });
@@ -2146,6 +2157,32 @@ function refreshVisibility() {
 // Options that stay visible (greyed out) when they do not apply, so the user knows they exist
 const KEEP_OFF = new Set(['layout', 'barTextMode', 'barTextAlign', 'labelOrient', 'axisCircLabels']);
 // Hides hints of hidden options and subheads whose group has nothing visible.
+// Subsections (the subheads inside a section) fold. They start closed, the open ones are remembered (also when their
+// section closes), and Collapse closes them all. A side plot hidden with its eye in Layers greys out its options.
+const SUB_KEY = 'tree2go-subopen';
+let subOpen = new Set((() => { try { return JSON.parse(localStorage.getItem(SUB_KEY) || '[]'); } catch (e) { return []; } })());
+const subSave = () => { try { localStorage.setItem(SUB_KEY, JSON.stringify([...subOpen])); } catch (e) { } };
+const subKeyOf = (sec, h) => ((sec.closest('details') || {}).querySelector ? (sec.closest('details').querySelector('summary') || {}).textContent : 'Page settings') + '::' + (h.dataset.label || h.textContent);
+const SUB_LAYER = { Bars: 'bar', Categories: 'cat', Heatmap: 'heat', Alignment: 'aln', 'Clade name bars': 'clade' };
+function applySubs() {
+  const hid = settings.sideHidden || {};
+  for (const sec of document.querySelectorAll('aside .sec, #pageSheet .sec')) {
+    let cur = null, off = false;
+    for (const el of sec.children) {
+      if (el.classList.contains('subhead')) {
+        if (!el.dataset.label) el.dataset.label = el.textContent;
+        cur = el; const open = subOpen.has(subKeyOf(sec, el)); off = !!hid[SUB_LAYER[el.dataset.label]];
+        el.classList.add('fold'); el.classList.toggle('open', open); el.setAttribute('aria-expanded', String(open)); el.setAttribute('role', 'button'); el.tabIndex = 0;
+        continue;
+      }
+      el.classList.toggle('subshut', !!cur && !cur.classList.contains('open'));
+      el.classList.toggle('layeroff', !!cur && off);   // a hidden layer: its options greyed out until it shows again
+    }
+  }
+}
+const subToggle = h => { const sec = h.parentElement, k = subKeyOf(sec, h); if (subOpen.has(k)) subOpen.delete(k); else subOpen.add(k); subSave(); applySubs(); };
+document.addEventListener('click', e => { const h = e.target.closest && e.target.closest('.subhead.fold'); if (h && h.closest('aside, #pageSheet')) subToggle(h); });
+document.addEventListener('keydown', e => { const h = e.target.closest && e.target.closest('.subhead.fold'); if (h && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); subToggle(h); } });
 function tidyPanel() {
   for (const sec of document.querySelectorAll('aside .sec, #pageSheet .sec')) {
     const kids = [...sec.children];
@@ -2166,6 +2203,7 @@ function tidyPanel() {
       owner = el;
     }
   }
+  applySubs();
 }
 // Changes one setting from code, as if done in the panel.
 function setSetting(k, v) {
@@ -2364,9 +2402,8 @@ function addTableFile(file) {
     settings.dataTables = [...(settings.dataTables || []), t];
     // what the table is most likely for: presence/absence → categories; values for internal nodes too → branch colors; otherwise → bars
     const inner = tree ? (() => { const m = tableIndex(t); let k = 0; walkAll(tree, x => { if (x.children.length && x.name && m.has(normTip(x.name))) k++; }); return k; })() : 0;
-    if (bin) { settings.catTable = t.id; settings.catCols = catColsOf(t); }
-    else if (inner > 0) { settings.brcTable = t.id; settings.brcCol = numericCols(t).find(c => /rate/i.test(c)) || numericCols(t).find(c => c !== t.header[0]) || numericCols(t)[0]; settings.dataActive = t.id; settings.dataCols = []; }
-    else { settings.dataActive = t.id; settings.dataCols = [numericCols(t)[0]]; }
+    // side plots start on None: the user chooses which table each one shows (branch colours still take a table with internal nodes)
+    if (inner > 0 && !bin) { settings.brcTable = t.id; settings.brcCol = numericCols(t).find(c => /rate/i.test(c)) || numericCols(t).find(c => c !== t.header[0]) || numericCols(t)[0]; }
     buildSide();
     for (const d of document.querySelectorAll('#side details')) if (d.querySelector('#tabList') || (settings.brcTable === t.id ? d.querySelector('.row[data-k=brcTable]') : d.querySelector('#barCols, #catCols'))) d.open = true;
     dataChanged(file.name + ': ' + matchInfo(t));
@@ -2387,7 +2424,7 @@ function refreshAttach() {
     box.innerHTML = sm + lg + al + (ts.length || mcmcLog ? ts.map(t => `<div class="tabitem" data-id="${esc(t.id)}"><div class="thead"><span class="tname" title="${esc(t.name)}">${esc(t.name)}</span><button type="button" class="btn small danger" data-del>Remove</button></div><span class="tmeta">${esc(matchInfo(t, false))}</span><label class="tidcol"><span>Names in</span><select data-idcol>${t.header.map((h, i) => `<option value="${i}"${i === (t.idCol || 0) ? ' selected' : ''}>${esc(h)}</option>`).join('')}</select></label></div>`).join('') : sm ? '' : '<p class="hint">No tables yet.</p>');
     const ds = box.querySelector('[data-delsmap]'); if (ds) ds.onclick = () => { smap = null; persistSmap(); buildSide(); render(); toast('SIMMAP removed'); };
     const dl = box.querySelector('[data-dellog]'); if (dl) dl.onclick = () => { mcmcLog = null; refreshAttach(); refreshTreeSetBox(); toast('MCMC log removed'); };
-    box.querySelectorAll('[data-delaln]').forEach(b => b.onclick = () => { alnSets.splice(+b.dataset.delaln, 1); alnSync(); if (!alnSets.length) { try { localStorage.removeItem(ALN_KEY); } catch (e) { } settings.alnOn = false; } else alnSave(); buildSide(); render(); persist(); refreshAttach(); toast('Alignment removed'); });
+    box.querySelectorAll('[data-delaln]').forEach(b => b.onclick = () => { alnSets.splice(+b.dataset.delaln, 1); alnSync(); if (!alnSets.length) { try { localStorage.removeItem(ALN_KEY); } catch (e) { } settings.alnPick = ''; } else alnSave(); buildSide(); render(); persist(); refreshAttach(); toast('Alignment removed'); });
     box.querySelectorAll('.tabitem[data-id] [data-idcol]').forEach(sl => sl.onchange = () => {
       const t = (settings.dataTables || []).find(x => x.id === sl.closest('.tabitem').dataset.id); if (!t) return;
       t.idCol = +sl.value; t.idLocked = true; dataChanged();
@@ -3088,7 +3125,7 @@ async function saveProject() {
     tabs: (() => { const r = tabsRecord(); if (r) for (const t of r.tabs) if (t.doc) t.doc.images = (t.doc.images || []).map(m => ({ ...m, src: imgStore.get(m.sid) })); return r; })()
   };
   // the same project without the attached files: tables, SIMMAP, MCMC log, alignments, pie charts and images
-  const lite = { ...proj, settings: { ...settings, dataTables: [], pieData: null, pieOn: false, alnOn: false }, smap: null, alignments: [], mcmc: null, images: [],
+  const lite = { ...proj, settings: { ...settings, dataTables: [], pieData: null, pieOn: false, alnPick: '' }, smap: null, alignments: [], mcmc: null, images: [],
     tabs: proj.tabs ? { ...proj.tabs, tabs: proj.tabs.tabs.map(t => t.doc ? { ...t, doc: { ...t.doc, images: [], settings: t.doc.settings ? { ...t.doc.settings, dataTables: [], pieData: null } : t.doc.settings } } : t) } : proj.tabs };
   const full = JSON.stringify(proj, null, 1), bare = JSON.stringify(lite, null, 1), size = t => { const b = new Blob([t]).size; return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; };
   const A = attachSummary(), imgs = figImages.length;
@@ -3195,7 +3232,7 @@ const attachKinds = A => A.kinds.map(k => `${k.label} (${k.count})`).join(', ');
 function clearAttachments() {
   settings.dataTables = []; settings.pieData = null; settings.pieOn = false;
   smap = null; persistSmap(); alnSets = []; alnSync(); try { localStorage.removeItem(ALN_KEY); } catch (e) { }
-  settings.alnOn = false; mcmcLog = null;
+  settings.alnPick = ''; mcmcLog = null;
   buildSide(); render(); persist(); refreshAttach(); refreshTreeSetBox();
 }
 // After a new tree is opened with files still attached: keep them for it, or remove them.
@@ -4335,7 +4372,7 @@ function renderOnce() {
   const alnRows = () => [...tips, ...gNodes.filter(x => !x.children.length)].filter(n => !n._tri && alnData && alnData.seqs.has(normTip(n.name || ''))).map(n => ({ y: n._py, seq: alnData.seqs.get(normTip(n.name || '')) }));
   const alnDraw = x0 => { const rs = alnRows(); if (!rs.length) return; const top = Math.min(...rs.map(r => r.y)) - sp / 2, bottom = Math.max(...rs.map(r => r.y)) + sp / 2; const a = alnSvg(S, rs, x0, Math.max(1, sp * (S.alnCell || 100) / 100), top, bottom); anL.push(`<g>${a.svg}</g>`); alnEnd = a.end; };
   const sideHid = k => !!(S.sideHidden && S.sideHidden[k]);   // a layer hidden with its eye: kept, but not drawn
-  const alnHere = S.alnOn && alnData && L === 'rect' && !circ && !sideHid('aln');
+  const alnHere = !!alnData && L === 'rect' && !circ && !sideHid('aln');
   // Layers: on rectangular trees each side plot starts where the ones before it in the order end. A width is the real
   // one once its plot is drawn, and worked out beforehand otherwise (plots are drawn in a fixed order in the code).
   const layered = L === 'rect' && !circ, sideBase = labEnd, sideOn = {}, sideW = {};
@@ -8253,7 +8290,14 @@ const PDF_URL = 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/conten
 $('helpPdf').href = /^https?:/.test(location.protocol) ? 'content/tree2go-manual.pdf' : PDF_URL;
 const helpM = $('helpModal');
 // Closes the Reference window.
-const closeHelp = () => { helpM.hidden = true; };
+const closeHelp = () => { if (document.body.classList.contains('refpage')) return; helpM.hidden = true; };   // the reference on its own page stays open
+// Opened as …#reference (the New tab button): the reference alone, as a full page, next to the app in another tab.
+$('helpTab').href = location.href.split('#')[0] + '#reference';
+$('helpTab').addEventListener('click', () => setTimeout(closeHelp));   // the reference goes to its own tab: the tree is in view here again
+if (location.hash === '#reference') {
+  document.body.classList.add('refpage'); document.title = 'tree2go reference';
+  helpM.hidden = false; setTimeout(() => { loadHelp(); $('helpFind').focus(); });
+}
 // The first # title of the file becomes the title of the window (and leaves the text, so it is not shown twice).
 function helpTitleFromBody() {
   const box = $('helpBody'), h = box.firstElementChild;
@@ -9188,7 +9232,7 @@ function mergeRuns(list) {
 /* ================= Sequence alignment next to the tree (FASTA) ================= */
 // Kept apart from the settings (it can be large): one sequence per tip name, as written in the file.
 let alnSets = [], alnData = null;   // every alignment loaded; alnData: the one shown, { seqs: Map(normName -> sequence), len, n, type: 'dna' | 'aa', name }
-const alnSync = () => { alnData = alnSets.find(a => a.name === settings.alnPick) || alnSets[0] || null; };
+const alnSync = () => { alnData = alnSets.find(a => a.name === settings.alnPick) || null; };   // None until one is chosen in Side plots
 const alnSave = () => { try { localStorage.setItem(ALN_KEY, JSON.stringify(alnSets.map(a => ({ seqs: [...a.seqs], len: a.len, type: a.type, name: a.name })))); } catch (e) { toast('The alignments are shown but too large to be kept after a reload'); } };
 const ALN_KEY = 'tree2go-aln';
 function alnFromText(text, name) {
@@ -9204,9 +9248,9 @@ function alnFromText(text, name) {
   const sample = [...seqs.values()].join('').slice(0, 20000).replace(/[-?.N]/g, '');
   const type = sample.length && (sample.match(/[ACGTU]/g) || []).length / sample.length > 0.9 ? 'dna' : 'aa';
   let nm = name || 'alignment'; while (alnSets.some(a => a.name === nm)) nm = nm.replace(/( \(\d+\))?$/, m => ` (${(+(m.match(/\d+/) || [1])[0]) + 1})`);
-  alnSets.push({ seqs, len, n: seqs.size, type, name: nm }); settings.alnPick = nm; alnSync(); alnSave();
+  alnSets.push({ seqs, len, n: seqs.size, type, name: nm }); alnSync(); alnSave();   // loaded, not shown: chosen in Side plots
   const matched = tree ? leaves(tree).filter(l => seqs.has(normTip(l.name || ''))).length : 0;
-  settings.alnOn = true; settings.alnFrom = 1; settings.alnTo = len;
+  if (!alnData) { settings.alnFrom = 1; settings.alnTo = len; }
   buildSide(); render(); persist(); refreshAttach();
   toast(`${seqs.size} sequences of ${len} ${type === 'dna' ? 'bases' : 'residues'}, ${matched} of ${tree ? leaves(tree).length : 0} tips matched`);
 }
@@ -9219,7 +9263,7 @@ function alnBox() {
       <p class="hint">The names after > must match the tip names. Show it from Side plots, Alignment.</p>`;
     d.querySelector('#alnBtn').onclick = () => { if (!tree) return toast('Open a tree first'); d.querySelector('#alnIn').click(); };
     d.querySelector('#alnIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => alnFromText(r.result, f.name); r.readAsText(f); } e.target.value = ''; };
-    d.querySelectorAll('[data-alnrm]').forEach(b => b.onclick = () => { alnSets.splice(+b.dataset.alnrm, 1); alnSync(); if (!alnSets.length) { try { localStorage.removeItem(ALN_KEY); } catch (e) { } settings.alnOn = false; } else alnSave(); buildSide(); render(); persist(); });
+    d.querySelectorAll('[data-alnrm]').forEach(b => b.onclick = () => { alnSets.splice(+b.dataset.alnrm, 1); alnSync(); if (!alnSets.length) { try { localStorage.removeItem(ALN_KEY); } catch (e) { } settings.alnPick = ''; } else alnSave(); buildSide(); render(); persist(); });
   };
   setTimeout(fill); return d;
 }
@@ -9270,7 +9314,7 @@ function sideOrderOf(S) {
   return o;
 }
 // Which layers are in use (shown in the list as such; the others are listed greyed).
-const sideActive = S => ({ aln: !!(alnSets.length && S.alnOn), cat: !!(typeof hasCat === 'function' && hasCat(S)), bar: !!(typeof hasData === 'function' && hasData(S)), heat: !!(typeof hasHeat === 'function' && hasHeat(S)), clade: !!tree && [...nodeById.values()].some(n => n.cladeLabel) });
+const sideActive = S => ({ aln: !!alnData, cat: !!(typeof hasCat === 'function' && hasCat(S)), bar: !!(typeof hasData === 'function' && hasData(S)), heat: !!(typeof hasHeat === 'function' && hasHeat(S)), clade: !!tree && [...nodeById.values()].some(n => n.cladeLabel) });
 function sideLayersBox() {
   const d = document.createElement('div'); d.className = 'treetools sidelayers';
   const fill = () => {
@@ -9331,7 +9375,7 @@ $('clearBtn').onclick = async () => {
 // Opens every section of the panel.
 function expandAllSections() { document.querySelectorAll('#side details').forEach(d => { d.open = true; }); }
 // Closes every section of the panel.
-function collapseAllSections() { document.querySelectorAll('#side details').forEach(d => { d.open = false; }); $('side').scrollTop = 0; }
+function collapseAllSections() { document.querySelectorAll('#side details').forEach(d => { d.open = false; }); subOpen.clear(); subSave(); applySubs(); $('side').scrollTop = 0; }   // sections and their subsections
 // MRCA: tick two tips in the list and the smallest clade containing both is selected
 const mrcaPick = new Set();
 // Fills the tip list of the MRCA picker.
