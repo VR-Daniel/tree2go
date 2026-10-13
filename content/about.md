@@ -22,6 +22,10 @@ The tool also supports external resources, such as figures or tables containing 
 
 #### How to cite
 
+If you use tree2go in a publication, we would appreciate it if you cite it as:
+
 <div class="citation-box">
-  Vásquez-Restrepo, J. D. (2026). <i>tree2go: An interactive browser-based phylogenetic tree viewer and editor</i> [Software]. GitHub. <a href="https://github.com/VR-Daniel/tree2go">https://github.com/VR-Daniel/tree2go</a>
+  Vásquez-Restrepo, J. D. & Simões, T. R. (2026). <i>tree2go: An interactive browser-based phylogenetic tree viewer and editor</i> [Software]. GitHub. <a href="https://github.com/VR-Daniel/tree2go">https://github.com/VR-Daniel/tree2go</a>
 </div>
+
+tree2go is shared under a <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (CC BY-NC-SA 4.0)</a>: it can be shared and modified with credit to its authors, for non-commercial purposes only, and any modified version must be shared under the same license.
