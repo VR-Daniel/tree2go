@@ -241,6 +241,10 @@ aside .inline input.num.boxed, .pop .inline input.num, aside .cat select{backgro
 .helpBody mark.find{background:#ffe8b0; color:inherit; border-radius:2px; padding:0}
 .helpBody mark.find.on{background:var(--mustard); box-shadow:0 0 0 1px var(--mustard)}
 .nethit{cursor:context-menu; pointer-events:stroke}
+.pielist .row label{flex:1}
+.part .kv.tsrow{align-items:flex-start; min-height:0; padding-top:2px; padding-bottom:2px; margin:0} .tsval{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+.tsub{font-size:12px; color:var(--muted, #667)}
+.tshelp{cursor:help; color:var(--muted, #667); font-size:12px}
 .arrowhit{cursor:move; pointer-events:stroke}
 .arrowend{cursor:crosshair; pointer-events:all}
 .netpickctl{display:flex; align-items:center; gap:6px}
@@ -334,6 +338,10 @@ body.hastabs .status{top:50px}
 .hit{stroke:transparent; fill:none; cursor:pointer; pointer-events:stroke}
 .hitlabel,.hittri,.hitpt{cursor:pointer}
 .hitlabel,.hitpt{fill:transparent}
+/* Click areas are never painted: hidden, they still take clicks (stroke and all ignore visibility). On large trees this
+   saves the browser from painting tens of thousands of invisible shapes at every frame. */
+.hit,.hitlabel,.hitpt,.hittri{visibility:hidden}
+.hitlabel,.hitpt,.hittri{pointer-events:all}
 .sideTab{position:absolute; left:0; top:50%; transform:translateY(-50%); z-index:15; width:18px; height:56px; border:1px solid var(--line); border-left:0; border-radius:0 8px 8px 0; background:var(--panel); cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center; color:var(--muted)}
 .sideTab:hover{background:var(--panel2); color:var(--ink)}
 .sideTab svg{width:10px; height:10px; transition:transform .3s}
@@ -457,6 +465,19 @@ body.hastabs .status{top:50px}
 .freelock rect{fill:#fff}
 .freelock path{fill:none; stroke:#fff; stroke-width:1.6; stroke-linecap:round}
 .freeitem.unlocked .freelock circle{fill:var(--mustard)}
+.layerlist{display:flex; flex-direction:column; gap:6px; margin:6px 0 4px}
+.layer{display:grid; grid-template-columns:auto minmax(0,1fr) auto auto auto auto; align-items:center; gap:5px; padding:5px 6px; border:1px solid var(--line-strong); border-radius:8px; background:var(--panel); cursor:grab; font-size:13px}
+.layer.off .lname{color:var(--muted, #667)} .layer .lnote{font-size:11px; color:var(--muted, #667); white-space:nowrap; text-align:right}
+.layer .lname{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; line-height:24px}   /* one line, whatever the width of the panel */
+.layer .grip{color:var(--muted, #667); letter-spacing:-2px; cursor:grab}
+.layer .btn.icon{width:24px; height:24px; padding:0; display:inline-flex; align-items:center; justify-content:center; line-height:1}
+.layer .btn.icon svg{display:block}
+.layer.dragging{opacity:.5}
+.layerlist{position:relative} .dropline{position:absolute; left:4px; right:4px; height:2px; border-radius:2px; background:var(--accent); pointer-events:none}
+.layer .eye.shut{color:var(--muted, #667)}
+.savechoice{display:flex; gap:10px; align-items:flex-start; margin:8px 0; cursor:pointer} .savechoice input{margin-top:3px}
+.dmgctx{display:inline-block; margin-top:6px; padding:4px 8px; border-radius:6px; background:var(--line); font-size:12px; word-break:break-all}
+.pop .kv > .lgtext{width:100px; height:28px}   /* as wide as the lists of the menus */
 .pop .lgtext{width:100%; height:28px; padding:0 8px; border:1px solid var(--line-strong); border-radius:6px; background:var(--panel); color:var(--ink)}
 .imgrot{fill:transparent; cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M17 6.5A7.5 7.5 0 1 0 18.5 13' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M17 6.5A7.5 7.5 0 1 0 18.5 13' fill='none' stroke='black' stroke-width='1.6'/%3E%3Cpath d='M13.5 5.5h4.5V1' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") 11 11, alias}
 .guidelab{cursor:text}
@@ -478,7 +499,7 @@ aside > *{flex:none}
 aside > .sidefoot{margin-top:auto}
 .hovertip{position:fixed; z-index:90; pointer-events:none; max-width:280px; padding:7px 10px; border-radius:8px; background:var(--panel); border:1px solid var(--line); box-shadow:0 8px 22px rgba(20,25,35,.18); font-size:12.5px; display:flex; flex-direction:column; gap:2px}
 .hovertip[hidden]{display:none}
-.hovertip span{color:var(--muted)}
+.hovertip span{color:var(--muted); display:block}
 .hovbtn{margin-right:auto}
 .hovbtn.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
 .useg.wide{width:auto; min-width:180px}
@@ -511,7 +532,7 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
 .tabitem .tidcol{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted)}
 .tabitem .tidcol span{flex:none}
 .tabitem .tidcol select{flex:1; min-width:0; font-size:12px; padding:3px 6px}
-.tcols{display:flex; flex-direction:column; gap:6px}
+.tcols{display:flex; flex-direction:column; gap:10px; margin:6px 0}
 .tcol{display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:8px}
 .tcol input[type=checkbox]{accent-color:var(--accent); width:16px; height:16px; margin:0}
 .tcol label{font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -881,6 +902,8 @@ function serialize(n) {
   if (n.bud != null) o.bu = n.bud;
   if (n.grafts && n.grafts.length) o.gr = n.grafts.map(serialize);
   if (n.hyb && n.hyb.length) o.hy = n.hyb;
+  if (n.poly) o.py = n.poly;   // the branches a polytomy replaced, to restore them
+  if (n._unrooted) o.ur = 1; if (n._rooted) o.rr = 1;   // [&U] or [&R] of the file
   if (n.don && n.don.length) o.dn = n.don;
   if (n.children.length) o.k = n.children.map(serialize);
   return o;
@@ -894,6 +917,8 @@ function deserialize(o, parent = null) {
   n.ex = !!o.ex; n.noEx = !!o.nx; n.fa = o.fa ?? null; n.bud = o.bu ?? null;
   if (o.m) n.meta = o.m;
   if (o.hy) n.hyb = JSON.parse(JSON.stringify(o.hy));
+  if (o.py) n.poly = JSON.parse(JSON.stringify(o.py));
+  if (o.ur) n._unrooted = true; if (o.rr) n._rooted = true;
   if (o.dn) n.don = JSON.parse(JSON.stringify(o.dn));
   if (o.gr) n.grafts = o.gr.map(g => markGraft(deserialize(g, null), n));
   if (o.fx) n.grafts = (n.grafts || []).concat(o.fx.map(f => { const G = mk(f.name || 'Fossil'); G.fa = f.age; G.bud = f.bud ?? null; return markGraft(G, n); }));
@@ -1195,7 +1220,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 // Default settings merged with saved ones, with the migrations that keep older sessions and projects working.
@@ -1278,10 +1303,12 @@ const SECTIONS_RAW = [
   ]},
   { title: 'Layout', items: [
     { k: 'layout', type: 'seg', opts: [['rect', 'Rectangular'], ['circular', 'Circular'], ['fan', 'Fan'], ['unrooted', 'Unrooted']], refit: true, enable: () => !figImages.length },
-    { k: 'rectOrient', type: 'seg', label: 'Orientation', opts: [['horizontal', 'Horizontal'], ['vertical', 'Vertical']], refit: true, show: s => s.layout === 'rect', sub: true },
+    { k: 'rectOrient', type: 'seg', label: 'Orientation', opts: [['horizontal', 'Horizontal'], ['vertical', 'Vertical'], ['custom', 'Custom']], refit: true, show: s => s.layout === 'rect', sub: true },
+    { k: 'rectAngle', type: 'range', label: 'Angle', min: 0, max: 359, step: 1, unit: '°', refit: true, show: s => s.layout === 'rect' && s.rectOrient === 'custom', sub: true },
+    { type: 'hint', text: s => s.layout === 'rect' && s.rectOrient === 'custom' ? 'Turns the tree clockwise: 0° is horizontal, 270° vertical with the tips on top. At other angles the text turns with the tree, and pages and alignment guides are off, as on circular trees.' : '' },
     { k: 'scaleTurn', type: 'seg', label: 'Scale bar on a vertical tree', opts: [['tree', 'Turns with the tree'], ['upright', 'Horizontal']], show: s => s.layout === 'rect' && s.rectOrient === 'vertical' && !s.axisOn && s.scaleBar, sub: true },   // the time axis, which replaces the bar, always turns with the tree
     { k: 'vertText', type: 'seg', label: 'Text on a vertical tree', opts: [['vertical', 'Vertical'], ['horizontal', 'Horizontal']], show: s => s.layout === 'rect' && s.rectOrient === 'vertical', sub: true },
-    { type: 'hint', text: s => s.layout === 'rect' && s.rectOrient === 'vertical' ? 'The tips go on top and the root at the bottom; the time axis and the scale bar turn with the tree, legends and the title do not. With horizontal text, widen the tip spacing so the names do not overlap.' : '' },
+    { type: 'hint', text: s => s.layout === 'rect' && s.rectOrient === 'vertical' ? 'The tips go on top and the root at the bottom. The time axis and the scale bar turn with the tree, while legends and the title do not. With horizontal text, widen the tip spacing so the names do not overlap.' : '' },
     { type: 'hint', text: () => figImages.length ? 'While the page has images, the tree shape cannot be changed. Remove the images, change the shape, then add them back.' : '' },
     { k: 'useLengths', type: 'check', label: 'Use branch lengths', refit: true },
     { type: 'custom', build: treeToolsBox },
@@ -1292,7 +1319,22 @@ const SECTIONS_RAW = [
     { k: 'circSpan', type: 'range', label: 'Total angle', min: 20, max: 360, step: 1, hmin: 1, hmax: 360, unit: '°', show: s => s.layout === 'circular' },
     { k: 'fanSpan', type: 'range', label: 'Fan opening', min: 20, max: 359, step: 1, hmin: 1, hmax: 359, unit: '°', show: s => s.layout === 'fan' },
     { k: 'rotation', type: 'range', label: 'Rotation', min: -180, max: 180, step: 1, hmin: -360, hmax: 360, unit: '°', show: s => !isRectish(s) },
+    { k: 'catInvert', type: 'check', label: 'Turn circular and fan trees inside out', show: s => isCirc(s), refit: true },
     { k: 'rootStub', type: 'range', label: 'Root branch', min: 0, max: 80, step: 1, hmax: 1000, unit: 'px', show: s => s.layout !== 'unrooted' },
+  ]},
+  { title: 'Tree cloud', items: [
+    { type: 'hint', text: s => !dtAvailable() ? 'Open a file with several dated trees (a posterior sample) to draw them as a cloud with the tree shown.' : s.layout !== 'rect' ? 'Drawn on rectangular trees.' : 'The trees of the sample, after the burn-in, on the tip order and time axis of the tree shown: dense where they agree, spread where they differ.' },
+    { k: 'dtOn', type: 'check', label: 'Show the trees of the sample', enable: s => dtAvailable() && s.layout === 'rect' },
+    { k: 'dtMode', type: 'seg', label: 'Trees drawn', opts: [['count', 'A number'], ['percent', 'A percentage']], enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
+    { type: 'hint', text: s => s.dtOn && dtAvailable() ? `${dtCount(s)} of ${treeSet.trees.length - (treeSet.skip || 0)} trees. Drawing more trees can slow the view down considerably, since every tree adds lines for the browser to draw.` : '' },
+    { k: 'dtN', type: 'number', commit: true, label: 'Number of trees', min: 1, max: 100000, step: 10, show: s => s.dtMode !== 'percent', enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
+    { k: 'dtPct', type: 'range', commit: true, label: 'Percentage of the trees', min: 1, max: 100, step: 1, unit: '%', show: s => s.dtMode === 'percent', enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
+    { k: 'dtPick', type: 'seg', label: 'Which trees', opts: [['even', 'Evenly spaced'], ['random', 'At random']], enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
+    { k: 'dtSeed', type: 'number', commit: true, label: 'Seed', min: 0, max: 999999, step: 1, show: s => s.dtPick === 'random', enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
+    { k: 'dtColor', type: 'color', label: 'Color', enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
+    { k: 'dtOp', type: 'range', label: 'Opacity of each tree', min: 1, max: 100, step: 1, unit: '%', enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
+    { k: 'dtW', type: 'number', label: 'Line width', min: 0.1, max: 10, step: 0.1, unit: 'px', enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
+    { k: 'dtPlace', type: 'seg', label: 'Place', opts: [['back', 'Behind the tree'], ['front', 'In front']], enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
   ]},
   { title: 'Branches', items: [
     { k: 'lineWidth', type: 'range', label: 'Line width', min: 1, max: 20, step: 1, hmin: 0.05, hmax: 100, unit: 'px' },
@@ -1444,6 +1486,15 @@ const SECTIONS_RAW = [
     { k: 'nbarMeanW', type: 'number', label: 'Mean line width', min: 0.1, max: 20, step: 0.1, unit: 'px', show: s => nbDens(s) && s.nbarMean, sub: true },
     { k: 'nbarMeanStyle', type: 'seg', label: 'Mean line', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], show: s => nbDens(s) && s.nbarMean, sub: true },
     { k: 'nbarMeanColor', type: 'color', label: 'Mean color', show: s => nbDens(s) && s.nbarMean, sub: true },
+    { type: 'head', label: 'Pie charts' },
+    { type: 'custom', build: pieBox },
+    { k: 'pieOn', type: 'check', label: 'Show the pies', enable: s => !!s.pieData },
+    { k: 'piePos', type: 'seg', label: 'Place', opts: [['node', 'On the node'], ['branch', 'Middle of the branch']], enable: s => !!s.pieData && s.pieOn, sub: true },
+    { k: 'pieR', type: 'number', label: 'Radius', min: 1, max: 50, step: 0.5, unit: 'px', enable: s => !!s.pieData && s.pieOn, sub: true },
+    { k: 'pieBorder', type: 'number', label: 'Border width', min: 0, max: 5, step: 0.1, unit: 'px', enable: s => !!s.pieData && s.pieOn, sub: true },
+    { k: 'pieBorderColor', type: 'color', label: 'Border color', enable: s => !!s.pieData && s.pieOn && s.pieBorder > 0, sub: true },
+    { k: 'pieLegend', type: 'check', label: 'Show legend', enable: s => !!s.pieData && s.pieOn, sub: true },
+    { k: 'pieTitle', type: 'text', label: 'Legend title', enable: s => !!s.pieData && s.pieOn && s.pieLegend, sub: true }
   ]},
   { title: 'Tip labels', items: [
     { k: 'showTips', type: 'check', label: 'Show tip names' },
@@ -1477,23 +1528,24 @@ const SECTIONS_RAW = [
     { k: 'hlEnd', type: 'seg', label: 'Ends at', opts: [['tree', 'The tree edge'], ['labels', 'The clade labels']] },
     { k: 'hlGradient', type: 'seg', label: 'Gradient', opts: [['none', 'None'], ['right', 'Fade out'], ['left', 'Fade in']] },
     { k: 'hlRadius', type: 'range', label: 'Corner rounding', min: 0, max: 20, step: 1, hmax: 500, unit: 'px', show: s => isRectish(s) },
+    { type: 'custom', build: cladeHlBox },
     { type: 'head', label: 'Collapsed clades' },
     { k: 'triSlots', type: 'range', label: 'Triangle height', min: 1, max: 10, step: 0.5, hmin: 0.2, hmax: 100, unit: 'rows' },
     { k: 'triFill', type: 'check', label: 'Fill collapsed triangles' },
     { k: 'triCount', type: 'check', label: 'Show tip count on collapsed clades' },
     { type: 'head', label: 'Clade name bars' },
-    { type: 'custom', build: cladeFileBox },
     { k: 'barShowName', type: 'check', label: 'Show the names next to the bars' },
     { k: 'barTextMode', type: 'seg', label: 'Names on circular and fan trees', opts: [['radial', 'Radial'], ['curved', 'Curved along the arc']], enable: s => s.barShowName && isCirc(s) },
     { k: 'barTextAlign', type: 'seg', label: 'Position along the arc', opts: [['start', 'Start'], ['center', 'Center'], ['end', 'End']], enable: s => s.barShowName && isCirc(s) && s.barTextMode === 'curved' },
     { k: 'barWidth', type: 'range', label: 'Clade bar width', min: 1, max: 12, step: 0.5, hmin: 0.1, hmax: 100, unit: 'px' },
     { k: 'barAlign', type: 'check', label: 'Line up the clade bars in one column' },
     { type: 'hint', text: () => 'When off, each bar sits right after the labels of its own clade.' },
-    { k: 'barGap', type: 'range', label: 'Clade bar distance from labels', min: -200, max: 200, step: 1, hmin: -5000, hmax: 5000, unit: 'px' },
+    { k: 'barGap', type: 'range', label: 'Clade bar distance from the previous element', min: -200, max: 200, step: 1, hmin: -5000, hmax: 5000, unit: 'px' },
     { k: 'barTextGap', type: 'range', label: 'Clade name distance from bar', min: 0, max: 60, step: 1, hmin: -500, hmax: 1000, unit: 'px' },
     { k: 'barFontSize', type: 'number', label: 'Clade name size', min: 1, max: 200, step: 0.5, unit: 'px' },
     { k: 'barBold', type: 'check', label: 'Clade names in bold' },
-    { k: 'barItalic', type: 'check', label: 'Clade names in italic' }
+    { k: 'barItalic', type: 'check', label: 'Clade names in italic' },
+    { type: 'custom', build: cladeFileBox },
   ], custom: 'tools' },
   { title: 'Fossils', items: [
     { type: 'hint', text: () => 'Mark a tip as extinct, or add a fossil lineage to a branch, from the right-click menu.' },
@@ -1628,6 +1680,7 @@ const SECTIONS_RAW = [
     { type: 'custom', build: ancBox },
     { k: 'ancOn', type: 'check', label: 'Show pies on the nodes', enable: s => !!smap },
     { k: 'ancWhere', type: 'seg', label: 'Show on', opts: [['all', 'All nodes'], ['internal', 'Internal'], ['tips', 'Tips']], enable: s => !!smap && s.ancOn, sub: true },
+    { k: 'ancPos', type: 'seg', label: 'Place', opts: [['node', 'On the node'], ['branch', 'Middle of the branch']], enable: s => !!smap && s.ancOn, sub: true },
     { type: 'hint', text: () => 'Size, border and opacity of the pies are set in Nodes. A pie replaces any dot or support circle on its node.' },
     { k: 'ancCollapse', type: 'check', label: 'Group the small slices', enable: s => !!smap },
     { k: 'ancCollapsePct', type: 'range', label: 'Group the slices below', min: 1, max: 50, step: 1, hmin: 0.1, hmax: 100, unit: '%', enable: s => !!smap && s.ancCollapse, sub: true },
@@ -1644,8 +1697,10 @@ const SECTIONS_RAW = [
     { type: 'hint', text: s => s.layout === 'rect' || isCirc(s) ? ({ map: 'Each stretch of a branch takes the state with the highest posterior probability, and changes shorter than the given share of the branch are ignored.', bins: '', density: 'The color blends the states by their probability along the branch.' }[s.ancBranch] || '') : 'Branch colors are drawn on rectangular, circular and fan trees.' },
     { k: 'ancLegend', type: 'check', label: 'Show a legend', enable: s => !!smap }
   ]},
-  { title: 'Attachments', custom: 'attach' },
+  { title: 'Attachments', custom: 'attach', items: [
+  ]},
   { title: 'Side plots', items: [
+    { type: 'custom', build: sideLayersBox },
     { type: 'head', label: 'Bars' },
     { type: 'custom', build: pickerBox('barCols') },
     { k: 'dataWidth', type: 'range', label: 'Width of the bar area', min: 20, max: 600, step: 5, hmin: 5, hmax: 5000, unit: 'px', enable: s => hasData(s) },
@@ -1677,14 +1732,12 @@ const SECTIONS_RAW = [
     { k: 'catSize', type: 'range', label: 'Size', min: 4, max: 40, step: 0.5, hmin: 1, hmax: 500, unit: 'px', enable: s => hasCat(s) },
     { k: 'catGap', type: 'range', label: 'Space between columns', min: 0, max: 40, step: 0.5, hmin: 0, hmax: 1000, unit: 'px', enable: s => hasCat(s) },
     { k: 'catDist', type: 'range', label: 'Distance from the previous element', min: 0, max: 200, step: 1, hmin: -5000, hmax: 2000, unit: 'px', enable: s => hasCat(s) },
-    { k: 'catOrder', type: 'seg', label: 'Place them', opts: [['after', 'After the bars'], ['before', 'Before the bars']], enable: s => hasCat(s) && hasData(s) },
     { k: 'catAbsentStyle', type: 'seg', label: 'Absent shapes', opts: [['fill', 'Filled'], ['outline', 'Outline only']], enable: s => hasCat(s) },
     { k: 'catAbsent', type: 'color', label: 'Absent color', enable: s => hasCat(s) },
     { k: 'catBorderStyle', type: 'seg', label: 'Shape border', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['none', 'None']], enable: s => hasCat(s) },
     { k: 'catBorderColor', type: 'color', label: 'Border color', enable: s => hasCat(s) && s.catBorderStyle !== 'none', sub: true },
     { k: 'catBorderWidth', type: 'number', label: 'Border width', min: 0.05, max: 50, step: 0.5, unit: 'px', enable: s => hasCat(s) && s.catBorderStyle !== 'none', sub: true },
     { k: 'catBorderCount', type: 'range', label: 'Number of dashes or dots', min: 1, max: 60, step: 1, hmax: 500, enable: s => hasCat(s) && (s.catBorderStyle === 'dashed' || s.catBorderStyle === 'dotted'), sub: true },
-    { k: 'catInvert', type: 'check', label: 'Turn circular and fan trees inside out', enable: s => hasCat(s) && isCirc(s), refit: true },
     { type: 'hint', text: s => 'The tree goes to the outside and its labels, bars and categories fill the middle, with the clade name bars around the outside.' + (isCirc(s) ? '' : ' It takes effect when the layout is circular or fan.') },
     { k: 'catTitles', type: 'check', label: 'Show the column titles', enable: s => hasCat(s) && isRectish(s) },
     { k: 'catTitleAngle', type: 'seg', label: 'Title angle', opts: [['45', '45°'], ['90', 'Vertical']], enable: s => hasCat(s) && isRectish(s) && s.catTitles && !isVertical(s), sub: true },   // on a vertical tree the titles are always straight
@@ -1708,12 +1761,46 @@ const SECTIONS_RAW = [
     { k: 'heatCellW', type: 'range', label: 'Cell width', min: 2, max: 60, step: 1, hmin: 0.5, hmax: 400, unit: 'px' },
     { k: 'heatH', type: 'range', label: 'Cell height', min: 0.1, max: 1, step: 0.05, unit: '× row' },
     { k: 'heatColGap', type: 'range', label: 'Space between columns', min: 0, max: 20, step: 0.5, hmax: 200, unit: 'px' },
-    { k: 'heatGap', type: 'range', label: 'Distance from the labels', min: 0, max: 100, step: 1, hmin: -500, hmax: 2000, unit: 'px' },
+    { k: 'heatGap', type: 'range', label: 'Distance from the previous element', min: 0, max: 100, step: 1, hmin: -500, hmax: 2000, unit: 'px' },
     { k: 'heatTitles', type: 'check', label: 'Column titles' },
     { k: 'heatTitleAngle', type: 'range', label: 'Title angle', min: 0, max: 90, step: 5, unit: '°', enable: s => s.heatTitles && !isVertical(s), sub: true },
     { k: 'heatTitleSize', type: 'number', label: 'Title size', min: 1, max: 100, step: 0.5, unit: 'px', enable: s => s.heatTitles, sub: true },
     { k: 'heatTitleColor', type: 'color', label: 'Title color', enable: s => s.heatTitles, sub: true },
-    { k: 'heatLegend', type: 'check', label: 'Show legend' }
+    { k: 'heatLegend', type: 'check', label: 'Show legend' },
+    { type: 'head', label: 'Alignment' },
+    { type: 'custom', build: () => { const d = document.createElement('div'); d.className = 'tpicker'; if (!alnSets.length) d.innerHTML = '<p class="hint">Load a FASTA alignment in Attachments to show it here.</p>'; return d; } },   // keeps the Alignment head in view, as the table pickers do
+    { k: 'alnOn', type: 'check', label: 'Show the alignment next to the tips', enable: s => !!alnData && s.layout === 'rect' },
+    { type: 'hint', text: s => !alnData || !s.alnOn ? (alnData && s.layout !== 'rect' ? 'Shown on rectangular trees.' : '') : (() => { const from = clamp(Math.round(s.alnFrom || 1), 1, alnData.len), to = clamp(Math.round(s.alnTo || alnData.len), from, alnData.len), n = to - from + 1, fit = Math.floor(Math.max(10, s.alnWidth) / Math.max(1, s.spacing * (s.alnCell || 100) / 100)); return n <= fit ? `Sites ${from} to ${to} as squares (${fit} fit in this width).` : `Sites ${from} to ${to} do not fit as squares (${fit} would), so they are shown as a barcode: each column compared with its most common residue.`; })() },
+    { k: 'alnPick', type: 'select', label: 'Alignment', opts: () => alnSets.map(a => [a.name, a.name]), show: () => alnSets.length > 1, enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnFrom', type: 'number', label: 'From site', min: 1, max: 1000000, step: 1, enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnTo', type: 'number', label: 'To site', min: 1, max: 1000000, step: 1, enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnWidth', type: 'range', label: 'Width', min: 20, max: 2000, step: 10, unit: 'px', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnCell', type: 'range', label: 'Cell size (% of the row)', min: 20, max: 100, step: 5, unit: '%', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnGap', type: 'range', label: 'Distance from the previous element', min: 0, max: 200, step: 1, unit: 'px', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnRuler', type: 'check', label: 'Site numbers', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnRulerPos', type: 'seg', label: 'Place', opts: [['top', 'Above'], ['bottom', 'Below']], enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
+    { k: 'alnRulerStep', type: 'number', label: 'Every (sites, 0 for automatic)', min: 0, max: 100000, step: 1, enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
+    { k: 'alnRulerFs', type: 'number', label: 'Text size', min: 4, max: 40, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
+    { k: 'alnRulerGap', type: 'number', label: 'Space between numbers and ticks', min: 0, max: 40, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
+    { k: 'alnRulerTick', type: 'number', label: 'Tick length', min: 0, max: 30, step: 0.5, unit: 'px', enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
+    { k: 'alnRulerColor', type: 'color', label: 'Color of numbers and ticks', enable: s => !!alnData && s.alnOn && s.alnRuler, sub: true },
+    { k: 'alnLetters', type: 'check', label: 'Letters in the cells (when large enough)', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnColA', type: 'color', label: 'Adenine (A)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnColC', type: 'color', label: 'Cytosine (C)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnColG', type: 'color', label: 'Guanine (G)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnColT', type: 'color', label: 'Thymine (T) or uracil (U)', show: s => !alnData || alnData.type === 'dna', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnAaHyd', type: 'color', label: 'Hydrophobic (A, I, L, M, F, W, V)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnAaPos', type: 'color', label: 'Positive (K, R)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnAaNeg', type: 'color', label: 'Negative (D, E)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnAaPol', type: 'color', label: 'Polar (N, Q, S, T)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnAaCys', type: 'color', label: 'Cysteine (C)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnAaGly', type: 'color', label: 'Glycine (G)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnAaPro', type: 'color', label: 'Proline (P)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnAaAro', type: 'color', label: 'Aromatic (H, Y)', show: s => !!alnData && alnData.type === 'aa', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnColN', type: 'color', label: 'Other or ambiguous', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnColGap', type: 'color', label: 'Gaps and missing data', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnSame', type: 'color', label: 'Barcode: as the most common', enable: s => !!alnData && s.alnOn, sub: true },
+    { k: 'alnDiff', type: 'color', label: 'Barcode: different', enable: s => !!alnData && s.alnOn, sub: true },
   ]},
   { title: 'Legends', items: [
     { type: 'hint', text: () => 'Hover a legend or the scale bar on the canvas and click its lock to drag it by hand. Right-click a legend to rewrite its title and entries.' },
@@ -1780,7 +1867,7 @@ const SECTIONS = SECTIONS_RAW;
   const sec = SECTIONS.find(x => x.title === 'Side plots'); if (!sec) return;
   let gate = hasData;
   for (const it of sec.items) {
-    if (it.type === 'head') { gate = /Heat/.test(it.label) ? hasHeat : /Categor/.test(it.label) ? hasCat : hasData; if (/^(Bars|Categories|Heatmap)$/.test(it.label)) continue; }
+    if (it.type === 'head') { gate = /Heat/.test(it.label) ? hasHeat : /Categor/.test(it.label) ? hasCat : /Align/.test(it.label) ? (() => alnSets.length > 0) : hasData; if (/^(Bars|Categories|Heatmap|Alignment)$/.test(it.label)) continue; }   // the alignment has its own file and conditions
     if (it.type === 'custom') continue;   // the table pickers always show
     const g = gate, oldShow = it.show, oldText = it.text;
     it.show = s => g(s) && (oldShow ? oldShow(s) : true);
@@ -1792,11 +1879,13 @@ const allItems = () => SECTIONS.flatMap(s => s.items || []).filter(i => i.k);
 
 // Builds the whole left panel from the SECTIONS definition.
 function buildSide() {
-  const side0 = $('side'), sheet = $('pageSheetBody'); side0.innerHTML = ''; if (sheet) sheet.innerHTML = '';
+  const side0 = $('side'), sheet = $('pageSheetBody');
+  const wasOpen = new Set([...side0.querySelectorAll('details[open] > summary')].map(x => x.textContent)), wasTop = side0.scrollTop, again = !!side0.querySelector('details');
+  side0.innerHTML = ''; if (sheet) sheet.innerHTML = '';
   for (const sec of SECTIONS) {
     const side = sec.where === 'page' && sheet ? sheet : side0;   // the page sections live in the Page settings menu
     if (side.lastChild) { const sep = document.createElement('div'); sep.className = 'secsep'; side.appendChild(sep); }
-    const d = document.createElement('details'); if (sec.open) d.open = true;
+    const d = document.createElement('details'); if (again ? wasOpen.has(sec.title) : sec.open) d.open = true;   // as the user left it
     d.innerHTML = `<summary>${sec.title}</summary>`;
     const body = document.createElement('div'); body.className = 'sec';
     if (sec.custom === 'data') body.appendChild(dataPanel());
@@ -1810,8 +1899,10 @@ function buildSide() {
   }
   const foot = document.createElement('div'); foot.className = 'sidefoot';
   foot.innerHTML = '<button type="button" class="btn small hovbtn" data-hover title="Show the information of a branch when the mouse is over it" aria-pressed="false">Info on hover</button><button type="button" class="btn small" data-all="1" title="Open every section of this panel">Expand</button><button type="button" class="btn small" data-all="0" title="Close every section of this panel">Collapse</button>';
-  foot.querySelectorAll('button').forEach(b => b.onclick = () => b.dataset.all === '1' ? expandAllSections() : collapseAllSections()); side0.appendChild(foot);
+  // only Expand and Collapse: Info on hover has its own action
+  foot.querySelectorAll('button[data-all]').forEach(b => b.onclick = () => b.dataset.all === '1' ? expandAllSections() : collapseAllSections()); side0.appendChild(foot);
   refreshVisibility();
+  if (again) side0.scrollTop = wasTop;
 }
 
 // Number box of the panel, with its unit inside.
@@ -1891,13 +1982,15 @@ function control(it) {
       (it.type === 'range' ? `<input type="range" min="${it.min}" max="${it.max}" step="${it.step}" value="${clamp(v, it.min, it.max)}" aria-label="${esc(it.label)} slider">` : '');
     const num = row.querySelector('.num'); num.id = id;
     const rng = row.querySelector('input[type=range]');
-    if (rng) rng.addEventListener('input', () => { settings[it.k] = +rng.value; num.value = rng.value; changeSoon(it); });
+    if (rng) rng.addEventListener('input', () => { num.value = rng.value; if (it.commit) return; settings[it.k] = +rng.value; changeSoon(it); });
+    if (rng && it.commit) rng.addEventListener('change', () => { settings[it.k] = +rng.value; changed(it); });   // applied when the slider is let go
     num.addEventListener('input', () => {
+      if (it.commit) return;   // applied on Enter or when leaving the box, not while typing
       if (it.blank && num.value.trim() === '') { settings[it.k] = null; changed(it); return; }
       const x = parseFloat(num.value); if (isNaN(x)) return;
       settings[it.k] = clamp(x, lo, hi); if (rng) rng.value = clamp(settings[it.k], it.min, it.max); changed(it);
     });
-    num.addEventListener('change', () => { if (it.blank && num.value.trim() === '') return; const x = parseFloat(num.value); if (isNaN(x)) num.value = settings[it.k] ?? ''; else num.value = settings[it.k] = clamp(x, lo, hi); fitDxSliders(); });
+    num.addEventListener('change', () => { if (it.blank && num.value.trim() === '') return; const x = parseFloat(num.value); if (isNaN(x)) num.value = settings[it.k] ?? ''; else { num.value = settings[it.k] = clamp(x, lo, hi); if (rng) rng.value = clamp(settings[it.k], it.min, it.max); if (it.commit) changed(it); } fitDxSliders(); });
     num.addEventListener('keydown', e => { if (e.key === 'Enter') num.blur(); });
   } else if (it.type === 'check') {
     row.className = 'row check' + (it.sub ? ' sub' : '');
@@ -2026,6 +2119,7 @@ function catLabel(c, cats, lowIn) {
 }
 // Shows, hides or greys out each panel option according to what it depends on.
 function refreshVisibility() {
+  const sl = document.querySelector('.sidelayers'); if (sl && sl._refresh) sl._refresh();   // which layers are in use
   if (typeof refreshPagesBox === 'function' && $('pagesBox') && $('pagesBox').dataset.layout !== settings.layout + ':' + settings.rectOrient) { $('pagesBox').dataset.layout = settings.layout + ':' + settings.rectOrient;   /* shape or orientation changed */ refreshPagesBox(); }
   document.querySelectorAll('.dynhint').forEach(el => { if (el._fn) el.textContent = el._fn(settings); });
   document.querySelectorAll('.dynhead').forEach(el => { el.hidden = !el._show(settings); });
@@ -2252,6 +2346,7 @@ const treePost = t => t._post ?? (mcmcLog && t._name != null ? mcmcLog.map.get(s
 function addTableFile(file) {
   const r = new FileReader();
   r.onload = () => {
+    if (/^\s*>/.test(String(r.result))) { alnFromText(String(r.result), file.name); return; }   // a FASTA alignment, shown from Side plots
     if (looksSimmap(r.result)) { loadSmapText(String(r.result), file.name); return; }
     const lg = readMcmcLog(r.result, file.name);
     if (lg) {
@@ -2288,9 +2383,11 @@ function refreshAttach() {
     // the MCMC log (.log of BEAST2, .p of MrBayes), with what it is good for
     const lgHit = mcmcLog && treeSet && treeSet.trees ? treeSet.trees.filter(t => treePost(t) != null).length : 0;
     const lg = mcmcLog ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(mcmcLog.name)}">${esc(mcmcLog.name)}</span><button type="button" class="btn small danger" data-dellog>Remove</button></div><span class="tmeta">MCMC log, ${plural(mcmcLog.map.size, 'state', 'states')} (${esc(mcmcLog.col)}). ${treeSet && treeSet.trees ? `${lgHit} of ${treeSet.trees.length} trees matched: choose MAP in Tree → Summary tree.` : 'Open the sampled trees (.t of MrBayes, .trees of BEAST) to build the MAP tree, a consensus tree is not enough.'}</span></div>` : '';
-    box.innerHTML = sm + lg + (ts.length || mcmcLog ? ts.map(t => `<div class="tabitem" data-id="${esc(t.id)}"><div class="thead"><span class="tname" title="${esc(t.name)}">${esc(t.name)}</span><button type="button" class="btn small danger" data-del>Remove</button></div><span class="tmeta">${esc(matchInfo(t, false))}</span><label class="tidcol"><span>Names in</span><select data-idcol>${t.header.map((h, i) => `<option value="${i}"${i === (t.idCol || 0) ? ' selected' : ''}>${esc(h)}</option>`).join('')}</select></label></div>`).join('') : sm ? '' : '<p class="hint">No tables yet.</p>');
+    const al = alnSets.map((a, i) => `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(a.name)}">${esc(a.name)}</span><button type="button" class="btn small danger" data-delaln="${i}">Remove</button></div><span class="tmeta">Alignment: ${a.n} sequences of ${a.len} ${a.type === 'dna' ? 'bases' : 'residues'}. Shown from Side plots, Alignment.</span></div>`).join('');
+    box.innerHTML = sm + lg + al + (ts.length || mcmcLog ? ts.map(t => `<div class="tabitem" data-id="${esc(t.id)}"><div class="thead"><span class="tname" title="${esc(t.name)}">${esc(t.name)}</span><button type="button" class="btn small danger" data-del>Remove</button></div><span class="tmeta">${esc(matchInfo(t, false))}</span><label class="tidcol"><span>Names in</span><select data-idcol>${t.header.map((h, i) => `<option value="${i}"${i === (t.idCol || 0) ? ' selected' : ''}>${esc(h)}</option>`).join('')}</select></label></div>`).join('') : sm ? '' : '<p class="hint">No tables yet.</p>');
     const ds = box.querySelector('[data-delsmap]'); if (ds) ds.onclick = () => { smap = null; persistSmap(); buildSide(); render(); toast('SIMMAP removed'); };
     const dl = box.querySelector('[data-dellog]'); if (dl) dl.onclick = () => { mcmcLog = null; refreshAttach(); refreshTreeSetBox(); toast('MCMC log removed'); };
+    box.querySelectorAll('[data-delaln]').forEach(b => b.onclick = () => { alnSets.splice(+b.dataset.delaln, 1); alnSync(); if (!alnSets.length) { try { localStorage.removeItem(ALN_KEY); } catch (e) { } settings.alnOn = false; } else alnSave(); buildSide(); render(); persist(); refreshAttach(); toast('Alignment removed'); });
     box.querySelectorAll('.tabitem[data-id] [data-idcol]').forEach(sl => sl.onchange = () => {
       const t = (settings.dataTables || []).find(x => x.id === sl.closest('.tabitem').dataset.id); if (!t) return;
       t.idCol = +sl.value; t.idLocked = true; dataChanged();
@@ -2343,9 +2440,9 @@ function refreshAttach() {
 function attachPanel() {
   const w = document.createElement('div'); w.style.cssText = 'display:flex;flex-direction:column;gap:10px';
   w.innerHTML = `
-    <div class="btns"><button class="btn primary" id="tabAdd">Add table</button></div>
+    <div class="btns"><button class="btn primary" id="tabAdd">Add file</button></div>
     <input type="file" id="tabIn" multiple hidden>
-    <p class="hint">CSV or TSV files with additional data to plot. Rows can match only the tip names, or the tips and the internal nodes of the tree. SIMMAP files from stochastic character mapping can also be imported, as well as the MCMC log of the trees (.log of BEAST2 or .p of MrBayes) to build the MAP tree.</p>
+    <p class="hint">CSV or TSV files with additional data to plot. Rows can match only the tip names, or the tips and the internal nodes of the tree. SIMMAP files from stochastic character mapping can also be imported, as well as the MCMC log of the trees (.log of BEAST2 or .p of MrBayes) to build the MAP tree, and FASTA alignments to show next to the tips.</p>
     <div id="tabList" class="tablist"></div>`;
   setTimeout(() => {
     $('tabAdd').onclick = () => $('tabIn').click();
@@ -2550,7 +2647,7 @@ function parseTreeFile(txt) {
     } else if (/^u?tree\b/i.test(st)) {
       const k = st.indexOf('='); if (k < 0) continue;
       const t = parseNewick(st.slice(k + 1).trim() + ';');
-      { const nm = /^u?tree\s+(?:\*\s*)?([^\s=\[]+)/i.exec(st); if (nm) t._name = nm[1]; if (/\[&U\]/i.test(st.slice(0, st.indexOf('(', k)))) t._unrooted = true; }
+      { const nm = /^u?tree\s+(?:\*\s*)?([^\s=\[]+)/i.exec(st); if (nm) t._name = nm[1]; if (/\[&U\]/i.test(st.slice(0, st.indexOf('(', k)))) t._unrooted = true; if (/\[&R\]/i.test(st.slice(0, st.indexOf('(', k)))) t._rooted = true; }
       { const head = st.slice(0, Math.max(0, st.indexOf('(', k))), pm = /\bposterior\s*=\s*([-+\d.eE]+)/i.exec(head) || /\blnP\s*=\s*([-+\d.eE]+)/i.exec(head); if (pm) t._post = parseFloat(pm[1]); }
       if (tr.size) walkAll(t, x => { if (!x.children.length && tr.has(x.name)) x.name = tr.get(x.name); });
       trees.push(t);
@@ -2752,10 +2849,13 @@ function consensusTree(pct, compat) {
   for (const t of root.tips) {
     const P = owner.get(t), L = mk(t); L.parent = P; P.children.push(L);
     const tk = cladeKey(...tipHash(t), 1), o = T.clades.get(tk); L._age = o ? mean(o.ages) : 0;
+    if (o && o.lens && o.lens.length && o.lens.filter(v => v === 0).length > o.lens.length / 2) L._saKeep = true;
   }
+  // sampled ancestors (zero-length tips in most trees) stay so, as in the MCC tree: their node takes their age
+  walkAll(R, x => { if (x._saKeep && x.parent) x.parent._age = x._age; });
   if (T.hasLen && !T.unrooted) walkAll(R, x => { if (x.parent) x.len = Math.max(0, (x.parent._age ?? 0) - (x._age ?? 0)); });
   else if (T.hasLen) { const keysR = treeCladeKeys(R, T.ref, T.tot); for (const [x, k] of keysR) if (x.parent) { const o = T.clades.get(k); x.len = o && o.lens && o.lens.length ? mean(o.lens) : 0; } }
-  walkAll(R, x => { delete x._age; });
+  walkAll(R, x => { delete x._age; delete x._saKeep; });
   return R;
 }
 // A tree of the sample chosen by a score, with node ages from all the trees (MCC) or its own (MAP)
@@ -2840,7 +2940,7 @@ function refreshTreeSetBox() {
 // loaded so they can be used again, but their options are reset too. Images belong to the old figure and go.
 function resetForNewTree() {
   if (tree) pushUndo(true);
-  settings = freshSettings({ dataTables: settings.dataTables });
+  settings = freshSettings({ dataTables: settings.dataTables, pieData: settings.pieData, pieColors: settings.pieColors });   // attached files stay: tables and pie charts
   figImages = []; selImg = null; selCat = selCell = null; persistImages(); refreshImageList();
   buildSide();
 }
@@ -2983,9 +3083,22 @@ async function saveProject() {
   const proj = {
     format: 'tree2go-project', version: 1, saved: new Date().toISOString(),
     newick: toNewick(tree), tree: serialize(tree), settings, source: srcText, images: imageRecords(), smap: smapRecord(), trees: treeSetRecord(), ro: treeSetRO,
+    alignments: alnSets.map(a => ({ name: a.name, len: a.len, type: a.type, seqs: [...a.seqs] })),
+    mcmc: mcmcLog ? { name: mcmcLog.name, col: mcmcLog.col, map: [...mcmcLog.map] } : null,
     tabs: (() => { const r = tabsRecord(); if (r) for (const t of r.tabs) if (t.doc) t.doc.images = (t.doc.images || []).map(m => ({ ...m, src: imgStore.get(m.sid) })); return r; })()
   };
-  saveFile(name + '.tree2go.json', JSON.stringify(proj, null, 1));
+  // the same project without the attached files: tables, SIMMAP, MCMC log, alignments, pie charts and images
+  const lite = { ...proj, settings: { ...settings, dataTables: [], pieData: null, pieOn: false, alnOn: false }, smap: null, alignments: [], mcmc: null, images: [],
+    tabs: proj.tabs ? { ...proj.tabs, tabs: proj.tabs.tabs.map(t => t.doc ? { ...t, doc: { ...t.doc, images: [], settings: t.doc.settings ? { ...t.doc.settings, dataTables: [], pieData: null } : t.doc.settings } } : t) } : proj.tabs };
+  const full = JSON.stringify(proj, null, 1), bare = JSON.stringify(lite, null, 1), size = t => { const b = new Blob([t]).size; return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; };
+  const A = attachSummary(), imgs = figImages.length;
+  if (!A.list.length && !imgs) { saveFile(name + '.tree2go.json', full); return; }
+  const ok = await askConfirm({ title: 'Save project', ok: 'Save project', okClass: 'primary', focusOk: true,
+    html: `<label class="savechoice"><input type="radio" name="saveAtt" value="1" checked> <span><b>With the attached files</b> (${size(full)})<br>Anyone who opens it sees the same figure. It holds: ${[attachKinds(A), imgs ? `Images (${imgs})` : ''].filter(Boolean).join(', ')}.</span></label>
+      <label class="savechoice"><input type="radio" name="saveAtt" value="0"> <span><b>Without them</b> (${size(bare)})<br>The tree and every setting only. The files have to be attached again after opening it.</span></label>` });
+  if (!ok) return;
+  const withAtt = !document.querySelector('#confirmModal input[name=saveAtt][value="0"]').checked;
+  saveFile(name + '.tree2go.json', withAtt ? full : bare);
 }
 // Opens a project file (and older formats).
 function openProject(o) {
@@ -2995,6 +3108,8 @@ function openProject(o) {
   else throw new Error('This JSON file is not a tree2go project.');
   settings = freshSettings(o.settings);
   if (settings.layout === 'slanted') settings.layout = 'rect';
+  if (o.mcmc && o.mcmc.map) mcmcLog = { name: o.mcmc.name, col: o.mcmc.col, map: new Map(o.mcmc.map) };   // the MCMC log of the project
+  if (Array.isArray(o.alignments)) { alnSets = o.alignments.map(a => ({ seqs: new Map(a.seqs), len: a.len, n: a.seqs.length, type: a.type, name: a.name })); alnSync(); alnSave(); }   // the alignments of the project
   srcText = o.source || o.newick || '';
   loadImageRecords(o.images); persistImages();
   smap = smapRevive(o.smap); persistSmap();
@@ -3019,9 +3134,25 @@ function setTree(t, keepView) {
 // Rebuilds the id -> node map after the tree changes.
 function reindex() { nodeById = new Map(); if (tree) walkAll(tree, n => { nodeById.set(n.id, n); if (n.grafts) for (const G of n.grafts) walkAll(G, x => nodeById.set(x.id, x)); }); }
 // Loads a tree, a NEXUS file or a set of trees from text.
-function loadText(txt) {
+// Annotations broken by another program: MrBayes partition keys rewritten as flags ({1=true,2=true}) or cut at
+// their commas (,4}_mean=). Other programs stop on them; tree2go can rebuild the keys, so it asks first.
+function findDamagedAnnotations(txt) {
+  const re = /\{\d+=true,|[,\[]\d+\}_[\w%.+-]+=/g; let m, count = 0, first = -1;
+  while ((m = re.exec(txt)) && count < 100000) { if (first < 0) first = m.index; count++; }
+  if (!count) return null;
+  const line = txt.slice(0, first).split('\n').length, col = first - txt.lastIndexOf('\n', first - 1);
+  return { count, line, col, ctx: txt.slice(Math.max(0, first - 28), first + 36).replace(/\s+/g, ' ') };
+}
+function loadText(txt, opts) {
   const err = $('parseErr');
   txt = (txt || '').trim();
+  const dmg = !(opts && opts.repairOk) && !txt.startsWith('{') && findDamagedAnnotations(txt);
+  if (dmg) {
+    askConfirm({ title: 'Damaged annotations in the file', ok: 'Load with the repair', okClass: 'primary', focusOk: true,
+      html: `Line ${dmg.line}, character ${dmg.col}:<br><code class="dmgctx">…${esc(dmg.ctx)}…</code><br><br>The annotations of this tree were rewritten by another program in a way that breaks them.<br><br>tree2go can repair them: it matches the braces and rebuilds the names of the keys (${dmg.count} ${dmg.count === 1 ? 'place' : 'places'}). Values that were removed from the file, such as rates, cannot be recovered.` })
+      .then(ok => { if (ok) loadText(txt, { repairOk: true }); });
+    return;
+  }
   if (!txt.startsWith('{') && !/^#NEXUS/i.test(txt) && /#[A-Za-z]+\d+/.test(txt)) { const nets = findNetworks(txt); netList = nets; netIdx = 0; if (nets.length) txt = nets[0].nwk; }
   else netList = [];
   try {
@@ -3038,9 +3169,42 @@ let lastFileName = null;
 function readFile(file) {
   lastFileName = file.name;
   const r = new FileReader();
-  r.onload = () => { const t = String(r.result); if (t.length > 1e6) { toast('Reading the trees, this can take a few seconds…'); setTimeout(() => loadText(t), 60); } else loadText(t); };
+  r.onload = () => {
+    const t = String(r.result), had = !!tree && !/^\s*\{/.test(t);   // a new tree (not a project) while files are attached
+    const go = () => { const before = tree; loadText(t); if (had && tree && tree !== before) confirmAttachments(); };
+    if (t.length > 1e6) { toast('Reading the trees, this can take a few seconds…'); setTimeout(go, 60); } else go();
+  };
   r.onerror = () => toast('The file could not be read');
   r.readAsText(file);
+}
+
+/* ================= Attachments when the tree changes ================= */
+// What is attached, by kind: how many files, and how many tips of the tree shown each one finds.
+function attachSummary() {
+  const L = tree ? leaves(tree) : [], n = L.length, tips = new Set(L.map(l => normTip(l.name || ''))), kinds = [];
+  const add = (label, hits) => { if (hits.length) kinds.push({ label, count: hits.length, hits }); };
+  add('Tables', (settings.dataTables || []).map(t => { const m = tableIndex(t); return [...tips].filter(k => m.has(k)).length; }));
+  add('SIMMAP', smap ? [L.filter(l => ancKeys && smap.clades.has(ancKeys.get(l))).length] : []);
+  add('Alignments', alnSets.map(a => [...tips].filter(k => a.seqs.has(k)).length));
+  add('Pie charts', settings.pieData ? [[...tips].filter(k => settings.pieData.rows[k]).length] : []);
+  add('MCMC log', mcmcLog ? [null] : []);
+  return { kinds, n, list: kinds };
+}
+// "Tables (2)", "SIMMAP (1)"...: the kinds of files and how many of each, without their names.
+const attachKinds = A => A.kinds.map(k => `${k.label} (${k.count})`).join(', ');
+function clearAttachments() {
+  settings.dataTables = []; settings.pieData = null; settings.pieOn = false;
+  smap = null; persistSmap(); alnSets = []; alnSync(); try { localStorage.removeItem(ALN_KEY); } catch (e) { }
+  settings.alnOn = false; mcmcLog = null;
+  buildSide(); render(); persist(); refreshAttach(); refreshTreeSetBox();
+}
+// After a new tree is opened with files still attached: keep them for it, or remove them.
+function confirmAttachments() {
+  const A = attachSummary(); if (!A.kinds.length) return;
+  const found = k => { const h = k.hits.filter(v => v != null); if (!h.length) return 'not tied to the tip names'; const lo = Math.min(...h), hi = Math.max(...h); return `${lo === hi ? lo : `${lo} to ${hi}`} of the ${A.n} tips found`; };
+  askConfirm({ title: 'Keep the attached files?', ok: 'Keep them', okClass: 'primary', cancel: 'Remove them', focusOk: true,
+    html: `You opened a new tree, and the files attached to the previous one are still loaded. They are matched to this tree by its tip names:<br><br>${A.kinds.map(k => `<b>${k.label} (${k.count})</b>: ${found(k)}`).join('<br>')}<br><br>Keep them to use them with this tree, or remove them all to start clean.` })
+    .then(ok => { if (!ok) { clearAttachments(); toast('Attachments removed'); } });
 }
 
 /* ================= Undo ================= */
@@ -3236,7 +3400,7 @@ function render() {
   if (PALETTE[0] !== (PALETTES[settings.paletteName] || PALETTES.default)[0]) applyPalette(); else applyCvd();
   radFlip = null;
   const S = settings;
-  if (!tree || !isCirc(S) || !S.catInvert || !hasCat(S)) return renderOnce();
+  if (!tree || !isCirc(S) || !S.catInvert) return renderOnce();
   renderOnce();
   const R = lastReach; if (!R) return;
   const slot = rad(S.layout === 'circular' ? S.circSpan : S.fanSpan) / Math.max(1, R.n);
@@ -3252,6 +3416,11 @@ function render() {
 /* Vertical rectangular trees: the tree is drawn as usual and turned 90 degrees, tips on top and the root at the bottom.
    Its texts turn with it (vertical); with horizontal text, each one is turned back around its own anchor. */
 const isVertical = S => S.layout === 'rect' && S.rectOrient === 'vertical';
+// How much the tree is turned, in degrees clockwise: -90 for a vertical tree, any angle for a custom one, 0 otherwise.
+// A custom angle turns the drawing as it is: the tools made for horizontal or vertical trees (straight text, pages,
+// guides) are off, as on circular trees.
+const treeTurn = S => S.layout !== 'rect' ? 0 : S.rectOrient === 'vertical' ? -90 : S.rectOrient === 'custom' ? ((((+S.rectAngle || 0) % 360) + 360) % 360) : 0;
+const isTurned = S => treeTurn(S) !== 0;
 // Texts of the side plots marked data-up stand upright on a vertical tree: column titles end just before their row,
 // axis numbers start right after their tick, and values sit centred above their bar.
 function uprightMarked(svgStr) {
@@ -3288,6 +3457,8 @@ function vertText(svgStr, S, tips) {
   return svgStr.replace(/<text\b(?![^>]*transform=)([^>]*?)\bx="([-\d.]+)"([^>]*?)\by="([-\d.]+)"([^>]*)>/g, (m, a, x, b, y, c) => /data-up=|data-keep=/.test(m) ? m : `<text${a}x="${x}"${b}y="${y}"${c} transform="rotate(90 ${x} ${y})">`);
 }
 function renderOnce() {
+  alnSync();
+  pieHits.length = 0;   // the click and hover areas of the pies, drawn over those of the nodes   // the alignment chosen in Side plots
   /* Order of the drawing (each step is commented below):
      1. layout: position of every node (computeLayout) for the chosen shape, and the size of every tip label
      2. fossils detected from their ages, grafted fossil lineages, colors and widths from data
@@ -3366,17 +3537,18 @@ function renderOnce() {
     maxLW = Math.max(maxLW, n._lw);
   }
 
+  const LOFF = S.labelOffset + Math.max(S.pieOn && S.pieData && S.piePos !== 'branch' ? S.pieR : 0, smap && S.ancOn && S.ancWhere !== 'internal' && S.ancPos !== 'branch' && S.tipDotOn ? S.tipDot : 0);   // the names start after the pies on the tips (from a file, or SIMMAP)
   for (const n of tips) {
     if (L === 'unrooted') {
       const ext = n._tri ? n._md * uScale : 0;
       n._ex = n._px + ext * Math.cos(rad(n._a)); n._ey = n._py + ext * Math.sin(rad(n._a));
-      n._lx = n._ex + S.labelOffset * Math.cos(rad(n._a)); n._ly = n._ey + S.labelOffset * Math.sin(rad(n._a)); n._la = n._a;
+      n._lx = n._ex + LOFF * Math.cos(rad(n._a)); n._ly = n._ey + LOFF * Math.sin(rad(n._a)); n._la = n._a;
     } else if (circ) {
       const rE = rOf(n._dEnd); [n._ex, n._ey] = polar(rE, n._a);
-      const rb = (S.align ? S.radius : rE) + S.labelOffset; [n._lx, n._ly] = polar(rb, n._a); n._la = n._a;
+      const rb = (S.align ? S.radius : rE) + LOFF; [n._lx, n._ly] = polar(rb, n._a); n._la = n._a;
     } else {
       n._ex = n._dEnd * sx; n._ey = n._py;
-      n._lx = (S.align && !n._sa ? maxD * sx : n._ex) + S.labelOffset; n._ly = n._py; n._la = 0; n._saAnchor = null;
+      n._lx = (S.align && !n._sa ? maxD * sx : n._ex) + LOFF; n._ly = n._py; n._la = 0; n._saAnchor = null;
       if (n._sa) {
         const pos = stv(n, 'sap') ?? S.saLabelPos, al = stv(n, 'saa') ?? S.saLabelAlign, gap = 2 + (stv(n, 'dot') ?? S.saDot);
         n._ly = n._py + (pos === 'below' ? 1 : -1) * (n._fs * 0.75 + S.saLabelDy) - (stv(n, 'sady') ?? 0);   // a positive offset moves the name up
@@ -3385,7 +3557,7 @@ function renderOnce() {
       }
     }
   }
-  const tipLabelEnd = n => (S.align ? maxD * sx : n._ex) + (S.showTips ? S.labelOffset + (n._lw || 0) : 0);
+  const tipLabelEnd = n => (S.align ? maxD * sx : n._ex) + (S.showTips ? LOFF + (n._lw || 0) : 0);
   let labelsEnd = Math.max(0, ...tips.map(tipLabelEnd));
   const tipLabelR = n => (S.align ? S.radius : rOf(n._dEnd)) + (S.showTips ? S.labelOffset + (n._lw || 0) : 0);
   let outerR = Math.max(0, ...tips.map(tipLabelR));
@@ -3822,6 +3994,45 @@ function renderOnce() {
     }
   }
 
+  // DensiTree: each tree of the sample on the tip order and time axis of this one (rectangular, not turned)
+  if (S.dtOn && dtAvailable() && L === 'rect' && maxD > 0) {
+    const rowY = new Map(); for (const n of vis) if (!n.children.length) rowY.set(normTip(n.name || ''), n._py);
+    let sig = 0, i0 = 0; for (const [k, y] of rowY) sig += (++i0) * y + k.length;
+    const key = [treeSet.name, treeSet.skip, S.dtMode, S.dtN, S.dtPct, S.dtPick, S.dtSeed, S.branchAngle, S.branchRound, f2(sx), f2(maxD), f2(sig)].join(':');
+    if (!dtCache || dtCache.key !== key) {
+      const used = treeSet.trees.slice(treeSet.skip || 0), paths = [];
+      // a branch as the tree draws its own: square corners, or leaving the parent at an angle with an optional rounded bend
+      const seg = (ax, ay, cx, cy) => {
+        if (!elbow || Math.abs(cy - ay) < 1e-6) return `M${f2(ax)},${f2(cy)}H${f2(cx)}`;
+        const ady = Math.abs(cy - ay), run = Math.max(0, cx - ax), dx = Math.min(run, S.branchAngle >= 89.9 ? 0 : ady / Math.tan(rad(S.branchAngle)));
+        const bx = ax + dx, s1 = Math.hypot(bx - ax, cy - ay), r = Math.min(S.branchRound, s1 * 0.9, cx - bx);
+        if (r > 0.05 && s1 > 1e-6) { const ux = (bx - ax) / s1, uy = (cy - ay) / s1; return `M${f2(ax)},${f2(ay)}L${f2(bx - ux * r)},${f2(cy - uy * r)}Q${f2(bx)},${f2(cy)} ${f2(bx + r)},${f2(cy)}H${f2(cx)}`; }
+        return `M${f2(ax)},${f2(ay)}L${f2(bx)},${f2(cy)}H${f2(cx)}`;
+      };
+      for (const ti of dtPickIdx(S, used.length)) {
+        const t = treeOfRec(used[ti]), H = nodeHeights(t); if (!H) continue;
+        const yOf = new Map();
+        (function g(x) { if (!x.children.length) { const y = rowY.get(normTip(x.name || '')); if (y != null) yOf.set(x, y); return y; } const ys = x.children.map(g).filter(v => v != null); if (!ys.length) return null; const y = (Math.min(...ys) + Math.max(...ys)) / 2; yOf.set(x, y); return y; })(t);
+        let d = '';
+        walkAll(t, x => {
+          const y = yOf.get(x); if (y == null) return; const X = (maxD - H.get(x)) * sx;
+          if (x.parent && yOf.has(x.parent)) d += seg((maxD - H.get(x.parent)) * sx, elbow ? yOf.get(x.parent) : y, X, y);
+          const ys = x.children.map(c => yOf.get(c)).filter(v => v != null); if (!elbow && ys.length > 1) d += `M${f2(X)},${f2(Math.min(...ys))}V${f2(Math.max(...ys))}`;
+        });
+        if (d) paths.push(d);
+      }
+      dtCache = { key, paths };
+    }
+    const cloud = dtCache.paths.map(d => `<path d="${d}" fill="none" stroke="${S.dtColor}" stroke-width="${f2(S.dtW)}" stroke-opacity="${f2(S.dtOp / 100)}"/>`).join('');
+    (S.dtPlace === 'front' ? brL : bgL).push(cloud);
+  }
+
+  // Pie charts on the tips, from a file
+  if (S.pieOn && S.pieData) {
+    const pcol = S.pieColors || {}, pb = S.pieBorder > 0 ? ` stroke="${S.pieBorderColor}" stroke-width="${f2(S.pieBorder)}"` : '';
+    for (const n of vis) if (n.name) { const o = S.pieData.rows[normTip(n.name)]; if (o) { const [px, py] = piePt(n, S.piePos); pieHits.push(`<circle class="hitpt" cx="${f2(px)}" cy="${f2(py)}" r="${f2(Math.max(S.pieR, 4))}" data-id="${n.id}" data-kind="node" data-pie="file"/>`); dotL.push(pieSvg(px, py, S.pieR, S.pieData.cats.map(c => [pcol[c] || '#888888', o[c] || 0]), pb)); } }   // tips and named internal nodes
+  }
+
   // Reticulations of a phylogenetic network: always dashed, from the donor lineage to the hybrid node
   const netDrawn = [], netLabHits = [];   // what was drawn, for the selection highlight; the gamma labels go on top of the click layer
   if (S.netOn) {
@@ -4069,13 +4280,14 @@ function renderOnce() {
     const border = strokeAttr(stv(n, 'dbc') || S.dotBorderColor, stv(n, 'dbs') ?? S.dotBorderStyle, stv(n, 'dbw') ?? S.dotBorderWidth, r, stv(n, 'dbn') ?? S.dotBorderCount);
     const op = S.dotOpacity < 100 ? ` opacity="${f2(S.dotOpacity / 100)}"` : '';
     if (pieAt(n)) {   // pie of state probabilities, with the dot's size, border and opacity
-      const sl = anc.slices(anc.cl(n).node); let a = -90, body = '';
-      if (sl.length === 1) body = `<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${r}" fill="${sl[0].color}"/>`;
+      const sl = anc.slices(anc.cl(n).node), [cx, cy] = piePt(n, S.ancPos); let a = -90, body = '';   // on the node, or mid-branch
+      pieHits.push(`<circle class="hitpt" cx="${f2(cx)}" cy="${f2(cy)}" r="${f2(Math.max(r, 4))}" data-id="${n.id}" data-kind="node" data-pie="anc"/>`);
+      if (sl.length === 1) body = `<circle cx="${f2(cx)}" cy="${f2(cy)}" r="${r}" fill="${sl[0].color}"/>`;
       else for (const x of sl) {
-        const b = a + x.p * 360, [x0, y0] = [n._px + r * Math.cos(rad(a)), n._py + r * Math.sin(rad(a))], [x1, y1] = [n._px + r * Math.cos(rad(b)), n._py + r * Math.sin(rad(b))];
-        body += `<path d="M${f2(n._px)},${f2(n._py)}L${f2(x0)},${f2(y0)}A${r},${r} 0 ${x.p > 0.5 ? 1 : 0} 1 ${f2(x1)},${f2(y1)}Z" fill="${x.color}"/>`; a = b;
+        const b = a + x.p * 360, [x0, y0] = [cx + r * Math.cos(rad(a)), cy + r * Math.sin(rad(a))], [x1, y1] = [cx + r * Math.cos(rad(b)), cy + r * Math.sin(rad(b))];
+        body += `<path d="M${f2(cx)},${f2(cy)}L${f2(x0)},${f2(y0)}A${r},${r} 0 ${x.p > 0.5 ? 1 : 0} 1 ${f2(x1)},${f2(y1)}Z" fill="${x.color}"/>`; a = b;
       }
-      return `<g${op}>${body}<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${r}" fill="none"${border}/></g>`;
+      return `<g${op}>${body}<circle cx="${f2(cx)}" cy="${f2(cy)}" r="${r}" fill="none"${border}/></g>`;
     }
     return shapeSvg(n._px, n._py, r, stv(n, 'dsh') ?? (n.children.length ? S.nodeDotShape : S.tipDotShape), ` fill="${fill}"${border}${op}`);
   };
@@ -4118,7 +4330,24 @@ function renderOnce() {
   let labEnd = -Infinity;
   for (const n of tips) labEnd = Math.max(labEnd, circ ? (S.align ? S.radius : rOf(n._dEnd)) + (S.showTips ? S.labelOffset + (n._lw || 0) : 0) : (S.showTips ? n._lx + (n._lw || 0) : n._ex));
   for (const x of gNodes) if (!x.children.length) labEnd = Math.max(labEnd, circ ? x._r + (S.showTips ? S.labelOffset + (x._lw || 0) : 0) : (S.showTips ? x._lx + (x._lw || 0) : x._px));
-  const cPlot = L !== 'unrooted' ? catPlot(S) : null;
+  // the alignment, on rectangular trees: right after the names, or (alnBars 'before') after the clade names, further down
+  let alnEnd = -Infinity, alnBlock = -Infinity;   // alnBlock: the end of an alignment the clade names must clear
+  const alnRows = () => [...tips, ...gNodes.filter(x => !x.children.length)].filter(n => !n._tri && alnData && alnData.seqs.has(normTip(n.name || ''))).map(n => ({ y: n._py, seq: alnData.seqs.get(normTip(n.name || '')) }));
+  const alnDraw = x0 => { const rs = alnRows(); if (!rs.length) return; const top = Math.min(...rs.map(r => r.y)) - sp / 2, bottom = Math.max(...rs.map(r => r.y)) + sp / 2; const a = alnSvg(S, rs, x0, Math.max(1, sp * (S.alnCell || 100) / 100), top, bottom); anL.push(`<g>${a.svg}</g>`); alnEnd = a.end; };
+  const sideHid = k => !!(S.sideHidden && S.sideHidden[k]);   // a layer hidden with its eye: kept, but not drawn
+  const alnHere = S.alnOn && alnData && L === 'rect' && !circ && !sideHid('aln');
+  // Layers: on rectangular trees each side plot starts where the ones before it in the order end. A width is the real
+  // one once its plot is drawn, and worked out beforehand otherwise (plots are drawn in a fixed order in the code).
+  const layered = L === 'rect' && !circ, sideBase = labEnd, sideOn = {}, sideW = {};
+  const sideGap = k => k === 'aln' ? S.alnGap : k === 'cat' ? S.catDist : k === 'bar' ? S.dataGap : k === 'heat' ? S.heatGap : 0;
+  const layerAt = key => { let x = sideBase; for (const k of sideOrderOf(S)) { if (!sideOn[k]) continue; if (k === key) return x + sideGap(k); x += sideGap(k) + (sideW[k] || 0); } return x; };
+  if (alnHere) { const rs = alnRows(); if (rs.length) { const cell = Math.max(1, sp * (S.alnCell || 100) / 100), from = clamp(Math.round(S.alnFrom || 1), 1, alnData.len), to = clamp(Math.round(S.alnTo || alnData.len), from, alnData.len), nS = to - from + 1, W = Math.max(10, S.alnWidth); sideOn.aln = true; sideW.aln = nS <= Math.floor(W / cell) ? nS * cell : W; } }
+  { const hp = layered && !sideHid('heat') ? heatPlot(S) : null; if (hp) { sideOn.heat = true; sideW.heat = hp.cols.length * S.heatCellW + Math.max(0, hp.cols.length - 1) * S.heatColGap; } }
+  { const lab = layered && !sideHid('clade') ? vis.filter(n => n.cladeLabel) : []; if (lab.length) {   // clade names: their widest bar and name, times how deep they nest
+    const lv = n => { let m = 0, x = n.parent; while (x) { if (x.cladeLabel) m++; x = x.parent; } return m; };
+    const item = Math.max(...lab.map(n => (stv(n, 'barW') ?? S.barWidth) + Math.max(0, stv(n, 'barTO') ?? S.barTextGap) + measure(n.cladeLabel, stv(n, 'barFs') ?? S.barFontSize, fam, stv(n, 'barI') ?? S.barItalic, stv(n, 'barB') ?? S.barBold))) + 14;
+    sideOn.clade = true; sideW.clade = (Math.max(...lab.map(lv)) + 1) * item + Math.max(0, S.barGap) + 6; } }
+  const cPlot = L !== 'unrooted' && !sideHid('cat') ? catPlot(S) : null;
   // column centers from the start of the categories: each column may be pushed right, or left until it touches its neighbor
   const catPos = { cs: [], w: 0, sz: 0 };
   let catCap = null;
@@ -4129,12 +4358,14 @@ function renderOnce() {
     cPlot.cols.forEach((c, i) => { x += Math.max(0, c.off) + (i ? S.catGap : 0); catPos.cs.push(x + sz / 2); x += sz; });
     catPos.w = x;
   }
-  const catFirst = !!cPlot && S.catOrder === 'before';
+  const catFirst = !!cPlot && sideOrderOf(S).indexOf('cat') < sideOrderOf(S).indexOf('bar');   // the order of the layers, on every layout
+  if (layered && cPlot) { sideOn.cat = true; sideW.cat = catPos.w; }
   // Data bars from an attached table, one row per tip, lined up after the tip labels
   for (const x of [...vis, ...gNodes]) x._dxe = null;
-  const dPlot = L !== 'unrooted' ? dataPlot(S) : null;
+  const dPlot = L !== 'unrooted' && !sideHid('bar') ? dataPlot(S) : null;
+  if (layered && dPlot) { sideOn.bar = true; sideW.bar = Math.max(1, S.dataWidth) + (S.dataValues ? S.dataValSize * 4 : 0) + 4; }   // until the bars are drawn
   let dataEnd = -Infinity, dLegend = null, dAxis = null, barsReach = -Infinity, catDistLo = null;
-  let drawnEnd = -Infinity;   // where the side plots really end, for placing the scale bar, legends and title
+  let drawnEnd = alnEnd;   // where the side plots really end, for placing the scale bar, legends and title
   const dataGeo = new Map();   // selection id -> shapes, for the selection outline
   if (dPlot) {
     const dataL = [], nC = dPlot.cols.length, prop = dPlot.prop, pct = prop && S.dataPropFmt === 'percent';
@@ -4155,7 +4386,7 @@ function renderOnce() {
     const W = Math.max(1, S.dataWidth), kx = vmax > 0 ? W / vmax : 0, th = clamp(S.dataThick, 1, 100) / 100, vfs = S.dataValSize;
     const fmtV = v => pct ? +(v * 100).toFixed(v * 100 >= 10 ? 1 : 2) + '%' : prop ? String(+v.toFixed(v >= 0.1 ? 3 : 4)) : fmtNum(v);
     const vTxt = r => nC > 1 && !prop ? fmtV(tot(r)) : nC > 1 ? '' : r.vals[0] == null ? '' : fmtV(r.vals[0]);
-    const x0 = (catFirst ? labEnd + S.catDist + catPos.w : labEnd) + S.dataGap, xMax = x0 + W;
+    const x0 = layered ? layerAt('bar') : (catFirst ? labEnd + S.catDist + catPos.w : labEnd) + S.dataGap, xMax = x0 + W;
     dataEnd = xMax;   // the whole bar area is reserved, even where bars are short
     barsReach = x0;
     const usedGroups = new Set();
@@ -4219,7 +4450,8 @@ function renderOnce() {
   if (cPlot) {
     const catL = [], sz = catPos.sz, half = sz / 2, cs = catPos.cs;
     const prevEnd = !catFirst && dPlot ? dataEnd : labEnd, minStart = !catFirst && dPlot ? barsReach : labEnd;
-    const start = Math.max(minStart, prevEnd + S.catDist);
+    if (layered && dPlot && isFinite(dataEnd)) sideW.bar = Math.max(sideW.bar || 0, barsReach - layerAt('bar'), dataEnd - layerAt('bar'));   // the real width of the bars
+    const start = layered ? layerAt('cat') : Math.max(minStart, prevEnd + S.catDist);
     catDistLo = Math.floor(minStart - prevEnd);
     const cells = S.catCell || {};
     const rows = [];
@@ -4271,12 +4503,13 @@ function renderOnce() {
 
   // ---- Heatmap: a grid of values next to the tips, one column per variable (rectangular trees)
   let heatTop = null, heatLeg = null;
-  const hPlot = L === 'rect' ? heatPlot(S) : null;
+  const hPlot = L === 'rect' && !sideHid('heat') ? heatPlot(S) : null;
   if (hPlot) {
     const { t, idx, cols } = hPlot, hm = tableIndex(t), rows = [];
     for (const n of tips) { if (n._tri || n._sa || !n.name) continue; const r = hm.get(normTip(n.name)); if (r) rows.push([n, idx.map(j => cellNum(r[j], t.delim))]); }
     if (rows.length) {
-      const start = Math.max(labelsEnd, isFinite(dataEnd) ? dataEnd : -Infinity) + S.heatGap, cw = S.heatCellW, cg = S.heatColGap, ch = sp * clamp(S.heatH, 0.05, 1);
+      if (layered && dPlot && isFinite(barsReach)) sideW.bar = Math.max(sideW.bar || 0, barsReach - layerAt('bar'));
+      const start = layered ? layerAt('heat') : Math.max(labelsEnd, isFinite(dataEnd) ? dataEnd : -Infinity) + S.heatGap, cw = S.heatCellW, cg = S.heatColGap, ch = sp * clamp(S.heatH, 0.05, 1);
       const stops = S.heatMidOn ? [S.heatLow, S.heatMid, S.heatHigh] : [S.heatLow, S.heatHigh];
       const ramp = q => { q = clamp(q, 0, 1) * (stops.length - 1); const i = Math.min(stops.length - 2, Math.floor(q)), u = q - i, c0 = hexRGB(stops[i]), c1 = hexRGB(stops[i + 1]); return rgbHex(c0.map((c, k) => c + (c1[k] - c) * u)); };
       const rng = cols.map((c, j) => { const v = rows.map(r => r[1][j]).filter(v => v != null); return v.length ? [Math.min(...v), Math.max(...v)] : [0, 1]; });
@@ -4306,7 +4539,7 @@ function renderOnce() {
   }
 
   // Clade name bars
-  const labeled = vis.filter(n => n.cladeLabel);
+  const labeled = sideHid('clade') ? [] : vis.filter(n => n.cladeLabel);
   let barGapLo = null, cladeReach = -Infinity, curvedNeed = -Infinity, cladeOut = 0;
   const barGeo = new Map();
   if (labeled.length && L !== 'unrooted') {
@@ -4320,7 +4553,9 @@ function renderOnce() {
     const opts = new Map(labeled.map(n => [n, bOpt(n)]));
     for (const n of labeled) { const o = opts.get(n); o.tw = measure(n.cladeLabel, o.fs, fam, o.it, o.bold); o.tc = stv(n, 'barTC') || o.bc; }
     const step = Math.max(...labeled.map(n => { const o = opts.get(n); return o.w + Math.max(0, o.tgap) + o.tw; })) + 14;
-    const edge = Math.max(circ ? outerR : labelsEnd, dataEnd) + 6;   // outer edge of clade highlights, or of the data bars
+    if (layered && dPlot && isFinite(barsReach)) sideW.bar = Math.max(sideW.bar || 0, barsReach - layerAt('bar'));
+    const cladeFloor = layered && layerAt('clade') > sideBase + 1e-6 ? layerAt('clade') : -Infinity;   // the layers before the clade names
+    const edge = layered ? Math.max(labelsEnd, layerAt('clade')) + 6 : Math.max(circ ? outerR : labelsEnd, dataEnd, alnBlock) + 6;   // outer edge of clade highlights, or of the data bars
     // Inside out, the clade bars go around the outside of the tree, measured in real radii
     const outside = circ && radFlip != null, edgeOut = outside ? realR(Math.min(0, rIn - stub)) + 6 : 0;
     barRange = new Map();
@@ -4329,11 +4564,12 @@ function renderOnce() {
     const ownEnd = n => {
       let m = -Infinity;
       (function g(x) {
-        if (!x.children.length || x._tri) m = Math.max(m, circ ? (S.align ? S.radius : rOf(x._dEnd)) + (S.showTips ? S.labelOffset + (x._lw || 0) : 0) : (S.showTips ? x._lx + (x._lw || 0) : x._ex), x._dxe ?? -Infinity);
+        if (!x.children.length || x._tri) m = Math.max(m, circ ? (S.align ? S.radius : rOf(x._dEnd)) + (S.showTips ? S.labelOffset + (x._lw || 0) : 0) : (S.showTips ? x._lx + (x._lw || 0) : x._ex), layered ? -Infinity : x._dxe ?? -Infinity);
         else x.children.forEach(g);
-        if (x.grafts) for (const G of x.grafts) walkAll(G, y => { if (gLive.has(y) && !y.children.length) m = Math.max(m, circ ? y._r + (S.showTips ? S.labelOffset + (y._lw || 0) : 0) : (S.showTips ? y._lx + (y._lw || 0) : y._px), y._dxe ?? -Infinity); });
+        if (x.grafts) for (const G of x.grafts) walkAll(G, y => { if (gLive.has(y) && !y.children.length) m = Math.max(m, circ ? y._r + (S.showTips ? S.labelOffset + (y._lw || 0) : 0) : (S.showTips ? y._lx + (y._lw || 0) : y._px), layered ? -Infinity : y._dxe ?? -Infinity); });
       })(n);
-      return dPlot || cPlot ? Math.max(m, dataEnd) : m;   // the data bars form one block that clade bars never enter
+      if (layered) return Math.max(m, cladeFloor);
+      return dPlot || cPlot || alnBlock > -Infinity ? Math.max(m, dataEnd, alnBlock) : m;   // the data bars form one block that clade bars never enter
     };
     const aligned = S.barAlign !== false;
     const barPos = new Map();
@@ -4354,6 +4590,7 @@ function renderOnce() {
     // own labels, so every bar keeps moving over the whole slider range.
     barLo = new Map();
     for (const n of labeled) cladeReach = Math.max(cladeReach, barExtent(n));
+    // the clade names keep the width worked out beforehand, since the layers drawn before them already used it
     for (const n of labeled) barLo.set(n.id, outside ? -4 : aligned ? Math.ceil(ownEnd(n) + 4 - edge - (lvl.get(n) || 0) * step) : 2);
     if (outside) for (const n of labeled) cladeOut = Math.max(cladeOut, barExtent(n));
     const glob = labeled.filter(n => stv(n, 'barOff') == null);
@@ -4569,6 +4806,7 @@ function renderOnce() {
   if (heatTop != null) minY = Math.min(minY, heatTop);   // category titles stand above the first row
   // Page box used to place the scale bar and the title
   if (L === 'unrooted') for (const n of tips) maxX = Math.max(maxX, n._lx + (n._lw || 0));
+  if (alnHere && sideOn.aln) { alnDraw(layerAt('aln')); drawnEnd = Math.max(drawnEnd, alnEnd); }   // the alignment, at its place among the layers
   let boxL = isRectish(S) ? 0 : minX, boxR = isRectish(S) ? Math.max(maxX, labelsEnd, drawnEnd) : maxX;
   let scaleBottom = maxY, scaleTopY = null, legendBottom = null;
   dxRange = {};
@@ -4627,6 +4865,12 @@ function renderOnce() {
       freeBoxes.scale = { x: sb.x + dx, y: sb.y + dy, w: sb.w, h: sb.h };
       if (!S.scaleFree) scaleBottom = scaleNatBottom = ty + sb.h;   // legends go below it
     }
+  } else if (isTurned(S)) {
+    // a custom angle: legends and the title go around the turned box of the tree
+    const A = treeTurn(S) * Math.PI / 180, ca = Math.cos(A), sa = Math.sin(A), B0 = Math.max(maxY, scaleBottom, scaleNatBottom ?? -Infinity, dAxis ? dAxis.bottom : -Infinity);
+    const pts = [[boxL, minY], [boxR, minY], [boxL, B0], [boxR, B0]].map(([x, y]) => [x * ca - y * sa, x * sa + y * ca]);
+    boxL = Math.min(...pts.map(q => q[0])); boxR = Math.max(...pts.map(q => q[0])); minY = Math.min(...pts.map(q => q[1])); maxY = Math.max(...pts.map(q => q[1]));
+    scaleBottom = maxY; scaleNatBottom = null; scaleTopY = null; dAxis = null;
   }
   const blocks = [];
   if (S.supportMode !== 'none' && S.supportScheme === 'categories' && S.supportLegend && cats.length && sups.length)
@@ -4638,6 +4882,7 @@ function renderOnce() {
     if (S.nlabColorBy) blocks.push({ key: 'nlabc', title: nlabLeg.title, gradient: { stops: [S.nlabLow, S.nlabHigh], lo: nlabLeg.lo, hi: nlabLeg.hi } });
     if (S.nlabSizeBy) blocks.push({ key: 'nlabs', title: S.nlabColorBy ? '' : nlabLeg.title, entries: [nlabLeg.lo, (nlabLeg.lo + nlabLeg.hi) / 2, nlabLeg.hi].map(v => ({ text: fmtV(v), sym: { t: 'circle', r: nlabLeg.rOf(v), fill: S.nlabColorBy ? '#9a9a9a' : S.ancLabelColor } })) });
   }
+  if (S.pieOn && S.pieData && S.pieLegend) blocks.push({ key: 'pie', title: S.pieTitle || '', entries: S.pieData.cats.map(c => ({ text: c, sym: { t: 'circle', r: 5, fill: (S.pieColors || {})[c] || '#888888' } })) });
   if (dotLeg && S.dotDataLegend) {
     const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
     if (S.dotDataColor) blocks.push({ key: 'dotc', title: dotLeg.col, gradient: { stops: dotStops(S), lo: dotLeg.lo, hi: dotLeg.hi } });
@@ -4712,14 +4957,14 @@ function renderOnce() {
   }
   // ---- Page sections (rectangular trees): row ranges exported as separate pages, each with a small map of the whole tree
   pageGeo = []; pageBounds = null; pageSp = sp; pageRows = null;
-  if (L === 'rect' && !isVertical(S)) {   // pages are bands of rows: horizontal trees only
+  if (L === 'rect' && !isTurned(S)) {   // pages are bands of rows: horizontal trees only
     // which tip, collapsed clade or fossil owns each row
     const owners = [], spanOf = new Map();
     for (const n of vis) if ((!n.children.length || n._tri) && !n._sa) { const w = n._w || 1, st0 = Math.round(n._y - (w - 1) / 2); for (let q = 0; q < w; q++) owners[st0 + q] = n.id; spanOf.set(n.id, [st0, st0 + w - 1]); }
     for (const x of gNodes) if (!x.children.length) { owners[x._y] = x.id; spanOf.set(x.id, [x._y, x._y]); }
     pageRows = { owners, spanOf, N };
   }
-  if (L === 'rect' && !isVertical(S) && S.pages && S.pages.length) {   // the pages wait, kept, while the tree is vertical
+  if (L === 'rect' && !isTurned(S) && S.pages && S.pages.length) {   // the pages wait, kept, while the tree is vertical
     const { spanOf } = pageRows;
     for (const sec of S.pages) {
       let s0 = (spanOf.get(sec.from) || [])[0] ?? sec.s0 ?? 0, s1 = (spanOf.get(sec.to) || [])[1] ?? sec.s1 ?? N - 1;
@@ -4763,20 +5008,20 @@ function renderOnce() {
     anL.push(`<text x="${f2(x)}" y="${f2(y)}" text-anchor="${anchor}" font-size="${S.titleSize}"${S.titleBold ? ' font-weight="bold"' : ''}${S.titleItalic ? ' font-style="italic"' : ''} fill="${S.titleColor}" font-family="${esc(fam)}">${esc(S.title)}</text>`);
   }
 
-  const vert = isVertical(S), anFixed = vert ? anL.splice(anTreeEnd) : [], arrowsNow = arrowsSvg();
+  const vert = isTurned(S), anFixed = vert ? anL.splice(anTreeEnd) : [], arrowsNow = arrowsSvg();
   const contentStr = alphaAttrs([
     `<g id="imgBack"></g>`,
-    vert ? '<g transform="rotate(-90)">' : '',
+    vert ? `<g transform="rotate(${treeTurn(S)})">` : '',
     `<g>${bgL.join('')}</g>`,
     `<g stroke="${S.lineColor}" stroke-width="0.8" opacity="0.6">${alL.join('')}</g>`,
-    `<g fill="none" stroke-width="${LW}" stroke-linecap="${S.lineCap}" stroke-linejoin="round">${brL.join('')}</g>`,
+    `<g fill="none" stroke-width="${LW}" stroke-linecap="${S.lineCap}" stroke-linejoin="round">${mergeRuns(brL)}</g>`,
     nbarL.length ? `<g>${nbarL.join('')}</g>` : '',
     ancBrL.length ? `<g fill="none" stroke-linecap="butt">${ancDefs.length ? `<defs>${ancDefs.join('')}</defs>` : ''}${ancBrL.join('')}</g>` : '',
     `<g>${triL.join('')}</g>`,
     `<g>${dotL.join('')}</g>`,
     supL.length ? `<g>${supL.join('')}</g>` : '',   // support circles above any node dot
-    `<g font-family="${esc(fam)}" font-size="${S.fontSize}"${S.italic ? ' font-style="italic"' : ''}${S.bold ? ' font-weight="bold"' : ''}>${vert ? vertText(lbL.join(''), S, true) : lbL.join('')}</g>`,
-    `<g>${vert ? vertText(anL.join(''), S) : anL.join('')}</g>`,
+    `<g font-family="${esc(fam)}" font-size="${S.fontSize}"${S.italic ? ' font-style="italic"' : ''}${S.bold ? ' font-weight="bold"' : ''}>${isVertical(S) ? vertText(lbL.join(''), S, true) : lbL.join('')}</g>`,
+    `<g>${isVertical(S) ? vertText(anL.join(''), S) : anL.join('')}</g>`,
     vert ? `</g><g>${anFixed.join('')}</g>` : '',
     `<g id="imgFront"></g>`,
     `<g id="arrows">${arrowsNow.svg}</g>`
@@ -4829,11 +5074,11 @@ function renderOnce() {
     if (cl) ovL.push(S.catShape === 'circle' ? `<circle transform="${cl.tr}" r="${f2(cl.h + 3)}" fill="none" stroke="${hl}" stroke-width="2"/>` : `<rect transform="${cl.tr}" x="${f2(-cl.h - 3)}" y="${f2(-cl.h - 3)}" width="${f2(cl.h * 2 + 6)}" height="${f2(cl.h * 2 + 6)}" rx="2" fill="none" stroke="${hl}" stroke-width="2"/>`);
     if (cg.t) ovL.push(`<rect data-up="title" transform="${cg.t.tr}" x="-3" y="${f2(-cg.t.h / 2)}" width="${f2(cg.t.w)}" height="${f2(cg.t.h)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.3"/>`);
   }
-  overlay.innerHTML = (isVertical(S) ? `<g transform="rotate(-90)">${vertText(ovL.join(''), S)}</g>` : ovL.join('')) + arrowsNow.hl;
+  overlay.innerHTML = (isTurned(S) ? `<g transform="rotate(${treeTurn(S)})">${isVertical(S) ? vertText(ovL.join(''), S) : ovL.join('')}</g>` : ovL.join('')) + arrowsNow.hl;
   for (const n of [...vis, ...gNodes]) hitL.push(`<circle class="hitpt" cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(Math.max(6, LW * 2))}" data-id="${n.id}" data-kind="node"/>`);
   const ih = imageHits();
   const treeHits = hitL.join('') + valHits.join('') + netLabHits.join('');
-  const hitsStr = ih.back + (isVertical(S) ? `<g transform="rotate(-90)">${vertText(treeHits, S)}</g>` : treeHits) + ih.front + arrowsNow.hits + '<g id="hitExtra"></g>';
+  const hitsStr = ih.back + (isTurned(S) ? `<g transform="rotate(${treeTurn(S)})">${isVertical(S) ? vertText(treeHits, S) : treeHits}</g>` : treeHits) + ih.front + pieHits.join('') + arrowsNow.hits + '<g id="hitExtra"></g>';
   if (hitsStr !== lastHitsStr) { hits.innerHTML = hitsStr; lastHitsStr = hitsStr; }
   const hitExtra = hits.querySelector('#hitExtra'); hitExtra.innerHTML = '';
   hitExtra.insertAdjacentHTML('beforeend', pageItemsSvg() + freeItemsSvg());
@@ -5055,7 +5300,8 @@ pop.addEventListener('pointerdown', e => {
 // Places the right-click menu next to the pointer, inside the screen.
 function placePop(cx, cy, keep) {
   const mr = $('main').getBoundingClientRect();
-  if ((keep || popPinned) && popPos) { pop.style.left = popPos.x + 'px'; pop.style.top = clamp(popPos.y, 10, Math.max(10, mr.height - pop.offsetHeight - 10)) + 'px'; return; }
+  // a menu refreshed in place stays where it is; a new one opens at the click
+  if (keep && popPos) { pop.style.left = popPos.x + 'px'; pop.style.top = clamp(popPos.y, 10, Math.max(10, mr.height - pop.offsetHeight - 10)) + 'px'; return; }
   const pw = pop.offsetWidth, ph = pop.offsetHeight;
   let x = cx - mr.left + 14, y = cy - mr.top - 20;
   if (x + pw > mr.width - 10) x = cx - mr.left - pw - 14;
@@ -5343,7 +5589,7 @@ function openEdit(cx, cy, keep) {
   if (roots.length) {
     const internal = T.internal;
     let h = `<div class="part"><b>${single && !single.children.length ? 'Tip' : 'Clade'}</b>`;
-    if (internal.length) h += `<div class="btns">${T.internalReal.length ? (single ? `<button class="btn small" data-a="toggle">${single.collapsed ? 'Expand clade' : 'Collapse clade'}</button>` : `<button class="btn small" data-a="collapse">Collapse</button><button class="btn small" data-a="expand">Expand</button>`) : ''}
+    if (internal.length) h += `<div class="btns">${T.internalReal.length ? (single ? `<button class="btn small" data-a="toggle">${single.collapsed ? 'Expand clade' : 'Collapse clade'}</button>${single.poly ? '<button class="btn small" data-a="unpoly" title="Gives back the branches the polytomy replaced">Undo the polytomy</button>' : single.children.length > 1 && single.children.some(c => c.children.length) ? `<button class="btn small" data-a="poly" title="${[...sel.values()].some(v => v.kind === 'clade') ? 'Every tip of the clade straight from this node' : 'The branches of its children join this node'}">Make a polytomy</button>` : ''}` : `<button class="btn small" data-a="collapse">Collapse</button><button class="btn small" data-a="expand">Expand</button>`) : ''}
       <button class="btn small" data-a="rotate">Rotate children</button><button class="btn small" data-a="ladder">Ladderize</button>${T.internalReal.length ? '<button class="btn small" data-a="expandSub">Expand all inside</button>' : ''}</div>`;
     h += `<div class="grp"><span>${single && !single.children.length ? 'Branch and label color' : 'Clade color'}</span>${sw('color', 'roots', roots[0].color)}</div>`;
     if (single && !isGraft(single)) h += `<div class="grp"><span>Highlight background</span>${sw('bg', 'roots', single.bg, BGPAL)}</div>
@@ -5623,6 +5869,8 @@ function openEdit(cx, cy, keep) {
   function act(a) {
     const n = single;
     if (a === 'toggle') apply([n], x => { x.collapsed = !x.collapsed; });
+    else if (a === 'poly') { const full = [...sel.values()].some(v => v.kind === 'clade'); mutate(() => { for (const x of T.internalReal) makePoly(x, full); }); openEdit(0, 0, true); }
+    else if (a === 'unpoly') { mutate(() => { for (const x of T.internalReal) undoPoly(x); }); openEdit(0, 0, true); }
     else if (a === 'collapse') apply(T.internal, x => { x.collapsed = true; });
     else if (a === 'expand') apply(T.internal, x => { x.collapsed = false; });
     else if (a === 'rotate') apply(T.internal, x => { x.children.reverse(); });
@@ -6140,7 +6388,7 @@ async function exportTIFF() {
 }
 // Exports in a format; with pages, the Export menu saves the pages.
 function exportAs(fmt) {
-  if (/^(svg|pdf|png|tif)$/.test(fmt) && settings.layout === 'rect' && !isVertical(settings) && (settings.pages || []).length && settings.exportSplit !== false) return exportPages(fmt);   // a vertical tree exports whole
+  if (/^(svg|pdf|png|tif)$/.test(fmt) && settings.layout === 'rect' && !isTurned(settings) && (settings.pages || []).length && settings.exportSplit !== false) return exportPages(fmt);   // a vertical tree exports whole
   ({ svg: exportSVG, pdf: exportPDF, png: exportPNG, tif: exportTIFF, nwk: () => exportTree('newick'), nex: () => exportTree('nexus') })[fmt](); }
 
 /* ================= Misc ================= */
@@ -6285,7 +6533,7 @@ document.addEventListener('click', e => {
 const expMenu = $('expMenu'), expBtn = $('expMenuBtn');
 // Closes the Export menu.
 const closeExp = () => { expMenu.hidden = true; expBtn.setAttribute('aria-expanded', 'false'); };
-expBtn.onclick = () => { const hasPages = settings.layout === 'rect' && !isVertical(settings) && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); const open = expMenu.hidden; expMenu.hidden = !open; expBtn.setAttribute('aria-expanded', String(open)); if (open) syncDpi(); };
+expBtn.onclick = () => { const hasPages = settings.layout === 'rect' && !isTurned(settings) && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); const open = expMenu.hidden; expMenu.hidden = !open; expBtn.setAttribute('aria-expanded', String(open)); if (open) syncDpi(); };
 expMenu.querySelectorAll('[data-fmt]').forEach(b => b.onclick = () => { closeExp(); exportAs(b.dataset.fmt); });
 // Shows whether the Export menu saves the pages split or the whole figure.
 function syncSplit() { document.querySelectorAll('[data-split]').forEach(b => b.setAttribute('aria-pressed', String((settings.exportSplit !== false) === (b.dataset.split === '1')))); }
@@ -6297,7 +6545,7 @@ $('pageBtn').addEventListener('click', e => { e.stopPropagation(); const sh = $(
   if (open) { const r = $('pageBtn').getBoundingClientRect(); sh.style.top = (r.bottom + 6) + 'px'; sh.style.left = Math.max(8, Math.min(r.left, innerWidth - sh.offsetWidth - 8)) + 'px'; } $('pageBtn').setAttribute('aria-expanded', String(open)); if (open) refreshVisibility(); });
 document.addEventListener('pointerdown', e => { const sh = $('pageSheet'); if (!sh.hidden && !sh.contains(e.target) && !$('pageBtn').contains(e.target) && !$('pop').contains(e.target)) { sh.hidden = true; $('pageBtn').setAttribute('aria-expanded', 'false'); } });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('pageSheet').hidden) { $('pageSheet').hidden = true; $('pageBtn').setAttribute('aria-expanded', 'false'); } });
-$('expMenuBtn').addEventListener('click', () => { const hasPages = settings.layout === 'rect' && !isVertical(settings) && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); });
+$('expMenuBtn').addEventListener('click', () => { const hasPages = settings.layout === 'rect' && !isTurned(settings) && (settings.pages || []).length > 0; $('expSplitRow').hidden = !hasPages; syncSplit(); });
 syncSplit();
 $('dpiTop').addEventListener('change', e => setDpi(e.target.value));
 $('dpiTop').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); setDpi(e.target.value); } });
@@ -6711,7 +6959,8 @@ svg.addEventListener('pointerdown', e => {
     else {
       const sx = handle.includes('e') ? 1 : -1, sy = handle.includes('s') ? 1 : -1, ratio = o.h / o.w;
       let w = Math.max(8, o.w + sx * (Math.abs(dx) > Math.abs(dy) / ratio ? dx : sy * dy / ratio * sx));
-      const h = w * ratio;
+      let h = w * ratio;
+      if (m.free) { w = Math.max(8, o.w + sx * dx); h = Math.max(8, o.h + sy * dy); }   // proportions unlocked
       m.w = w; m.h = h; m.x = sx > 0 ? o.x : o.x + o.w - w; m.y = sy > 0 ? o.y : o.y + o.h - h;
     }
     if (!raf) raf = requestAnimationFrame(() => { raf = 0; render(); });
@@ -6872,8 +7121,8 @@ function openImage(cx, cy, keep) {
       const v = parseFloat(inp.value); if (isNaN(v)) return;
       const k = inp.dataset.im;
       commit(() => {
-        if (k === 'w') { const ratio = m.h / m.w; m.w = Math.max(1, v); m.h = m.w * ratio; }
-        else if (k === 'h') { const ratio = m.w / m.h; m.h = Math.max(1, v); m.w = m.h * ratio; }
+        if (k === 'w') { const ratio = m.h / m.w; m.w = Math.max(1, v); if (!m.free) m.h = m.w * ratio; }
+        else if (k === 'h') { const ratio = m.w / m.h; m.h = Math.max(1, v); if (!m.free) m.w = m.h * ratio; }
         else if (k === 'op') m.op = clamp(v / 100, 0, 1);
         else m[k] = v;
       });
@@ -6891,6 +7140,24 @@ function openImage(cx, cy, keep) {
     else if (a === 'dup') { if (tree) pushUndo(); const c = { ...m, id: ++imgUid, x: m.x + 20, y: m.y + 20 }; figImages.push(c); selImg = c.id; imgChanged('Image duplicated'); openImage(0, 0, true); }
     else if (a === 'del') { if (tree) pushUndo(); figImages = figImages.filter(x => x !== m); selImg = null; closePop(); imgChanged('Image deleted'); }
   });
+  if (m.ltt) {   // a lineages-through-time plot: its look and its lines; of position and size, only the size
+    const h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta'); if (h3) h3.textContent = 'Lineages through time'; if (meta) meta.textContent = `${m.ltt.lines.length} ${m.ltt.lines.length === 1 ? 'line' : 'lines'}, on the ages of the tree.`;
+    pop.querySelectorAll('[data-im="x"], [data-im="y"]').forEach(inp => inp.closest('.kv').remove());
+    const ps = [...pop.querySelectorAll('.part > b')].find(b => b.textContent === 'Position and size');
+    if (ps) {   // Size, with whether its proportions are locked
+      ps.textContent = 'Size';
+      ps.insertAdjacentHTML('afterend', `<div class="kv"><span>Proportions</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><select class="psel" data-free aria-label="Proportions"><option value="0"${m.free ? '' : ' selected'}>Locked</option><option value="1"${m.free ? ' selected' : ''}>Free</option></select></div>`);
+      ps.parentNode.querySelector('[data-free]').onchange = e => { pushUndo(); m.free = e.target.value === '1'; imgChanged(); openImage(cx, cy, true); };
+    }
+    const kp = lttMenuPart(m), first = pop.querySelector('.part');
+    first.insertAdjacentHTML('beforebegin', kp.html);
+    wireCtl(kp.spec, (key, v) => { pushUndo(); kp.set(key, v); imgChanged(); openImage(cx, cy, true); });
+    pop.querySelectorAll('[data-lttlab]').forEach(ti => { ti.addEventListener('change', () => { pushUndo(); m.ltt.lines[+ti.dataset.lttlab].label = ti.value.trim(); imgChanged(); }); ti.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ti.blur(); } }); });
+    pop.querySelectorAll('[data-ltttx]').forEach(ti => { ti.addEventListener('change', () => { pushUndo(); m.ltt[ti.dataset.ltttx] = ti.value; imgChanged(); }); ti.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ti.blur(); } }); });
+    const addB = pop.querySelector('[data-lttadd]');
+    if (addB) addB.onclick = () => { pushUndo(); const i = m.ltt.lines.length, named = [...nodeById.values()].filter(x => x.cladeLabel); m.ltt.lines.push({ src: named[i - 1] ? named[i - 1].cladeLabel : 'all', fossils: true, color: LTT_COLORS[i % LTT_COLORS.length], w: 1.8, dash: 'solid' }); imgChanged(); openImage(cx, cy, true); };
+    pop.querySelectorAll('[data-lttdel]').forEach(b => b.onclick = () => { pushUndo(); m.ltt.lines.splice(+b.dataset.lttdel, 1); imgChanged(); openImage(cx, cy, true); });
+  }
   if (m.txt || m.kde) {   // items the app draws: a title that says what they are
     const h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta');
     if (h3) h3.textContent = m.txt ? `Label: ${m.txt.text || ''}` : `Density plot${m.kde.col ? ' of ' + kdeColLabel(settings, m.kde.src, m.kde.col) : ''}`;
@@ -6939,7 +7206,7 @@ function refreshImageList() {
 function imagesPanel() {
   const w = document.createElement('div'); w.style.cssText = 'display:flex;flex-direction:column;gap:10px';
   w.innerHTML = `
-    <div class="btns"><button class="btn primary" id="imgAdd">Add image</button><button class="btn" id="txtAdd" title="A text you can place anywhere and align with the tree">Add label</button><button class="btn" id="kdeAdd" title="A density plot of a value of the tree, such as rates">Add density plot</button><button class="btn" id="arrowAdd" title="An arrow you can anchor to nodes and images">Draw arrow</button></div>
+    <div class="btns"><button class="btn primary" id="imgAdd">Add image</button><button class="btn" id="txtAdd" title="A text you can place anywhere and align with the tree">Add label</button><button class="btn" id="kdeAdd" title="A density plot of a value of the tree, such as rates">Add density plot</button><button class="btn" id="lttAdd" title="Lineages through time, for the whole tree or named clades">Add LTT plot</button><button class="btn" id="arrowAdd" title="An arrow you can anchor to nodes and images">Draw arrow</button></div>
     <input type="file" id="imgIn" accept="image/png,image/jpeg" multiple hidden>
     <input type="file" id="imgRep" accept="image/png,image/jpeg" hidden>
     <div id="imgList" class="imglist"></div>
@@ -6947,6 +7214,7 @@ function imagesPanel() {
   setTimeout(() => {
     $('imgAdd').onclick = () => $('imgIn').click();
     $('kdeAdd').onclick = () => { if (!tree) return toast('Open a tree first'); addKdePlot(); };
+    $('lttAdd').onclick = () => { if (!tree) return toast('Open a tree first'); if (!treeHasAges()) return toast('Lineages through time need a tree with ages (a dated tree)'); addLttPlot(); };
     $('txtAdd').onclick = () => { if (!tree) return toast('Open a tree first'); addLabel(); };
     $('arrowAdd').onclick = () => { if (!tree) return toast('Open a tree first'); addArrow(); };
     $('imgIn').onchange = e => { [...e.target.files].forEach(addImageFile); e.target.value = ''; };
@@ -7147,7 +7415,7 @@ function pagesBox() {
 function refreshPagesBox() {
   const d = $('pagesBox'); if (!d) return;
   if (settings.layout !== 'rect') { d.innerHTML = '<p class="hint">Pages work on rectangular trees. Switch the layout to Rectangular to use them.</p>'; return; }
-  if (isVertical(settings)) { d.innerHTML = '<p class="hint">Pages work on horizontal trees. Set the orientation to Horizontal in Layout to use them.</p>'; return; }
+  if (isTurned(settings)) { d.innerHTML = '<p class="hint">Pages work on horizontal trees. Set the orientation to Horizontal in Layout to use them.</p>'; return; }
   if (!tree) { d.innerHTML = '<p class="hint">Load a tree first.</p>'; return; }
   const list = PAGE_SORT();
   d.innerHTML = `
@@ -7396,7 +7664,7 @@ function wireLock(reopen) {
 function openLegendMenu(key, cx, cy, keep) {
   const auto = legendAuto[key]; if (!auto) return;
   const T0 = settings.legendText || {}, keepScroll = keep ? pop.scrollTop : 0;
-  const names = { support: 'Support legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', dots: 'Dot size legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
+  const names = { support: 'Support legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
   const field = (i, ph, lab) => `<div class="grp"><span>${lab}</span><input type="text" class="lgtext" data-li="${i}" value="${esc(T0[key + ':' + i] ?? '')}" placeholder="${esc(ph || '(none)')}"></div>`;
   pop.innerHTML = `
     <button class="close" aria-label="Close">×</button>
@@ -7515,7 +7783,7 @@ function guideTarget() {
 // Draws the distance guides with their editable numbers (rectangular trees).
 function drawGuides() {
   guideNow = null;
-  const tgt = guideTarget(); if (!tgt || !tree || settings.layout !== 'rect') return;
+  const tgt = guideTarget(); if (!tgt || !tree || settings.layout !== 'rect' || (isTurned(settings) && !isVertical(settings))) return;   // not on a custom angle, as on circular trees
   const G = computeGuidesBox(tgt.box); guideNow = { G, tgt };
   const k = 1, lw = 1.2 / k, fs = 11 / k, col = '#27408B';   // figure units: the distances zoom together with the tree
   const lines = [], labels = [];
@@ -7568,6 +7836,14 @@ function nodeInfo(n) {
   if (sv != null) parts.push('support ' + fmtNum(sv));
   return { title, meta: parts.join(', ') };
 }
+// The proportions of a pie, one category per line, largest first: from a file, or the SIMMAP state probabilities.
+function pieInfo(n, src) {
+  const S = settings, pct = v => `${+(v * 100).toFixed(v >= 0.1 ? 0 : 1)}%`;
+  let rows = [];
+  if (src === 'file') { const o = S.pieData && n.name && S.pieData.rows[normTip(n.name)]; if (o) rows = S.pieData.cats.map(c => [c, o[c] || 0]); }
+  else { const c = smap && smap.states.length && ancKeys && smap.clades.get(ancKeys.get(n)); if (c && c.node) rows = smap.states.map((st, i) => [st, c.node[i] || 0]); }
+  return rows.filter(r => r[1] > 0).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}: ${pct(v)}`);
+}
 const hoverTip = document.createElement('div'); hoverTip.className = 'hovertip'; hoverTip.hidden = true; document.body.appendChild(hoverTip);
 let hoverKey = null;
 // Hides the information box shown on hover.
@@ -7590,8 +7866,12 @@ svg.addEventListener('pointermove', e => {
   const t = e.target.closest && e.target.closest('[data-id][data-kind]');
   const kind = t && t.dataset.kind, n = t && nodeById.get(+t.dataset.id);
   if (!n || !/^(branch|node|label|support|length)$/.test(kind)) { if (!hoverTip.hidden) hideHover(); return; }
-  const key = n.id + ':' + kind;
-  if (key !== hoverKey) { const i = nodeInfo(n); hoverTip.innerHTML = `<b>${esc(i.title)}</b><span>${esc(i.meta)}</span>`; hoverKey = key; hoverTip.hidden = false; }
+  const pie = t.dataset.pie, key = n.id + ':' + kind + (pie || '');
+  if (key !== hoverKey) {
+    const i = nodeInfo(n);
+    hoverTip.innerHTML = pie ? `<b>${esc(i.title)}</b>${pieInfo(n, pie).map(l => `<span>${esc(l)}</span>`).join('')}` : `<b>${esc(i.title)}</b><span>${esc(i.meta)}</span>`;   // a pie: only its proportions
+    hoverKey = key; hoverTip.hidden = false;
+  }
   }
   const w = hoverTip.offsetWidth, h = hoverTip.offsetHeight;
   hoverTip.style.left = Math.min(innerWidth - w - 8, e.clientX + 14) + 'px';
@@ -7689,7 +7969,7 @@ function altNames(S) {
 }
 
 /* ================= Clade names from a file: Name={species, species, ...} ================= */
-function cladeNamesFromText(text) {
+function cladeNamesFromText(text, mode) {
   if (!tree) return toast('Load a tree first');
   const groups = [], re = /([^=\n{}]+?)\s*=\s*(?:\{([^}]*)\}|([^\n]*))/g; let m;
   while ((m = re.exec(String(text)))) {
@@ -7709,11 +7989,24 @@ function cladeNamesFromText(text) {
     plan.push([node, name]);
   }
   if (!plan.length) return toast('None of the groups matched tips of this tree');
-  mutate(() => { for (const [node, name] of plan) node.cladeLabel = name; });
-  let msg = `${plan.length} ${plan.length === 1 ? 'clade' : 'clades'} named`;
+  const pal = (typeof PALETTES !== 'undefined' && (PALETTES[settings.paletteName] || PALETTES.default)) || ['#5B8DEF'];
+  if (mode === 'highlight') mutate(() => { plan.forEach(([node], i) => { node.bg = pal[i % pal.length]; }); });   // each clade in the next colour of the palette
+  else mutate(() => { for (const [node, name] of plan) node.cladeLabel = name; });
+  let msg = `${plan.length} ${plan.length === 1 ? 'clade' : 'clades'} ${mode === 'highlight' ? 'highlighted' : 'named'}`;
   if (missing.length) msg += `, not found: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '…' : ''}`;
   if (notMono.length) msg += `. Not monophyletic, so the name covers the common ancestor: ${notMono.slice(0, 3).join(', ')}${notMono.length > 3 ? '…' : ''}`;
   toast(msg);
+}
+// Highlight clades from the same kind of file, in the Highlights part of the Clades section.
+function cladeHlBox() {
+  const d = document.createElement('div'); d.className = 'treetools';
+  d.innerHTML = `<div class="btns"><button type="button" class="btn small" id="chBtn">Highlight clades from a file…</button></div><input type="file" id="chIn" hidden>
+    <p class="hint">One group per line, for example Primates={Homo sapiens, Pan troglodytes}. Two names mark their most recent common ancestor, a full list also works.</p>`;
+  setTimeout(() => {
+    $('chBtn').onclick = () => { if (!tree) return toast('Load a tree first'); $('chIn').click(); };
+    $('chIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => cladeNamesFromText(r.result, 'highlight'); r.readAsText(f); } e.target.value = ''; };
+  });
+  return d;
 }
 // Name clades from a file, in the Clades section.
 function cladeFileBox() {
@@ -7722,7 +8015,7 @@ function cladeFileBox() {
     <p class="hint">One group per line, for example Primates={Homo sapiens, Pan troglodytes}. Two names mark their most recent common ancestor, a full list also works.</p>`;
   setTimeout(() => {
     $('cnBtn').onclick = () => { if (!tree) return toast('Load a tree first'); $('cnIn').click(); };
-    $('cnIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => cladeNamesFromText(r.result); r.readAsText(f); } e.target.value = ''; };
+    $('cnIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => cladeNamesFromText(r.result, 'name'); r.readAsText(f); } e.target.value = ''; };
   });
   return d;
 }
@@ -7741,7 +8034,7 @@ function selectMatches() {
 }
 
 /* ================= Style templates: the look of a figure, without its tree or data ================= */
-const STYLE_SKIP = new Set(['arrows', 'dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
+const STYLE_SKIP = new Set(['alnPick', 'pieData', 'arrows', 'dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
   'pages', 'legendPos', 'legendText', 'scaleX', 'scaleY', 'scaleFree', 'title', 'projectName', 'exportName', 'exportSizeMode', 'exportWidthVal', 'axisCustom', 'nbarSrc', 'nlabSrc', 'supportSource']);
 // Saves a style template: every setting except the tree and its data.
 async function saveStyle() {
@@ -8355,7 +8648,7 @@ function txtSvg(t) {
   return { w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${f2(w)}" height="${f2(h)}" viewBox="0 0 ${f2(w)} ${f2(h)}"><text x="2" y="${f2(h * 0.5)}" dominant-baseline="central" font-size="${t.size}" font-family="${esc(fam)}" fill="${t.color}"${t.bold ? ' font-weight="bold"' : ''}${t.italic ? ' font-style="italic"' : ''}>${esc(t.text || '')}</text></svg>` };
 }
 // The drawing of an item the app makes itself: a density plot or a text label.
-const itemSvg = m => m.kde ? kdeSvg(m.kde) : m.txt ? txtSvg(m.txt).svg : null;
+const itemSvg = m => m.kde ? kdeSvg(m.kde) : m.ltt ? lttSvg(m.ltt, m) : m.txt ? txtSvg(m.txt).svg : null;
 function addLabel() {
   const t = { ...TXT_DEF }, d = txtSvg(t), sid = 's' + (++imgUid) + 't'; imgStore.set(sid, '');
   const cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k;
@@ -8373,13 +8666,13 @@ function txtMenuPart(m) {
     { k: 'bold', label: 'Bold', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] }, { k: 'italic', label: 'Italic', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] },
     { k: 'font', label: 'Typeface', type: 'sel', opts: [['', 'Same as the tip names'], ...FONTS] },
   ];
-  return { spec, html: `<div class="part"><b>Label</b><div class="kv"><span>Text</span><input type="text" class="lgtext" data-txttext value="${esc(t.text || '')}" placeholder="Write the text"></div>${ctlRows(spec, k => ({ v: t[k], own: false }))}
+  return { spec, html: `<div class="part"><b>Label</b><div class="kv"><span>Text</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" data-txttext value="${esc(t.text || '')}" placeholder="Write the text"></div>${ctlRows(spec, k => ({ v: t[k], own: false }))}
     <p class="hint">Drag the label to place it. To align it with the tree, select it, shift-click a branch, label or clade, and use Align below.</p></div>`,
     set: (k, v) => { t[k] = v; } };
 }
 // In an export, each density plot is written as drawing (vector), placed and sized like its image.
 function inlineKdes(str) {
-  for (const m of figImages) if (m.kde || m.txt) {
+  for (const m of figImages) if (m.kde || m.ltt || m.txt) {
     const src = imgStore.get(m.sid); if (!src) continue;
     const body = itemSvg(m).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, ''), cx = m.x + m.w / 2, cy = m.y + m.h / 2, tf = [];
     if (m.rot) tf.push(`rotate(${f2(m.rot)} ${f2(cx)} ${f2(cy)})`);
@@ -8398,8 +8691,9 @@ function refreshKdes() {
     const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(d.svg)));
     if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
   }
-  for (const m of figImages) if (m.kde) {
-    const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(kdeSvg(m.kde))));
+  for (const m of figImages) if (m.kde || m.ltt) {
+    if (m.ltt && m.w > 0) { m.nw = 360; m.nh = Math.round(360 * m.h / m.w); }   // drawn at the shape of the image
+    const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(itemSvg(m))));
     if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
   }
 }
@@ -8437,8 +8731,8 @@ function kdeMenuPart(m) {
     { k: 'axisFs', label: 'Axis text size', type: 'num', unit: 'px' }, { k: 'axisGap', label: 'Space to the axis', type: 'num', unit: 'px' },
   ];
   const get = key => ({ v: key === 'fillOp' ? Math.round(k.fillOp * 100) : key === 'histOp' ? Math.round((k.histOp ?? 0.6) * 100) : k[key] ?? KDE_DEF[key], own: false });
-  return { spec, html: `<div class="part"><b>Density plot</b>${ctlRows(spec, get)}<div class="kv"><span>Axis title</span><input type="text" class="lgtext" data-kdetitle value="${esc(k.title || '')}" placeholder="e.g. Rate (subs./site/Myr)"></div>
-    <p class="hint">${k.mode !== 'single' && !(kdeModes(S, k).some(o => o[0] === k.mode) && kdeScale(k.mode)) ? `The ${k.mode === 'branches' ? 'branches are' : 'dots are'} not colored by these values, so the plot uses its own fill color.` : `Gaussian kernel density; smoothing multiplies the bandwidth. A density spills past the data, so it can be cut at chosen values, for example 100 for support. Leave the bin width empty for an automatic one.${k.log ? ' With the logarithmic scale the curve is drawn over the base-10 logarithm of the values, and the axis shows the values themselves. The bin width is then in log₁₀ units: 0.1 makes each bin span a factor of about 1.26.' : ''} To take the colors of the branches or the dots, color them by these same values first.`}</p></div>`,
+  return { spec, html: `<div class="part"><b>Density plot</b>${ctlRows(spec, get)}<div class="kv"><span>Axis title</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" data-kdetitle value="${esc(k.title || '')}" placeholder="e.g. Rate (subs./site/Myr)"></div>
+    <p class="hint">${k.mode !== 'single' && !(kdeModes(S, k).some(o => o[0] === k.mode) && kdeScale(k.mode)) ? `The ${k.mode === 'branches' ? 'branches are' : 'dots are'} not colored by these values, so the plot uses its own fill color.` : `Gaussian kernel density, where smoothing multiplies the bandwidth. A density spills past the data, so it can be cut at chosen values, for example 100 for support. Leave the bin width empty for an automatic one.${k.log ? ' With the logarithmic scale the curve is drawn over the base-10 logarithm of the values, and the axis shows the values themselves. The bin width is then in log₁₀ units: 0.1 makes each bin span a factor of about 1.26.' : ''} To take the colors of the branches or the dots, color them by these same values first.`}</p></div>`,
     set: (key, v) => { if (key === 'fillOp' || key === 'histOp') v = clamp(v, 0, 100) / 100; if (key === 'binW' && v != null && !(v > 0)) v = null; if (key === 'src') { k.col = (kdeColOpts(S, v)[0] || [''])[0]; } k[key] = v; if (key === 'col' || key === 'src') m.name = 'Density' + (k.col ? ' of ' + kdeColLabel(S, k.src, k.col) : ''); } };
 }
 
@@ -8447,7 +8741,7 @@ let selArrow = null, arrowSnap = null;
 const ARROW_DEF = { color: '#333333', w: 1.5, op: 100, dash: 'solid', head: 'end', hs: 9, curve: 0, gapA: 0, gapB: 0 };
 const arrowById = id => (settings.arrows || []).find(a => a.id === id);
 const imgAnchorPts = m => ({ nw: [m.x, m.y], n: [m.x + m.w / 2, m.y], ne: [m.x + m.w, m.y], e: [m.x + m.w, m.y + m.h / 2], se: [m.x + m.w, m.y + m.h], s: [m.x + m.w / 2, m.y + m.h], sw: [m.x, m.y + m.h], w: [m.x, m.y + m.h / 2], c: [m.x + m.w / 2, m.y + m.h / 2] });
-const nodeFigPt = n => isVertical(settings) ? [n._py, -n._px] : [n._px, n._py];   // where a node is drawn, also on a vertical tree
+const nodeFigPt = n => { const t = treeTurn(settings); if (!t) return [n._px, n._py]; const A = t * Math.PI / 180, c = Math.cos(A), s0 = Math.sin(A); return [n._px * c - n._py * s0, n._px * s0 + n._py * c]; };   // where a node is drawn, also on a turned tree
 // A node is anchored by its tips (its name for a tip), so the anchor survives undo, reloading and rerooting.
 const nodeKey = n => n.children.length ? 'c:' + leaves(n).map(l => l.name).sort().join('|') : 't:' + n.name;
 function arrowEndPt(E, keys) {
@@ -8545,7 +8839,7 @@ function openArrowMenu(id, cx, cy, keep) {
       <p class="hint">A positive curvature bends it to the left of its direction, a negative one to the right. The spaces keep an anchored end a little away from its anchor.</p>
       <div class="btns">${A.a.an ? '<button class="btn small" data-aa="freeA">Free the start</button>' : ''}${A.b.an ? '<button class="btn small" data-aa="freeB">Free the end</button>' : ''}<button class="btn small danger" data-aa="del">Delete arrow</button></div></div>`;
   pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
-  wireCtl(ARROW_SPEC, (k, v) => { pushUndo(true); A[k] = v == null ? ARROW_DEF[k] : v; render(); persist(); openArrowMenu(id, cx, cy, true); });
+  wireCtl(ARROW_SPEC, (k, v) => { pushUndo(true); if (k === 'op' && v != null) v = clamp(v, 0, 100); A[k] = v == null ? ARROW_DEF[k] : v; render(); persist(); openArrowMenu(id, cx, cy, true); });
   pop.querySelectorAll('[data-aa]').forEach(b => b.onclick = () => {
     pushUndo(true);
     if (b.dataset.aa === 'del') { settings.arrows = settings.arrows.filter(x => x.id !== id); selArrow = null; closePop(); }
@@ -8565,12 +8859,463 @@ document.addEventListener('keydown', e => {
   e.preventDefault(); pushUndo(true); settings.arrows = (settings.arrows || []).filter(x => x.id !== selArrow); selArrow = null; closePop(); render(); persist();
 });
 
+/* ================= Tree statistics, polytomies and lineages-through-time plots ================= */
+// True when the tree has ages: dated (ultrametric), with fossils found by the app, or with ages in its annotations.
+const treeHasAges = () => !!tree && ((treeSet && treeSet.hasLen && !treeSet.unrooted && treeSet.clades && [...treeSet.clades.values()].some(c => c.ages && c.ages.length)) || isUltrametric(tree) || autoExt.size > 0 || [...nodeById.values()].some(x => x.children.length && x.meta && Object.keys(x.meta).some(k => /^(height|age)(_|$)/i.test(k))));
+// The age of the youngest tip, when the tips carry their own ages (height, as BEAST writes them); 0 otherwise.
+// Ages measured from the youngest tip become absolute ages by adding it.
+function tipAgeOffset() {
+  const hs = leaves(tree).map(l => l.meta && typeof l.meta.height === 'number' ? l.meta.height : null).filter(v => v != null);
+  return hs.length >= leaves(tree).length / 2 ? Math.max(0, Math.min(...hs)) : Math.max(0, +settings.axisOffset || 0);   // else the age given to the youngest tip in Time axis
+}
+// ---- tree statistics: right-click an empty part of the canvas
+const fmtS = v => v == null || !isFinite(v) ? '—' : Math.abs(v) >= 1000 || Number.isInteger(v) ? String(Math.round(v * 1000) / 1000) : String(+v.toPrecision(4));
+function treeStats() {
+  const rows = [], add = (g, k, v, help) => rows.push([g, k, v, help || '']);
+  const L = leaves(tree), I = [], E = []; walkAll(tree, x => { if (x.children.length) I.push(x); if (x.parent) E.push(x); });
+  const n = L.length, deg = I.map(x => x.children.length), sd = a => { const m = a.reduce((x, y) => x + y, 0) / a.length; return Math.sqrt(a.reduce((x, v) => x + (v - m) ** 2, 0) / Math.max(1, a.length - 1)); };
+  const med = a => { const o = a.slice().sort((x, y) => x - y), h = o.length / 2; return o.length % 2 ? o[Math.floor(h)] : (o[h - 1] + o[h]) / 2; };
+  // structure
+  add('Structure', 'Tips', n);
+  add('Structure', 'Internal nodes', I.length);
+  add('Structure', 'Bifurcating nodes', deg.filter(d => d === 2).length);
+  const poly = deg.filter(d => d > 2);
+  add('Structure', 'Polytomies', poly.length);
+  if (poly.length) add('Structure', 'Largest polytomy (branches)', Math.max(...poly));
+  if (deg.some(d => d === 1)) add('Structure', 'Nodes with a single child', deg.filter(d => d === 1).length);
+  // rooted: the [&U] or [&R] of the file tells an unrooted tree from a rooted one with a basal polytomy
+  const unr = (treeSet && treeSet.unrooted) || tree._unrooted;
+  add('Structure', 'Rooted', unr ? 'No (unrooted)' : tree.children.length === 2 ? 'Yes' : tree._rooted ? 'Yes, basal polytomy' : 'Basal polytomy',
+    unr || tree.children.length === 2 ? '' : tree._rooted ? '' : 'The root has more than two branches and the file does not say whether the tree is rooted ([&R]) or unrooted ([&U])');
+  const nets = typeof netEdges === 'function' ? netEdges() : [];
+  if (nets.length) add('Structure', 'Reticulations', nets.length);
+  // branch lengths
+  const hasLen = E.some(x => x.len != null);
+  if (hasLen) {
+    const lens = E.map(x => x.len || 0), sum = lens.reduce((a, b) => a + b, 0);
+    const dist = new Map(); (function g(x, d) { dist.set(x, d); x.children.forEach(c => g(c, d + (c.len || 0))); })(tree, 0);
+    const H = Math.max(...L.map(l => dist.get(l)));
+    add('Branch lengths', 'Tree length (sum of all branches)', fmtS(sum));
+    add('Branch lengths', 'Root height (root to the farthest tip)', fmtS(H));
+    add('Branch lengths', 'Mean (SD)', `${fmtS(sum / lens.length)} (${fmtS(sd(lens))})`);
+    add('Branch lengths', 'Median', fmtS(med(lens)));
+    add('Branch lengths', 'Shortest', fmtS(Math.min(...lens)));
+    add('Branch lengths', 'Longest', fmtS(Math.max(...lens)));
+    const zero = lens.filter(v => v === 0).length; if (zero) add('Branch lengths', 'Zero-length branches', zero);
+    // time: only for trees with ages (dated, with fossils found, or with ages in their annotations)
+    const ageMeta = I.some(x => x.meta && Object.keys(x.meta).some(k => /^(height|age)(_|$)/i.test(k)));
+    const dated = ageMeta || treeHasAges();
+    if (dated) {
+      // fossils as the app marks them (by hand, or found from the tips that end before the present)
+      const off = tipAgeOffset(), tolF = H * (settings.fossilAutoTol || 0.5) / 100, isFos = l => !!l.ex || autoExt.has(l.id) || (off > 0 && !l._sa) || (H - dist.get(l) > tolF && !l.noEx), sa = L.filter(l => l._sa).length;
+      const fos = L.filter(l => isFos(l) && !l._sa), extant = L.filter(l => !isFos(l) && !l._sa).length, ages = fos.map(l => H - dist.get(l) + off);
+      add('Time', 'Age of the root', fmtS(H + off));
+      add('Time', 'Extant tips', extant);
+      if (fos.length) {
+        add('Time', 'Fossil tips', fos.length);
+        add('Time', 'Oldest fossil', fmtS(Math.max(...ages)));
+        add('Time', 'Youngest fossil', fmtS(Math.min(...ages)));
+      }
+      if (sa) add('Time', 'Sampled ancestors', sa);
+      if (extant === n && !fos.length && n > 2 && deg.every(d => d === 2)) {   // gamma (Pybus & Harvey 2000): bifurcating, every tip at the present
+        const na = I.map(x => H - dist.get(x)).sort((a, b) => b - a); na.push(0);   // every tip at the present here, so no offset
+        const g = []; for (let k = 2; k <= n; k++) g[k] = na[k - 2] - na[k - 1];
+        let T = 0; for (let j = 2; j <= n; j++) T += j * g[j];
+        let acc = 0, inner = 0; for (let i = 2; i <= n - 1; i++) { acc += i * g[i]; inner += acc; }
+        add('Time', 'Gamma statistic (γ)', fmtS((inner / (n - 2) - T / 2) / (T * Math.sqrt(1 / (12 * (n - 2))))),
+          'Pybus & Harvey (2000): below 0, most branching happened early, near the root, and above 0 late, near the tips. Below −1.645, diversification slowed down significantly over time (one-tailed test at 5%)');
+      }
+    }
+  }
+  // shape
+  const cnt = new Map(); (function g(x) { cnt.set(x, x.children.length ? x.children.reduce((a, c) => a + g(c), 0) : 1); return cnt.get(x); })(tree);
+  add('Shape', 'Cherries', I.filter(x => x.children.length === 2 && x.children.every(c => !c.children.length)).length, 'Pairs of tips that are each other\u2019s closest relatives');
+  if (deg.every(d => d === 2) && n > 2) {
+    const colless = I.reduce((a, x) => a + Math.abs(cnt.get(x.children[0]) - cnt.get(x.children[1])), 0);
+    add('Shape', 'Colless index', colless, 'Imbalance: the sum, over the nodes, of the difference between the tips on each side (0 in a perfectly balanced tree)');
+    add('Shape', 'Colless index (normalized)', fmtS(colless / ((n - 1) * (n - 2) / 2)), 'The Colless index over its largest possible value (0 balanced, 1 for a ladder-like tree)');
+  }
+  let sackin = 0; (function g(x, d) { if (!x.children.length) sackin += d; x.children.forEach(c => g(c, d + 1)); })(tree, 0);
+  add('Shape', 'Sackin index', sackin, 'The sum of the number of nodes between each tip and the root (larger in unbalanced trees)');
+  // support values
+  const sup = I.filter(x => x.parent && isSupport(x.name)).map(x => parseFloat(String(x.name).split('/')[0])).filter(Number.isFinite);
+  if (sup.length) {
+    const prob = Math.max(...sup) <= 1, thr = prob ? 0.95 : 70, hi = sup.filter(v => v >= thr).length;
+    add('Support values', 'Nodes with a value', sup.length);
+    add('Support values', 'Mean (SD)', `${fmtS(sup.reduce((a, b) => a + b, 0) / sup.length)} (${fmtS(sd(sup))})`);
+    add('Support values', 'Median', fmtS(med(sup)));
+    add('Support values', 'Lowest', fmtS(Math.min(...sup)));
+    add('Support values', 'Highest', fmtS(Math.max(...sup)));
+    add('Support values', `Nodes at ${prob ? '0.95' : '70'} or more`, `${hi} (${Math.round(100 * hi / sup.length)}%)`);
+  }
+  // the tree set it comes from
+  if (treeSet && !treeSet.ro) {
+    add('Tree set', 'Trees in the file', treeSet.count);
+    if (treeSet.burnin != null) add('Tree set', 'Burn-in', `${treeSet.burnin}%`);
+    if (treeSet.shown) add('Tree set', 'Shown', treeSet.shown);
+    if (treeSet.clades) add('Tree set', 'Clades found in the sample', treeSet.clades.size);
+  }
+  return rows;
+}
+// The statistics window: one part per group, laid out like the other right-click menus.
+function openTreeStats(cx, cy) {
+  if (!tree) return toast('Open a tree first');
+  const rows = treeStats(), groups = [...new Set(rows.map(r => r[0]))];
+  const lab = (k, help) => { const m0 = /^(.*?) (\(.*\))$/.exec(k), m = m0 && m0[2].length > 6 ? m0 : null; return `<span>${esc(m ? m[1] : k)}${help ? ` <span class="tshelp" title="${esc(help)}">ⓘ</span>` : ''}${m ? `<br><span class="tsub">${esc(m[2])}</span>` : ''}</span>`; };
+  const parts = groups.map((g, gi) => `<div class="part"><b>${esc(g)}</b>${rows.filter(r => r[0] === g).map(([, k, v, help]) => `<div class="kv tsrow">${lab(k, help)}<span class="tsval">${esc(String(v))}</span></div>`).join('')}${gi === groups.length - 1 ? '<div class="btns"><button class="btn small" data-tsc>Copy as text</button></div>' : ''}</div>`).join('');
+  pop.innerHTML = `<button class="close" aria-label="Close">×</button>
+    <div class="dragh" title="Drag to move"><h3>Tree statistics</h3><div class="meta">Hover ⓘ for what an index means.</div></div>${parts}`;
+  pop.classList.add('on'); placePop(cx, cy, true);
+  pop.querySelector('.close').onclick = closePop;
+  pop.querySelector('[data-tsc]').onclick = () => { const t = rows.map(r => `${r[0]}\t${r[1]}\t${r[2]}`).join('\n'); navigator.clipboard.writeText(t).then(() => toast('Statistics copied'), () => toast('Could not copy')); };
+}
+// Right-click an empty part of the canvas: a menu for the whole tree.
+svg.addEventListener('contextmenu', e => {
+  for (let el = e.target; el && el !== svg; el = el.parentNode) if (el.attributes && [...el.attributes].some(a => a.name.startsWith('data-'))) return;   // an element: its own menu
+  if (!tree) return;
+  e.preventDefault(); e.stopImmediatePropagation(); sel.clear(); render();
+  const cx = e.clientX, cy = e.clientY;
+  pop.innerHTML = `<button class="close" aria-label="Close">×</button><div class="dragh" title="Drag to move"><h3>Tree statistics</h3><div class="meta">Counts, lengths, ages, shape and support of the tree shown.</div></div>
+    <div class="part"><div class="btns"><button class="btn small" data-cm="stats">Calculate</button></div></div>`;
+  pop.classList.add('on'); placePop(cx, cy);
+  pop.querySelector('.close').onclick = closePop;
+  pop.querySelector('[data-cm="stats"]').onclick = () => openTreeStats(cx, cy);
+}, true);
+
+// ---- polytomies: a node's branches merged, kept so they can be restored
+function makePoly(n, full) {
+  if (!n.children.length || n.poly) return;
+  n.poly = n.children.map(serialize);   // what to give back
+  let kids = [];
+  if (full) {   // the whole clade: every tip straight from the node, at its own distance
+    (function g(x, d) { for (const c of x.children) { const dd = d + (c.len || 0); if (c.children.length && !c.collapsed) g(c, dd); else { c.len = dd; kids.push(c); } } })(n, 0);
+  } else {      // one level: the branches of the node's children join the node
+    for (const c of n.children) {
+      if (c.children.length && !c.collapsed) for (const gc of c.children) { gc.len = gc.len == null && c.len == null ? null : (gc.len || 0) + (c.len || 0); kids.push(gc); }
+      else kids.push(c);
+    }
+  }
+  n.children = kids; for (const c of kids) c.parent = n;
+}
+function undoPoly(n) {
+  if (!n.poly) return;
+  n.children = n.poly.map(deserialize); for (const c of n.children) c.parent = n;
+  delete n.poly;
+}
+
+// ---- lineages through time: an image the app draws from the tree (m.ltt); several lines, each the whole tree or a named clade
+const LTT_DEF = { count: 'cumulative', bin: 0, bg: true, logY: true, showTree: false, treeOp: 25, treeColor: '#888888', treeW: 0.8, axisColor: '#333333', axisW: 1, axisFs: 10, tickGap: 4, titleGap: 6, xTitle: 'Time before present', yTitle: 'Lineages', legend: true,
+  lines: [{ src: 'all', fossils: true, color: '#2F5D8C', w: 1.8, dash: 'solid' }] };
+const LTT_COLORS = ['#2F5D8C', '#C8553D', '#4C9A6A', '#8A5FBF', '#D9A21B', '#3E8E9E'];
+function lttSvg(k, m) {
+  // drawn at the shape of the image, so its parts keep their size
+  const W = 360, H = m && m.w > 0 ? Math.round(360 * m.h / m.w) : 220, fam = 'Helvetica, Arial, sans-serif', head = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+  const msg = t => head + `<rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="6" fill="none" stroke="#bbb" stroke-dasharray="4 3"/><text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-size="12" fill="#888" font-family="${fam}">${t}</text></svg>`;
+  if (!tree) return msg('No tree');
+  if (!treeHasAges()) return msg('Lineages through time need a tree with ages');
+  const dist = new Map(); (function g(x, d) { dist.set(x, d); x.children.forEach(c => g(c, d + (c.len || 0))); })(tree, 0);
+  const Ht = Math.max(...leaves(tree).map(l => dist.get(l))); if (!(Ht > 0)) return msg('The tree needs branch lengths');
+  const age = x => Ht - dist.get(x), tol = Ht * 1e-6;
+  // each line: the times its lineages begin and end
+  const curves = [];
+  for (const ln of k.lines) {
+    const R = ln.src === 'all' ? tree : [...nodeById.values()].find(x => x.cladeLabel === ln.src); if (!R) continue;
+    const keep = x => ln.fossils || leaves(x).some(l => age(l) <= tol);   // without fossils, only the lineages with a tip at the present
+    const ev = []; (function g(x) { for (const c of x.children) { if (!keep(c)) continue; const a0 = age(x), a1 = age(c); if (a0 - a1 > tol) ev.push([a0, a1]); g(c); } })(R);
+    if (!ev.length) continue;
+    const start = Math.max(...ev.map(e => e[0])), cum = k.count !== 'standing';
+    // cumulative: every lineage that has appeared by that time; standing: the lineages alive at that time
+    const at = t => cum ? 1 + ev.filter(e => e[0] > t && e[0] < start - tol).length + (ev.filter(e => Math.abs(e[0] - start) <= tol).length > 1 ? ev.filter(e => Math.abs(e[0] - start) <= tol).length - 1 : 0) : ev.filter(e => e[0] >= t && e[1] < t).length;
+    let ts;
+    if (k.bin > 0) { ts = []; for (let t = start; t > 0; t -= k.bin) ts.push(t); ts.push(0); }   // fixed bins, from the clade's origin to the present
+    else ts = [...new Set([...ev.flatMap(e => e), 0])].filter(t => t <= start).sort((a, b) => b - a);
+    const steps = [];
+    for (let i = 0; i < ts.length - 1; i++) { const mm = k.bin > 0 ? ts[i + 1] : (ts[i] + ts[i + 1]) / 2, nn = at(mm); if (nn > 0) steps.push([ts[i], ts[i + 1], nn]); }
+    if (!steps.length) continue;
+    curves.push({ ln, steps, label: ln.label || ((ln.src === 'all' ? 'All lineages' : ln.src) + (ln.fossils ? '' : ' (no fossils)')) });
+  }
+  if (!curves.length) return msg(k.lines.some(l => !l.fossils) ? 'No lineage reaches the present: include the fossils' : 'Nothing to plot: name a clade or add a line');
+  const T0 = Ht, Nmax = Math.max(...curves.flatMap(c => c.steps.map(s => s[2])));
+  const ytv = k.logY ? [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000].filter(v => v <= Math.max(2, Nmax)) : (() => { const s2 = niceNum(Nmax / 4) || 1, o = []; for (let v = 0; v <= Nmax + 1e-9; v += s2) o.push(Math.round(v)); return o; })();
+  const numW = Math.max(...ytv.map(v => String(v).length)) * k.axisFs * 0.62;   // the widest number of the lineages axis
+  const tg = k.tickGap ?? 4, tt = k.titleGap ?? 6, padL = 10 + (k.yTitle ? k.axisFs * 1.2 + tt : 0) + numW + tg + 4, padR = 12, padT = 10, padB = 8 + tg + tt + k.axisFs * 2.2;
+  const X = a => padL + (1 - a / T0) * (W - padL - padR);
+  const Y = nn => { const top = padT, bot = H - padB; if (k.logY) { const lm = Math.log10(Math.max(2, Nmax)); return bot - (Math.log10(Math.max(1, nn)) / lm) * (bot - top); } return bot - (nn / Nmax) * (bot - top); };
+  let body = k.bg !== false ? `<rect x="0" y="0" width="${W}" height="${H}" rx="6" fill="#ffffff"/>` : '';   // a white background, so it reads over the tree
+  if (k.showTree) {   // the tree, faint, on the same time axis
+    const tips = leaves(tree), row = new Map(tips.map((t, i) => [t, i])), yOf = new Map();
+    const ty = i => padT + (i + 0.5) / tips.length * (H - padB - padT);
+    (function g(x) { if (!x.children.length) { yOf.set(x, ty(row.get(x))); return yOf.get(x); } const ys = x.children.map(g); yOf.set(x, (Math.min(...ys) + Math.max(...ys)) / 2); return yOf.get(x); })(tree);
+    let d = ''; walkAll(tree, x => { if (x.parent) d += `M${f2(X(age(x.parent)))},${f2(yOf.get(x))}H${f2(X(age(x)))}`; if (x.children.length) d += `M${f2(X(age(x)))},${f2(Math.min(...x.children.map(c => yOf.get(c))))}V${f2(Math.max(...x.children.map(c => yOf.get(c))))}`; });
+    body += `<path d="${d}" fill="none" stroke="${k.treeColor || '#888888'}" stroke-width="${k.treeW ?? 0.8}" opacity="${clamp(k.treeOp, 0, 100) / 100}"/>`;
+  }
+  for (const c of curves) {
+    let d = ''; c.steps.forEach(([a0, a1, nn], i) => { d += `${i ? 'L' : 'M'}${f2(X(a0))},${f2(Y(nn))}H${f2(X(a1))}`; });
+    body += `<path d="${d}" fill="none" stroke="${c.ln.color}" stroke-width="${c.ln.w}"${dashOf(c.ln.dash, c.ln.w)}/>`;
+  }
+  // axes
+  const ac = k.axisColor, fs = k.axisFs, y0 = H - padB, xt = [], step = niceNum(T0 / 4), off = tipAgeOffset();   // absolute ages when the tips carry theirs
+  for (let t = Math.ceil(off / step) * step; t <= off + T0 + 1e-9; t += step) xt.push(t - off);
+  const yt = ytv;
+  body += `<path d="M${padL},${padT}V${f2(y0)}H${W - padR}${xt.map(t => `M${f2(X(t))},${f2(y0)}v4`).join('')}${yt.map(v => `M${padL},${f2(Y(v))}h-4`).join('')}" fill="none" stroke="${ac}" stroke-width="${k.axisW}"/>`;
+  body += xt.map(t => `<text x="${f2(X(t))}" y="${f2(y0 + 4 + tg + fs * 0.8)}" text-anchor="middle" font-size="${fs}" fill="${ac}" font-family="${fam}">${String(+(t + off).toPrecision(4))}</text>`).join('');
+  body += yt.map(v => `<text x="${f2(padL - 4 - tg)}" y="${f2(Y(v))}" text-anchor="end" dominant-baseline="central" font-size="${fs}" fill="${ac}" font-family="${fam}">${v}</text>`).join('');
+  if (k.xTitle) body += `<text x="${f2((padL + W - padR) / 2)}" y="${f2(y0 + 4 + tg + fs * 1.8 + tt)}" text-anchor="middle" font-size="${fs}" fill="${ac}" font-family="${fam}">${esc(k.xTitle)}</text>`;
+  if (k.yTitle) body += `<text transform="translate(${f2(padL - 4 - tg - numW - tt - fs * 0.6)},${f2((padT + y0) / 2)}) rotate(-90)" text-anchor="middle" dominant-baseline="central" font-size="${fs}" fill="${ac}" font-family="${fam}">${esc(k.yTitle)}</text>`;
+  if (k.legend && (curves.length > 1 || curves.some(c => c.ln.label))) curves.forEach((c, i) => { const ly = padT + 6 + i * (fs + 4); body += `<path d="M${padL + 8},${f2(ly)}h14" stroke="${c.ln.color}" stroke-width="${c.ln.w}"${dashOf(c.ln.dash, c.ln.w)}/><text x="${padL + 26}" y="${f2(ly)}" dominant-baseline="central" font-size="${fs}" fill="${ac}" font-family="${fam}">${esc(c.label)}</text>`; });
+  return head + body + '</svg>';
+}
+function addLttPlot() {
+  const sid = 's' + (++imgUid) + 'l'; imgStore.set(sid, '');
+  const w = 288, h = 176, cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k;
+  if (tree) pushUndo();
+  const m = { id: ++imgUid, sid, name: 'Lineages through time', x: cx - w / 2, y: cy - h / 2, w, h, nw: 360, nh: 220, op: 1, rot: 0, layer: 'front', ltt: JSON.parse(JSON.stringify(LTT_DEF)) };
+  figImages.push(m); selImg = m.id; refreshKdes();
+  imgChanged('Lineages-through-time plot added. Right-click it to add lines and change its look.');
+}
+// The part of the image menu for an LTT plot: its look, then each of its lines.
+function lttMenuPart(m) {
+  const k = m.ltt, named = [...nodeById.values()].filter(x => x.cladeLabel).map(x => [x.cladeLabel, x.cladeLabel]);
+  const spec = [
+    { k: 'count', label: 'Count', type: 'sel', opts: [['cumulative', 'Cumulative'], ['standing', 'Lineages alive']] },
+    { k: 'bin', label: 'Time bins (0 for every event)', type: 'num', unit: '' },
+    { k: 'bg', label: 'Background', type: 'sel', opts: [[true, 'White'], [false, 'None']] },
+    { k: 'logY', label: 'Logarithmic lineages axis', type: 'sel', opts: [[true, 'Yes'], [false, 'No']] },
+    { k: 'showTree', label: 'The tree behind', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] },
+    { k: 'treeOp', label: 'Tree opacity', type: 'num', unit: '%' },
+    { k: 'treeColor', label: 'Tree color', type: 'color' }, { k: 'treeW', label: 'Tree line width', type: 'num', unit: 'px' },
+    { k: 'legend', label: 'Legend of the lines', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] },
+    { k: 'axisColor', label: 'Axis color', type: 'color' }, { k: 'axisW', label: 'Axis width', type: 'num', unit: 'px' }, { k: 'axisFs', label: 'Axis text size', type: 'num', unit: 'px' },
+    { k: 'tickGap', label: 'Space to the numbers', type: 'num', unit: 'px' }, { k: 'titleGap', label: 'Space to the titles', type: 'num', unit: 'px' },
+  ];
+  k.lines.forEach((ln, i) => spec.push(
+    { k: `L${i}_src`, label: 'Lineages of', type: 'sel', opts: [['all', 'The whole tree'], ...named] },
+    { k: `L${i}_fossils`, label: 'Fossils', type: 'sel', opts: [[true, 'Included'], [false, 'Left out']] },
+    { k: `L${i}_color`, label: 'Color', type: 'color' }, { k: `L${i}_w`, label: 'Width', type: 'num', unit: 'px' },
+    { k: `L${i}_dash`, label: 'Line style', type: 'sel', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] }));
+  const get = key => { const mm = /^L(\d+)_(\w+)$/.exec(key); return { v: mm ? k.lines[+mm[1]][mm[2]] : k[key], own: false }; };
+  const NG = 14, gen = ctlRows(spec.slice(0, NG), get);
+  const lines = k.lines.map((ln, i) => `<div class="part"><b>Line ${i + 1}</b><div class="kv"><span>Name in the legend</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" data-lttlab="${i}" value="${esc(ln.label || '')}" placeholder="${esc((ln.src === 'all' ? 'All lineages' : ln.src) + (ln.fossils ? '' : ' (no fossils)'))}"></div>${ctlRows(spec.slice(NG + i * 5, NG + 5 + i * 5), get)}${k.lines.length > 1 ? `<div class="btns"><button class="btn small danger" data-lttdel="${i}">Remove this line</button></div>` : ''}</div>`).join('');
+  return { spec, html: `<div class="part"><b>Lineages through time</b>${gen}
+      <div class="kv"><span>Time axis title</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" data-ltttx="xTitle" value="${esc(k.xTitle || '')}"></div>
+      <div class="kv"><span>Lineages axis title</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" data-ltttx="yTitle" value="${esc(k.yTitle || '')}"></div>
+      <p class="hint">${named.length ? 'A line can follow the whole tree or any named clade (Clade name bars).' : 'Name clades (Clade name bars) to plot their lineages as lines of their own.'} Without fossils, only the lineages with a tip at the present are counted. Cumulative counts every lineage that has appeared by each time, while lineages alive drops when they go extinct.</p>
+      <div class="btns"><button class="btn small" data-lttadd>Add a line</button></div></div>${lines}`,
+    set: (key, v) => { if (key === 'treeW') v = Math.max(0.1, v); if (key === 'bin') v = Math.max(0, v || 0); if (key === 'treeOp') v = clamp(v, 0, 100); if (/Gap$|axisW|axisFs/.test(key)) v = Math.max(0, v); const mm = /^L(\d+)_(\w+)$/.exec(key); if (mm) k.lines[+mm[1]][mm[2]] = v; else k[key] = v; } };   // limits, as in the other fields
+}
+/* ================= Pie charts on tips (from a file) and the DensiTree cloud of a tree set ================= */
+// ---- pies: one per tip, from lines "Species | {A:0.3,B:0.7}" or a table with one column per category
+function pieFromText(text) {
+  if (!tree) return toast('Open a tree first');
+  const lines = String(text).split(/\r?\n/).map(l => l.trim()).filter(Boolean), rows = {}, cats = [];
+  const addCat = c => { if (!cats.includes(c)) cats.push(c); };
+  if (lines.some(l => /\{[^}]*:[^}]*\}/.test(l))) {   // name, then {cat:value,...}
+    for (const l of lines) {
+      const m = /^(.*?)[\s|,;\t]*\{([^}]*)\}/.exec(l); if (!m) continue;
+      const name = m[1].replace(/[|,;\t]+$/, '').trim().replace(/^"|"$/g, ''), o = {};
+      for (const kv of m[2].split(',')) { const [k, v] = kv.split(':').map(x => x && x.trim()); if (k && isFinite(+v)) { o[k] = +v; addCat(k); } }
+      if (name && Object.keys(o).length) rows[normTip(name)] = o;
+    }
+  } else {   // a table: the first column the names, the other columns the categories
+    const delim = lines[0].includes('\t') ? '\t' : lines[0].includes(';') ? ';' : ',', head = lines[0].split(delim).map(x => x.trim());
+    head.slice(1).forEach(addCat);
+    for (const l of lines.slice(1)) { const c = l.split(delim).map(x => x.trim()), o = {}; head.slice(1).forEach((h, i) => { const v = +c[i + 1]; if (isFinite(v)) o[h] = v; }); if (c[0] && Object.keys(o).length) rows[normTip(c[0])] = o; }
+  }
+  for (const k in rows) { const sum = Object.values(rows[k]).reduce((a, b) => a + b, 0); if (sum > 0) for (const c in rows[k]) rows[k][c] /= sum; else delete rows[k]; }   // each pie adds up to 1
+  const named = [...nodeById.values()].filter(x => x.name && rows[normTip(x.name)]), matched = named.filter(x => !x.children.length).length, inner = named.length - matched;
+  if (!named.length) return toast('No tip or node of the tree matched the names in the file');
+  const pal = (typeof PALETTES !== 'undefined' && (PALETTES[settings.paletteName] || PALETTES.default)) || ['#2F5D8C', '#C8553D', '#4C9A6A', '#D9A21B'];
+  pushUndo(true);
+  settings.pieData = { cats, rows };
+  settings.pieColors = Object.fromEntries(cats.map((c, i) => [c, (settings.pieColors || {})[c] || pal[i % pal.length]]));
+  settings.pieOn = true; buildSide(); render(); persist();
+  toast(`Pies for ${matched} of ${leaves(tree).length} tips${inner ? ` and ${inner} internal nodes` : ''}, ${cats.length} categories`);
+}
+function pieBox() {
+  const d = document.createElement('div'); d.className = 'treetools';
+  const fill = () => {
+    const P = settings.pieData;
+    d.innerHTML = `<div class="btns"><button type="button" class="btn small" id="pieBtn">Pie charts from a file…</button>${P ? '<button type="button" class="btn small" id="pieClr">Remove</button>' : ''}</div><input type="file" id="pieIn" hidden>
+      <p class="hint">One tip or node per line: Name | {A:0.3, B:0.7}, as in the SIMMAP files, or a table with the names in the first column and one column per category. Internal nodes go by their names in the tree, as for the other attachments. Each pie adds up to 1.</p>
+      ${P ? `<div class="tcols">${P.cats.map(c => `<div class="tcol"><span></span><label>${esc(c)}</label><input type="color" data-piec="${esc(c)}" ${colorAttrs((settings.pieColors || {})[c] || '#888888')} aria-label="Color for ${esc(c)}"></div>`).join('')}</div>` : ''}`;
+    d.querySelector('#pieBtn').onclick = () => { if (!tree) return toast('Open a tree first'); d.querySelector('#pieIn').click(); };
+    d.querySelector('#pieIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => { pieFromText(r.result); }; r.readAsText(f); } e.target.value = ''; };
+    const clr = d.querySelector('#pieClr'); if (clr) clr.onclick = () => { pushUndo(true); settings.pieData = null; settings.pieOn = false; buildSide(); render(); persist(); };
+    d.querySelectorAll('[data-piec]').forEach(inp => inp.addEventListener('input', () => { settings.pieColors = { ...(settings.pieColors || {}), [inp.dataset.piec]: inp.value }; renderSoon ? renderSoon() : render(); persist(); }));
+  };
+  setTimeout(fill); return d;
+}
+// Where a pie goes: on its node, or in the middle of the branch that leads to it.
+function piePt(n, where) {
+  if (where !== 'branch' || !n.parent) return [n._px, n._py];
+  if (settings.layout === 'rect') return [(n.parent._px + n._px) / 2, n._py];
+  const r1 = Math.hypot(n._px, n._py), r0 = Math.hypot(n.parent._px, n.parent._py), a = Math.atan2(n._py, n._px), r = (r0 + r1) / 2;
+  return [r * Math.cos(a), r * Math.sin(a)];
+}
+// A pie centred on (x, y): parts are [colour, fraction].
+function pieSvg(x, y, r, parts, border) {
+  const P = parts.filter(p => p[1] > 0); if (!P.length) return '';
+  if (P.length === 1) return `<circle cx="${f2(x)}" cy="${f2(y)}" r="${f2(r)}" fill="${P[0][0]}"${border}/>`;
+  let a = -Math.PI / 2, out = '';
+  for (const [c, f] of P) { const b = a + f * 2 * Math.PI; out += `<path d="M${f2(x)},${f2(y)}L${f2(x + r * Math.cos(a))},${f2(y + r * Math.sin(a))}A${f2(r)},${f2(r)} 0 ${f > 0.5 ? 1 : 0} 1 ${f2(x + r * Math.cos(b))},${f2(y + r * Math.sin(b))}Z" fill="${c}"/>`; a = b; }
+  return out + (border ? `<circle cx="${f2(x)}" cy="${f2(y)}" r="${f2(r)}" fill="none"${border}/>` : '');
+}
+// ---- DensiTree: the trees of a dated sample, faint, on the tip order and the time axis of the tree shown
+let dtCache = null;
+const pieHits = [];
+const dtCount = S => { const n = treeSet ? treeSet.trees.length - (treeSet.skip || 0) : 0; return Math.max(1, Math.min(n, S.dtMode === 'percent' ? Math.round(n * clamp(S.dtPct, 1, 100) / 100) : Math.round(S.dtN || 1))); };
+function dtPickIdx(S, n) {
+  const N = dtCount(S);
+  if (S.dtPick !== 'random') return [...Array(N)].map((_, i) => Math.floor(i * n / N));
+  let a = (+S.dtSeed || 0) >>> 0;   // mulberry32: the same seed always gives the same trees
+  const rnd = () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const idx = [...Array(n).keys()]; for (let i = 0; i < N; i++) { const j = i + Math.floor(rnd() * (n - i)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  return idx.slice(0, N).sort((x, y) => x - y);
+}
+const dtAvailable = () => !!(treeSet && treeSet.hasLen && !treeSet.unrooted && treeSet.trees && treeSet.trees.length - (treeSet.skip || 0) > 1);
+// Consecutive paths that look the same are written as one path: on large trees the browser gets far fewer elements
+// to read, lay out and paint, and the exported SVG is smaller. Paths with ids, classes or data are left as they are.
+function mergeRuns(list) {
+  const out = []; let curA = null, curD = '';
+  const flush = () => { if (curA != null) out.push(`<path d="${curD}"${curA}/>`); curA = null; curD = ''; };
+  for (const str of list) {
+    const m = /^<path d="([^"]*)"((?:\s+(?!data-|id=|class=)[a-z:-]+="[^"]*")*)\s*\/>$/.exec(str);
+    if (!m) { flush(); out.push(str); continue; }
+    if (m[2] === curA) curD += m[1]; else { flush(); curA = m[2]; curD = m[1]; }
+  }
+  flush(); return out.join('');
+}
+/* ================= Sequence alignment next to the tree (FASTA) ================= */
+// Kept apart from the settings (it can be large): one sequence per tip name, as written in the file.
+let alnSets = [], alnData = null;   // every alignment loaded; alnData: the one shown, { seqs: Map(normName -> sequence), len, n, type: 'dna' | 'aa', name }
+const alnSync = () => { alnData = alnSets.find(a => a.name === settings.alnPick) || alnSets[0] || null; };
+const alnSave = () => { try { localStorage.setItem(ALN_KEY, JSON.stringify(alnSets.map(a => ({ seqs: [...a.seqs], len: a.len, type: a.type, name: a.name })))); } catch (e) { toast('The alignments are shown but too large to be kept after a reload'); } };
+const ALN_KEY = 'tree2go-aln';
+function alnFromText(text, name) {
+  const seqs = new Map(); let cur = null, buf = [];
+  const flush = () => { if (cur != null) seqs.set(normTip(cur), buf.join('').replace(/\s+/g, '').toUpperCase()); };
+  for (const raw of String(text).split(/\r?\n/)) {
+    const l = raw.trim(); if (!l) continue;
+    if (l[0] === '>') { flush(); cur = l.slice(1).trim().split(/\s+/)[0]; buf = []; } else if (cur != null) buf.push(l);
+  }
+  flush();
+  if (!seqs.size) return toast('No sequences found: the file should be FASTA, with lines starting with >');
+  const len = Math.max(...[...seqs.values()].map(s => s.length));
+  const sample = [...seqs.values()].join('').slice(0, 20000).replace(/[-?.N]/g, '');
+  const type = sample.length && (sample.match(/[ACGTU]/g) || []).length / sample.length > 0.9 ? 'dna' : 'aa';
+  let nm = name || 'alignment'; while (alnSets.some(a => a.name === nm)) nm = nm.replace(/( \(\d+\))?$/, m => ` (${(+(m.match(/\d+/) || [1])[0]) + 1})`);
+  alnSets.push({ seqs, len, n: seqs.size, type, name: nm }); settings.alnPick = nm; alnSync(); alnSave();
+  const matched = tree ? leaves(tree).filter(l => seqs.has(normTip(l.name || ''))).length : 0;
+  settings.alnOn = true; settings.alnFrom = 1; settings.alnTo = len;
+  buildSide(); render(); persist(); refreshAttach();
+  toast(`${seqs.size} sequences of ${len} ${type === 'dna' ? 'bases' : 'residues'}, ${matched} of ${tree ? leaves(tree).length : 0} tips matched`);
+}
+try { const o = JSON.parse(localStorage.getItem(ALN_KEY) || 'null'); if (o) alnSets = (Array.isArray(o) ? o : [o]).map(a => ({ seqs: new Map(a.seqs), len: a.len, n: a.seqs.length, type: a.type, name: a.name })); } catch (e) { }
+function alnBox() {
+  const d = document.createElement('div'); d.className = 'treetools';
+  const fill = () => {
+    d.innerHTML = `<div class="btns"><button type="button" class="btn small" id="alnBtn">Alignment from a FASTA file…</button></div><input type="file" id="alnIn" hidden>
+      ${alnSets.map((a, i) => `<div class="tfile"><span>${esc(a.name)}: ${a.n} sequences of ${a.len} ${a.type === 'dna' ? 'bases' : 'residues'}</span><button type="button" class="btn small" data-alnrm="${i}">Remove</button></div>`).join('')}
+      <p class="hint">The names after > must match the tip names. Show it from Side plots, Alignment.</p>`;
+    d.querySelector('#alnBtn').onclick = () => { if (!tree) return toast('Open a tree first'); d.querySelector('#alnIn').click(); };
+    d.querySelector('#alnIn').onchange = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => alnFromText(r.result, f.name); r.readAsText(f); } e.target.value = ''; };
+    d.querySelectorAll('[data-alnrm]').forEach(b => b.onclick = () => { alnSets.splice(+b.dataset.alnrm, 1); alnSync(); if (!alnSets.length) { try { localStorage.removeItem(ALN_KEY); } catch (e) { } settings.alnOn = false; } else alnSave(); buildSide(); render(); persist(); });
+  };
+  setTimeout(fill); return d;
+}
+// Protein residues by their chemistry (a Clustal-like scheme).
+const AA_COL = (c, S = settings) => /[AILMFWV]/.test(c) ? S.alnAaHyd : /[KR]/.test(c) ? S.alnAaPos : /[DE]/.test(c) ? S.alnAaNeg : /[NQST]/.test(c) ? S.alnAaPol : c === 'C' ? S.alnAaCys : c === 'G' ? S.alnAaGly : c === 'P' ? S.alnAaPro : /[HY]/.test(c) ? S.alnAaAro : null;   // groups by chemistry, colours from the panel
+// Draws the alignment from x0 on the rows of the tips; returns where it ends and its drawing.
+function alnSvg(S, rows, x0, cell, top, bottom) {
+  const A = alnData, from = clamp(Math.round(S.alnFrom || 1), 1, A.len), to = clamp(Math.round(S.alnTo || A.len), from, A.len), nS = to - from + 1;
+  const W = Math.max(10, S.alnWidth), fits = Math.floor(W / cell), squares = nS <= fits, sw = squares ? cell : W / nS;
+  const colOf = ch => A.type === 'dna' ? ({ A: S.alnColA, C: S.alnColC, G: S.alnColG, T: S.alnColT, U: S.alnColT })[ch] || (/[-.?]/.test(ch) ? S.alnColGap : S.alnColN) : (/[-.?]/.test(ch) ? S.alnColGap : AA_COL(ch, S) || S.alnColN);
+  let out = '', cons = null;
+  if (!squares) {   // the most common residue of each column, to tell what differs
+    cons = new Array(nS);
+    for (let j = 0; j < nS; j++) { const cnt = {}; for (const r of rows) { const ch = r.seq[from - 1 + j]; if (ch && !/[-.?N]/.test(ch)) cnt[ch] = (cnt[ch] || 0) + 1; } let best = null, bn = 0; for (const k in cnt) if (cnt[k] > bn) { bn = cnt[k]; best = k; } cons[j] = best; }
+  }
+  for (const r of rows) {
+    const y = r.y - cell / 2, s = r.seq; let j = 0;
+    while (j < nS) {   // runs of the same colour become one rectangle
+      const ch = s[from - 1 + j] || '-';
+      const col = squares ? colOf(ch) : (/[-.?]/.test(ch) ? S.alnColGap : ch === cons[j] ? S.alnSame : S.alnDiff);
+      let k = j + 1;
+      while (k < nS) { const c2 = s[from - 1 + k] || '-'; const col2 = squares ? colOf(c2) : (/[-.?]/.test(c2) ? S.alnColGap : c2 === cons[k] ? S.alnSame : S.alnDiff); if (col2 !== col) break; k++; }
+      out += `<rect x="${f2(x0 + j * sw)}" y="${f2(y)}" width="${f2((k - j) * sw)}" height="${f2(cell)}" fill="${col}"/>`;
+      j = k;
+    }
+    if (squares && S.alnLetters && cell >= 7) for (let q = 0; q < nS; q++) { const ch = s[from - 1 + q]; if (ch) out += `<text x="${f2(x0 + (q + 0.5) * cell)}" y="${f2(r.y)}" text-anchor="middle" dominant-baseline="central" font-size="${f2(cell * 0.62)}" fill="#1f1f1f" font-family="ui-monospace,Menlo,Consolas,monospace">${esc(ch)}</text>`; }
+  }
+  const used = squares ? nS * cell : W;
+  if (S.alnRuler) {   // site numbers, above or below the alignment, every so many sites
+    const step = S.alnRulerStep > 0 ? Math.round(S.alnRulerStep) : niceNum(nS / Math.max(2, Math.floor(used / 40))) || 1;
+    const below = S.alnRulerPos === 'bottom', fs = S.alnRulerFs || 8, tk = S.alnRulerTick ?? 4, gp = S.alnRulerGap ?? 2, col = S.alnRulerColor || '#555555';
+    const yEdge = below ? bottom + 2 : top - 2, dir = below ? 1 : -1;
+    for (let p = Math.ceil(from / step) * step; p <= to; p += step) {
+      const x = x0 + (p - from + 0.5) * sw;
+      out += `<path d="M${f2(x)},${f2(yEdge)}v${f2(dir * tk)}" stroke="${col}" stroke-width="0.6"/><text x="${f2(x)}" y="${f2(yEdge + dir * (tk + gp))}" text-anchor="middle" dominant-baseline="${below ? 'hanging' : 'alphabetic'}" font-size="${f2(fs)}" fill="${col}" font-family="Helvetica, Arial, sans-serif">${p}</text>`;
+    }
+  }
+  return { svg: out, end: x0 + used, squares, nS, fits };
+}
+/* ================= Side plot layers: their order next to the tips ================= */
+// Nearest to the tree first. Sessions from before the layers keep their look: their old options give the order.
+const SIDE_KEYS = ['aln', 'cat', 'bar', 'heat', 'clade'];
+const SIDE_NAMES = { aln: 'Alignment', cat: 'Categories', bar: 'Bars', heat: 'Heatmap', clade: 'Clade names' };
+function sideOrderOf(S) {
+  let o = Array.isArray(S.sideOrder) ? S.sideOrder.filter(k => SIDE_KEYS.includes(k)) : [];
+  if (!o.length) { o = ['aln', ...(S.catOrder === 'before' ? ['cat', 'bar'] : ['bar', 'cat']), 'heat', 'clade']; if (S.alnBars === 'before') o = [...o.filter(k => k !== 'aln'), 'aln']; }
+  for (const k of SIDE_KEYS) if (!o.includes(k)) o.push(k);
+  return o;
+}
+// Which layers are in use (shown in the list as such; the others are listed greyed).
+const sideActive = S => ({ aln: !!(alnSets.length && S.alnOn), cat: !!(typeof hasCat === 'function' && hasCat(S)), bar: !!(typeof hasData === 'function' && hasData(S)), heat: !!(typeof hasHeat === 'function' && hasHeat(S)), clade: !!tree && [...nodeById.values()].some(n => n.cladeLabel) });
+function sideLayersBox() {
+  const d = document.createElement('div'); d.className = 'treetools sidelayers';
+  const fill = () => {
+    const S = settings, o = sideOrderOf(S), on = sideActive(S), rect = S.layout === 'rect', hid = S.sideHidden || {};
+    const rectOnly = { aln: true, heat: true };   // drawn on rectangular trees only
+    const note = k => !on[k] ? 'not in use' : !rect && rectOnly[k] ? 'not visible' : '';
+    d.innerHTML = `<p class="hint">${rect ? 'Layers from the tips outwards. Drag them or use the arrows to change their order on the tree, and the eye to show or hide one.' : 'Layers from the tips outwards. On circular and fan trees the clade name bars always go around the outside, whatever their place in the list. The eye shows or hides each one.'}</p>
+      <div class="layerlist">${o.map((k, i) => `<div class="layer${note(k) || hid[k] ? ' off' : ''}" ${rect || k !== 'clade' ? 'draggable="true"' : ''} data-layer="${k}"><span class="grip" aria-hidden="true"${rect || k !== 'clade' ? '' : ' style="visibility:hidden"'}>⋮⋮</span><span class="lname">${SIDE_NAMES[k]}</span><span class="lnote">${note(k)}</span><button type="button" class="btn small icon eye${hid[k] ? ' shut' : ''}" data-leye title="${hid[k] ? 'Show' : 'Hide'} ${SIDE_NAMES[k]}" aria-pressed="${!hid[k]}">${hid[k] ? '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg>' : '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></svg>'}</button><button type="button" class="btn small icon" data-lmove="-1" ${i && (rect || k !== 'clade') ? '' : 'disabled'} aria-label="Move ${SIDE_NAMES[k]} closer to the tree">↑</button><button type="button" class="btn small icon" data-lmove="1" ${i < o.length - 1 && (rect || k !== 'clade') ? '' : 'disabled'} aria-label="Move ${SIDE_NAMES[k]} away from the tree">↓</button></div>`).join('')}<div class="dropline" hidden></div></div>`;
+    const set = list => { pushUndo(true); settings.sideOrder = list; render(); persist(); fill(); };
+    d.querySelectorAll('[data-leye]').forEach(b => b.onclick = () => { const k = b.closest('.layer').dataset.layer; pushUndo(true); settings.sideHidden = { ...(settings.sideHidden || {}), [k]: !(settings.sideHidden || {})[k] }; render(); persist(); fill(); });
+    d.querySelectorAll('[data-lmove]').forEach(b => b.onclick = () => { const k = b.closest('.layer').dataset.layer, list = sideOrderOf(settings), i = list.indexOf(k), j = i + +b.dataset.lmove; if (j < 0 || j >= list.length) return; [list[i], list[j]] = [list[j], list[i]]; set(list); });
+    // dragging: one line between two layers (or above the first, below the last) shows where it will go
+    const listEl = d.querySelector('.layerlist'), line = d.querySelector('.dropline'), rows = [...d.querySelectorAll('.layer')];
+    let drag = null, at = -1;
+    const place = y => {
+      const lr = listEl.getBoundingClientRect(); let idx = rows.length;
+      for (let i = 0; i < rows.length; i++) { const r = rows[i].getBoundingClientRect(); if (y < r.top + r.height / 2) { idx = i; break; } }
+      const above = rows[idx - 1] && rows[idx - 1].getBoundingClientRect(), below = rows[idx] && rows[idx].getBoundingClientRect();
+      const yy = above && below ? (above.bottom + below.top) / 2 : below ? below.top - 3 : above.bottom + 3;
+      line.style.top = (yy - lr.top - 1) + 'px'; line.hidden = false; at = idx;
+    };
+    rows.forEach(el => {
+      el.addEventListener('dragstart', e => { drag = el.dataset.layer; el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', drag); } catch (x) { } });
+      el.addEventListener('dragend', () => { el.classList.remove('dragging'); line.hidden = true; drag = null; });
+    });
+    listEl.addEventListener('dragover', e => { if (!drag) return; e.preventDefault(); place(e.clientY); });
+    listEl.addEventListener('dragleave', e => { if (!listEl.contains(e.relatedTarget)) line.hidden = true; });
+    listEl.addEventListener('drop', e => {
+      e.preventDefault(); line.hidden = true; if (!drag || at < 0) return;
+      const list = sideOrderOf(settings), from = list.indexOf(drag); list.splice(from, 1); list.splice(at > from ? at - 1 : at, 0, drag); drag = null;
+      set(list);
+    });
+  };
+  d._refresh = fill; setTimeout(fill); return d;
+}
 /* ================= Start ================= */
 /* ================= Clear session, collapse all, MRCA picker ================= */
 // a confirmation in the same style as the Save project window, instead of the browser's own
-function askConfirm() {
+// A confirmation window. Without options it asks about clearing the session; with them, it says what it is given.
+function askConfirm(o = {}) {
+  $('cTitle').textContent = o.title || 'Clear session';
+  $('cText').innerHTML = o.html || 'The tree, every setting, the attachments and the images will be removed, and tree2go will start again. Save the project first if you want to keep it.';
+  $('cOk').textContent = o.ok || 'Clear session'; $('cOk').className = 'btn ' + (o.okClass || 'danger'); $('cCancel').textContent = o.cancel || 'Cancel';
   return new Promise(res => {
-    const m = $('confirmModal'); m.hidden = false; setTimeout(() => $('cCancel').focus());
+    const m = $('confirmModal'); m.hidden = false; setTimeout(() => (o.focusOk ? $('cOk') : $('cCancel')).focus());
     const done = v => { m.hidden = true; $('cOk').onclick = $('cCancel').onclick = m.onclick = m.onkeydown = null; res(v); };
     $('cOk').onclick = () => done(true);
     $('cCancel').onclick = () => done(false);
