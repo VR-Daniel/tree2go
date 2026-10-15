@@ -1,6 +1,6 @@
 # tree2go options reference guide
 
-Every option of the left panel, section by section, in the same order as in the app. Many options only appear once something they depend on is turned on: the column **Appears when** says what. Options can also be set for single elements from their `Right-click` menu (see [Right-click menus](#right-click-menus)).
+Every option of the left panel, section by section, in the same order as in the app. Many options only appear once something they depend on is turned on: the column **Appears when** says what. Options can also be set for single elements from their `Right-click` menu (see [Right-click menus](#right-click-menus)). Sections and their subsections (marked ›) fold: subsections start closed, and the open ones are remembered while their section is closed. `Collapse` closes everything, and `Expand` opens the sections and keeps their subsections as they were.
 
 ## Contents
 
@@ -22,6 +22,7 @@ Every option of the left panel, section by section, in the same order as in the 
 - [Side plots](#side-plots)
 - [Legends](#legends)
 - [Split into pages](#split-into-pages)
+- [Geography](#geography)
 - [Images and visual elements](#images-and-visual-elements)
 - [Page settings](#page-settings)
 - [Export](#export)
@@ -72,7 +73,7 @@ The shape of the tree and its overall size.
 | `Rotation` | Turns the whole circular, fan or unrooted tree. | −180 to 180° | 0° | **Circular**, **Fan** or **Unrooted** layout |
 | `Root branch` | Short branch drawn before the root, which can hold its values. | 0 to 80 px | 0 px | `Shape` is not **Unrooted** |
 
-¹ Locked while the page has images.<br>
+¹ Locked while the page has images (maps do not count).<br>
 ² Affects the whole tree.
 
 ## Tree cloud
@@ -565,7 +566,7 @@ Ancestral states from a SIMMAP file: pie charts on the nodes and colored branche
 
 ## Attachments
 
-Tables (CSV or TSV) and other files that add data to the tree. Rows are matched to tips and internal nodes by name. When another tree is opened while files are attached, tree2go says how many tips of the new tree each file matches, and asks whether to keep them or remove them all. Projects can be saved with the attached files (tables, SIMMAP, MCMC log, alignments, pie charts and images), so that anyone who opens them sees the same figure, or without them, and the window shows the size of each.
+Tables (CSV or TSV) and other files that add data to the tree. Rows are matched to tips and internal nodes by name. When another tree is opened while files are attached, tree2go says how many tips of the new tree each file matches, and asks whether to keep them or remove them all. Attached tables are not chosen for the side plots by themselves: each side plot starts on None. Projects can be saved with the attached files (tables, SIMMAP, MCMC log, alignments, pie charts and images), so that anyone who opens them sees the same figure, or without them, and the window shows the size of each.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -579,7 +580,7 @@ Bars, categories and a heatmap drawn next to the tips, from the attached tables.
 
 ### › Layers
 
-The side plots are layers next to the tips: the first in the list is the nearest to the tree, and each one starts where the one before it ends. Drag a layer or use its arrows to move it, and its eye to hide it: a hidden layer keeps its table and settings but is not drawn and takes no room. Layers not in use are listed greyed as *not in use*, and layers that the layout of the tree does not draw (the alignment and the heatmap on circular and fan trees) as *not visible*. With the clade names first, their bars go right after the tip names. On circular and fan trees the clade name bars always go around the outside, whatever their place in the list.
+The side plots are layers next to the tips: the first in the list is the nearest to the tree, and each one starts where the one before it ends. Drag a layer or use its arrows to move it, and its eye to hide it: a hidden layer keeps its table and settings but is not drawn and takes no room, and its options are greyed out until it is shown again. Layers not in use are listed greyed as *not in use*, and layers that the layout of the tree does not draw (the alignment and the heatmap on circular and fan trees) as *not visible*. With the clade names first, their bars go right after the tip names. On circular and fan trees the clade name bars always go around the outside, whatever their place in the list.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -671,37 +672,36 @@ A sequence alignment (FASTA) next to the tips, matched by name. The cells are sq
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Show the alignment next to the tips` |  | On<br>Off | On | An alignment is loaded, `Shape` is **Rectangular** |
-| `Alignment` | Which alignment to show, when several are loaded. | The alignments loaded | The last one loaded | `Show the alignment next to the tips` is **On**, more than one alignment |
-| `From site` |  | 1 to the length | 1 bp | `Show the alignment next to the tips` is **On** |
-| `To site` |  | 1 to the length | Last bp | `Show the alignment next to the tips` is **On** |
-| `Width` | Space for the alignment: it sets how many sites fit as squares. | 20 to 2000 px | 300 px | `Show the alignment next to the tips` is **On** |
-| `Cell size (% of the row)` |  | 20 to 100% | 100% | `Show the alignment next to the tips` is **On** |
-| `Distance from the previous element` | Space between the alignment and the layer before it in `Layers`. Changing it moves the alignment and every layer after it together, as one block, and making it smaller brings them back the same way. | 0 to 200 px | 10 px | `Show the alignment next to the tips` is **On** |
-| `Site numbers` |  | On<br>Off | On | `Show the alignment next to the tips` is **On** |
-| `Place` | Site numbers above or below the alignment. | Above<br>Below | Above | `Show the alignment next to the tips` is **On**, `Site numbers` is **On** |
-| `Every (sites, 0 for automatic)` | How many sites between two numbers. | 0 to 100000 | 0 (automatic) | `Show the alignment next to the tips` is **On**, `Site numbers` is **On** |
-| `Text size` |  | 4 to 40 px | 8 px | `Show the alignment next to the tips` is **On**, `Site numbers` is **On** |
-| `Space between numbers and ticks` |  | 0 to 40 px | 2 px | `Show the alignment next to the tips` is **On**, `Site numbers` is **On** |
-| `Tick length` |  | 0 to 30 px | 4 px | `Show the alignment next to the tips` is **On**, `Site numbers` is **On** |
-| `Color of numbers and ticks` |  | Color | <img src="img/colors/555555.svg" alt="#555555" align="absmiddle"> #555555 | `Show the alignment next to the tips` is **On**, `Site numbers` is **On** |
-| `Letters in the cells (when large enough)` |  | On<br>Off | On | `Show the alignment next to the tips` is **On** |
-| `Adenine (A)` |  | Color | <img src="img/colors/5CB85C.svg" alt="#5CB85C" align="absmiddle"> #5CB85C | `Show the alignment next to the tips` is **On**, a DNA alignment |
-| `Cytosine (C)` |  | Color | <img src="img/colors/4A86C5.svg" alt="#4A86C5" align="absmiddle"> #4A86C5 | `Show the alignment next to the tips` is **On**, a DNA alignment |
-| `Guanine (G)` |  | Color | <img src="img/colors/F0AD4E.svg" alt="#F0AD4E" align="absmiddle"> #F0AD4E | `Show the alignment next to the tips` is **On**, a DNA alignment |
-| `Thymine (T) or uracil (U)` |  | Color | <img src="img/colors/D9534F.svg" alt="#D9534F" align="absmiddle"> #D9534F | `Show the alignment next to the tips` is **On**, a DNA alignment |
-| `Hydrophobic (A, I, L, M, F, W, V)` |  | Color | <img src="img/colors/80A0F0.svg" alt="#80A0F0" align="absmiddle"> #80A0F0 | `Show the alignment next to the tips` is **On**, a protein alignment |
-| `Positive (K, R)` |  | Color | <img src="img/colors/F01505.svg" alt="#F01505" align="absmiddle"> #F01505 | `Show the alignment next to the tips` is **On**, a protein alignment |
-| `Negative (D, E)` |  | Color | <img src="img/colors/C048C0.svg" alt="#C048C0" align="absmiddle"> #C048C0 | `Show the alignment next to the tips` is **On**, a protein alignment |
-| `Polar (N, Q, S, T)` |  | Color | <img src="img/colors/15C015.svg" alt="#15C015" align="absmiddle"> #15C015 | `Show the alignment next to the tips` is **On**, a protein alignment |
-| `Cysteine (C)` |  | Color | <img src="img/colors/F08080.svg" alt="#F08080" align="absmiddle"> #F08080 | `Show the alignment next to the tips` is **On**, a protein alignment |
-| `Glycine (G)` |  | Color | <img src="img/colors/F09048.svg" alt="#F09048" align="absmiddle"> #F09048 | `Show the alignment next to the tips` is **On**, a protein alignment |
-| `Proline (P)` |  | Color | <img src="img/colors/C0C000.svg" alt="#C0C000" align="absmiddle"> #C0C000 | `Show the alignment next to the tips` is **On**, a protein alignment |
-| `Aromatic (H, Y)` |  | Color | <img src="img/colors/15A4A4.svg" alt="#15A4A4" align="absmiddle"> #15A4A4 | `Show the alignment next to the tips` is **On**, a protein alignment |
-| `Other or ambiguous` |  | Color | <img src="img/colors/B0B0B0.svg" alt="#B0B0B0" align="absmiddle"> #B0B0B0 | `Show the alignment next to the tips` is **On** |
-| `Gaps and missing data` |  | Color | <img src="img/colors/F2F2F2.svg" alt="#F2F2F2" align="absmiddle"> #F2F2F2 | `Show the alignment next to the tips` is **On** |
-| `Barcode: as the most common` |  | Color | <img src="img/colors/C8C8C8.svg" alt="#C8C8C8" align="absmiddle"> #C8C8C8 | `Show the alignment next to the tips` is **On**, more sites than fit |
-| `Barcode: different` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Show the alignment next to the tips` is **On**, more sites than fit |
+| `Alignment` | The alignment shown next to the tips, among the ones loaded in Attachments. A loaded alignment is not shown until it is chosen here. | None<br>The alignments loaded | None | An alignment is loaded |
+| `From site` |  | 1 to the length | 1 bp | `Alignment` is not **None** |
+| `To site` |  | 1 to the length | Last bp | `Alignment` is not **None** |
+| `Width` | Space for the alignment: it sets how many sites fit as squares. | 20 to 2000 px | 300 px | `Alignment` is not **None** |
+| `Cell size (% of the row)` |  | 20 to 100% | 100% | `Alignment` is not **None** |
+| `Distance from the previous element` | Space between the alignment and the layer before it in `Layers`. Changing it moves the alignment and every layer after it together, as one block, and making it smaller brings them back the same way. | 0 to 200 px | 10 px | `Alignment` is not **None** |
+| `Site numbers` |  | On<br>Off | On | `Alignment` is not **None** |
+| `Place` | Site numbers above or below the alignment. | Above<br>Below | Above | `Alignment` is not **None**, `Site numbers` is **On** |
+| `Every (sites, 0 for automatic)` | How many sites between two numbers. | 0 to 100000 | 0 (automatic) | `Alignment` is not **None**, `Site numbers` is **On** |
+| `Text size` |  | 4 to 40 px | 8 px | `Alignment` is not **None**, `Site numbers` is **On** |
+| `Space between numbers and ticks` |  | 0 to 40 px | 2 px | `Alignment` is not **None**, `Site numbers` is **On** |
+| `Tick length` |  | 0 to 30 px | 4 px | `Alignment` is not **None**, `Site numbers` is **On** |
+| `Color of numbers and ticks` |  | Color | <img src="img/colors/555555.svg" alt="#555555" align="absmiddle"> #555555 | `Alignment` is not **None**, `Site numbers` is **On** |
+| `Letters in the cells (when large enough)` |  | On<br>Off | On | `Alignment` is not **None** |
+| `Adenine (A)` |  | Color | <img src="img/colors/5CB85C.svg" alt="#5CB85C" align="absmiddle"> #5CB85C | `Alignment` is not **None**, a DNA alignment |
+| `Cytosine (C)` |  | Color | <img src="img/colors/4A86C5.svg" alt="#4A86C5" align="absmiddle"> #4A86C5 | `Alignment` is not **None**, a DNA alignment |
+| `Guanine (G)` |  | Color | <img src="img/colors/F0AD4E.svg" alt="#F0AD4E" align="absmiddle"> #F0AD4E | `Alignment` is not **None**, a DNA alignment |
+| `Thymine (T) or uracil (U)` |  | Color | <img src="img/colors/D9534F.svg" alt="#D9534F" align="absmiddle"> #D9534F | `Alignment` is not **None**, a DNA alignment |
+| `Hydrophobic (A, I, L, M, F, W, V)` |  | Color | <img src="img/colors/80A0F0.svg" alt="#80A0F0" align="absmiddle"> #80A0F0 | `Alignment` is not **None**, a protein alignment |
+| `Positive (K, R)` |  | Color | <img src="img/colors/F01505.svg" alt="#F01505" align="absmiddle"> #F01505 | `Alignment` is not **None**, a protein alignment |
+| `Negative (D, E)` |  | Color | <img src="img/colors/C048C0.svg" alt="#C048C0" align="absmiddle"> #C048C0 | `Alignment` is not **None**, a protein alignment |
+| `Polar (N, Q, S, T)` |  | Color | <img src="img/colors/15C015.svg" alt="#15C015" align="absmiddle"> #15C015 | `Alignment` is not **None**, a protein alignment |
+| `Cysteine (C)` |  | Color | <img src="img/colors/F08080.svg" alt="#F08080" align="absmiddle"> #F08080 | `Alignment` is not **None**, a protein alignment |
+| `Glycine (G)` |  | Color | <img src="img/colors/F09048.svg" alt="#F09048" align="absmiddle"> #F09048 | `Alignment` is not **None**, a protein alignment |
+| `Proline (P)` |  | Color | <img src="img/colors/C0C000.svg" alt="#C0C000" align="absmiddle"> #C0C000 | `Alignment` is not **None**, a protein alignment |
+| `Aromatic (H, Y)` |  | Color | <img src="img/colors/15A4A4.svg" alt="#15A4A4" align="absmiddle"> #15A4A4 | `Alignment` is not **None**, a protein alignment |
+| `Other or ambiguous` |  | Color | <img src="img/colors/B0B0B0.svg" alt="#B0B0B0" align="absmiddle"> #B0B0B0 | `Alignment` is not **None** |
+| `Gaps and missing data` |  | Color | <img src="img/colors/F2F2F2.svg" alt="#F2F2F2" align="absmiddle"> #F2F2F2 | `Alignment` is not **None** |
+| `Barcode: as the most common` |  | Color | <img src="img/colors/C8C8C8.svg" alt="#C8C8C8" align="absmiddle"> #C8C8C8 | `Alignment` is not **None**, more sites than fit |
+| `Barcode: different` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Alignment` is not **None**, more sites than fit |
 
 ## Legends
 
@@ -763,6 +763,72 @@ Split a long rectangular tree into pages of the same width, each with a small ma
 | `Tree color` |  | Color | <img src="img/colors/BDBDBD.svg" alt="#BDBDBD" align="absmiddle"> #BDBDBD | **Rectangular** layout, the tree has pages, `Show a map of the whole tree on each page` is **On** |
 | `Color of the rows on the page` |  | Color | <img src="img/colors/C8553D.svg" alt="#C8553D" align="absmiddle"> #C8553D | **Rectangular** layout, the tree has pages, `Show a map of the whole tree on each page` is **On** |
 | `Mark the rows on the page with` | How the rows of the page stand out on the map. | Branch color<br>Color and background | `Color of the rows on the page` | **Rectangular** layout, the tree has pages, `Show a map of the whole tree on each page` is **On** |
+
+## Geography
+
+Maps for the figure, from a file of your own or downloaded, with the records of a table drawn on them. Each map is an image that moves, aligns and shows guides like any other, numbered, and drawn behind the tree. Its `Right-click` menu sets its name, its lines, fill, the area shown (the whole map, only around the points with a margin, or a custom view), its scale as 1:X and a frame. With the map selected, `Ctrl` + drag moves its view inside its frame and `Ctrl` + scroll zooms in and out, as in a GIS, and the area becomes custom. Each map has its own points, projection, styles and lines: the options below `Map` belong to the map chosen there, and appear once a map is on the figure. The points of coastlines from GPlates are reconstructed to their age and plate model by themselves. The map and its points must use the same coordinate system: both in degrees (WGS84), projected together, or both in the same planar system (metres), drawn as they are. When they may not match (latitudes beyond ±90°, degrees against metres, or most points outside the map), a window says so, with what the .prj file of the map says.
+
+### › Add a map
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Map from a shapefile…` | Reads a `.shp` file, or a `.zip` with its `.shp`, `.dbf` and `.prj`. Very detailed maps are simplified as they load. |  |  | Always |
+| Load from`Natural Earth` | Downloads one layer (land, countries or coastlines) at the resolution chosen, as a map. Needs internet once: the map is then kept in the app, and in projects saved with their attached files. | 1:110 million<br>1:50 million<br>1:10 million<br>Land<br>Countries<br>Coastlines | 1:110 million, land | Always, internet conection is available |
+| Load the `Coastlines of the past (GPlates)` | Downloads the coastlines of an age and a plate model as a map (0 to 1000 Ma). Its points are reconstructed to the same age and model. | Scotese 2016 (PALEOMAP)<br>Müller et al. (2019)<br>Merdith et al. (2021) | 50 Ma, Scotese 2016 (PALEOMAP) | Always, internet conection is available |
+| Maps loaded | Every map loaded, each in its own box, with its number of shapes and its units (degrees or planar units). A map deleted from the figure stays loaded: `Show it on the figure` brings it back, and `Add it again as a new map` adds another copy with settings of its own. `Remove` unloads it. |  |  | A map is loaded |
+
+### › Map
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Map` | The map whose options are shown below. | None<br>The maps on the figure | The last one added | Always |
+| `Projection (maps in degrees)` | How a map in degrees, and its points, are drawn on the plane. Maps in a planar system are drawn as they are. | Equal Earth (EPSG:8857)<br>Equirectangular (EPSG:4326)<br>Mercator (EPSG:3857)<br>Mollweide (ESRI:54009) | Equal Earth (EPSG:8857) | A map is on the figure |
+
+### › Points
+
+One row per record, with the species in the first column, as attached in Attachments. Records at the same place are drawn once. Larger points are drawn behind smaller ones, so they never hide them. With `Info on hover`, a point shows its species, its longitude (x), its latitude (y) and how many records it holds. A click selects a point and `Shift-click` adds or removes points. The `Right-click` menu gives the point, or all the selected ones, a style of their own (color, size, shape, border), which wins over the panel.
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Table` | The table of the records. | None<br>The tables attached | None | Always |
+| `Longitude (x)` | Found by its name (lon, longitude, x…) unless chosen. | Found by its name<br>The columns of the table | Found by its name | `Table` is chosen |
+| `Latitude (y)` | Found by its name (lat, latitude, y…) unless chosen. | Found by its name<br>The columns of the table | Found by its name | `Table` is chosen |
+| `Lineages` | All the records, or only those of living or of fossil lineages (as the tips of the tree are found). | All<br>Living<br>Fossils | All | `Table` is chosen |
+| `Shape` |  | Circle<br>Square<br>Triangle<br>Diamond<br>Star | Circle | `Table` is chosen |
+| `Size` | One size, by how many records a point holds, or by a value. | One size<br>By the number of records<br>By a value | One size | `Table` is chosen |
+| `Point size` | With grouping, a grouped point grows with its records, up to `Largest`. | 0.5 to 40 px | 3.5 px | `Table` is chosen, `Size` is **One size** |
+| `Value for the size` | A column of the records, a tip annotation of the tree, or a column of another table (by species). | None<br>The columns and annotations found | None | `Table` is chosen, `Size` is **By a value** |
+| `Smallest` |  | 0.5 to 40 px | 2.5 px | `Table` is chosen, `Size` is not **One size** |
+| `Largest` |  | 0.5 to 60 px | 12 px | `Table` is chosen, `Size` is not **One size**, or with grouping |
+| `Color` | One color, the color of the named clade of the species, the color of the highlight of its clade, a color per category, or a gradient along a value. Species outside any named or highlighted clade, or without a value, are grey. | One color<br>By named clade<br>As the highlight of its clade<br>By a category<br>By a value (gradient) | One color | `Table` is chosen |
+| `Point color` |  | Color | <img src="img/colors/C8553D.svg" alt="#C8553D" align="absmiddle"> #C8553D | `Table` is chosen, `Color` is **One color** |
+| `Value for the color` | As the value for the size, and independent of it: the color and the size can follow different values. | None<br>The columns and annotations found | None | `Table` is chosen, `Color` is **By a category** or **By a value** |
+| `Palette` |  | The palettes of the app | Viridis | `Table` is chosen, `Color` is **By a value** |
+| `Reverse the colors` |  | On<br>Off | Off | `Table` is chosen, `Color` is **By a value** |
+| `Opacity` |  | 5 to 100% | 85% | `Table` is chosen |
+| `Border color` |  | Color | <img src="img/colors/FFFFFF.svg" alt="#FFFFFF" align="absmiddle"> #FFFFFF | `Table` is chosen |
+| `Border width` |  | 0 to 5 px | 0.6 px | `Table` is chosen |
+| `Clear the styles of single points` | Every point follows the panel again. |  |  | `Table` is chosen |
+
+### › Lines to the tips
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Join each tip to its points` | One line from each tip to every point holding a record of its species, on any layout of the tree. The lines follow the map when it moves, pass under the names of the tree and over their map. | On<br>Off | Off | `Table` is chosen |
+| `From` |  | The tip<br>The end of its name | The tip | `Table` is chosen, `Join each tip to its points` is **On** |
+| `Line color` | One color, or the color of the point each line goes to. | One color<br>As its point | One color | `Table` is chosen, `Join each tip to its points` is **On** |
+| `Color of the lines` |  | Color | <img src="img/colors/8A8F98.svg" alt="#8A8F98" align="absmiddle"> #8A8F98 | `Table` is chosen, `Line color` is **One color** |
+| `Line width` |  | 0.1 to 6 px | 0.6 px | `Table` is chosen, `Join each tip to its points` is **On** |
+| `Line opacity` |  | 5 to 100% | 70% | `Table` is chosen, `Join each tip to its points` is **On** |
+| `Line style` |  | Solid<br>Dashed<br>Dotted | Solid | `Table` is chosen, `Join each tip to its points` is **On** |
+
+### › Grouping
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Neighbourhood radius (map units, 0 for none)` | Records closer than this become one point. In the units of the map: degrees for maps in degrees, the units of the planar system (usually metres) otherwise. | 0 and up | 0 | `Table` is chosen |
+| `Number of records on grouped points` |  | On<br>Off | On | `Table` is chosen, `Neighbourhood radius` is above 0 |
+| `Color of groups with several colors` | A grouped point whose records have different colors takes this one. | Color | <img src="img/colors/9AA0A6.svg" alt="#9AA0A6" align="absmiddle"> #9AA0A6 | `Table` is chosen, `Neighbourhood radius` is above 0 |
 
 ## Images and visual elements
 
