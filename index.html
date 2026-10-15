@@ -353,6 +353,7 @@ body.hastabs .status{top:50px}
 /* Click areas are never painted: hidden, they still take clicks (stroke and all ignore visibility). On large trees this
    saves the browser from painting tens of thousands of invisible shapes at every frame. */
 .hit,.hitlabel,.hitpt,.hittri{visibility:hidden}
+.geopt{fill:transparent; cursor:context-menu; pointer-events:all}
 .hitlabel,.hitpt,.hittri{pointer-events:all}
 .sideTab{position:absolute; left:0; top:50%; transform:translateY(-50%); z-index:15; width:18px; height:56px; border:1px solid var(--line); border-left:0; border-radius:0 8px 8px 0; background:var(--panel); cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center; color:var(--muted)}
 .sideTab:hover{background:var(--panel2); color:var(--ink)}
@@ -477,6 +478,8 @@ body.hastabs .status{top:50px}
 .freelock rect{fill:#fff}
 .freelock path{fill:none; stroke:#fff; stroke-width:1.6; stroke-linecap:round}
 .freeitem.unlocked .freelock circle{fill:var(--mustard)}
+.geobox .tabitem{display:flex; flex-direction:column; gap:8px} .geobox .tabitem .btns{margin:0} .geobox .row.sub{margin:0}
+.nelayers{display:flex; flex-wrap:wrap; gap:6px 16px} .geohead{display:block; font-size:13.5px; margin:6px 0 -2px}
 .layerlist{display:flex; flex-direction:column; gap:6px; margin:6px 0 4px}
 .layer{display:grid; grid-template-columns:auto minmax(0,1fr) auto auto auto auto; align-items:center; gap:5px; padding:5px 6px; border:1px solid var(--line-strong); border-radius:8px; background:var(--panel); cursor:grab; font-size:13px}
 .layer.off .lname{color:var(--muted, #667)} .layer .lnote{font-size:11px; color:var(--muted, #667); white-space:nowrap; text-align:right}
@@ -1199,6 +1202,9 @@ const palStops = (name, custom, rev, hue) => { const pal = name && name !== 'cus
 // The colours of the branches and of the dots coloured by data.
 const brcStops = S => palStops(S.brcPalette, S.brcMidOn ? [S.brcLow, S.brcMid, S.brcHigh] : [S.brcLow, S.brcHigh], S.brcRev, S.brcHue);
 const dotStops = S => palStops(S.dotPalette, [S.dotLow, S.dotHigh], S.dotRev, S.dotHue);
+// The projections of maps in degrees, with their codes (Geography).
+const GEO_MODELS = [['PALEOMAP', 'Scotese 2016 (PALEOMAP)'], ['MULLER2019', 'Müller et al. (2019)'], ['MERDITH2021', 'Merdith et al. (2021)']];
+const GEO_PROJ = [['equalearth', 'Equal Earth (EPSG:8857)'], ['equirect', 'Equirectangular (EPSG:4326)'], ['mercator', 'Mercator (EPSG:3857)'], ['mollweide', 'Mollweide (ESRI:54009)']];
 const DEFAULTS = {
   layout: 'rect', useLengths: true, width: 700, spacing: 18, radius: 320, innerRadius: 0, circSpan: 360, fanSpan: 180, rotation: 0, rootStub: 0,
   lineWidth: 1, lineColor: '#1f1f1f', lineCap: 'round', branchAngle: 90, branchRound: 0, lineStyle: 'solid', lineDash: 5, lineGap: 3,
@@ -1232,7 +1238,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', gmProj: 'equalearth', gmTable: '', gmLon: '', gmLat: '', gmShape: 'circle', gmSizeBy: 'fixed', gmSize: 3.5, gmSizeMin: 2.5, gmSizeMax: 12, gmColorBy: 'single', gmColor: '#C8553D', gmColorVar: '', gmSizeVar: '', gmPts: {}, gmPal: 'viridis', gmRev: false, gmOp: 85, gmBorder: '#ffffff', gmBorderW: 0.6, gmCluster: 0, gmCount: true, gmMixColor: '#9AA0A6', gmLines: false, gmLineFrom: 'tip', gmLineColor: '#8A8F98', gmLineW: 0.6, gmLineOp: 70, gmLineStyle: 'solid', gmLegend: true, gmLegendTitle: '', gmLineColorBy: 'single', gmLife: 'all', gmPaleo: false, gmAge: 50, gmModel: 'PALEOMAP', gmMap: '', neRes: '110m', neLayers: ['land'], gpAge: 50, gpModel: 'PALEOMAP', brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 // Default settings merged with saved ones, with the migrations that keep older sessions and projects working.
@@ -1314,14 +1320,14 @@ const SECTIONS_RAW = [
     { type: 'custom', build: treeSetBox }
   ]},
   { title: 'Layout', items: [
-    { k: 'layout', type: 'seg', opts: [['rect', 'Rectangular'], ['circular', 'Circular'], ['fan', 'Fan'], ['unrooted', 'Unrooted']], refit: true, enable: () => !figImages.length },
+    { k: 'layout', type: 'seg', opts: [['rect', 'Rectangular'], ['circular', 'Circular'], ['fan', 'Fan'], ['unrooted', 'Unrooted']], refit: true, enable: () => !figImages.some(m => !m.geo) },   // maps do not lock the shape: their lines follow the tips on any layout
     { k: 'rectOrient', type: 'seg', label: 'Orientation', opts: [['horizontal', 'Horizontal'], ['vertical', 'Vertical'], ['custom', 'Custom']], refit: true, show: s => s.layout === 'rect', sub: true },
     { k: 'rectAngle', type: 'range', label: 'Angle', min: 0, max: 359, step: 1, unit: '°', refit: true, show: s => s.layout === 'rect' && s.rectOrient === 'custom', sub: true },
     { type: 'hint', text: s => s.layout === 'rect' && s.rectOrient === 'custom' ? 'Turns the tree clockwise: 0° is horizontal, 270° vertical with the tips on top. At other angles the text turns with the tree, and pages and alignment guides are off, as on circular trees.' : '' },
     { k: 'scaleTurn', type: 'seg', label: 'Scale bar on a vertical tree', opts: [['tree', 'Turns with the tree'], ['upright', 'Horizontal']], show: s => s.layout === 'rect' && s.rectOrient === 'vertical' && !s.axisOn && s.scaleBar, sub: true },   // the time axis, which replaces the bar, always turns with the tree
     { k: 'vertText', type: 'seg', label: 'Text on a vertical tree', opts: [['vertical', 'Vertical'], ['horizontal', 'Horizontal']], show: s => s.layout === 'rect' && s.rectOrient === 'vertical', sub: true },
     { type: 'hint', text: s => s.layout === 'rect' && s.rectOrient === 'vertical' ? 'The tips go on top and the root at the bottom. The time axis and the scale bar turn with the tree, while legends and the title do not. With horizontal text, widen the tip spacing so the names do not overlap.' : '' },
-    { type: 'hint', text: () => figImages.length ? 'While the page has images, the tree shape cannot be changed. Remove the images, change the shape, then add them back.' : '' },
+    { type: 'hint', text: () => figImages.some(m => !m.geo) ? 'While the page has images, the tree shape cannot be changed. Remove the images, change the shape, then add them back. Maps do not count.' : '' },
     { k: 'useLengths', type: 'check', label: 'Use branch lengths', refit: true },
     { type: 'custom', build: treeToolsBox },
     { k: 'width', type: 'range', label: 'Width', min: 80, max: 4000, step: 10, hmax: 20000, unit: 'px', show: isRectish },
@@ -1852,6 +1858,48 @@ const SECTIONS_RAW = [
     { k: 'pageMiniHi', type: 'color', label: 'Color of the rows on the page', show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn },
     { k: 'pageMiniMark', type: 'seg', label: 'Mark the rows on the page with', opts: [['lines', 'Branch color'], ['both', 'Color and background']], show: s => s.layout === 'rect' && s.rectOrient !== 'vertical' && (s.pages || []).length > 0, enable: s => s.pageMiniOn }
   ]},
+  { title: 'Geography', items: [
+    { type: 'custom', build: geoBox },
+    { type: 'head', label: 'Map' },
+    { k: 'gmMap', type: 'select', label: 'Map', opts: () => { const ms = figImages.filter(m => m.geo); return ms.length ? ms.map(m => [String(m.id), geoTitle(m)]) : [['', 'None']]; } },
+    { type: 'hint', text: () => figImages.some(m => m.geo) ? 'The options below belong to this map: each map has its own points, projection, styles and lines.' : 'Add a map above to set its points.' },
+    { k: 'gmProj', type: 'select', label: 'Projection (maps in degrees)', opts: GEO_PROJ, enable: () => figImages.some(m => m.geo) },
+    { type: 'head', label: 'Points' },
+    { k: 'gmTable', type: 'select', label: 'Table', opts: s => [['', 'None'], ...(s.dataTables || []).map(t => [t.id, t.name])] },
+    { k: 'gmLon', type: 'select', label: 'Longitude (x)', opts: s => { const t = (s.dataTables || []).find(x => x.id === s.gmTable); return t ? [['', 'Found by its name'], ...allCols(t).map(c => [c, c])] : [['', '—']]; }, enable: s => !!s.gmTable, sub: true },
+    { k: 'gmLat', type: 'select', label: 'Latitude (y)', opts: s => { const t = (s.dataTables || []).find(x => x.id === s.gmTable); return t ? [['', 'Found by its name'], ...allCols(t).map(c => [c, c])] : [['', '—']]; }, enable: s => !!s.gmTable, sub: true },
+    { type: 'hint', text: s => s.gmTable ? 'One row per record, with the species in the first column. Records at the same place are drawn once.' : 'Add a table with the species and their coordinates in Attachments, then choose it here.' },
+    { k: 'gmShape', type: 'select', label: 'Shape', opts: SHAPE_OPTS, enable: s => !!s.gmTable, sub: true },
+    { k: 'gmSizeBy', type: 'select', label: 'Size', opts: [['fixed', 'One size'], ['density', 'By the number of records'], ['cont', 'By a value']], enable: s => !!s.gmTable, sub: true },
+    { k: 'gmSize', type: 'number', label: 'Point size', min: 0.5, max: 40, step: 0.5, unit: 'px', show: s => s.gmSizeBy === 'fixed', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmSizeVar', type: 'select', label: 'Value for the size', opts: s => geoVarOpts(s), show: s => s.gmSizeBy === 'cont', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmSizeMin', type: 'number', label: 'Smallest', min: 0.5, max: 40, step: 0.5, unit: 'px', show: s => s.gmSizeBy !== 'fixed', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmSizeMax', type: 'number', label: 'Largest', min: 0.5, max: 60, step: 0.5, unit: 'px', show: s => s.gmSizeBy !== 'fixed' || s.gmCluster > 0, enable: s => !!s.gmTable, sub: true },
+    { k: 'gmColorBy', type: 'select', label: 'Color', opts: [['single', 'One color'], ['clade', 'By named clade'], ['highlight', 'As the highlight of its clade'], ['cat', 'By a category'], ['cont', 'By a value (gradient)']], enable: s => !!s.gmTable, sub: true },
+    { k: 'gmColor', type: 'color', label: 'Point color', show: s => s.gmColorBy === 'single', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmColorVar', type: 'select', label: 'Value for the color', opts: s => geoVarOpts(s), show: s => s.gmColorBy === 'cat' || s.gmColorBy === 'cont', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmPal', type: 'select', label: 'Palette', opts: PALETTE_OPTS.filter(o => o[0] !== 'custom'), show: s => s.gmColorBy === 'cont', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmRev', type: 'check', label: 'Reverse the colors', show: s => s.gmColorBy === 'cont', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmOp', type: 'range', label: 'Opacity', min: 5, max: 100, step: 5, unit: '%', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmBorder', type: 'color', label: 'Border color', enable: s => !!s.gmTable, sub: true },
+    { k: 'gmBorderW', type: 'number', label: 'Border width', min: 0, max: 5, step: 0.1, unit: 'px', enable: s => !!s.gmTable, sub: true },
+    { type: 'custom', build: () => { const d = document.createElement('div'); d.className = 'btns'; d.innerHTML = '<button type="button" class="btn small" id="geoPtsReset">Clear the styles of single points</button>'; d.firstChild.onclick = () => { pushUndo(true); settings.gmPts = {}; render(); persist(); toast('Every point follows the panel again'); }; return d; } },
+    { k: 'gmLife', type: 'seg', label: 'Lineages', opts: [['all', 'All'], ['living', 'Living'], ['fossil', 'Fossils']], enable: s => !!s.gmTable, sub: true },
+    { type: 'head', label: 'Lines to the tips' },
+    { k: 'gmLines', type: 'check', label: 'Join each tip to its points', enable: s => !!s.gmTable },
+    { type: 'hint', text: s => s.gmLines ? 'One line to every point that holds a record of the species. Easiest to read with the map below or beside a vertical tree.' : '' },
+    { k: 'gmLineFrom', type: 'seg', label: 'From', opts: [['tip', 'The tip'], ['label', 'The end of its name']], enable: s => !!s.gmTable && s.gmLines, sub: true },
+    { k: 'gmLineColorBy', type: 'seg', label: 'Line color', opts: [['single', 'One color'], ['point', 'As its point']], enable: s => !!s.gmTable && s.gmLines, sub: true },
+    { k: 'gmLineColor', type: 'color', label: 'Color of the lines', show: s => s.gmLineColorBy !== 'point', enable: s => !!s.gmTable && s.gmLines, sub: true },
+    { k: 'gmLineW', type: 'number', label: 'Line width', min: 0.1, max: 6, step: 0.1, unit: 'px', enable: s => !!s.gmTable && s.gmLines, sub: true },
+    { k: 'gmLineOp', type: 'range', label: 'Line opacity', min: 5, max: 100, step: 5, unit: '%', enable: s => !!s.gmTable && s.gmLines, sub: true },
+    { k: 'gmLineStyle', type: 'seg', label: 'Line style', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], enable: s => !!s.gmTable && s.gmLines, sub: true },
+    { type: 'head', label: 'Grouping' },
+    { k: 'gmCluster', type: 'number', label: 'Neighbourhood radius (map units, 0 for none)', min: 0, max: 10000000, step: 0.1, enable: s => !!s.gmTable },
+    { type: 'hint', text: s => { const g = [...geoStore.values()].pop(); return s.gmCluster > 0 ? `Records closer than this, in ${g && !g.deg ? 'the units of the map (metres in most planar systems)' : 'degrees'}, become one point. With one size, a grouped point grows with its records, up to the value set for Largest.` : ''; } },
+    { k: 'gmCount', type: 'check', label: 'Number of records on grouped points', enable: s => !!s.gmTable && s.gmCluster > 0, sub: true },
+    { k: 'gmMixColor', type: 'color', label: 'Color of groups with several colors', enable: s => !!s.gmTable && s.gmCluster > 0, sub: true },
+  ]},
   { title: 'Images and visual elements', custom: 'images' },
   { title: 'Page', where: 'page', open: true, items: [
     { k: 'bg', type: 'color', label: 'Background color' },
@@ -1874,6 +1922,11 @@ const SECTIONS_RAW = [
 ];
 // Side plot options appear only once a table with matching names is chosen
 const SECTIONS = SECTIONS_RAW;
+(function gateGeography() {   // the options of a map only once a map is on the figure
+  const sec = SECTIONS.find(x => x.title === 'Geography'); if (!sec) return;
+  const i0 = sec.items.findIndex(it => it.type === 'head' && it.label === 'Points'), hasMap = () => figImages.some(m => m.geo);
+  for (const it of sec.items.slice(i0)) { const old = it.show; it.show = s => hasMap() && (old ? old(s) : true); }
+})();
 (function gateSidePlots() {
   const sec = SECTIONS.find(x => x.title === 'Side plots'); if (!sec) return;
   let gate = hasData;
@@ -1913,7 +1966,7 @@ function buildSide() {
   // only Expand and Collapse: Info on hover has its own action
   foot.querySelectorAll('button[data-all]').forEach(b => b.onclick = () => b.dataset.all === '1' ? expandAllSections() : collapseAllSections()); side0.appendChild(foot);
   refreshVisibility();
-  if (again) side0.scrollTop = wasTop;
+  if (again) { side0.scrollTop = wasTop; setTimeout(() => { side0.scrollTop = wasTop; }); setTimeout(() => { side0.scrollTop = wasTop; }, 60); }   // again once the boxes are filled
 }
 
 // Number box of the panel, with its unit inside.
@@ -2229,6 +2282,7 @@ function changeSoon(it) { chItem = it; if (!chRaf) chRaf = requestAnimationFrame
 function renderSoon() { if (!rRaf) rRaf = requestAnimationFrame(() => { rRaf = 0; render(); }); }
 // Reacts to a panel change: redraws, refits when needed, saves and refreshes the panel.
 function changed(it) {
+  if (it && /^gm(Table|Lon|Lat)$/.test(it.k)) setTimeout(geoCheck, 50);   // points and map: do they match?
   if (it && it.k === 'brcTable') { const t = (settings.dataTables || []).find(x => x.id === settings.brcTable); settings.brcCol = t ? (numericCols(t).find(c => /rate/i.test(c)) || numericCols(t)[0] || '') : ''; }
   enforceSupportLocks();
   if (it && (it.k === 'ancWhere' || (it.k === 'ancOn' && settings.ancOn))) applyAncWhere();
@@ -3123,10 +3177,11 @@ async function saveProject() {
     newick: toNewick(tree), tree: serialize(tree), settings, source: srcText, images: imageRecords(), smap: smapRecord(), trees: treeSetRecord(), ro: treeSetRO,
     alignments: alnSets.map(a => ({ name: a.name, len: a.len, type: a.type, seqs: [...a.seqs] })),
     mcmc: mcmcLog ? { name: mcmcLog.name, col: mcmcLog.col, map: [...mcmcLog.map] } : null,
+    geo: [...geoStore],
     tabs: (() => { const r = tabsRecord(); if (r) for (const t of r.tabs) if (t.doc) t.doc.images = (t.doc.images || []).map(m => ({ ...m, src: imgStore.get(m.sid) })); return r; })()
   };
   // the same project without the attached files: tables, SIMMAP, MCMC log, alignments, pie charts and images
-  const lite = { ...proj, settings: { ...settings, dataTables: [], pieData: null, pieOn: false, alnPick: '' }, smap: null, alignments: [], mcmc: null, images: [],
+  const lite = { ...proj, settings: { ...settings, dataTables: [], pieData: null, pieOn: false, alnPick: '' }, smap: null, alignments: [], mcmc: null, images: [], geo: [],
     tabs: proj.tabs ? { ...proj.tabs, tabs: proj.tabs.tabs.map(t => t.doc ? { ...t, doc: { ...t.doc, images: [], settings: t.doc.settings ? { ...t.doc.settings, dataTables: [], pieData: null } : t.doc.settings } } : t) } : proj.tabs };
   const full = JSON.stringify(proj, null, 1), bare = JSON.stringify(lite, null, 1), size = t => { const b = new Blob([t]).size; return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; };
   const A = attachSummary(), imgs = figImages.length;
@@ -3146,6 +3201,7 @@ function openProject(o) {
   else throw new Error('This JSON file is not a tree2go project.');
   settings = freshSettings(o.settings);
   if (settings.layout === 'slanted') settings.layout = 'rect';
+  if (Array.isArray(o.geo)) { geoStore = new Map(o.geo); geoCache = null; geoSave(); }   // the maps of the project
   if (o.mcmc && o.mcmc.map) mcmcLog = { name: o.mcmc.name, col: o.mcmc.col, map: new Map(o.mcmc.map) };   // the MCMC log of the project
   if (Array.isArray(o.alignments)) { alnSets = o.alignments.map(a => ({ seqs: new Map(a.seqs), len: a.len, n: a.seqs.length, type: a.type, name: a.name })); alnSync(); alnSave(); }   // the alignments of the project
   srcText = o.source || o.newick || '';
@@ -3226,6 +3282,7 @@ function attachSummary() {
   add('Alignments', alnSets.map(a => [...tips].filter(k => a.seqs.has(k)).length));
   add('Pie charts', settings.pieData ? [[...tips].filter(k => settings.pieData.rows[k]).length] : []);
   add('MCMC log', mcmcLog ? [null] : []);
+  add('Maps', [...geoStore.keys()].map(() => null));
   return { kinds, n, list: kinds };
 }
 // "Tables (2)", "SIMMAP (1)"...: the kinds of files and how many of each, without their names.
@@ -3496,6 +3553,7 @@ function vertText(svgStr, S, tips) {
 }
 function renderOnce() {
   alnSync();
+  geoSyncCfg();   // the panel edits the map chosen in Geography
   pieHits.length = 0;   // the click and hover areas of the pies, drawn over those of the nodes   // the alignment chosen in Side plots
   /* Order of the drawing (each step is commented below):
      1. layout: position of every node (computeLayout) for the chosen shape, and the size of every tip label
@@ -5051,6 +5109,7 @@ function renderOnce() {
     `<g id="imgBack"></g>`,
     vert ? `<g transform="rotate(${treeTurn(S)})">` : '',
     `<g>${bgL.join('')}</g>`,
+    `<g id="gmLines"${vert ? ` transform="rotate(${f2(-treeTurn(S))})"` : ''}></g>`,   // lines to the maps: over the highlights, under the tree and its names (in figure coordinates)
     `<g stroke="${S.lineColor}" stroke-width="0.8" opacity="0.6">${alL.join('')}</g>`,
     `<g fill="none" stroke-width="${LW}" stroke-linecap="${S.lineCap}" stroke-linejoin="round">${mergeRuns(brL)}</g>`,
     nbarL.length ? `<g>${nbarL.join('')}</g>` : '',
@@ -5062,6 +5121,7 @@ function renderOnce() {
     `<g>${isVertical(S) ? vertText(anL.join(''), S) : anL.join('')}</g>`,
     vert ? `</g><g>${anFixed.join('')}</g>` : '',
     `<g id="imgFront"></g>`,
+    `<g id="geoLinesOver"></g>`,   // the parts of those lines over their maps
     `<g id="arrows">${arrowsNow.svg}</g>`
   ].join(''));
   if (contentStr !== lastContentStr) { content.innerHTML = contentStr; lastContentStr = contentStr; }
@@ -6879,6 +6939,7 @@ function replaceImageFile(id, file) {
 // Build the <image> nodes once and move them into the freshly drawn slots
 function placeImages() {
   refreshKdes();   // density plots follow the current values and colours
+  { const L = geoLinesSvg(), gl = content.querySelector('#gmLines'), go = content.querySelector('#geoLinesOver'); if (gl) gl.innerHTML = L.under; if (go) go.innerHTML = L.over; }   // lines to the points of the maps, now in place
   const back = content.querySelector('#imgBack'), front = content.querySelector('#imgFront');
   for (const id of [...imgEls.keys()]) if (!imgById(id)) { imgEls.get(id).remove(); imgEls.delete(id); }   // a deleted image leaves the canvas too
   for (const m of figImages) {
@@ -6900,6 +6961,10 @@ function imageHits() {
   for (const m of figImages) {
     const tr = m.rot ? ` transform="rotate(${f2(m.rot)} ${f2(m.x + m.w / 2)} ${f2(m.y + m.h / 2)})"` : '';
     (m.layer === 'back' ? back : front).push(`<rect class="imghit" data-img="${m.id}" x="${f2(m.x)}" y="${f2(m.y)}" width="${f2(m.w)}" height="${f2(m.h)}"${tr}/>`);
+    if (m.geo && m._geoPts && m._geoPts.length) {   // the points of a map: each one its own click and hover area
+      const sx = m.w / m.nw, sy = m.h / m.nh;
+      (m.layer === 'back' ? back : front).push(`<g${tr}>` + m._geoPts.map((q, i) => (geoSel.has(m.id + '|' + q.key) ? `<circle cx="${f2(m.x + q.x * sx)}" cy="${f2(m.y + q.y * sy)}" r="${f2(q.r * sx + 3 / k)}" fill="none" stroke="var(--accent)" stroke-width="${f2(3 / k)}" opacity=".6" pointer-events="none"/>` : '') + `<circle class="geopt" data-geopt="${m.id}:${i}" cx="${f2(m.x + q.x * sx)}" cy="${f2(m.y + q.y * sy)}" r="${f2(Math.max(q.r * sx, 3 / k))}"/>`).join('') + '</g>');   // a selected point shows a halo
+    }
   }
   const m = selImg != null && imgById(selImg);
   if (m) {
@@ -7195,6 +7260,16 @@ function openImage(cx, cy, keep) {
     const addB = pop.querySelector('[data-lttadd]');
     if (addB) addB.onclick = () => { pushUndo(); const i = m.ltt.lines.length, named = [...nodeById.values()].filter(x => x.cladeLabel); m.ltt.lines.push({ src: named[i - 1] ? named[i - 1].cladeLabel : 'all', fossils: true, color: LTT_COLORS[i % LTT_COLORS.length], w: 1.8, dash: 'solid' }); imgChanged(); openImage(cx, cy, true); };
     pop.querySelectorAll('[data-lttdel]').forEach(b => b.onclick = () => { pushUndo(); m.ltt.lines.splice(+b.dataset.lttdel, 1); imgChanged(); openImage(cx, cy, true); });
+  }
+  if (m.geo) {   // a map: its lines, fill and frame
+    const g = geoStore.get(m.geo.id), h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta');
+    const C = geoCfg(m); if (h3) h3.textContent = geoTitle(m); if (meta) meta.textContent = g ? `${g.name}: ${g.parts.length} shapes, ${g.deg ? 'in degrees, ' + (GEO_PROJ.find(p => p[0] === C.gmProj) || GEO_PROJ[0])[1] : 'in a planar system, drawn as it is'}.` : 'Map not found.';
+    const spec = [{ k: 'line', label: 'Line color', type: 'color' }, { k: 'lw', label: 'Line width', type: 'num', unit: 'px' }, { k: 'fill', label: 'Fill', type: 'color' }, { k: 'fillOp', label: 'Fill opacity', type: 'num', unit: '%' },
+      { k: 'area', label: 'Area', type: 'sel', opts: [['all', 'The whole map'], ['points', 'Around the points'], ['custom', 'Custom']] }, { k: 'pad', label: 'Margin around the points', type: 'num', unit: '%' }, { k: 'scale', label: 'Scale 1:', type: 'num' },
+      { k: 'frame', label: 'Frame', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] }, { k: 'frameColor', label: 'Frame color', type: 'color' }];
+    pop.querySelector('.part').insertAdjacentHTML('beforebegin', `<div class="part"><b>Map</b><div class="kv"><span>Name</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" id="geoTitleIn" value="${esc(geoTitle(m))}" aria-label="Name of the map"></div>${ctlRows(spec, key => ({ v: key === 'scale' ? Math.round(geoScaleOf(m)) : m.geo[key], own: false }))}<p class="hint">${m.geo.area === 'custom' ? 'With the map selected, Ctrl + drag moves its view and Ctrl + scroll zooms in and out. The scale is the one of the figure at its size (96 px per inch), true at the center of the map. ' : ''}Its points, projection and lines are set in Geography, with this map chosen in Map.</p></div>`);
+    { const ti = pop.querySelector('#geoTitleIn'); ti.addEventListener('change', () => { m.geo.title = ti.value.trim() || m.geo.title; if (h3) h3.textContent = m.geo.title; persist(); buildSide(); }); }
+    wireCtl(spec, (key, v) => { pushUndo(); if (key === 'scale') { geoSetScale(m, v); openImage(cx, cy, true); return; } if (key === 'area' && v === 'custom' && !m.geo.view && m._geoBox) m.geo.view = [...m._geoBox]; if (key === 'fillOp') v = clamp(v, 0, 100); if (key === 'lw' || key === 'pad') v = Math.max(0, v); m.geo[key] = v; imgChanged(); openImage(cx, cy, true); });
   }
   if (m.txt || m.kde) {   // items the app draws: a title that says what they are
     const h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta');
@@ -7702,7 +7777,7 @@ function wireLock(reopen) {
 function openLegendMenu(key, cx, cy, keep) {
   const auto = legendAuto[key]; if (!auto) return;
   const T0 = settings.legendText || {}, keepScroll = keep ? pop.scrollTop : 0;
-  const names = { support: 'Support legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
+  const names = { support: 'Support legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', geo: 'Map legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
   const field = (i, ph, lab) => `<div class="grp"><span>${lab}</span><input type="text" class="lgtext" data-li="${i}" value="${esc(T0[key + ':' + i] ?? '')}" placeholder="${esc(ph || '(none)')}"></div>`;
   pop.innerHTML = `
     <button class="close" aria-label="Close">×</button>
@@ -7887,6 +7962,7 @@ let hoverKey = null;
 // Hides the information box shown on hover.
 const hideHover = () => { hoverTip.hidden = true; hoverKey = null; };
 svg.addEventListener('pointermove', e => {
+  if (e.target.closest && e.target.closest('[data-geopt]') && settings.hoverInfo) return;   // a point of a map shows its own information
   if (!settings.hoverInfo || ptrs.size || e.pointerType !== 'mouse') { if (!hoverTip.hidden) hideHover(); return; }
   const nt = e.target.closest && e.target.closest('[data-net], [data-netlab], [data-netmaj]');
   if (nt && nt.dataset.netmaj) {   // the major edge of a hybrid node
@@ -7954,6 +8030,37 @@ document.addEventListener('click', e => {
   settings.hoverInfo = !settings.hoverInfo; persist(); syncHoverBtn(); if (!settings.hoverInfo) hideHover();
   toast(settings.hoverInfo ? 'Info on hover is on' : 'Info on hover is off');
 });
+// A point of a map: what it holds on hover, and its own style from its right-click menu.
+let geoSel = new Set();   // selected points of the maps, as "map id|place"
+const geoPtOf = el => { const [id, i] = el.dataset.geopt.split(':'), m = figImages.find(x => String(x.id) === id); return m && m._geoPts ? { m, q: m._geoPts[+i] } : null; };
+const geoPtText = (m, q) => { const g = geoStore.get(m.geo.id), deg = !g || g.deg; const nd = deg ? 4 : 1; return { title: q.names.length > 3 ? `${q.names.slice(0, 3).map(disp).join(', ')} and ${q.names.length - 3} more` : q.names.map(disp).join(', '), lines: [`Lon (x): ${+q.lon.toFixed(nd)}`, `Lat (y): ${+q.lat.toFixed(nd)}`, ...(settings.gmPaleo ? [`At ${settings.gmAge} Ma (${settings.gmModel})`] : []), `${q.n} ${q.n === 1 ? 'record' : 'records'}`], meta: `Lon (x) ${+q.lon.toFixed(nd)}, Lat (y) ${+q.lat.toFixed(nd)}, ${q.n} ${q.n === 1 ? 'record' : 'records'}` }; };
+svg.addEventListener('pointermove', e => {
+  const t = settings.hoverInfo && e.target.closest && e.target.closest('[data-geopt]'); if (!t) return;
+  const o = geoPtOf(t); if (!o) return; const key = 'geo:' + t.dataset.geopt;
+  if (key !== hoverKey) { const i = geoPtText(o.m, o.q); hoverTip.innerHTML = `<b>${esc(i.title)}</b>${i.lines.map(l => `<span>${esc(l)}</span>`).join('')}`; hoverKey = key; hoverTip.hidden = false; }
+  hoverTip.style.left = (e.clientX + 14) + 'px'; hoverTip.style.top = (e.clientY + 14) + 'px';
+}, true);
+svg.addEventListener('pointerdown', e => {   // select a point (Shift adds or removes it); elsewhere, the selection of points ends
+  if (e.button !== 0) return; const t = e.target.closest && e.target.closest('[data-geopt]');
+  if (!t) { if (geoSel.size && !(e.target.closest && e.target.closest('#pop'))) { geoSel.clear(); render(); } return; }
+  const o = geoPtOf(t); if (!o) return; const k = o.m.id + '|' + o.q.key;
+  if (e.shiftKey) { if (geoSel.has(k)) geoSel.delete(k); else geoSel.add(k); } else { geoSel.clear(); geoSel.add(k); }
+  e.stopPropagation(); render();
+}, true);
+function openGeoPoint(el, cx, cy) {
+  const o = geoPtOf(el); if (!o) return; const { m, q } = o, S = settings, own = (S.gmPts || {})[q.key] || {}, i = geoPtText(m, q);
+  const me = m.id + '|' + q.key; if (!geoSel.has(me)) { geoSel.clear(); geoSel.add(me); render(); }   // the point clicked, or all the selected ones
+  const keys = [...geoSel].filter(x => x.startsWith(m.id + '|')).map(x => x.slice(String(m.id).length + 1)), many = keys.length > 1;
+  pop.innerHTML = `<button class="close" aria-label="Close">×</button><div class="dragh" title="Drag to move"><h3>${many ? `${keys.length} points` : 'Point: ' + esc(i.title)}</h3><div class="meta">${many ? 'Shift-click points to add or remove them.' : esc(i.meta)}</div></div><div class="part"><b>${many ? 'Style of these points' : 'Style of this point'}</b></div><div class="btns"><button type="button" class="btn small" id="geoPtClr">Follow the panel again</button></div>`;
+  const spec = [{ k: 'c', label: 'Color', type: 'color' }, { k: 'r', label: 'Size', type: 'num', unit: 'px' }, { k: 'sh', label: 'Shape', type: 'sel', opts: SHAPE_OPTS }, { k: 'b', label: 'Border color', type: 'color' }, { k: 'bw', label: 'Border width', type: 'num', unit: 'px' }];
+  const now = { c: own.c || '#888888', r: own.r ?? +q.r.toFixed(1), sh: own.sh || S.gmShape, b: own.b || S.gmBorder, bw: own.bw ?? S.gmBorderW };
+  pop.querySelector('.part').insertAdjacentHTML('beforeend', ctlRows(spec, k => ({ v: now[k], own: own[k] != null })));
+  wireCtl(spec, (k, v) => { pushUndo(true); const all = { ...(settings.gmPts || {}) }; for (const kk of keys) all[kk] = { ...(all[kk] || {}), [k]: k === 'r' || k === 'bw' ? Math.max(0, +v) : v }; settings.gmPts = all; render(); persist(); });
+  pop.querySelector('#geoPtClr').onclick = () => { pushUndo(true); const all = { ...(settings.gmPts || {}) }; for (const kk of keys) delete all[kk]; settings.gmPts = all; render(); persist(); closePop(); };
+  pop.querySelector('.close').onclick = closePop;
+  pop.classList.add('on'); placePop(cx, cy);
+}
+svg.addEventListener('contextmenu', e => { const t = e.target.closest && e.target.closest('[data-geopt]'); if (!t) return; e.preventDefault(); e.stopPropagation(); hideHover(); openGeoPoint(t, e.clientX, e.clientY); }, true);
 // Shows whether Info on hover is on.
 function syncHoverBtn() { document.querySelectorAll('[data-hover]').forEach(b => { b.setAttribute('aria-pressed', !!settings.hoverInfo); b.classList.toggle('on', !!settings.hoverInfo); }); }
 setTimeout(syncHoverBtn);
@@ -8072,7 +8179,7 @@ function selectMatches() {
 }
 
 /* ================= Style templates: the look of a figure, without its tree or data ================= */
-const STYLE_SKIP = new Set(['alnPick', 'pieData', 'arrows', 'dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
+const STYLE_SKIP = new Set(['gmMap', 'neRes', 'neLayers', 'gpAge', 'gpModel', 'gmTable', 'gmLon', 'gmLat', 'gmColorVar', 'gmSizeVar', 'gmPts', 'alnPick', 'pieData', 'arrows', 'dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
   'pages', 'legendPos', 'legendText', 'scaleX', 'scaleY', 'scaleFree', 'title', 'projectName', 'exportName', 'exportSizeMode', 'exportWidthVal', 'axisCustom', 'nbarSrc', 'nlabSrc', 'supportSource']);
 // Saves a style template: every setting except the tree and its data.
 async function saveStyle() {
@@ -8693,7 +8800,7 @@ function txtSvg(t) {
   return { w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${f2(w)}" height="${f2(h)}" viewBox="0 0 ${f2(w)} ${f2(h)}"><text x="2" y="${f2(h * 0.5)}" dominant-baseline="central" font-size="${t.size}" font-family="${esc(fam)}" fill="${t.color}"${t.bold ? ' font-weight="bold"' : ''}${t.italic ? ' font-style="italic"' : ''}>${esc(t.text || '')}</text></svg>` };
 }
 // The drawing of an item the app makes itself: a density plot or a text label.
-const itemSvg = m => m.kde ? kdeSvg(m.kde) : m.ltt ? lttSvg(m.ltt, m) : m.txt ? txtSvg(m.txt).svg : null;
+const itemSvg = m => m.geo ? geoSvg(m) : m.kde ? kdeSvg(m.kde) : m.ltt ? lttSvg(m.ltt, m) : m.txt ? txtSvg(m.txt).svg : null;
 function addLabel() {
   const t = { ...TXT_DEF }, d = txtSvg(t), sid = 's' + (++imgUid) + 't'; imgStore.set(sid, '');
   const cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k;
@@ -8717,7 +8824,7 @@ function txtMenuPart(m) {
 }
 // In an export, each density plot is written as drawing (vector), placed and sized like its image.
 function inlineKdes(str) {
-  for (const m of figImages) if (m.kde || m.ltt || m.txt) {
+  for (const m of figImages) if (m.geo || m.kde || m.ltt || m.txt) {
     const src = imgStore.get(m.sid); if (!src) continue;
     const body = itemSvg(m).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, ''), cx = m.x + m.w / 2, cy = m.y + m.h / 2, tf = [];
     if (m.rot) tf.push(`rotate(${f2(m.rot)} ${f2(cx)} ${f2(cy)})`);
@@ -8735,6 +8842,11 @@ function refreshKdes() {
     if (Math.abs(d.w - m.nw) > 0.01 || Math.abs(d.h - m.nh) > 0.01) { m.nw = d.w; m.nh = d.h; m.w = d.w * sc; m.h = d.h * sc; }
     const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(d.svg)));
     if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
+  }
+  for (const m of figImages) if (m.geo) {   // a map keeps the shape of its projection
+    const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(geoSvg(m))));
+    if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
+    if (!m.free && m.nw) m.h = m.w * m.nh / m.nw;
   }
   for (const m of figImages) if (m.kde || m.ltt) {
     if (m.ltt && m.w > 0) { m.nw = 360; m.nh = Math.round(360 * m.h / m.w); }   // drawn at the shape of the image
@@ -9348,6 +9460,391 @@ function sideLayersBox() {
       const list = sideOrderOf(settings), from = list.indexOf(drag); list.splice(from, 1); list.splice(at > from ? at - 1 : at, 0, drag); drag = null;
       set(list);
     });
+  };
+  d._refresh = fill; setTimeout(fill); return d;
+}
+/* ================= Geography: maps from shapefiles, and the points of a table on them =================
+   A map is an image the app draws (m.geo), so it moves, aligns and shows guides like any other. Maps and points must
+   use the same coordinate system: in degrees (WGS84) they are projected together with the projection chosen, in a
+   planar system (metres) they are drawn as they are. */
+let geoStore = new Map();   // id -> { name, kind: 'poly' | 'line' | 'point', parts: [[[x, y], ...], ...], prj, bbox, deg }
+const GEO_KEY = 'tree2go-geo';
+const geoSave = () => { try { localStorage.setItem(GEO_KEY, JSON.stringify([...geoStore])); } catch (e) { } };
+try { const o = JSON.parse(localStorage.getItem(GEO_KEY) || 'null'); if (o) geoStore = new Map(o); } catch (e) { }
+// The projections, from degrees to a plane (y up). Spherical formulas: the map and its points always use the same one.
+function geoProjector(kind) {
+  const R = Math.PI / 180;
+  if (kind === 'equirect') return (lo, la) => [lo, la];
+  if (kind === 'mercator') return (lo, la) => [lo * R, Math.log(Math.tan(Math.PI / 4 + clamp(la, -85, 85) * R / 2))];
+  if (kind === 'mollweide') return (lo, la) => {
+    const p = la * R; let t = p; for (let i = 0; i < 30; i++) { const f = 2 * t + Math.sin(2 * t) - Math.PI * Math.sin(p), d = 2 + 2 * Math.cos(2 * t); if (Math.abs(d) < 1e-12) break; t -= f / d; if (Math.abs(f) < 1e-10) break; }
+    return [2 * Math.SQRT2 / Math.PI * lo * R * Math.cos(t), Math.SQRT2 * Math.sin(t)];
+  };
+  // Equal Earth (Šavrič, Patterson & Jenny 2018)
+  const A1 = 1.340264, A2 = -0.081106, A3 = 0.000893, A4 = 0.003796, M = Math.sqrt(3) / 2;
+  return (lo, la) => { const th = Math.asin(M * Math.sin(la * R)), t2 = th * th, t6 = t2 * t2 * t2; return [lo * R * Math.cos(th) / (M * (A1 + 3 * A2 * t2 + t6 * (7 * A3 + 9 * A4 * t2))), th * (A1 + A2 * t2 + t6 * (A3 + A4 * t2))]; };
+}
+// A zip: stored or deflated entries, unpacked with the browser's own decompression.
+async function unzipFiles(buf) {
+  const dv = new DataView(buf), out = {}; let e = buf.byteLength - 22;
+  while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  if (e < 0) throw new Error('This file is not a zip');
+  let c = dv.getUint32(e + 16, true); const n = dv.getUint16(e + 10, true);
+  for (let i = 0; i < n; i++) {
+    const method = dv.getUint16(c + 10, true), csize = dv.getUint32(c + 20, true), nl = dv.getUint16(c + 28, true), xl = dv.getUint16(c + 30, true), cl = dv.getUint16(c + 32, true), lho = dv.getUint32(c + 42, true);
+    const name = new TextDecoder().decode(new Uint8Array(buf, c + 46, nl)), start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true), data = new Uint8Array(buf, start, csize);
+    if (method === 0) out[name] = data.slice().buffer;
+    else if (method === 8) out[name] = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
+    c += 46 + nl + xl + cl;
+  }
+  return out;
+}
+// The shapes of a .shp file: points, lines or polygons (their Z and M values are left out).
+function parseShp(buf) {
+  const dv = new DataView(buf); if (dv.getInt32(0) !== 9994) throw new Error('This file is not a shapefile (.shp)');
+  const end = Math.min(buf.byteLength, dv.getInt32(24) * 2), type = dv.getInt32(32, true) % 10, parts = []; let p = 100;
+  while (p + 12 <= end) {
+    const clen = dv.getInt32(p + 4) * 2, s = p + 8, t = dv.getInt32(s, true) % 10;
+    if (t === 1) parts.push([[dv.getFloat64(s + 4, true), dv.getFloat64(s + 12, true)]]);
+    else if (t === 8) { const np = dv.getInt32(s + 36, true); for (let i = 0; i < np; i++) parts.push([[dv.getFloat64(s + 40 + 16 * i, true), dv.getFloat64(s + 48 + 16 * i, true)]]); }
+    else if (t === 3 || t === 5) {
+      const nP = dv.getInt32(s + 36, true), nPt = dv.getInt32(s + 40, true), ps = s + 44, pts = ps + 4 * nP;
+      for (let k = 0; k < nP; k++) { const a = dv.getInt32(ps + 4 * k, true), b = k < nP - 1 ? dv.getInt32(ps + 4 * (k + 1), true) : nPt, ring = []; for (let i = a; i < b; i++) ring.push([dv.getFloat64(pts + 16 * i, true), dv.getFloat64(pts + 16 * i + 8, true)]); parts.push(ring); }
+    }
+    p = s + clen;
+  }
+  return { kind: type === 5 ? 'poly' : type === 3 ? 'line' : 'point', parts };
+}
+// Fewer points along a line (Douglas-Peucker), for maps too detailed for a figure.
+function simplifyRing(r, tol) {
+  if (r.length < 5) return r;
+  const keep = new Uint8Array(r.length); keep[0] = keep[r.length - 1] = 1; const st = [[0, r.length - 1]];
+  while (st.length) {
+    const [a, b] = st.pop(); let md = 0, mi = -1; const [ax, ay] = r[a], [bx, by] = r[b], dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy) || 1e-12;
+    for (let i = a + 1; i < b; i++) { const d = Math.abs(dy * r[i][0] - dx * r[i][1] + bx * ay - by * ax) / L; if (d > md) { md = d; mi = i; } }
+    if (md > tol && mi > 0) { keep[mi] = 1; st.push([a, mi], [mi, b]); }
+  }
+  return r.filter((_, i) => keep[i]);
+}
+async function addGeoFile(file) {
+  try {
+    const buf = await file.arrayBuffer(); let shp = buf, prj = '', name = file.name;
+    if (/\.zip$/i.test(name)) {
+      const f = await unzipFiles(buf), k = Object.keys(f).find(x => /\.shp$/i.test(x)); if (!k) throw new Error('The zip holds no .shp file');
+      shp = f[k]; const pk = Object.keys(f).find(x => /\.prj$/i.test(x)); if (pk) prj = new TextDecoder().decode(f[pk]); name = k.split('/').pop();
+    }
+    const g = parseShp(shp); if (!g.parts.length) throw new Error('The shapefile holds no shapes');
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, total = 0;
+    for (const r of g.parts) for (const [x, y] of r) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; total++; }
+    if (total > 60000) { const tol = Math.max(x1 - x0, y1 - y0) / 4000; g.parts = g.parts.map(r => simplifyRing(r, tol)); }
+    const deg = x0 >= -180.5 && x1 <= 180.5 && y0 >= -90.5 && y1 <= 90.5;
+    const id = 'g' + Date.now().toString(36); geoStore.set(id, { name, kind: g.kind, parts: g.parts, prj, bbox: [x0, y0, x1, y1], deg }); geoSave();
+    geoAddImage(id, name);
+  } catch (e) { askConfirm({ title: 'The map could not be read', html: esc(e.message || String(e)) + '<br><br>Load a .shp file, or a .zip with its .shp (and its .dbf and .prj).', ok: 'OK', okClass: 'primary', cancel: 'Close', focusOk: true }); }
+}
+// The rows of the points table: name, longitude, latitude, and the row itself.
+function geoRows(S) {
+  const t = (S.dataTables || []).find(x => x.id === S.gmTable); if (!t) return [];
+  const H = t.header, guess = re => H.find(h => re.test(h)), lo = H.indexOf(S.gmLon || guess(/^(lon|long|longitude|decimallongitude|x)$/i) || ''), la = H.indexOf(S.gmLat || guess(/^(lat|latitude|decimallatitude|y)$/i) || '');
+  if (lo < 0 || la < 0) return [];
+  return t.rows.map(r => ({ name: String(r[0] || '').trim(), x: +String(r[lo]).replace(',', '.'), y: +String(r[la]).replace(',', '.'), row: r })).filter(p => isFinite(p.x) && isFinite(p.y) && p.name);
+}
+// What could be wrong between the points and the map: in a window, as for a damaged file.
+function geoCheck() {
+  const S = settings, rows = geoRows(S), maps = figImages.filter(m => m.geo && geoStore.has(m.geo.id)); if (!rows.length || !maps.length) return;
+  const issues = [], g = geoStore.get(maps[maps.length - 1].geo.id), [x0, y0, x1, y1] = g.bbox, mx = (x1 - x0) * 0.05, my = (y1 - y0) * 0.05;
+  const ptsDeg = rows.every(p => Math.abs(p.x) <= 180 && Math.abs(p.y) <= 90);
+  if (rows.some(p => Math.abs(p.y) > 90 && Math.abs(p.x) <= 90)) issues.push('Some latitudes are beyond ±90°: the longitude and latitude columns may be swapped.');
+  if (g.deg !== ptsDeg) issues.push(g.deg ? 'The map is in degrees, but the points look like a planar system (metres).' : 'The map is in a planar system (metres), but the points look like degrees.');
+  const inside = rows.filter(p => p.x >= x0 - mx && p.x <= x1 + mx && p.y >= y0 - my && p.y <= y1 + my).length;
+  if (inside < rows.length * 0.8) issues.push(`Only ${inside} of ${rows.length} points fall within the map.`);
+  if (issues.length) askConfirm({ title: 'The points and the map may not match', ok: 'OK', okClass: 'primary', cancel: 'Close', focusOk: true,
+    html: issues.map(esc).join('<br>') + `<br><br>The map and the points must use the same coordinate system: both in degrees (WGS84), or both in the same planar system.${g.prj ? `<br><br>The map says: <code class="dmgctx">${esc(g.prj.slice(0, 160))}</code>` : ''}` });
+}
+// Colours and sizes of the points: by clade, by highlight, by a categorical or a continuous value, by density.
+function geoValues(S, key) {   // record -> value of the variable chosen for the colour (gmColorVar) or the size (gmSizeVar)
+  const v = String(S[key] || ''), i = v.indexOf('\u001f'); if (i < 0) return null;
+  const src = v.slice(0, i), col = v.slice(i + 1);
+  if (src === 'geo') { const t = (S.dataTables || []).find(x => x.id === S.gmTable), ci = t ? t.header.indexOf(col) : -1; return ci < 0 ? null : p => p.row[ci]; }
+  if (src === 'meta') { const by = new Map(leaves(tree || { children: [] }).map(l => [normTip(l.name || ''), l.meta && l.meta[col]])); return p => by.get(normTip(p.name)); }
+  const t = (S.dataTables || []).find(x => x.id === src), ci = t ? t.header.indexOf(col) : -1; if (ci < 0) return null; const m = tableIndex(t); return p => { const r = m.get(normTip(p.name)); return r ? r[ci] : undefined; };
+}
+const geoVarOpts = S => {
+  const SEP = '\u001f', out = [['', 'None']], t = (S.dataTables || []).find(x => x.id === S.gmTable);
+  if (t) for (const c of allCols(t)) out.push(['geo' + SEP + c, `${c} (${t.name})`]);
+  for (const k of (typeof tipMetaKeys === 'function' ? tipMetaKeys() : [])) out.push(['meta' + SEP + k, `${k} (tree)`]);
+  for (const o of S.dataTables || []) if (o.id !== S.gmTable) for (const c of allCols(o)) out.push([o.id + SEP + c, `${c} (${o.name})`]);
+  return out;
+};
+let geoCache = null;
+// The map with its points, as SVG.
+function geoSvg(m) {
+  const S = geoCfg(m), k = m.geo, g = geoStore.get(k.id), W = 600;
+  if (!g) return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="200"><text x="300" y="100" text-anchor="middle" font-size="14" fill="#888">Map not found</text></svg>`;
+  const P = g.deg ? geoProjector(S.gmProj) : (x, y) => [x, y];
+  const key = k.id + ':' + (g.deg ? S.gmProj : 'plane');
+  if (!geoCache || geoCache.key !== key) {
+    const pr = rs => rs.map(r => r.map(([x, y]) => P(x, y))), parts = pr(g.parts), layers = g.layers ? g.layers.map(l => ({ role: l.role, kind: l.kind, parts: pr(l.parts) })) : null; let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const r of parts) for (const [x, y] of r) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    geoCache = { key, parts, layers, box: [x0, y0, x1, y1] };
+  }
+  let [x0, y0, x1, y1] = geoCache.box; const pad = 6;
+  if (k.area === 'points') {   // only the area around the points, with a margin
+    const Pq = g.deg ? geoProjector(S.gmProj) : (x, y) => [x, y], pts = geoRowsShown(S, geoRows(S)).map(p => Pq(p.x, p.y));
+    if (pts.length) { let a0 = Infinity, b0 = Infinity, a1 = -Infinity, b1 = -Infinity; for (const [x, y] of pts) { if (x < a0) a0 = x; if (x > a1) a1 = x; if (y < b0) b0 = y; if (y > b1) b1 = y; }
+      const mx = Math.max((a1 - a0), (b1 - b0) * 0.5, 1e-6) * (k.pad ?? 10) / 100, my = Math.max((b1 - b0), (a1 - a0) * 0.5, 1e-6) * (k.pad ?? 10) / 100; x0 = a0 - mx; x1 = a1 + mx; y0 = b0 - my; y1 = b1 + my; }
+  }
+  const H = Math.max(60, Math.round((W - 2 * pad) * (y1 - y0) / Math.max(1e-9, x1 - x0) + 2 * pad));
+  if (k.area === 'custom' && k.view) [x0, y0, x1, y1] = k.view;   // a view of its own
+  m._geoBox = [x0, y0, x1, y1];
+  const sc = (W - 2 * pad) / Math.max(1e-9, x1 - x0), X = x => pad + (x - x0) * sc, Y = y => pad + (y1 - y) * sc;
+  m.nw = W; m.nh = H;
+  const pathOf = (rs, closed) => { let d = ''; for (const r of rs) { r.forEach(([x, y], i) => { d += `${i ? 'L' : 'M'}${f2(X(x))},${f2(Y(y))}`; }); if (closed) d += 'Z'; } return d; };
+  let d = g.kind === 'point' || geoCache.layers ? '' : pathOf(geoCache.parts, g.kind === 'poly');
+  let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><clipPath id="gclip${m.id}"><rect width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#gclip${m.id})">`;
+  if (geoCache.layers) for (const L of ['land', 'countries', 'lakes', 'coast', 'rivers']) {   // Natural Earth: each layer with its own look
+    const l = geoCache.layers.find(x => x.role === L); if (!l) continue; const dd = pathOf(l.parts, l.kind === 'poly');
+    if (L === 'land' || L === 'countries') out += `<path d="${dd}" fill="${k.fill}" fill-opacity="${k.fillOp / 100}" fill-rule="evenodd" stroke="${k.line}" stroke-width="${f2(L === 'countries' ? k.lw * 0.7 : k.lw)}" stroke-linejoin="round"/>`;
+    else if (L === 'lakes') out += `<path d="${dd}" fill="${k.water || '#9CC3E0'}" stroke="none"/>`;
+    else out += `<path d="${dd}" fill="none" stroke="${L === 'rivers' ? k.water || '#9CC3E0' : k.line}" stroke-width="${f2(L === 'rivers' ? k.lw * 0.8 : k.lw)}" stroke-linejoin="round"/>`;
+  }
+  if (g.kind === 'point') out += geoCache.parts.map(r => `<circle cx="${f2(X(r[0][0]))}" cy="${f2(Y(r[0][1]))}" r="1.5" fill="${k.line}"/>`).join('');
+  else if (d) out += `<path d="${d}" fill="${g.kind === 'poly' ? k.fill : 'none'}" fill-opacity="${g.kind === 'poly' ? k.fillOp / 100 : 0}" fill-rule="evenodd" stroke="${k.line}" stroke-width="${f2(k.lw)}" stroke-linejoin="round"/>`;
+  out += '</g>';
+  // the points: one per place; records closer than the radius (in the units of the map) together, with how many there are
+  const rows = geoRowsShown(S, geoRows(S)); m._geoPts = [];
+  if (rows.length) {
+    const Pp = g.deg ? geoProjector(S.gmProj) : (x, y) => [x, y], places = new Map();
+    for (const p of rows) { const kk = p.x + ',' + p.y; let o = places.get(kk); if (!o) places.set(kk, o = { key: kk, x: p.x, y: p.y, recs: [] }); o.recs.push(p); }
+    let groups = [...places.values()];
+    if (S.gmCluster > 0) {
+      const out2 = [], used = new Set(), R2 = S.gmCluster * S.gmCluster; groups.sort((a, b) => b.recs.length - a.recs.length);
+      for (const a of groups) { if (used.has(a)) continue; const g2 = { key: a.key, x: a.x, y: a.y, recs: [...a.recs] }; used.add(a); for (const b of groups) if (!used.has(b) && (b.x - a.x) ** 2 + (b.y - a.y) ** 2 <= R2) { g2.recs.push(...b.recs); used.add(b); } out2.push(g2); }
+      groups = out2;
+    }
+    for (const gr of groups) { const [px, py] = Pp(gr.x, gr.y); gr.X = X(px); gr.Y = Y(py); }
+    const nodes = new Map(tree ? leaves(tree).map(l => [normTip(l.name || ''), l]) : []);
+    const pal = (typeof PALETTES !== 'undefined' && (PALETTES[settings.paletteName] || PALETTES.default)) || ['#2F5D8C', '#C8553D', '#4C9A6A', '#D9A21B'];
+    const named = tree ? [...nodeById.values()].filter(n => n.cladeLabel) : [];
+    const up = (name, f) => { let n = nodes.get(normTip(name)); while (n) { const r = f(n); if (r) return r; n = n.parent; } return null; };
+    const range = val => { const nums = rows.map(p => +val(p)).filter(isFinite), lo = Math.min(...nums), hi = Math.max(...nums); return v => hi > lo ? (v - lo) / (hi - lo) : 0.5; };
+    // colour of a record
+    const cv = geoValues(S, 'gmColorVar'); let colOf = () => S.gmColor;
+    if (S.gmColorBy === 'clade') colOf = p => { const c = up(p.name, n => n.cladeLabel && n); return c ? pal[named.indexOf(c) % pal.length] : '#A0A6AD'; };   // grey outside the named clades
+    else if (S.gmColorBy === 'highlight') colOf = p => up(p.name, n => n.bg) || '#A0A6AD';
+    else if (S.gmColorBy === 'cat' && cv) { const cats = [...new Set(rows.map(p => String(cv(p) ?? '')).filter(Boolean))]; colOf = p => { const v = String(cv(p) ?? ''); return v ? pal[cats.indexOf(v) % pal.length] : '#A0A6AD'; }; }
+    else if (S.gmColorBy === 'cont' && cv) { const q = range(cv), st = palStops(S.gmPal || 'viridis', ['#2C7BB6', '#D7191C'], S.gmRev, 0); colOf = p => { const v = +cv(p); return isFinite(v) ? rampOf(st, q(v)) : '#A0A6AD'; }; }
+    // size of a point: one size (growing with its records when grouped), by its records, or by a value
+    const nmax = Math.max(1, ...groups.map(gr => gr.recs.length)), byCount = gr => Math.sqrt((gr.recs.length - 1) / Math.max(1, nmax - 1));
+    let sizeOf = () => S.gmSize;
+    if (S.gmSizeBy === 'density' || (S.gmSizeBy === 'fixed' && S.gmCluster > 0)) { const lo = S.gmSizeBy === 'fixed' ? S.gmSize : S.gmSizeMin; sizeOf = gr => lo + (S.gmSizeMax - lo) * byCount(gr); }
+    else if (S.gmSizeBy === 'cont') { const sv = geoValues(S, 'gmSizeVar'); if (sv) { const q = range(sv); sizeOf = gr => { const vs = gr.recs.map(p => +sv(p)).filter(isFinite); return vs.length ? S.gmSizeMin + (S.gmSizeMax - S.gmSizeMin) * q(vs.reduce((a, b) => a + b, 0) / vs.length) : S.gmSize; }; } }
+    const own = S.gmPts || {};
+    for (const gr of groups) gr.r0 = (own[gr.key] || {}).r ?? sizeOf(gr);
+    groups.sort((a, b) => b.r0 - a.r0);   // the largest first, so they never hide the small ones
+    for (const gr of groups) {
+      const cs = new Set(gr.recs.map(colOf));
+      const o = own[gr.key] || {}, col = o.c || (cs.size > 1 ? S.gmMixColor : [...cs][0]), r = gr.r0, shp = o.sh || S.gmShape, bw = o.bw ?? S.gmBorderW, n = gr.recs.length;   // a point's own style first   // a group of several colours takes the colour set for mixed groups
+      out += shapeSvg(gr.X, gr.Y, r, shp, ` fill="${col}" fill-opacity="${f2(S.gmOp / 100)}"${bw > 0 ? ` stroke="${o.b || S.gmBorder}" stroke-width="${f2(bw)}"` : ''}`);
+      if (S.gmCluster > 0 && S.gmCount && n > 1) out += `<text x="${f2(gr.X)}" y="${f2(gr.Y)}" text-anchor="middle" dominant-baseline="central" font-size="${f2(Math.max(7, r * 0.95))}" font-weight="600" fill="#ffffff" font-family="Helvetica, Arial, sans-serif">${n}</text>`;
+      m._geoPts.push({ key: gr.key, x: gr.X, y: gr.Y, r, n, col, lon: gr.x, lat: gr.y, names: [...new Set(gr.recs.map(p => p.name))] });
+    }
+  }
+  if (k.frame) out += `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" fill="none" stroke="${k.frameColor}" stroke-width="1"/>`;   // the frame over everything
+  return out + '</svg>';
+}
+// Deep time, with the GPlates Web Service: points moved by a plate model to where they were at an age, and the
+// coastlines of that age. All or nothing: every point drawn is reconstructed, or none. Needs internet.
+const GWS = 'https://gws.gplates.org/reconstruct/';
+let paleoCache = new Map(), paleoBusy = null;   // "model:age" -> Map("lon,lat" -> [lon, lat] or null)
+async function paleoFetch(model, age, pts) {   // the reconstructed positions, a few at a time
+  const key = model + ':' + age, done = paleoCache.get(key) || new Map(), todo = pts.filter(p => !done.has(p));
+  for (let i = 0; i < todo.length; i += 100) {
+    const chunk = todo.slice(i, i + 100), r = await fetch(`${GWS}reconstruct_points/?points=${chunk.join(',')}&time=${age}&model=${model}&return_null_points`);
+    if (!r.ok) throw new Error(`GPlates answered ${r.status}`);
+    const j = await r.json(), c = j.coordinates || (j.features || []).map(f => f.geometry && f.geometry.coordinates);
+    if (!Array.isArray(c) || c.length !== chunk.length) throw new Error('GPlates did not return one position per point');
+    chunk.forEach((p, k) => done.set(p, c[k] && c[k].length >= 2 ? [+c[k][0], +c[k][1]] : null));
+  }
+  paleoCache.set(key, done); return done;
+}
+// The rows of the points with the filter of lineages and, in deep time, their reconstructed positions.
+function geoRowsShown(S, rows) {
+  if (S.gmLife !== 'all' && tree) {
+    const ext = new Map(leaves(tree).map(l => [normTip(l.name || ''), !!l.ex || autoExt.has(l.id)]));
+    rows = rows.filter(p => { const e = ext.get(normTip(p.name)); return e == null ? S.gmLife === 'living' : S.gmLife === 'fossil' ? e : !e; });
+  }
+  if (!S.gmPaleo) return rows;
+  const key = S.gmModel + ':' + S.gmAge, got = paleoCache.get(key), pts = [...new Set(rows.map(p => p.x + ',' + p.y))];
+  if (!got || pts.some(p => !got.has(p))) {
+    if (paleoBusy !== key) { paleoBusy = key; toast(`Reconstructing ${pts.length} places to ${S.gmAge} Ma with GPlates…`);
+      paleoFetch(S.gmModel, S.gmAge, pts).then(() => { paleoBusy = null; render(); })
+        .catch(e => { paleoBusy = null; settings.gmPaleo = false; buildSide(); render(); askConfirm({ title: 'GPlates could not be reached', html: esc(e.message || String(e)) + '<br><br>Reconstructing the points to a past time needs an internet connection. The points are shown at their present positions.', ok: 'OK', okClass: 'primary', cancel: 'Close', focusOk: true }); }); }
+    return [];   // nothing until every point is reconstructed
+  }
+  return rows.map(p => { const q = got.get(p.x + ',' + p.y); return q ? { ...p, x: q[0], y: q[1], x0: p.x, y0: p.y } : null; }).filter(Boolean);
+}
+async function addPaleoCoast() {
+  const S = { gmAge: settings.gpAge, gmModel: settings.gpModel }; toast(`Downloading the coastlines of ${S.gmAge} Ma from GPlates…`);
+  try {
+    const r = await fetch(`${GWS}coastlines/?time=${S.gmAge}&model=${S.gmModel}`); if (!r.ok) throw new Error(`GPlates answered ${r.status}`);
+    const pp = geoJsonParts(await r.json()), poly = pp.poly.length > 0, name = `Coastlines ${S.gmAge} Ma, ${(GEO_MODELS.find(m => m[0] === S.gmModel) || [0, S.gmModel])[1]}`;
+    const id = 'g' + Date.now().toString(36); geoStore.set(id, { name, kind: poly ? 'poly' : 'line', parts: poly ? pp.poly : pp.line, prj: `WGS84, reconstructed to ${S.gmAge} Ma (${S.gmModel})`, bbox: [-180, -90, 180, 90], deg: true, paleo: { age: S.gmAge, model: S.gmModel } }); geoSave();
+    geoAddImage(id, name, { gmPaleo: true, gmAge: S.gmAge, gmModel: S.gmModel });   // its points go to the same age and model
+  } catch (e) { askConfirm({ title: 'GPlates could not be reached', html: esc(e.message || String(e)) + '<br><br>This needs an internet connection. A map already downloaded stays in the app and works offline.', ok: 'OK', okClass: 'primary', cancel: 'Close', focusOk: true }); }
+}
+// Lines from each tip to its points on the maps (to every point holding one of its records), in figure coordinates.
+function geoLinesSvg() {
+  const res = { under: '', over: '' }; if (!tree) return res;
+  const tips = new Map(leaves(tree).filter(l => !l._hidden).map(l => [normTip(l.name || ''), l]));
+  for (const m of figImages) {
+    if (!m.geo || !m._geoPts || !m._geoPts.length) continue;
+    const S = geoCfg(m); if (!S.gmLines) continue;   // lines for this map or not
+    const byCol = new Map(), overCol = new Map(), box = [m.x, m.y, m.x + m.w, m.y + m.h], dash = S.gmLineStyle === 'dashed' ? ` stroke-dasharray="${f2(S.gmLineW * 4)} ${f2(S.gmLineW * 3)}"` : S.gmLineStyle === 'dotted' ? ` stroke-dasharray="${f2(S.gmLineW)} ${f2(S.gmLineW * 2.5)}" stroke-linecap="round"` : '';
+    const sx = m.w / m.nw, sy = m.h / m.nh, cx = m.x + m.w / 2, cy = m.y + m.h / 2, A = (m.rot || 0) * Math.PI / 180, c = Math.cos(A), sn = Math.sin(A);
+    const at = q => { const x = m.x + q.x * sx - cx, y = m.y + q.y * sy - cy; return [cx + x * c - y * sn, cy + x * sn + y * c]; };   // the point, turned with its map
+    for (const q of m._geoPts) for (const nm of q.names) {
+      const n = tips.get(normTip(nm)); if (!n || n._px == null) continue;
+      const [tx, ty] = S.gmLineFrom === 'label' && n._lx != null ? nodeFigPt({ _px: n._lx + (n._lw || 0) + 2, _py: n._ly }) : nodeFigPt(n), [px, py] = at(q);
+      const col = S.gmLineColorBy === 'point' ? q.col : S.gmLineColor;
+      // where the line enters the map: the part before goes under the names, the part on the map over everything
+      let t0 = 0; const dx = px - tx, dy = py - ty;
+      for (const [a, da, lo, hi] of [[tx, dx, box[0], box[2]], [ty, dy, box[1], box[3]]]) { if (Math.abs(da) < 1e-9) { if (a < lo || a > hi) t0 = 1; continue; } const u = (lo - a) / da, v = (hi - a) / da; t0 = Math.max(t0, Math.min(u, v)); }
+      t0 = m.layer === 'front' ? clamp(t0, 0, 1) : 1; const ex = tx + dx * t0, ey = ty + dy * t0;   // only a map in front needs its part of the line over it; behind the tree, one stroke is enough
+      if (t0 > 0) byCol.set(col, (byCol.get(col) || '') + `M${f2(tx)},${f2(ty)}L${f2(t0 < 1 ? ex : px)},${f2(t0 < 1 ? ey : py)}`);
+      if (t0 < 1) overCol.set(col, (overCol.get(col) || '') + `M${f2(ex)},${f2(ey)}L${f2(px)},${f2(py)}`);
+    }
+    const draw = mp => [...mp].map(([col, d]) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${f2(S.gmLineW)}" stroke-opacity="${f2(S.gmLineOp / 100)}"${dash}/>`).join('');
+    res.under += draw(byCol); res.over += draw(overCol);
+  }
+  return res;
+}
+// The legend of the points: their categories, named clades, or the gradient of their value.
+function gmLegend(S) {
+  if (!S.gmLegend || !figImages.some(m => m.geo)) return null;
+  const rows = geoRows(S); if (!rows.length) return null;
+  const pal = (typeof PALETTES !== 'undefined' && (PALETTES[S.paletteName] || PALETTES.default)) || ['#2F5D8C', '#C8553D', '#4C9A6A', '#D9A21B'];
+  const sym = fill => ({ t: 'circle', r: 5, fill }), title = S.gmLegendTitle || '';
+  if (S.gmColorBy === 'clade' && tree) { const named = [...nodeById.values()].filter(n => n.cladeLabel); return named.length ? { key: 'geo', title, entries: named.map((n, i) => ({ text: n.cladeLabel, sym: sym(pal[i % pal.length]) })) } : null; }
+  const cv = geoValues(S, 'gmColorVar'); if (!cv) return null;
+  if (S.gmColorBy === 'cat') { const cats = [...new Set(rows.map(p => String(cv(p) ?? '')).filter(Boolean))]; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], entries: cats.map((c, i) => ({ text: c, sym: sym(pal[i % pal.length]) })) }; }
+  if (S.gmColorBy === 'cont') { const nums = rows.map(p => +cv(p)).filter(isFinite); if (!nums.length) return null; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], gradient: { stops: palStops(S.gmPal || 'viridis', ['#2C7BB6', '#D7191C'], S.gmRev, 0), lo: Math.min(...nums), hi: Math.max(...nums) } }; }
+  return null;
+}
+// Natural Earth, from its GeoJSON files on GitHub (they allow being read from any page). Needs internet once:
+// the map is then kept in the app, and in projects saved with their attached files.
+const NE_URL = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/';
+const NE_LAYERS = [['land', 'Land', 'land'], ['countries', 'Countries', 'admin_0_countries'], ['coast', 'Coastlines', 'coastline']];
+function geoJsonParts(gj) {   // polygons as rings, lines as lines
+  const out = { poly: [], line: [] };
+  for (const f of gj.features || []) { const g = f.geometry; if (!g) continue;
+    if (g.type === 'Polygon') out.poly.push(...g.coordinates); else if (g.type === 'MultiPolygon') for (const p of g.coordinates) out.poly.push(...p);
+    else if (g.type === 'LineString') out.line.push(g.coordinates); else if (g.type === 'MultiLineString') out.line.push(...g.coordinates); }
+  return out;
+}
+async function addNaturalEarth(res, roles) {
+  if (!roles.length) return toast('Choose at least one layer');
+  toast(`Downloading ${roles.length} ${roles.length === 1 ? 'layer' : 'layers'} from Natural Earth…`);
+  try {
+    const layers = [];
+    for (const role of roles) {
+      const L = NE_LAYERS.find(l => l[0] === role), r = await fetch(`${NE_URL}ne_${res}_${L[2]}.geojson`);
+      if (!r.ok) throw new Error(`Natural Earth answered ${r.status} for ${L[1].toLowerCase()}`);
+      const pp = geoJsonParts(await r.json()); let parts = role === 'coast' || role === 'rivers' ? pp.line : pp.poly;
+      if (res === '10m') parts = parts.map(q => simplifyRing(q, 0.02));
+      layers.push({ role, kind: role === 'coast' || role === 'rivers' ? 'line' : 'poly', parts });
+    }
+    const all = layers.flatMap(l => l.parts), name = `Natural Earth ${res.replace('m', ' m')}: ${roles.map(r => NE_LAYERS.find(l => l[0] === r)[1].toLowerCase()).join(', ')}`;
+    const id = 'g' + Date.now().toString(36); geoStore.set(id, { name, kind: 'poly', parts: all, layers, prj: 'WGS84 (Natural Earth)', bbox: [-180, -90, 180, 90], deg: true }); geoSave();
+    geoAddImage(id, name);
+  } catch (e) { askConfirm({ title: 'Natural Earth could not be reached', html: esc(e.message || String(e)) + '<br><br>This needs an internet connection. A map already downloaded stays in the app and works offline.', ok: 'OK', okClass: 'primary', cancel: 'Close', focusOk: true }); }
+}
+// Each map keeps its own settings (points, projection, styles, lines, grouping, deep time); the geo* keys of the
+// panel are those of the map chosen in Map, read when it is chosen and written back as they change.
+const geoKeys = () => Object.keys(DEFAULTS).filter(k => k.startsWith('gm') && k !== 'gmMap');   // the settings of a map (gm…); the geological time scale keeps its own geo… settings
+let geoLastMap = null;
+function geoSyncCfg() {
+  const maps = figImages.filter(m => m.geo); if (!maps.length) { geoLastMap = null; settings.gmMap = ''; return; }
+  let m = maps.find(x => String(x.id) === String(settings.gmMap)); if (!m) { m = maps[maps.length - 1]; settings.gmMap = String(m.id); }
+  const keys = geoKeys(); if (!m.geo.cfg) m.geo.cfg = Object.fromEntries(keys.map(k => [k, settings[k]]));   // a map from before: the settings it was shown with
+  if (geoLastMap !== String(m.id)) {
+    const prev = maps.find(x => String(x.id) === geoLastMap); if (prev && prev.geo.cfg) for (const k of keys) prev.geo.cfg[k] = settings[k];   // the map left keeps its last changes
+    for (const k of keys) settings[k] = JSON.parse(JSON.stringify(m.geo.cfg[k] ?? DEFAULTS[k])); geoLastMap = String(m.id); setTimeout(() => buildSide()); }
+  else for (const k of keys) m.geo.cfg[k] = settings[k];
+}
+const geoCfg = m => ({ ...settings, ...(m.geo.cfg || {}) });   // the settings a map is drawn with
+const geoTitle = m => m.geo.title || 'Map';
+// The scale of a map as 1:X: ground metres per metre of the figure at its size (96 px per inch), at its centre.
+// Projected units: degrees (Equirectangular), radians of the sphere (the others), metres (planar maps).
+const geoUnitM = m => { const g = geoStore.get(m.geo.id), C = geoCfg(m); return !g || !g.deg ? 1 : C.gmProj === 'equirect' ? 111319.49 : 6371008.8; };
+function geoScaleOf(m) { const b = m._geoBox; if (!b || !m.w) return 0; const unitsPerPx = (b[2] - b[0]) / (m.w * 584 / 600); return unitsPerPx * geoUnitM(m) / (0.0254 / 96); }
+function geoSetScale(m, X) {
+  X = +X; if (!(X > 0) || !m._geoBox) return; const b = m._geoBox, cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, asp = (b[3] - b[1]) / Math.max(1e-12, b[2] - b[0]);
+  const w = X * (0.0254 / 96) * (m.w * 584 / 600) / geoUnitM(m), h = w * asp;
+  if (tree) pushUndo(); m.geo.area = 'custom'; m.geo.view = [cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2]; imgChanged();
+}
+// Ctrl + drag moves the view of the selected map inside its frame, and Ctrl + scroll zooms it, as in a GIS.
+const geoFigXY = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left - view.tx) / view.k, (e.clientY - r.top - view.ty) / view.k]; };
+const geoMapAt = e => { const t = e.target.closest && e.target.closest('[data-img], [data-geopt]'); if (!t) return null; const id = t.dataset.img || (t.dataset.geopt || '').split(':')[0]; const m = figImages.find(x => String(x.id) === String(id)); return m && m.geo && selImg === m.id && m._geoBox ? m : null; };
+const geoStartView = m => { if (m.geo.area !== 'custom' || !m.geo.view) { m.geo.view = [...m._geoBox]; m.geo.area = 'custom'; } return m.geo.view; };
+window.addEventListener('pointerdown', e => {   // on the window, before the canvas handles Ctrl-clicks
+  if (!e.ctrlKey || e.button !== 0 || !svg.contains(e.target)) return; const m = geoMapAt(e); if (!m) return;
+  e.preventDefault(); e.stopImmediatePropagation(); if (tree) pushUndo();
+  const v0 = [...geoStartView(m)], [sx, sy] = geoFigXY(e), u = (v0[2] - v0[0]) / (m.w * 584 / 600); let raf = 0;
+  const move = ev => { const [fx, fy] = geoFigXY(ev), dx = (fx - sx) * u, dy = (fy - sy) * u; m.geo.view = [v0[0] - dx, v0[1] + dy, v0[2] - dx, v0[3] + dy]; if (!raf) raf = requestAnimationFrame(() => { raf = 0; imgChanged(); }); };
+  const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); imgChanged(); persist(); };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+}, true);
+let geoWheelT = 0;
+svg.addEventListener('wheel', e => {
+  if (!e.ctrlKey) return; const m = geoMapAt(e); if (!m) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if (Date.now() - geoWheelT > 600 && tree) pushUndo(); geoWheelT = Date.now();
+  const v = geoStartView(m), [fx, fy] = geoFigXY(e), px = v[0] + (fx - m.x) / m.w * (v[2] - v[0]), py = v[3] - (fy - m.y) / m.h * (v[3] - v[1]), f = Math.pow(1.0015, e.deltaY);
+  m.geo.view = [px - (px - v[0]) * f, py - (py - v[1]) * f, px + (v[2] - px) * f, py + (v[3] - py) * f]; imgChanged();
+}, { capture: true, passive: false });
+// A map as an image of the figure, numbered, with settings of its own (fresh ones, or the age and model of its coastlines).
+function geoAddImage(id, name, extra) {
+  const sid = 's' + (++imgUid) + 'g'; imgStore.set(sid, '');
+  const w = 420, cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k;
+  if (tree) pushUndo();
+  const n = Math.max(0, ...figImages.filter(x => x.geo).map(x => +(String(x.geo.title || '').match(/^Map (\d+)$/) || [0, 0])[1])) + 1;
+  const cfg = Object.fromEntries(geoKeys().map(k => [k, JSON.parse(JSON.stringify(DEFAULTS[k]))])); Object.assign(cfg, extra || {});
+  const m = { id: ++imgUid, sid, name: 'Map: ' + name, x: cx - w / 2, y: cy - w / 3, w, h: w * 0.6, nw: 600, nh: 360, op: 1, rot: 0, layer: 'back', geo: { id, title: 'Map ' + n, line: '#6E6E6E', lw: 0.6, fill: '#ECE8DD', fillOp: 100, frame: false, frameColor: '#888888', area: 'all', pad: 10, cfg } };   // at the back: lines to its points stay in view
+  settings.gmMap = String(m.id);
+  figImages.push(m); selImg = m.id; refreshKdes(); m.h = m.w * m.nh / m.nw;
+  imgChanged(`Map added: ${name}`); geoCheck();
+}
+function geoBox() {
+  const d = document.createElement('div'); d.className = 'treetools geobox';
+  const fill = () => {
+    const S = settings, onFig = id => figImages.filter(m => m.geo && m.geo.id === id);
+    d.innerHTML = `
+      <div class="tabitem"><div class="thead"><span class="tname">Your own map</span></div>
+        <div class="btns"><button type="button" class="btn small" id="geoBtn">Map from a shapefile…</button></div><input type="file" id="geoIn" accept=".shp,.zip" hidden>
+        <span class="tmeta">A .shp file, or a .zip with its .shp, .dbf and .prj. The map and its points must use the same coordinate system: both in degrees (WGS84), or both in the same planar system.</span></div>
+      <div class="tabitem"><div class="thead"><span class="tname">Natural Earth</span></div>
+        <div class="row sub"><label>Resolution</label><select id="neRes">${[['110m', '1:110 million (light)'], ['50m', '1:50 million'], ['10m', '1:10 million (detailed, heavy)']].map(([v, l]) => `<option value="${v}" ${S.neRes === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+        <div class="nelayers" role="radiogroup" aria-label="Layer">${NE_LAYERS.map(([k, lab]) => `<label class="opt"><input type="radio" name="neLayer" value="${k}" ${(S.neLayers || [])[0] === k ? 'checked' : ''}> ${lab}</label>`).join('')}</div>
+        <div class="btns"><button type="button" class="btn small" id="neBtn">Load from Natural Earth</button></div>
+        <span class="tmeta">Needs internet once: the map is then kept in the app, and in projects saved with their attached files.</span></div>
+      <div class="tabitem"><div class="thead"><span class="tname">Coastlines of the past (GPlates)</span></div>
+        <div class="row sub"><label>Age</label><span class="numwrap"><input class="num boxed" type="number" id="gpAge" min="0" max="1000" step="1" value="${S.gpAge}"><span class="unit">Ma</span></span></div>
+        <div class="row sub"><label>Plate model</label><select id="gpModel">${GEO_MODELS.map(([v, l]) => `<option value="${v}" ${S.gpModel === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+        <div class="btns"><button type="button" class="btn small" id="gpBtn">Load the coastlines</button></div>
+        <span class="tmeta">Needs internet. The points of this map are reconstructed to the same age and model.</span></div>
+      ${geoStore.size ? '<b class="geohead">Maps loaded</b>' : ''}
+      ${[...geoStore].map(([id, g]) => { const f = onFig(id); return `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(g.name)}">${esc(g.name)}</span><button type="button" class="btn small danger" data-georm="${id}">Remove</button></div>
+        <span class="tmeta">${g.parts.length} shapes (${g.deg ? 'in degrees' : 'in planar units'})</span>
+        <div class="btns"><button type="button" class="btn small" data-geoshow="${id}">${f.length ? 'Add it again as a new map' : 'Show it on the figure'}</button></div></div>`; }).join('')}`;
+    const keep = () => { settings.neRes = d.querySelector('#neRes').value; settings.neLayers = [...d.querySelectorAll('.nelayers input:checked')].map(i => i.value).slice(0, 1); settings.gpAge = Math.max(0, +d.querySelector('#gpAge').value || 0); settings.gpModel = d.querySelector('#gpModel').value; persist(); };
+    d.querySelectorAll('#neRes, .nelayers input, #gpAge, #gpModel').forEach(el => el.addEventListener('change', keep));   // the choices are remembered
+    d.querySelector('#geoBtn').onclick = () => d.querySelector('#geoIn').click();
+    d.querySelector('#geoIn').onchange = e => { const f = e.target.files[0]; if (f) addGeoFile(f).then(fill); e.target.value = ''; };
+    d.querySelector('#neBtn').onclick = () => { keep(); addNaturalEarth(settings.neRes, settings.neLayers).then(fill); };
+    d.querySelector('#gpBtn').onclick = () => { keep(); addPaleoCoast().then(fill); };
+    d.querySelectorAll('[data-geoshow]').forEach(b => b.onclick = () => { const g = geoStore.get(b.dataset.geoshow); geoAddImage(b.dataset.geoshow, g.name, g.paleo ? { gmPaleo: true, gmAge: g.paleo.age, gmModel: g.paleo.model } : null); fill(); });
+    d.querySelectorAll('[data-georm]').forEach(b => b.onclick = () => { const id = b.dataset.georm; geoStore.delete(id); geoSave(); figImages = figImages.filter(m => !(m.geo && m.geo.id === id)); geoCache = null; imgChanged('Map removed'); buildSide(); });
   };
   d._refresh = fill; setTimeout(fill); return d;
 }
