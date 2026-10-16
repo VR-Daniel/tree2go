@@ -1,6 +1,6 @@
 # tree2go options reference guide
 
-Every option of the left panel, section by section, in the same order as in the app. Many options only appear once something they depend on is turned on: the column **Appears when** says what. Options can also be set for single elements from their `Right-click` menu (see [Right-click menus](#right-click-menus)). Sections and their subsections (marked ›) fold: subsections start closed, and the open ones are remembered while their section is closed. `Collapse` closes everything, and `Expand` opens the sections and keeps their subsections as they were.
+Every option of the left panel, section by section, in the same order as in the app. Many options only appear once something they depend on is turned on: the column **Appears when** says what. Options can also be set for single elements from their `Right-click` menu (see [Right-click menus](#right-click-menus)). Sections and their subsections (marked ›) fold: subsections start closed, and the open ones are remembered while their section is closed. `Collapse` closes everything, and `Expand` opens the sections and keeps their subsections as they were. Until a tree is open, every section but Tree and Attachments is greyed out.
 
 ## Contents
 
@@ -32,6 +32,8 @@ Every option of the left panel, section by section, in the same order as in the 
 ## Tree
 
 Load or paste a tree (Newick and NEXUS are recognized from their content, whatever the file extension). A file with many trees (for example a BEAST or MrBayes posterior) opens as a tree set. When the annotations of a file were rewritten by another program in a way that breaks them, tree2go says where and offers to load it with the keys repaired: it matches the braces and rebuilds the names of the keys. Values that were removed from the file, such as rates, cannot be recovered.
+
+A file with more than 10,000 trees opens a window before reading them: a burn-in, and how many trees to keep after it (a number or a percentage, evenly spaced or at random with a seed), so only the trees kept are read. A sample of 10,000 trees is more than enough for summary trees. If more trees are asked than are left after the burn-in, the window says so and does not load them. The trees can also all be read, and closing the window (×, a click outside, or Esc) loads nothing. The Tree set part then says, in a red box, how the trees were resampled, from how many, and with which burn-in, so that another burn-in is not applied by mistake. Clock trees of MrBayes carry their branch lengths in substitutions per site, with the clock rate of each tree in its header ([&clockrate = …]): each tree is divided by its own clock rate, so the ages of the summary trees are in time units, as in the consensus of MrBayes.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -467,6 +469,7 @@ An axis of ages for dated trees, with the geologic time scale, guide lines and s
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Show time axis (dated trees)`¹ | Adds an axis of ages under the tree. | On<br>Off | Off | `Use branch lengths` turned **On** |
+| `Position` | Below or above the tree, with its ticks and ages outwards. On vertical trees, Bottom is on the right and Top on the left. With the geologic time scale, the axis goes with its boxes instead. | Bottom<br>Top | Bottom | `Show time axis (dated trees)` is **On**, rectangular trees, no geologic time scale |
 
 ¹ Needs branch lengths in time units.  
 
@@ -520,6 +523,9 @@ Boundaries follow the GSA Geologic Time Scale v. 6.0.
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Show geologic boxes with official colors` | Adds the geologic time scale under the axis, with the colors of the International Commission on Stratigraphy. | On<br>Off | Off | `Show time axis (dated trees)` is **On** |
+| `Position` | Below or above the tree. The boxes take their axis (line, ticks, ages and title) with them, and a second axis can go on the other side. | Bottom<br>Top | Bottom | The geologic time scale is shown, rectangular trees |
+| `Ticks and ages with the boxes` | Off leaves the colored boxes alone, without the line, ticks, ages and title of the axis. | On<br>Off | On | The geologic time scale is shown |
+| `Axis title with the boxes` | Off takes the title of the axis away while the boxes are shown. | On<br>Off | On | The geologic time scale is shown, `Ticks and ages with the boxes` is **On** |
 | `Eras`<br>`Periods`<br>`Epochs`<br>`Ages (stages)` | Rows of the time scale to show. | On<br>Off | Off | `Show time axis (dated trees)` is **On**, `Show geologic boxes with official colors` is **On** |
 | `Row height` |  | 4 to 40 px | 14 px | `Show time axis (dated trees)` is **On**, `Show geologic boxes with official colors` is **On** |
 | `Show names that fit` | Writes the name of each unit when there is room. | On<br>Off | On | `Show time axis (dated trees)` is **On**, `Show geologic boxes with official colors` is **On** |
@@ -532,6 +538,20 @@ Boundaries follow the GSA Geologic Time Scale v. 6.0.
 | `Extend the background and guide lines down to the axis` | The shading and guides reach the axis instead of stopping at the tree. | On<br>Off | Off | **Rectangular** layout, `Show time axis (dated trees)` is **On**, `Tree background` is not **None**, `Guide lines at each label` is **On** |
 
 ¹ **Colors** uses the official colors of the intervals, while **Stripes** alternates light gray bands.  
+
+### › Second axis
+
+A plain second axis with the same ages and ticks of its own, for example every 10 above an axis every 50, on either side of the tree: it starts on the side opposite the axis already there. It stacks beyond whatever is already on its side. The grid follows the main axis.
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Show a second axis` |  | On<br>Off | Off | `Show time axis (dated trees)` is **On**, rectangular trees |
+| `Position` |  | Bottom<br>Top | Top | `Show a second axis` is **On** |
+| `Every (0 for automatic)` | The interval between its ages. | 0 and up | 0 | `Show a second axis` is **On** |
+| `Minor ticks between` |  | 0 to 9 | 0 | `Show a second axis` is **On** |
+| `Decimals (−1 for automatic)` |  | −1 to 6 | −1 | `Show a second axis` is **On** |
+| `Title` |  | Text |  | `Show a second axis` is **On** |
+| `Distance from the previous element` | Space between the second axis and what is already on its side. | 0 to 200 px | 8 px | `Show a second axis` is **On** |
 
 ## Ancestral reconstructions
 
@@ -895,6 +915,7 @@ Save the figure, the tree or a style template.
 | `Width`<br>`Height` | Final size of the figure, changing one keeps the proportions. |  | Natural size |  |
 | `Save Newick` | The tree as it is now: names, rooting, order. |  |  |  |
 | `Save NEXUS` | Same tree, with branch colors for FigTree and its annotations. |  |  |  |
+| `Save the trees (Newick)` and `Save the trees (NEXUS)` | The trees of the sample after the burn-in (and as resampled when read): one tree per line in Newick, or as NEXUS with a note on where they come from. Also in `Export`, Trees of the sample. |  |  | A file with several trees is open |
 | `Save style…` | Saves the look of the figure, without its tree or data. |  |  |  |
 | `Apply a style…` | Gives a saved look to the current tree. |  |  |  |
 | `Reset visual settings` | Back to the default look (names, lengths, collapsed clades, clade names, fossils and tables are kept). |  |  |  |
@@ -907,7 +928,7 @@ Save the figure, the tree or a style template.
 |---|---|
 | Empty part of the canvas | Tree statistics: tips and nodes, polytomies, rooting, reticulations, branch lengths, ages, fossils and sampled ancestors, tree shape (cherries¹, Colless² and Sackin³ indices, γ⁴), support values and the tree set it comes from |
 | Branch | Color, width, line style, branch length label, grafting a fossil, reroot here, extract clade, make a page, copy Newick, delete |
-| Clade | Clade color, highlight background (opacity, start at root, stem or crown, end, gradient, corners), collapse, make a polytomy of the whole clade (and undo it), rotate, ladderize, height and fill when collapsed, clade name bar |
+| Clade | Clade color, highlight background (opacity, start at root, stem or crown, end, gradient, corners), collapse, make a polytomy of the whole clade (and undo it), rotate its children (the order of the children of this node), rotate the clade (turned over on its own axis, the order reversed at every node inside it), ladderize, height and fill when collapsed, clade name bar |
 | Tip label | Font size, color, style, weight, open nomenclature qualifiers (cf., aff., sp.), extinct tip |
 | Node | Dot size, shape, fill, color and border, support label, other node labels, node bars, make a polytomy of its children (and undo it) |
 | Grafted fossil | Ages, split the lineage, add fossils to a split, delete |
