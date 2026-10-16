@@ -425,7 +425,8 @@ body.hastabs .status{top:50px}
 .row > span:empty{display:none}
 .row > .ovr{grid-column:1 / -1; margin-top:6px; display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; font-size:12px; color:var(--muted); background:var(--panel2); border-radius:6px; padding:5px 8px}
 .row > .ovr[hidden]{display:none}
-.row > .ovr .linkbtn{font-size:12px}
+.row > .ovr .linkbtn{font-size:12px} .row > .ovr .ovrp{white-space:nowrap}
+.row > .ovr:not([hidden]){display:block}   /* one line of text, the link inside its parentheses */ .row > .ovr .ovrp .linkbtn{padding:0 1px}
 .row:not(:has(> label)) > .seg{grid-row:1; grid-column:1 / -1}
 .row:not(:has(> label)) > .rst{display:none}
 .row.check{grid-template-columns:auto minmax(0,1fr) auto}
@@ -478,6 +479,14 @@ body.hastabs .status{top:50px}
 .freelock rect{fill:#fff}
 .freelock path{fill:none; stroke:#fff; stroke-width:1.6; stroke-linecap:round}
 .freeitem.unlocked .freelock circle{fill:var(--mustard)}
+details.needtree > :not(summary){opacity:.45; pointer-events:none; user-select:none}
+.hint.warn{color:#B4412B}
+#confirmModal .box{position:relative} #confirmModal .box > .close{position:absolute; top:10px; right:10px; width:28px; height:28px; border:0; border-radius:6px; background:none; color:var(--muted, #667); font-size:20px; line-height:1; cursor:pointer} #confirmModal .box > .close:hover{background:rgba(0,0,0,.06); color:var(--ink)}
+.rsmsg{margin:14px 0 16px; line-height:1.45}
+.rsnote{margin:8px 0; padding:8px 10px; border-radius:8px; font-size:12.5px; line-height:1.45; color:var(--ink); background:rgba(200,85,61,.09); border:1px solid rgba(200,85,61,.32)}
+.rsform{display:grid; grid-template-columns:auto 1fr; gap:10px 12px; align-items:center; margin-top:12px} .rsform label{display:contents} .rsform label > :not(span:first-child){justify-self:start}
+.rsform .ctl{display:flex; align-items:center; gap:8px; flex-wrap:wrap} .rsform .num.boxed{width:90px; height:32px}
+.rsform select{height:32px; padding:0 8px; border:1px solid var(--line-strong, #c9ced6); border-radius:8px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px}
 .geobox .tabitem{display:flex; flex-direction:column; gap:8px} .geobox .tabitem .btns{margin:0} .geobox .row.sub{margin:0}
 .nelayers{display:flex; flex-wrap:wrap; gap:6px 16px} .geohead{display:block; font-size:13.5px; margin:6px 0 -2px}
 .layerlist{display:flex; flex-direction:column; gap:6px; margin:6px 0 4px}
@@ -592,6 +601,8 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
           <button type="button" role="menuitem" data-fmt="tif">TIFF<span>Image</span></button>
           <button type="button" role="menuitem" data-fmt="nwk">Newick<span>Tree</span></button>
           <button type="button" role="menuitem" data-fmt="nex">NEXUS<span>Tree</span></button>
+          <button type="button" role="menuitem" data-fmt="setn">Newick<span>Trees of the sample</span></button>
+          <button type="button" role="menuitem" data-fmt="set">NEXUS<span>Trees of the sample</span></button>
           <div class="expsize expsep">
             <div class="exprow" id="expSplitRow" hidden><span>Pages</span><span class="useg" role="group" aria-label="Export the pages"><button type="button" data-split="1">Split</button><button type="button" data-split="0">Whole</button></span></div>
             <div class="exprow"><label for="dpiTop">Resolution</label><span class="numwrap"><input class="num boxed" type="number" id="dpiTop" min="36" max="2400" step="1" list="dpiListG"><span>dpi</span></span></div>
@@ -1238,7 +1249,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', gmProj: 'equalearth', gmTable: '', gmLon: '', gmLat: '', gmShape: 'circle', gmSizeBy: 'fixed', gmSize: 3.5, gmSizeMin: 2.5, gmSizeMax: 12, gmColorBy: 'single', gmColor: '#C8553D', gmColorVar: '', gmSizeVar: '', gmPts: {}, gmPal: 'viridis', gmRev: false, gmOp: 85, gmBorder: '#ffffff', gmBorderW: 0.6, gmCluster: 0, gmCount: true, gmMixColor: '#9AA0A6', gmLines: false, gmLineFrom: 'tip', gmLineColor: '#8A8F98', gmLineW: 0.6, gmLineOp: 70, gmLineStyle: 'solid', gmLegend: true, gmLegendTitle: '', gmLineColorBy: 'single', gmLife: 'all', gmPaleo: false, gmAge: 50, gmModel: 'PALEOMAP', gmMap: '', neRes: '110m', neLayers: ['land'], gpAge: 50, gpModel: 'PALEOMAP', brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', gmProj: 'equalearth', gmTable: '', gmLon: '', gmLat: '', gmShape: 'circle', gmSizeBy: 'fixed', gmSize: 3.5, gmSizeMin: 2.5, gmSizeMax: 12, gmColorBy: 'single', gmColor: '#C8553D', gmColorVar: '', gmSizeVar: '', gmPts: {}, gmPal: 'viridis', gmRev: false, gmOp: 85, gmBorder: '#ffffff', gmBorderW: 0.6, gmCluster: 0, gmCount: true, gmMixColor: '#9AA0A6', gmLines: false, gmLineFrom: 'tip', gmLineColor: '#8A8F98', gmLineW: 0.6, gmLineOp: 70, gmLineStyle: 'solid', gmLegend: true, gmLegendTitle: '', gmLineColorBy: 'single', gmLife: 'all', gmPaleo: false, gmAge: 50, gmModel: 'PALEOMAP', gmMap: '', neRes: '110m', neLayers: ['land'], gpAge: 50, gpModel: 'PALEOMAP', axisShow: true, axisPos: 'bottom', geoPos: 'bottom', ax2On: false, ax2Pos: 'top', ax2Interval: 0, ax2Minor: 0, ax2Decimals: -1, ax2Title: '', ax2Gap: 8, geoTitle: true, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 // Default settings merged with saved ones, with the migrations that keep older sessions and projects working.
@@ -1644,6 +1655,9 @@ const SECTIONS_RAW = [
   { title: 'Time axis', items: [
     { k: 'axisOn', type: 'check', label: 'Show time axis (dated trees)' },
     { type: 'hint', text: s => !hasLengths(tree || { children: [] }) || !s.useLengths ? 'Needs branch lengths in time units and "Use branch lengths" turned on.' : s.layout === 'unrooted' ? 'Not available for unrooted trees.' : 'Ages increase from the youngest tip toward the root (the axis replaces the scale bar).' },
+    { k: 'axisPos', type: 'seg', label: 'Position', opts: [['bottom', 'Bottom'], ['top', 'Top']], enable: s => s.axisOn && !s.geoOn && s.layout === 'rect', sub: true },
+    { type: 'hint', text: s => s.axisOn && s.geoOn ? 'With the geologic time scale, the axis goes with its boxes: set its position there.' : '' },
+    { type: 'hint', text: s => s.axisOn && s.layout === 'rect' && (s.rectOrient === 'vertical' || s.rectOrient === 'custom') ? 'On vertical trees, Bottom is on the right and Top on the left.' : '' },
     { type: 'head', label: 'Ages' },
     { k: 'axisOffset', type: 'number', label: 'Age of the youngest tip', min: -1e6, max: 1e6, step: 1, enable: s => s.axisOn, sub: true },
     { type: 'hint', text: () => 'Change it when the youngest tip is not from the present, as in a fossil-only tree. All tips then count as extinct.' },
@@ -1678,6 +1692,9 @@ const SECTIONS_RAW = [
     { type: 'head', label: 'Geologic time scale' },
     { type: 'hint', text: () => 'Boundaries follow the GSA Geologic Time Scale v. 6.0.' },
     { k: 'geoOn', type: 'check', label: 'Show geologic boxes with official colors', enable: s => s.axisOn, sub: true },
+    { k: 'geoPos', type: 'seg', label: 'Position', opts: [['bottom', 'Bottom'], ['top', 'Top']], enable: s => s.axisOn && s.geoOn && s.layout === 'rect', sub: true },
+    { k: 'axisShow', type: 'check', label: 'Ticks and ages with the boxes', enable: s => s.axisOn && s.geoOn, sub: true },
+    { k: 'geoTitle', type: 'check', label: 'Axis title with the boxes', enable: s => s.axisOn && s.geoOn && s.axisShow !== false, sub: true },
     { k: 'geoEra', type: 'check', label: 'Eras', enable: s => s.axisOn && s.geoOn, sub: true },
     { k: 'geoPeriod', type: 'check', label: 'Periods', enable: s => s.axisOn && s.geoOn, sub: true },
     { k: 'geoEpoch', type: 'check', label: 'Epochs', enable: s => s.axisOn && s.geoOn, sub: true },
@@ -1692,7 +1709,16 @@ const SECTIONS_RAW = [
     { k: 'geoBgLevel', type: 'seg', label: 'Background intervals', opts: [...GEO_LEVELS, ['ticks', 'Ticks']], enable: s => s.axisOn && s.geoBg !== 'none', sub: true },
     { type: 'hint', text: s => s.geoBgLevel === 'ticks' && s.geoBg !== 'none' ? 'Ticks shades the spaces between the ticks of the axis, for example your own ages.' : '' },
     { k: 'geoBgOpacity', type: 'range', label: 'Background opacity', min: 0.05, max: 1, step: 0.05, hmin: 0, hmax: 1, enable: s => s.axisOn && s.geoBg !== 'none', sub: true },
-    { k: 'geoBgToAxis', type: 'check', label: 'Extend the background and guide lines down to the axis', show: s => isRectish(s), enable: s => s.axisOn && (s.geoBg !== 'none' || s.axisGrid), sub: true }
+    { k: 'geoBgToAxis', type: 'check', label: 'Extend the background and guide lines down to the axis', show: s => isRectish(s), enable: s => s.axisOn && (s.geoBg !== 'none' || s.axisGrid), sub: true },
+    { type: 'head', label: 'Second axis' },
+    { k: 'ax2On', type: 'check', label: 'Show a second axis', enable: s => s.axisOn && s.layout === 'rect' },
+    { type: 'hint', text: s => s.ax2On ? 'The same ages with ticks of its own, for example every 10 above an axis every 50. The grid follows the main axis.' : '' },
+    { k: 'ax2Pos', type: 'seg', label: 'Position', opts: [['bottom', 'Bottom'], ['top', 'Top']], enable: s => s.axisOn && s.ax2On && s.layout === 'rect', sub: true },
+    { k: 'ax2Interval', type: 'number', label: 'Every (0 for automatic)', min: 0, max: 100000, step: 1, enable: s => s.axisOn && s.ax2On && s.layout === 'rect', sub: true },
+    { k: 'ax2Minor', type: 'number', label: 'Minor ticks between', min: 0, max: 9, step: 1, enable: s => s.axisOn && s.ax2On && s.layout === 'rect', sub: true },
+    { k: 'ax2Decimals', type: 'number', label: 'Decimals (−1 for automatic)', min: -1, max: 6, step: 1, enable: s => s.axisOn && s.ax2On && s.layout === 'rect', sub: true },
+    { k: 'ax2Title', type: 'text', label: 'Title', enable: s => s.axisOn && s.ax2On && s.layout === 'rect', sub: true },
+    { k: 'ax2Gap', type: 'number', label: 'Distance from the previous element', min: 0, max: 200, step: 1, unit: 'px', enable: s => s.axisOn && s.ax2On && s.layout === 'rect', sub: true },
   ]},
   { title: 'Ancestral reconstructions', items: [
     { type: 'custom', build: ancBox },
@@ -2109,7 +2135,7 @@ function control(it) {
     }));
   }
   if (OVERRIDES[it.k]) {
-    row.insertAdjacentHTML('beforeend', '<div class="ovr" hidden><span></span><button type="button" class="linkbtn">Use this value for all</button></div>');
+    row.insertAdjacentHTML('beforeend', '<div class="ovr" hidden><span></span><span class="ovrp"> (<button type="button" class="linkbtn">reset to general</button>)</span></div>');
     row.querySelector('.ovr button').addEventListener('click', () => {
       const specs = OVERRIDES[it.k]; let k = 0;
       mutate(() => { for (const n of allElements()) if (specs.some(sp => hasOwn(n, sp))) { specs.forEach(sp => clearOwn(n, sp)); k++; } });
@@ -2183,6 +2209,7 @@ function catLabel(c, cats, lowIn) {
 }
 // Shows, hides or greys out each panel option according to what it depends on.
 function refreshVisibility() {
+  document.querySelectorAll('#side details').forEach(d => { const t = (d.querySelector('summary') || {}).textContent; d.classList.toggle('needtree', !tree && t !== 'Tree' && t !== 'Attachments'); });   // nothing to set before a tree is open
   alnSync();   // the alignment chosen, before its options are enabled
   const sl = document.querySelector('.sidelayers'); if (sl && sl._refresh) sl._refresh();   // which layers are in use
   if (typeof refreshPagesBox === 'function' && $('pagesBox') && $('pagesBox').dataset.layout !== settings.layout + ':' + settings.rectOrient) { $('pagesBox').dataset.layout = settings.layout + ':' + settings.rectOrient;   /* shape or orientation changed */ refreshPagesBox(); }
@@ -2282,6 +2309,7 @@ function changeSoon(it) { chItem = it; if (!chRaf) chRaf = requestAnimationFrame
 function renderSoon() { if (!rRaf) rRaf = requestAnimationFrame(() => { rRaf = 0; render(); }); }
 // Reacts to a panel change: redraws, refits when needed, saves and refreshes the panel.
 function changed(it) {
+  if (it && it.k === 'ax2On' && settings.ax2On) { const main = settings.geoOn ? settings.geoPos : settings.axisPos; settings.ax2Pos = main === 'top' ? 'bottom' : 'top'; const r = allItems().find(x => x.k === 'ax2Pos'); if (r) syncControl(r); }   // the other side
   if (it && /^gm(Table|Lon|Lat)$/.test(it.k)) setTimeout(geoCheck, 50);   // points and map: do they match?
   if (it && it.k === 'brcTable') { const t = (settings.dataTables || []).find(x => x.id === settings.brcTable); settings.brcCol = t ? (numericCols(t).find(c => /rate/i.test(c)) || numericCols(t)[0] || '') : ''; }
   enforceSupportLocks();
@@ -2718,6 +2746,14 @@ function splitTopLevel(s, sep) {   // split at sep outside quotes, [comments] an
   out.push(s.slice(start));
   return out;
 }
+// The trees of the sample, after the burn-in (and as resampled when read), as a NEXUS file.
+async function exportTreeSet(kind = 'nexus') {
+  if (!treeSet || !treeSet.trees || treeSet.trees.length < 2) return toast('Open a file with several trees first');
+  const used = treeSet.trees.slice(treeSet.skip || 0), fname = await exportName(kind === 'newick' ? '.nwk' : '.trees', `${used.length} trees of the sample${kind === 'newick' ? ' as Newick' : ''}`); if (!fname) return;
+  if (kind === 'newick') return saveFile(fname, used.map(r => r.nwk.replace(/;?\s*$/, ';')).join('\n') + '\n');   // one tree per line
+  const R = treeSet.resample, note = `[${used.length} trees from tree2go${R ? `, resampled from ${R.total} trees after a burn-in of ${R.burnin}%` : ''}${treeSet.burnin ? `, burn-in of ${treeSet.burnin}% applied in tree2go` : ''}${treeSet.clockScaled ? ', branch lengths divided by the clock rate of each tree' : ''}]`;
+  saveFile(fname, `#NEXUS\n${note}\nbegin trees;\n${used.map((r, i) => `  tree ${r._name || 'tree_' + (i + 1)} = ${r._unrooted ? '[&U]' : '[&R]'} ${r.nwk.replace(/;?\s*$/, ';')}`).join('\n')}\nend;\n`);
+}
 // Reads Newick or NEXUS (with translate blocks and [&U] / [&R] flags). A file with several trees gives a list.
 function parseTreeFile(txt) {
   const s = String(txt).replace(/^\uFEFF/, '');
@@ -2740,7 +2776,7 @@ function parseTreeFile(txt) {
       const k = st.indexOf('='); if (k < 0) continue;
       const t = parseNewick(st.slice(k + 1).trim() + ';');
       { const nm = /^u?tree\s+(?:\*\s*)?([^\s=\[]+)/i.exec(st); if (nm) t._name = nm[1]; if (/\[&U\]/i.test(st.slice(0, st.indexOf('(', k)))) t._unrooted = true; if (/\[&R\]/i.test(st.slice(0, st.indexOf('(', k)))) t._rooted = true; }
-      { const head = st.slice(0, Math.max(0, st.indexOf('(', k))), pm = /\bposterior\s*=\s*([-+\d.eE]+)/i.exec(head) || /\blnP\s*=\s*([-+\d.eE]+)/i.exec(head); if (pm) t._post = parseFloat(pm[1]); }
+      { const head = st.slice(0, Math.max(0, st.indexOf('(', k))), pm = /\bposterior\s*=\s*([-+\d.eE]+)/i.exec(head) || /\blnP\s*=\s*([-+\d.eE]+)/i.exec(head); if (pm) t._post = parseFloat(pm[1]); const cr = /\bclockrate\s*=\s*([-+\d.eE]+)/i.exec(head); if (cr && +cr[1] > 0) t._clockrate = +cr[1]; }   // MrBayes clock trees
       if (tr.size) walkAll(t, x => { if (!x.children.length && tr.has(x.name)) x.name = tr.get(x.name); });
       trees.push(t);
     }
@@ -2997,6 +3033,7 @@ function refreshTreeSetBox() {
   const raw = !!treeSet.trees;
   d.innerHTML = `<div class="subhead">Several trees</div>
     <p class="hint">${esc(treeSet.name)}: ${plural(treeSet.total ?? treeSet.count, 'tree', 'trees')}${treeSet.unrooted ? ', unrooted (clades are read as splits, and node ages need a clock)' : treeSet.hasLen ? ', with branch lengths' : ''}${treeSet.burnin ? `, ${treeSet.count} used after the burn-in` : ''}.${raw ? '' : ' Open the file again to pick another tree, change the burn-in or build a consensus.'}</p>
+    ${treeSet.resample ? `<p class="rsnote">These ${treeSet.resample.kept.toLocaleString('en')} trees were resampled (${treeSet.resample.mode === 'random' ? `at random, seed ${treeSet.resample.seed}` : 'evenly spaced'}) from the ${treeSet.resample.from.toLocaleString('en')} left after a burn-in of ${treeSet.resample.burnin}% of ${treeSet.resample.total.toLocaleString('en')} trees. A burn-in here would drop some of the trees kept.</p>` : ''}
     <div class="row${raw ? '' : ' off'}"><label for="tsBurn">Burn-in</label><span class="numwrap"><input class="num" id="tsBurn" type="number" min="0" max="99" step="1" value="${treeSet.burnin || 0}"${raw ? '' : ' disabled'}><span class="u">%</span></span></div>
     <p class="hint">The first trees of the file, left out of every summary: summary trees, support values and age densities.</p>
     <div class="row${raw ? '' : ' off'}"><label for="tsIdx">Show tree number</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsIdx" type="number" min="1" max="${treeSet.total ?? treeSet.count}" step="1" value="${treeSet.shown || 1}"${raw ? '' : ' disabled'}><span class="u"></span></span><button class="btn small" id="tsShow"${raw ? '' : ' disabled'}>Show</button></span></div>
@@ -3037,11 +3074,51 @@ function resetForNewTree() {
   buildSide();
 }
 // a file read as text: one tree, or many
+// A file with very many trees: before reading them, offer a burn-in and a resample, so only the trees kept are read.
+function countTreeLines(txt) { const nex = /begin\s+trees\s*;/i.test(txt), re = nex ? /^[ \t]*u?tree\s/gim : /^[ \t]*(\[[^\]\n]*\][ \t]*)*\(/gm; let n = 0; while (re.exec(txt)) n++; return { n, nex }; }
 function loadTreesText(txt, name) {
+  const C = txt.length > 2e5 ? countTreeLines(txt) : { n: 0 };
+  if (C.n <= 10000) return loadTreesTextNow(txt, name);
+  askConfirm({ title: `${C.n.toLocaleString('en')} trees`, ok: 'Load the trees kept', okClass: 'primary', cancel: 'Load them all', focusOk: true, dismiss: true,
+    html: `This file has many trees, and reading them all takes a while. A burn-in and a resample read only the trees kept.
+      <div class="rsform"><span>Burn-in</span><div class="ctl"><span class="numwrap"><input class="num boxed" type="number" id="rsBurn" min="0" max="99" step="1" value="25"><span class="unit">%</span></span></div>
+      <span>Keep</span><div class="ctl"><select id="rsKind"><option value="n">A number of trees</option><option value="pct">A percentage</option></select><input class="num boxed" type="number" id="rsN" min="1" step="1" value="${Math.min(10000, Math.round(C.n * 0.75))}"></div>
+      <span>Which trees</span><div class="ctl"><select id="rsMode"><option value="even">Evenly spaced</option><option value="random">At random</option></select><span id="rsSeedW" hidden>Seed <input class="num boxed" type="number" id="rsSeed" min="0" step="1" value="123"></span></div></div><p class="hint rsmsg" id="rsMsg"></p>` })
+    .then(ok => {
+      if (ok === null) return;   // closed: nothing is loaded
+      if (!ok) return loadTreesTextNow(txt, name);
+      const b = clamp(+$('rsBurn').value || 0, 0, 99), kind = $('rsKind').value, mode = $('rsMode').value, seed = +$('rsSeed').value || 0;
+      const lines = txt.split('\n'), re = C.nex ? /^[ \t]*u?tree\s/i : /^[ \t]*(\[[^\]]*\][ \t]*)*\(/, idx = []; lines.forEach((l, i) => { if (re.test(l)) idx.push(i); });
+      const post = idx.slice(Math.floor(idx.length * b / 100)), want = kind === 'pct' ? Math.round(post.length * clamp(+$('rsN').value || 0, 0, 100) / 100) : Math.round(+$('rsN').value || 0), K = clamp(want, 1, post.length);
+      let pick;
+      if (mode === 'random') { let a = seed >>> 0; const rnd = () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; const p = post.slice(); for (let i = 0; i < K; i++) { const j = i + Math.floor(rnd() * (p.length - i)); [p[i], p[j]] = [p[j], p[i]]; } pick = new Set(p.slice(0, K)); }
+      else pick = new Set([...Array(K)].map((_, i) => post[Math.floor(i * post.length / K)]));
+      const keepAll = new Set(idx), out = lines.filter((l, i) => !keepAll.has(i) || pick.has(i)).join('\n');
+      loadTreesTextNow(out, name);
+      if (treeSet) { treeSet.resample = { total: idx.length, burnin: b, from: post.length, kept: K, mode, seed: mode === 'random' ? seed : null }; persistTreeSet(); refreshTreeSetBox(); toast(`${K.toLocaleString('en')} of ${idx.length.toLocaleString('en')} trees read`); }
+    });
+  setTimeout(() => {
+    const m = $('rsMode'), w = $('rsSeedW'); if (m && w) m.onchange = () => { w.hidden = m.value !== 'random'; };
+    // how many trees are left after the burn-in, and whether the number asked can be kept
+    const check = () => {
+      const b = clamp(+$('rsBurn').value || 0, 0, 99), left = C.n - Math.floor(C.n * b / 100), kind = $('rsKind').value, v = +$('rsN').value || 0, msg = $('rsMsg');
+      const bad = kind === 'pct' ? !(v >= 1 && v <= 100) : !(v >= 1 && v <= left);
+      $('cOk').disabled = bad; msg.classList.toggle('warn', bad);
+      msg.textContent = bad ? (kind === 'pct' ? 'Keep between 1 and 100% of the trees left.' : `Only ${left.toLocaleString('en')} trees are left after a burn-in of ${b}%: keep fewer, or lower the burn-in.`)
+        : `${left.toLocaleString('en')} trees are left after the burn-in. A sample of 10,000 trees is more than enough for summary trees.`;
+    };
+    ['rsBurn', 'rsKind', 'rsN'].forEach(id => { const el = $(id); if (el) { el.addEventListener('input', check); el.addEventListener('change', check); } });
+    check();
+  });
+}
+function loadTreesTextNow(txt, name) {
   const P = parseTreeFile(txt);
   resetForNewTree();
+  // MrBayes clock trees carry their branch lengths in substitutions per site: divided by each tree's clock rate, they are in time
+  const clocked = P.trees.length > 1 && P.trees.filter(t => t._clockrate > 0).length > P.trees.length / 2;
+  if (clocked) for (const t of P.trees) if (t._clockrate > 0) walkAll(t, x => { if (x.len != null) x.len /= t._clockrate; });
   if (P.trees.length > 1) {
-    treeSet = summarizeTrees(P.trees, name || 'Trees', 0); treeSet.shown = 1; treeSet.mode = 'majority'; treeSet.pct = 50;
+    treeSet = summarizeTrees(P.trees, name || 'Trees', 0); treeSet.clockScaled = clocked; treeSet.shown = 1; treeSet.mode = 'majority'; treeSet.pct = 50;
     srcText = txt.length < 2e6 ? txt : ''; $('nwkIn').value = srcText ? txt : toNewick(P.trees[0]) + ';';
     if (settings.supportSource === 'tree') settings.supportSource = 'boot';
     setTree(cloneTree(P.trees[0])); persistTreeSet(); buildSide();
@@ -3114,7 +3191,7 @@ function exportPanel() {
           </div>
     <p class="hint" id="dpiNote"></p>
     <div class="subhead">Tree</div>
-    <div class="btns"><button class="btn" data-fmt="nwk">Save Newick</button><button class="btn" data-fmt="nex">Save NEXUS</button></div>
+    <div class="btns"><button class="btn" data-fmt="nwk">Save Newick</button><button class="btn" data-fmt="nex">Save NEXUS</button>${treeSet && treeSet.trees && treeSet.trees.length > 1 ? '<button class="btn" data-fmt="setn">Save the trees (Newick)</button><button class="btn" data-fmt="set">Save the trees (NEXUS)</button>' : ''}</div>
     <p class="hint">The tree as it is now, with your names, rooting and order. NEXUS also keeps branch colors for FigTree and the annotations of the tree.</p>
     <div class="subhead">Style template</div>
     <div class="btns"><button class="btn" id="styleSave">Save style…</button><button class="btn" id="styleLoad">Apply a style…</button></div>
@@ -3547,6 +3624,11 @@ function vertText(svgStr, S, tips) {
     const tipName = tag === 'text' ? tips : /data-kind="label"/.test(attrs);   // tip names read at 45 degrees
     const at = attrs.trim();
     return `<${tag}${at ? ' ' + at : ''} transform="translate(${x},${y}) rotate(${(+(r || 0)) + (tipName ? 45 : 90)})"${slash}>`;
+  });
+  // ages of an axis: turned back, they start beside their tick (after it below the tree, before it above), centred on it
+  svgStr = svgStr.replace(/<text\b([^>]*?)data-axlab="(-?1)"([^>]*?)\bx="([-\d.]+)"([^>]*?)\by="([-\d.]+)"([^>]*)>/g, (m, a, d, b, x, c, y, e) => {
+    const at = (a + b + c + e).replace(/text-anchor="[^"]*"/, '').replace(/dominant-baseline="[^"]*"/, '');
+    return `<text data-keep="1"${at} x="${x}" y="${y}" text-anchor="${d === '1' ? 'start' : 'end'}" dominant-baseline="central" transform="rotate(90 ${x} ${y})">`;
   });
   // texts placed with x and y: a quarter turn back around that point
   return svgStr.replace(/<text\b(?![^>]*transform=)([^>]*?)\bx="([-\d.]+)"([^>]*?)\by="([-\d.]+)"([^>]*)>/g, (m, a, x, b, y, c) => /data-up=|data-keep=/.test(m) ? m : `<text${a}x="${x}"${b}y="${y}"${c} transform="rotate(90 ${x} ${y})">`);
@@ -4814,7 +4896,9 @@ function renderOnce() {
     if (L === 'rect') {
       const X = a => dOf(a) * sx;
       const top = minY, bottom = maxY;
-      const bgBottom = S.geoBgToAxis ? bottom + S.axisGap : bottom;
+      const sideOf = v => v === 'top' ? -1 : 1, geoSide = sideOf(S.geoPos), axisSide = S.geoOn ? geoSide : sideOf(S.axisPos), axShown = !S.geoOn || S.axisShow !== false;   // with the geologic scale, its axis goes where its boxes go   // without the boxes, the axis is always drawn
+      const usedB = (axShown && axisSide > 0) || (S.geoOn && geoSide > 0), usedT = (axShown && axisSide < 0) || (S.geoOn && geoSide < 0);
+      const bgBottom = S.geoBgToAxis && usedB ? bottom + S.axisGap : bottom, bgTop = S.geoBgToAxis && usedT ? top - S.axisGap : top;   // the bands reach the axis, below or above
       const gridSty = ` stroke="${S.axisGridColor}" stroke-width="${S.axisGridW}"${dashFor(S.axisGridStyle, S.axisGridW, S.axisGridDash, S.axisGridGap)}`;
       // background by interval
       if (S.geoBg !== 'none') {
@@ -4822,51 +4906,60 @@ function renderOnce() {
         for (const [, o, y, c] of bgLevel) {
           if (o <= off || y >= rootAge) continue;
           const [a0, a1] = clipI(o, y); const x0 = X(a0), x1 = X(a1);
-          if (S.geoBg === 'colors') bgL.unshift(`<rect x="${f2(x0)}" y="${f2(top)}" width="${f2(x1 - x0)}" height="${f2(bgBottom - top)}" fill="${c}" opacity="${S.geoBgOpacity}"/>`);
-          else if (k % 2 === 0) bgL.unshift(`<rect x="${f2(x0)}" y="${f2(top)}" width="${f2(x1 - x0)}" height="${f2(bgBottom - top)}" fill="#000" opacity="${f2(S.geoBgOpacity * 0.35)}"/>`);
+          if (S.geoBg === 'colors') bgL.unshift(`<rect x="${f2(x0)}" y="${f2(bgTop)}" width="${f2(x1 - x0)}" height="${f2(bgBottom - bgTop)}" fill="${c}" opacity="${S.geoBgOpacity}"/>`);
+          else if (k % 2 === 0) bgL.unshift(`<rect x="${f2(x0)}" y="${f2(bgTop)}" width="${f2(x1 - x0)}" height="${f2(bgBottom - bgTop)}" fill="#000" opacity="${f2(S.geoBgOpacity * 0.35)}"/>`);
           k++;
         }
       }
-      if (S.axisGrid) for (const a of majors) bgL.push(`<line x1="${f2(X(a))}" y1="${f2(top)}" x2="${f2(X(a))}" y2="${f2(bgBottom)}"${gridSty}/>`);
-      let y = bottom + S.axisGap;
-      const xL = X(rootAge), xR = X(off);
+      if (S.axisGrid) for (const a of majors) bgL.push(`<line x1="${f2(X(a))}" y1="${f2(bgTop)}" x2="${f2(X(a))}" y2="${f2(bgBottom)}"${gridSty}/>`);   // the grid follows the main axis
+      // Each side (1 below the tree, -1 above it) keeps where its next element goes: the geologic scale, the main axis
+      // and the second axis stack outwards from the tree on the side each one is set to.
+      const xL = X(rootAge), xR = X(off), edge = { 1: bottom + S.axisGap, [-1]: top - S.axisGap }, used = { 1: false, [-1]: false };
       if (S.geoOn) {
-        const rows = ['age', 'epoch', 'period', 'era'].filter(l => S['geo' + l.charAt(0).toUpperCase() + l.slice(1)]);
-        for (const lvl of rows) {
-          const h = S.geoRowH;
+        const rows = ['age', 'epoch', 'period', 'era'].filter(l => S['geo' + l.charAt(0).toUpperCase() + l.slice(1)]), d = geoSide; let y = edge[d];
+        for (const lvl of rows) {   // the finest level next to the tree, on either side
+          const h = S.geoRowH, y0 = d > 0 ? y : y - h;
           for (const [name, o, yy, c, ab] of GEO[lvl]) {
             if (o <= off || yy >= rootAge) continue;
             const [a0, a1] = clipI(o, yy); const x0 = X(a0), x1 = X(a1), w = x1 - x0;
-            anL.push(`<rect x="${f2(x0)}" y="${f2(y)}" width="${f2(w)}" height="${f2(h)}" fill="${c}"${S.geoBorderW > 0 ? ` stroke="${S.geoBorder}" stroke-width="${S.geoBorderW}"` : ''}/>`);
+            anL.push(`<rect x="${f2(x0)}" y="${f2(y0)}" width="${f2(w)}" height="${f2(h)}" fill="${c}"${S.geoBorderW > 0 ? ` stroke="${S.geoBorder}" stroke-width="${S.geoBorderW}"` : ''}/>`);
             if (S.geoNames) {
               const gfs = S.geoFontSize; let txt = null;
               for (const cand of [name, ab, ab && ab.charAt(0)]) if (cand && measure(cand, gfs, fam, false, false) + 4 <= w && gfs + 2 <= h) { txt = cand; break; }
-              if (txt) anL.push(`<text x="${f2(x0 + w / 2)}" y="${f2(y + h / 2)}" text-anchor="middle" dominant-baseline="central" font-size="${gfs}" fill="${textOn(c)}" font-family="${esc(fam)}">${esc(txt)}</text>`);
+              if (txt) anL.push(`<text data-keep="1" x="${f2(x0 + w / 2)}" y="${f2(y0 + h / 2)}" text-anchor="middle" dominant-baseline="central" font-size="${gfs}" fill="${textOn(c)}" font-family="${esc(fam)}">${esc(txt)}</text>`);
             }
           }
-          y += h;
+          y += d * h;
         }
+        edge[d] = y; used[d] = true;
       }
-      anL.push(`<path d="M${f2(xL)},${f2(y)}H${f2(xR)}" stroke="${col}" stroke-width="${S.axisLineW}" fill="none" stroke-linecap="square"/>`);
-      guideSegs.push({ x0: xL, x1: xR, y0: y, y1: y });
-      for (const a of minors) anL.push(`<path d="M${f2(X(a))},${f2(y)}v${f2(S.axisTickLen * 0.55)}" stroke="${col}" stroke-width="${f2(S.axisLineW * 0.8)}"/>`);
-      // labels left to right (oldest first); skip any that would overlap, always keeping the youngest
-      const lab = [...majors].sort((p, q) => q - p).map(a => ({ a, x: X(a), t: fmtA(a), w: measure(fmtA(a), afs, fam, false, false) }));
-      const keep = [];
-      for (const L1 of lab) {
-        const prev = keep[keep.length - 1];
-        if (prev && L1.x - L1.w / 2 < prev.x + prev.w / 2 + 3) { if (L1.a === off) keep.pop(); else continue; }
-        keep.push(L1);
+      // an axis: its line at the edge of its side, ticks and ages outwards, then its title
+      const drawAxis = (d, mj, mn, fmt, title, unitTxt) => {
+        const y = edge[d], base = d > 0 ? 'hanging' : 'alphabetic', ly = y + d * (S.axisTickLen + S.axisLabelGap);
+        anL.push(`<path d="M${f2(xL)},${f2(y)}H${f2(xR)}" stroke="${col}" stroke-width="${S.axisLineW}" fill="none" stroke-linecap="square"/>`);
+        guideSegs.push({ x0: xL, x1: xR, y0: y, y1: y });
+        for (const a of mn) anL.push(`<path d="M${f2(X(a))},${f2(y)}v${f2(d * S.axisTickLen * 0.55)}" stroke="${col}" stroke-width="${f2(S.axisLineW * 0.8)}"/>`);
+        // ages left to right (oldest first); skip any that would overlap, always keeping the youngest
+        const lab = [...mj].sort((p, q) => q - p).map(a => ({ a, x: X(a), t: fmt(a), w: measure(fmt(a), afs, fam, false, false) })), keep = [];
+        for (const L1 of lab) { const prev = keep[keep.length - 1]; if (prev && L1.x - L1.w / 2 < prev.x + prev.w / 2 + 3) { if (L1.a === off) keep.pop(); else continue; } keep.push(L1); }
+        for (const a of mj) anL.push(`<path d="M${f2(X(a))},${f2(y)}v${f2(d * S.axisTickLen)}" stroke="${col}" stroke-width="${S.axisLineW}"/>`);
+        if (unitTxt && keep.length) { const last = keep.reduce((m, q) => q.x > m.x ? q : m, keep[0]); anL.push(`<text x="${f2(last.x + last.w / 2 + afs * 0.3)}" y="${f2(ly)}" dominant-baseline="${base}" font-size="${afs}" fill="${col}" font-family="${esc(fam)}">${esc(unitTxt)}</text>`); }
+        for (const L1 of keep) anL.push(`<text data-axlab="${d}" x="${f2(L1.x)}" y="${f2(ly)}" text-anchor="middle" dominant-baseline="${base}" font-size="${afs}" fill="${col}" font-family="${esc(fam)}">${esc(L1.t)}</text>`);
+        let e = y + d * (S.axisTickLen + S.axisLabelGap + afs);
+        if (title) { anL.push(`<text x="${f2((xL + xR) / 2)}" y="${f2(e + d * 6)}" text-anchor="middle" dominant-baseline="${base}" font-size="${S.axisTitleSize}" fill="${col}" font-family="${esc(fam)}">${esc(title)}</text>`); e += d * (6 + S.axisTitleSize); }
+        edge[d] = e; used[d] = true;
+      };
+      if (axShown) drawAxis(axisSide, majors, minors, fmtA, S.geoOn && S.geoTitle === false ? '' : S.axisTitle, S.axisUnitShow && S.axisUnitText);
+      if (S.ax2On) {   // a second, plain axis: the same ages, ticks of its own
+        const d2 = sideOf(S.ax2Pos), st2 = S.ax2Interval > 0 ? S.ax2Interval : niceNum(Math.max(spanA, 1e-9) / 12), s0 = Math.ceil((off - 1e-9) / st2) * st2, mj2 = [], mn2 = [];
+        for (let a = s0, i = 0; a <= rootAge + 1e-9 && i < 4000; a = s0 + (++i) * st2) mj2.push(+a.toPrecision(12));
+        if (S.ax2Minor > 0) { const pts = [mj2[0] - st2, ...mj2, mj2[mj2.length - 1] + st2]; for (let i = 0; i < pts.length - 1; i++) for (let k2 = 1; k2 <= S.ax2Minor; k2++) { const a = pts[i] + (pts[i + 1] - pts[i]) * k2 / (S.ax2Minor + 1); if (inRange(a)) mn2.push(a); } }
+        const dec2 = S.ax2Decimals >= 0 ? S.ax2Decimals : Math.max(0, -Math.floor(Math.log10(st2) + 1e-9));
+        if (used[d2]) edge[d2] += d2 * S.ax2Gap;
+        drawAxis(d2, mj2, mn2, a => (+a).toFixed(dec2), S.ax2Title, '');
       }
-      for (const a of majors) anL.push(`<path d="M${f2(X(a))},${f2(y)}v${f2(S.axisTickLen)}" stroke="${col}" stroke-width="${S.axisLineW}"/>`);
-      if (S.axisUnitShow && S.axisUnitText && keep.length) {
-        const last = keep.reduce((m, q) => q.x > m.x ? q : m, keep[0]);
-        anL.push(`<text x="${f2(last.x + last.w / 2 + afs * 0.3)}" y="${f2(y + S.axisTickLen + S.axisLabelGap)}" dominant-baseline="hanging" font-size="${afs}" fill="${col}" font-family="${esc(fam)}">${esc(S.axisUnitText)}</text>`);
-      }
-      for (const L1 of keep) anL.push(`<text x="${f2(L1.x)}" y="${f2(y + S.axisTickLen + S.axisLabelGap)}" text-anchor="middle" dominant-baseline="hanging" font-size="${afs}" fill="${col}" font-family="${esc(fam)}">${esc(L1.t)}</text>`);
-      y += S.axisTickLen + S.axisLabelGap + afs;
-      if (S.axisTitle) { anL.push(`<text x="${f2((xL + xR) / 2)}" y="${f2(y + 6)}" text-anchor="middle" dominant-baseline="hanging" font-size="${S.axisTitleSize}" fill="${col}" font-family="${esc(fam)}">${esc(S.axisTitle)}</text>`); y += 6 + S.axisTitleSize; }
-      maxY = y;
+      maxY = Math.max(bottom, edge[1]);
+      if (used[-1]) minY = Math.min(minY, edge[-1]);
     } else {
       // Circular and fan: rings for ticks, background bands by interval
       const Rr = a => rOf(dOf(a));
@@ -5688,7 +5781,7 @@ function openEdit(cx, cy, keep) {
     const internal = T.internal;
     let h = `<div class="part"><b>${single && !single.children.length ? 'Tip' : 'Clade'}</b>`;
     if (internal.length) h += `<div class="btns">${T.internalReal.length ? (single ? `<button class="btn small" data-a="toggle">${single.collapsed ? 'Expand clade' : 'Collapse clade'}</button>${single.poly ? '<button class="btn small" data-a="unpoly" title="Gives back the branches the polytomy replaced">Undo the polytomy</button>' : single.children.length > 1 && single.children.some(c => c.children.length) ? `<button class="btn small" data-a="poly" title="${[...sel.values()].some(v => v.kind === 'clade') ? 'Every tip of the clade straight from this node' : 'The branches of its children join this node'}">Make a polytomy</button>` : ''}` : `<button class="btn small" data-a="collapse">Collapse</button><button class="btn small" data-a="expand">Expand</button>`) : ''}
-      <button class="btn small" data-a="rotate">Rotate children</button><button class="btn small" data-a="ladder">Ladderize</button>${T.internalReal.length ? '<button class="btn small" data-a="expandSub">Expand all inside</button>' : ''}</div>`;
+      <button class="btn small" data-a="rotate" title="Swaps the order of the children of this node only">Rotate children</button><button class="btn small" data-a="rotateAll" title="Turns the whole clade over on its own axis: the order is reversed at every node inside it">Rotate clade</button><button class="btn small" data-a="ladder">Ladderize</button>${T.internalReal.length ? '<button class="btn small" data-a="expandSub">Expand all inside</button>' : ''}</div>`;
     h += `<div class="grp"><span>${single && !single.children.length ? 'Branch and label color' : 'Clade color'}</span>${sw('color', 'roots', roots[0].color)}</div>`;
     if (single && !isGraft(single)) h += `<div class="grp"><span>Highlight background</span>${sw('bg', 'roots', single.bg, BGPAL)}</div>
       <div class="kv"><span>Highlight opacity</span>${num('bgOp', 'roots', S.cladeOpacity, '', !single.bg)}</div>
@@ -5972,6 +6065,7 @@ function openEdit(cx, cy, keep) {
     else if (a === 'collapse') apply(T.internal, x => { x.collapsed = true; });
     else if (a === 'expand') apply(T.internal, x => { x.collapsed = false; });
     else if (a === 'rotate') apply(T.internal, x => { x.children.reverse(); });
+    else if (a === 'rotateAll') { const under = (a, d) => { for (let x = d.parent; x; x = x.parent) if (x === a) return true; return false; }, tops = T.internal.filter(x => !T.internal.some(y => y !== x && under(y, x))); apply(tops, x => walkAll(x, y => { if (y.children.length) y.children.reverse(); })); }   // the clade mirrored
     else if (a === 'ladder') apply(T.internal, x => ladderize(x, false));
     else if (a === 'expandSub') apply(T.internal, x => walkAll(x, y => { y.collapsed = false; }));
     else if (a === 'rename') apply([n], x => { x.name = pop.querySelector('#pName').value.trim(); });
@@ -6487,7 +6581,7 @@ async function exportTIFF() {
 // Exports in a format; with pages, the Export menu saves the pages.
 function exportAs(fmt) {
   if (/^(svg|pdf|png|tif)$/.test(fmt) && settings.layout === 'rect' && !isTurned(settings) && (settings.pages || []).length && settings.exportSplit !== false) return exportPages(fmt);   // a vertical tree exports whole
-  ({ svg: exportSVG, pdf: exportPDF, png: exportPNG, tif: exportTIFF, nwk: () => exportTree('newick'), nex: () => exportTree('nexus') })[fmt](); }
+  ({ svg: exportSVG, pdf: exportPDF, png: exportPNG, tif: exportTIFF, nwk: () => exportTree('newick'), nex: () => exportTree('nexus'), set: () => exportTreeSet('nexus'), setn: () => exportTreeSet('newick') })[fmt](); }
 
 /* ================= Misc ================= */
 let toastT;
@@ -9855,14 +9949,18 @@ function geoBox() {
 function askConfirm(o = {}) {
   $('cTitle').textContent = o.title || 'Clear session';
   $('cText').innerHTML = o.html || 'The tree, every setting, the attachments and the images will be removed, and tree2go will start again. Save the project first if you want to keep it.';
-  $('cOk').textContent = o.ok || 'Clear session'; $('cOk').className = 'btn ' + (o.okClass || 'danger'); $('cCancel').textContent = o.cancel || 'Cancel';
+  $('cOk').textContent = o.ok || 'Clear session'; $('cOk').className = 'btn ' + (o.okClass || 'danger'); $('cCancel').textContent = o.cancel || 'Cancel'; $('cOk').disabled = false;
+  const m0 = $('confirmModal'), box = m0.querySelector('.box'); let x = box.querySelector(':scope > .close');
+  if (!x) { box.insertAdjacentHTML('afterbegin', '<button type="button" class="close" aria-label="Close">×</button>'); x = box.querySelector(':scope > .close'); }
+  x.hidden = !o.dismiss;   // with dismiss, closing (×, outside, Esc) does nothing: the promise gives null
   return new Promise(res => {
-    const m = $('confirmModal'); m.hidden = false; setTimeout(() => (o.focusOk ? $('cOk') : $('cCancel')).focus());
-    const done = v => { m.hidden = true; $('cOk').onclick = $('cCancel').onclick = m.onclick = m.onkeydown = null; res(v); };
+    const m = m0; m.hidden = false; setTimeout(() => (o.focusOk ? $('cOk') : $('cCancel')).focus());
+    const done = v => { m.hidden = true; $('cOk').onclick = $('cCancel').onclick = m.onclick = m.onkeydown = x.onclick = null; res(v); };
     $('cOk').onclick = () => done(true);
     $('cCancel').onclick = () => done(false);
-    m.onclick = e => { if (e.target === m) done(false); };
-    m.onkeydown = e => { if (e.key === 'Escape') { e.stopPropagation(); done(false); } };
+    x.onclick = () => done(null);
+    m.onclick = e => { if (e.target === m) done(o.dismiss ? null : false); };
+    m.onkeydown = e => { if (e.key === 'Escape') { e.stopPropagation(); done(o.dismiss ? null : false); } };
   });
 }
 $('clearBtn').onclick = async () => {
