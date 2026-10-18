@@ -2421,7 +2421,7 @@ function dataPanel() {
   setTimeout(() => {
     $('loadTxt').onclick = () => loadText($('nwkIn').value);
     $('openBtn2').onclick = () => $('fileIn').click();
-    $('benchBtn').onclick = () => runBench();
+    $('benchBtn').onclick = () => runBench(); $('benchBtn').hidden = !/[?&]bench=manual\b/.test(location.search);   // only for whoever opens the app with ?bench=manual
     $('nwkIn').addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') loadText($('nwkIn').value); });
   });
   return w;
@@ -3337,8 +3337,9 @@ const BENCH_SRC = {
   set2: ['content/bench/set10000x100.t', 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/bench/set10000x100.t'],
 };
 // the times on the computer tree2go was tuned on, to compare with
-const BENCH_REF = { open: 1200, reroot: 646, ladder: 541, nwk: 34, svg: 2700, pdf: 3400, read: 7700, maj: 205, mcc: 640, read2: 5600, maj2: 108, mcc2: 691 };   // 1 processor core, about 4 GB of memory
+const BENCH_REF = { zin: 2400, zout: 1500, pan: 430, open: 1200, reroot: 646, ladder: 541, nwk: 34, svg: 2700, pdf: 3400, read: 7700, maj: 205, mcc: 640, read2: 5600, maj2: 108, mcc2: 691 };   // 1 processor core, about 4 GB of memory
 const benchNext = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+const benchSettle = async () => { for (let i = 0; i < 600; i++) { await benchNext(); if (!nav && !cullPending) { await benchNext(); return; } } };   // until the view is sharp and still
 function benchWindow(title, html, closeLabel) {
   $('cTitle').textContent = title; $('cText').innerHTML = html;
   const cp = document.getElementById('benchCopy'); if (cp) cp.onclick = () => { const t = document.getElementById('benchText').value; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('The results are copied, as text'), () => { const a = document.getElementById('benchText'); a.hidden = false; a.select(); toast('Select and copy the text shown'); }); }; const m = $('confirmModal'); m.hidden = false;
@@ -3347,9 +3348,9 @@ function benchWindow(title, html, closeLabel) {
   $('cOk').onclick = () => { m.hidden = true; $('cCancel').hidden = false; $('cOk').hidden = false; };
   m.onclick = m.onkeydown = null;
 }
-async function runBench() {
+async function runBench(auto) {   // auto: opened with ?bench=auto, the test runs alone and leaves its results in window.__benchResult
   if (!navigator.onLine) return benchWindow('Test performance', 'The test downloads its files from the internet, and this computer seems to be offline. Connect it and try again.', 'Close');
-  const ok = await askConfirm({ title: 'Test performance', ok: 'Run the test', okClass: 'primary', cancel: 'Cancel', focusOk: true, dismiss: true,
+  const ok = auto ? true : await askConfirm({ title: 'Test performance', ok: 'Run the test', okClass: 'primary', cancel: 'Cancel', focusOk: true, dismiss: true,
     html: 'tree2go downloads three test files (about 38 MB: a tree of 20,000 tips, 1,000 trees of 1,000 tips and 10,000 trees of 100 tips) and times what it does with them on this computer. It takes a minute or two. Your work is kept and comes back as it was.' });
   if (!ok) return;
   const step = t => { $('cText').innerHTML = `<div class="benchrun">${t}</div>`; };
@@ -3357,7 +3358,7 @@ async function runBench() {
   step('Downloading the test files…');
   let T = null, ST = null, ST2 = null;
   try { const a = await fetchFirst(BENCH_SRC.tree), b = await fetchFirst(BENCH_SRC.set), c = await fetchFirst(BENCH_SRC.set2); T = a && a.text; ST = b && b.text; ST2 = c && c.text; } catch (e) { }
-  if (!T || !ST || !ST2) return benchWindow('Test performance', 'The test files could not be downloaded. The test needs an internet connection.', 'Close');
+  if (!T || !ST || !ST2) { if (auto) window.__benchResult = { error: 'The test files could not be downloaded' }; return benchWindow('Test performance', 'The test files could not be downloaded. The test needs an internet connection.', 'Close'); }
   // the user's work, kept whole (the trees of a set too), and nothing written in the browser until it is back
   const had = !!tree, snap = had ? projectObject() : null;
   if (snap && treeSet && treeSet.trees && treeSet.trees.length > 1) snap.treesAll = { name: treeSet.name, recs: treeSet.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0]),
@@ -3368,7 +3369,13 @@ async function runBench() {
   const shown = async fn => { fn(); await benchNext(); };   // until the result is on screen
   try {
     await time('open', 'Opening a tree of 20,000 tips', () => shown(() => loadText(T)));
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise(r => setTimeout(r, 400)); fit(); await benchSettle();
+    {   // one gesture each, as a user would time it: from the wheel or the drag until the view is sharp and still
+      const r = svg.getBoundingClientRect(), wheel = dy => svg.dispatchEvent(new WheelEvent('wheel', { deltaY: dy, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, bubbles: true, cancelable: true }));
+      await time('zin', 'Zooming in once', async () => { wheel(-100); await benchSettle(); });
+      await time('zout', 'Zooming out once', async () => { wheel(100); await benchSettle(); });
+      await time('pan', 'Moving it', async () => { view.ty -= r.height / 2; moveView(); await benchSettle(); });
+    }
     await time('reroot', 'Rerooting it', () => shown(() => { const L = leaves(tree), t = L[Math.floor(L.length / 3)]; tree = reroot(tree, t); setTree(tree, true); }));
     await time('ladder', 'Ladderizing it', () => shown(() => { ladderize(tree, true); render(); }));
     await time('nwk', 'Saving it as Newick', () => { toNewick(tree); });
@@ -3387,7 +3394,7 @@ async function runBench() {
   try { if (keep) openProject(keep); else restart = true; } catch (e) { toast('Your work could not be given back: open your last saved project'); }
   // the summary
   const ms = v => v >= 1000 ? `${(v / 1000).toFixed(1)} s` : `${Math.round(v)} ms`;
-  const COMP = [['open', 'Open a tree of 20,000 tips'], ['reroot', 'Reroot it'], ['ladder', 'Ladderize it'], ['nwk', 'Save it as Newick'], ['svg', 'Export it as SVG'], ['pdf', 'Export it as PDF'],
+  const COMP = [['open', 'Open a tree of 20,000 tips'], ['zin', 'Zoom in once, until sharp'], ['zout', 'Zoom out once, until sharp'], ['pan', 'Move it, until sharp'], ['reroot', 'Reroot it'], ['ladder', 'Ladderize it'], ['nwk', 'Save it as Newick'], ['svg', 'Export it as SVG'], ['pdf', 'Export it as PDF'],
     ['read', 'Read 1,000 trees of 1,000 tips'], ['maj', 'Majority-rule consensus of them'], ['mcc', 'MCC tree of them'],
     ['read2', 'Read 10,000 trees of 100 tips'], ['maj2', 'Majority-rule consensus of them'], ['mcc2', 'MCC tree of them']];
   const ratios = COMP.map(([k]) => BENCH_REF[k] > 0 && R[k] > 0 ? R[k] / BENCH_REF[k] : null).filter(x => x);
@@ -3402,9 +3409,14 @@ async function runBench() {
     ${grid('Tests', COMP)}${R.error ? `<p class="hint">One step stopped: ${esc(R.error)}.</p>` : ''}
     <div class="btns"><button type="button" class="btn small" id="benchCopy">Copy results</button></div>
     <textarea id="benchText" hidden>${esc(text)}</textarea></div>`;
-  if (restart) { try { sessionStorage.setItem('tree2go-bench', html); } catch (e) { } location.reload(); return; }   // no work was open: the app starts empty again, and shows the summary then
+  // for a test run by a script (?bench=auto): the results, in milliseconds, with what the browser tells of the computer
+  window.__benchResult = { results: Object.fromEntries(Object.entries(R).map(([k, v]) => [k, typeof v === 'number' ? Math.round(v) : v])), reference: BENCH_REF,
+    cores: navigator.hardwareConcurrency || null, memory: navigator.deviceMemory || null, userAgent: navigator.userAgent, date: new Date().toISOString(), text };
+  if (restart && !auto) { try { sessionStorage.setItem('tree2go-bench', html); } catch (e) { } location.reload(); return; }   // no work was open: the app starts empty again, and shows the summary then
   benchWindow('Performance', html, 'Close');
 }
+// Opened with ?bench=auto (a test run by a script): the test starts by itself, without asking.
+if (/[?&]bench=auto\b/.test(location.search)) setTimeout(() => runBench(true), 1500);
 // The summary of a test that ended with the app starting again (no work was open).
 setTimeout(() => { let h = null; try { h = sessionStorage.getItem('tree2go-bench'); sessionStorage.removeItem('tree2go-bench'); } catch (e) { } if (h) benchWindow('Performance', h, 'Close'); }, 300);
 // Everything a project holds, as an object (Save project, and the copy kept while the performance test runs).
@@ -3855,12 +3867,12 @@ function cullView() {
 }
 const cullIn = (C, p) => !C || (p[0] >= C.x0 && p[0] <= C.x1 && p[1] >= C.y0 && p[1] <= C.y1);
 // After the view changed: draw again if it left the part drawn, or zoomed far enough to show or hide names.
-let cullT = 0;
+let cullT = 0, cullPending = false;
 function cullCheck() {
   if (!cullOn || cullPause) return;
   const W = svg.clientWidth || 1000, H = svg.clientHeight || 800, k = view.k, x0 = -view.tx / k, y0 = -view.ty / k, x1 = x0 + W / k, y1 = y0 + H / k;
   const out = x0 < cullOn.x0 || y0 < cullOn.y0 || x1 > cullOn.x1 || y1 > cullOn.y1, zoomed = k / cullOn.k > 2 || cullOn.k / k > 2;
-  if (out || zoomed) { clearTimeout(cullT); cullT = setTimeout(() => { if (cullOn) render(); }, 120); }
+  if (out || zoomed) { clearTimeout(cullT); cullPending = true; cullT = setTimeout(() => { cullPending = false; if (cullOn) render(); }, 120); }
 }   // a frame waiting to build the click areas of a large tree, and which drawing they belong to
 function renderOnce() {
   alnSync();
