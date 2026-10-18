@@ -108,7 +108,7 @@ aside{width:var(--side); flex:0 0 auto; transition:margin-left .3s cubic-bezier(
 /* Separadores y resaltado del menú lateral: se desvanecen hacia los costados.
    --fade    = degradado de la línea separadora en cada lado (0% = bordes duros, 50% = solo el centro).
    --hl-fade = degradado del resaltado al pasar el cursor (más bajo = empieza más pegado al borde). */
-aside{--fade:28%; --hl-fade:6%}
+aside, .pagesheet{--fade:28%; --hl-fade:6%}   /* the same highlights in the panel and in Page settings */
 /* Panel sections: each one is a <details> element that opens and closes, with a sticky title. */
 details{border:0}
 /* Dividers between sections: an element exactly one screen pixel tall (--hair is set from the screen's pixel ratio),
@@ -270,6 +270,12 @@ html:has(body.refpage), body.refpage{height:auto; overflow:auto}   /* on its own
 .helpBody h1:first-child,.helpBody h2:first-child{margin-top:0}
 .modal .box.about .helpBody p{text-align:left; hyphens:manual}
 .helpBody .mdtable{overflow-x:auto; margin:0 0 10px}
+.helpBody details > summary{cursor:pointer; font-weight:700; color:var(--ink); padding:6px 0; list-style-position:outside}
+.helpBody details.refgroup{margin:22px 0 6px; border-top:1px solid var(--line); padding-top:6px}
+.helpBody details.refgroup > summary{margin:4px 0 10px}
+.helpBody details.refgroup > summary strong{font-size:1.5em !important; font-weight:700; vertical-align:middle}   /* a group: as large as a section title, in bold */   /* a group: the top level of the guide */
+.helpBody details.refgroup > blockquote{margin:0 0 18px; padding:10px 14px; border-left:3px solid var(--accent); background:var(--panel2); border-radius:0 8px 8px 0; color:var(--ink)}
+.helpBody details:not(.refgroup) > summary{font-size:1.05em} .helpBody details:not(.refgroup) > ul{margin-top:4px}
 /* inside the window, the rules of its own title and of the About must not reach the reference: sizes go from big to small */
 .modal .box.about .helpBody h1{font-family:var(--display); font-weight:400; font-size:26px; padding-right:0; margin:4px 0 8px}
 .modal .box.about .helpBody h2{font-family:var(--display); font-weight:400; font-size:22px; padding-right:0; margin:24px 0 8px}
@@ -301,8 +307,13 @@ textarea{width:100%; min-height:120px; resize:vertical; padding:8px; border:1px 
 .inline input[type=text]{flex:1; min-width:90px; padding:5px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg)}
 .inline select{padding:5px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg)}
 /* Subtitles inside a panel section ("› Ages"), with a fading separator line. */
-.subhead{font-size:13.5px; font-weight:600; color:var(--ink); margin:8px 0 -2px; padding-top:10px; border-top:1px solid var(--line)}
-.subhead.fold{cursor:pointer; user-select:none}
+.subhead{font-size:13.5px; font-weight:600; color:var(--ink); margin:8px 0 -2px; padding-top:14px; border-top:1px solid var(--line)}
+.subhead.fold:not(.open){margin-bottom:-6px}   /* closed: its title halfway between its line and the next one */
+.subhead.fold{cursor:pointer; user-select:none; position:relative; isolation:isolate}
+.subhead.fold::after{content:""; position:absolute; left:-18px; right:-22px; top:10px; bottom:-4px; z-index:-1; pointer-events:none; opacity:0; transition:opacity .15s;
+  background:linear-gradient(to right, transparent, var(--panel2) var(--hl-fade, 40px), var(--panel2) calc(100% - var(--hl-fade, 40px)), transparent)}   /* the fade also outside the panel, as in Page settings */
+.pagesheet .subhead.fold:hover::after{opacity:1}   /* in Page settings only: in the panel only the sections light up */
+.pagesheet{overflow-x:hidden} .pagesheet .subhead.fold::after{right:-20px}   /* the sheet has 20 px on its right */
 .subhead.fold::before{transition:transform .15s}
 .subhead.fold.open::before{transform:rotate(45deg)}   /* the chevron points down when open */
 .subshut{display:none !important}
@@ -372,7 +383,7 @@ body.hastabs .status{top:50px}
 .drop.on{display:flex}
 
 /* Right-click menu: a floating panel with parts (sections), rows and buttons. */
-.pop{position:absolute; z-index:20; width:360px; max-height:calc(100% - 24px); overflow-y:auto; scrollbar-gutter:stable; background-color:var(--panel); opacity:1; isolation:isolate; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 30px rgba(20,25,35,.2); padding:12px 14px; display:none; flex-direction:column; gap:10px}
+.pop{position:absolute; z-index:20; width:360px; max-height:75%; overflow-y:auto; scrollbar-gutter:stable; background-color:var(--panel); opacity:1; isolation:isolate; border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 30px rgba(20,25,35,.2); padding:12px 14px; display:none; flex-direction:column; gap:10px}
 .pop.on{display:flex}
 .psel{padding:4px 6px; border:1px solid var(--line-strong); border-radius:6px; background:var(--panel); font-size:13px}
 .pop h3{margin:0; font-size:15px; font-weight:600; word-break:break-word; padding-right:26px}
@@ -402,7 +413,7 @@ body.hastabs .status{top:50px}
 .toast .tclose:hover{opacity:1}
 .pagesheet{position:fixed; width:min(380px, 92vw); max-height:min(80vh, 780px); overflow-y:auto; overscroll-behavior:contain; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:12px; box-shadow:0 14px 36px rgba(0,0,0,.2); z-index:60; text-align:left}
 .pagesheet .gone{display:none !important}
-.pagesheet .sheetsec{padding-top:14px; padding-bottom:10px}
+.pagesheet .sheetsec{padding-top:14px; padding-bottom:20px}   /* room under the last part, as in the panel */
 
 @media (max-width: 860px){
   aside{position:fixed; margin-left:0 !important; z-index:30; left:0; top:0; bottom:0; width:min(380px,90vw); transform:translateX(-102%); transition:transform .2s; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); box-shadow:0 0 30px rgba(0,0,0,.25)}
@@ -482,6 +493,13 @@ body.hastabs .status{top:50px}
 details.needtree > :not(summary){opacity:.45; pointer-events:none; user-select:none}
 .hint.warn{color:#B4412B}
 #confirmModal .box{position:relative} #confirmModal .box > .close{position:absolute; top:10px; right:10px; width:28px; height:28px; border:0; border-radius:6px; background:none; color:var(--muted, #667); font-size:20px; line-height:1; cursor:pointer} #confirmModal .box > .close:hover{background:rgba(0,0,0,.06); color:var(--ink)}
+.lightlock{opacity:.45; pointer-events:none; user-select:none}
+.tkedges{display:flex; flex-wrap:wrap; gap:4px 12px; justify-content:flex-end}
+.copyparts{display:flex; flex-direction:column; gap:6px; margin-top:10px} .copywrap > .subhead{margin-top:2px} .copyparts[hidden]{display:none} .copyparts .btns{margin-top:4px}
+.savefile{display:block}   /* the margins of its choices meet, as above */ .savetrees{margin-top:10px; padding-top:10px; border-top:1px solid var(--line)}
+.thinview #content path, .thinview #content line, .thinview #content polyline{vector-effect:non-scaling-stroke}   /* on screen only: exports draw the true widths */
+.benchrun{padding:14px 0; color:var(--ink)} .bench p{margin:0 0 10px}
+.benchgrid{display:grid; grid-template-columns:1fr auto auto; gap:6px 18px; margin:6px 0 12px; font-size:13px} .benchgrid b{font-weight:600; border-bottom:1px solid var(--line); padding-bottom:4px} .benchgrid span:nth-child(3n+2), .benchgrid span:nth-child(3n){text-align:right; font-variant-numeric:tabular-nums}
 .rsmsg{margin:14px 0 16px; line-height:1.45}
 .rsnote{margin:8px 0; padding:8px 10px; border-radius:8px; font-size:12.5px; line-height:1.45; color:var(--ink); background:rgba(200,85,61,.09); border:1px solid rgba(200,85,61,.32)}
 .rsform{display:grid; grid-template-columns:auto 1fr; gap:10px 12px; align-items:center; margin-top:12px} .rsform label{display:contents} .rsform label > :not(span:first-child){justify-self:start}
@@ -529,6 +547,10 @@ aside > .sidefoot{margin-top:auto}
 .useg.wide{width:auto; min-width:180px}
 .useg.wide button{padding:0 10px}
 .treetools{display:flex; flex-direction:column; gap:8px}
+.treetools > .hint, .copyparts > .hint, .sidelayers > .hint, .geobox .tmeta, .tpicker > .hint{margin:0; line-height:1.45}
+.copyparts{gap:8px !important} .copyparts label.opt, .nelayers label.opt, .tkedges label.opt{display:flex; align-items:center; gap:8px; font-size:13.5px}
+.copyparts label.opt input, .nelayers label.opt input{margin:0}
+.sec > .btns:last-child, .treetools > .btns:last-child, .copyparts > .btns:last-child{margin-bottom:0}
 aside .gone{display:none !important}
 /* right-click menus: rows that do not apply are hidden, except the ones marked to stay */
 .pop .kv.off:not(.keep), .pop .grp.off:not(.keep), .pop .row.off:not(.keep){display:none}
@@ -549,7 +571,7 @@ header .mrcapop .hint{color:var(--muted); margin:0}
 .selmode .mrcawrap > button{border-radius:0 7px 7px 0; border-left:0}
 header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-color:var(--accent); color:#fff}
 .tpicker{display:flex; flex-direction:column; gap:8px}
-.tabitem{display:flex; flex-direction:column; gap:6px; padding:10px 12px; border:1px solid var(--line); border-radius:8px}
+.tabitem{display:flex; flex-direction:column; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:8px}
 .tabitem .thead{display:flex; align-items:center; justify-content:space-between; gap:10px}
 .tabitem .tname{flex:1; min-width:0; font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .tabitem .tmeta{font-size:12px; line-height:1.45; color:var(--muted)}
@@ -585,8 +607,22 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
   <header>
     <div class="brand">tree<span class="two">2</span>go<sub class="beta">BETA</sub></div>
     <div class="tb">
-      <button class="btn" id="openBtn" title="Open a tree2go project (.json) to continue where you left off">Import project</button>
-      <button class="btn" id="saveProjTop" title="Save the trees, their tabs, colors, styles and settings as a project file">Save project</button>
+      <!-- Import and Save: a project (the trees and everything with them), or a style (the options of the panel, for other trees) -->
+      <div class="expwrap">
+        <button class="btn" id="impMenuBtn" aria-haspopup="true" aria-expanded="false">Import <span aria-hidden="true">▾</span></button>
+        <div class="expmenu" id="impMenu" role="menu" hidden>
+          <button type="button" role="menuitem" id="openBtn" title="Open a tree2go project (.json) to continue where you left off">Project<span>Trees and all</span></button>
+          <button type="button" role="menuitem" id="impStyleTop" title="Apply a style saved from another tree to this one">Style<span>Onto this tree</span></button>
+        </div>
+        <input type="file" id="styleInTop" accept=".json" hidden>
+      </div>
+      <div class="expwrap">
+        <button class="btn" id="saveMenuBtn" aria-haspopup="true" aria-expanded="false">Save <span aria-hidden="true">▾</span></button>
+        <div class="expmenu" id="saveMenu" role="menu" hidden>
+          <button type="button" role="menuitem" id="saveProjTop" title="Save the trees, their tabs, colors, styles and settings as a project file">Project<span>Trees and all</span></button>
+          <button type="button" role="menuitem" id="saveStyleTop" title="Save every option of the panel that can go to another tree">Style<span>For other trees</span></button>
+        </div>
+      </div>
       <button class="btn" id="clearBtn" title="Remove the trees and their tabs, every setting, the attachments and the images, and start again">Clear session</button>
       <button class="btn icon" id="undoBtn" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
       <button class="btn icon" id="redoBtn" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↷</button>
@@ -629,7 +665,7 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
       <button class="btn about-btn" id="aboutBtn" title="What tree2go is and how to use it">About</button>
     </div>
     <input type="file" id="fileIn" hidden>
-    <input type="file" id="projIn" accept=".json,application/json" hidden>
+    <input type="file" id="projIn" accept=".json,.gz,application/json,application/gzip" hidden>
   </header>
 
   <div class="body">
@@ -1249,7 +1285,7 @@ const DEFAULTS = {
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
   catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
-  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', gmProj: 'equalearth', gmTable: '', gmLon: '', gmLat: '', gmShape: 'circle', gmSizeBy: 'fixed', gmSize: 3.5, gmSizeMin: 2.5, gmSizeMax: 12, gmColorBy: 'single', gmColor: '#C8553D', gmColorVar: '', gmSizeVar: '', gmPts: {}, gmPal: 'viridis', gmRev: false, gmOp: 85, gmBorder: '#ffffff', gmBorderW: 0.6, gmCluster: 0, gmCount: true, gmMixColor: '#9AA0A6', gmLines: false, gmLineFrom: 'tip', gmLineColor: '#8A8F98', gmLineW: 0.6, gmLineOp: 70, gmLineStyle: 'solid', gmLegend: true, gmLegendTitle: '', gmLineColorBy: 'single', gmLife: 'all', gmPaleo: false, gmAge: 50, gmModel: 'PALEOMAP', gmMap: '', neRes: '110m', neLayers: ['land'], gpAge: 50, gpModel: 'PALEOMAP', axisShow: true, axisPos: 'bottom', geoPos: 'bottom', ax2On: false, ax2Pos: 'top', ax2Interval: 0, ax2Minor: 0, ax2Decimals: -1, ax2Title: '', ax2Gap: 8, geoTitle: true, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
+  ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', gmProj: 'equalearth', gmTable: '', gmLon: '', gmLat: '', gmShape: 'circle', gmSizeBy: 'fixed', gmSize: 3.5, gmSizeMin: 2.5, gmSizeMax: 12, gmColorBy: 'single', gmColor: '#C8553D', gmColorVar: '', gmSizeVar: '', gmPts: {}, gmPal: 'viridis', gmRev: false, gmOp: 85, gmBorder: '#ffffff', gmBorderW: 0.6, gmCluster: 0, gmCount: true, gmMixColor: '#9AA0A6', gmLines: false, gmLineFrom: 'tip', gmLineColor: '#8A8F98', gmLineW: 0.6, gmLineOp: 70, gmLineStyle: 'solid', gmLegend: true, gmLegendTitle: '', gmLineColorBy: 'single', gmLife: 'all', gmPaleo: false, gmAge: 50, gmModel: 'PALEOMAP', gmMap: '', neRes: '110m', neLayers: ['land'], gpAge: 50, gpModel: 'PALEOMAP', axisShow: true, axisPos: 'bottom', geoPos: 'bottom', ax2On: false, ax2Pos: 'top', ax2Interval: 0, ax2Minor: 0, ax2Decimals: -1, ax2Title: '', ax2Gap: 8, geoTitle: true, copyParts: {}, lightMode: false, tgOn: false, tgTab: 0, tgFrom: 'label', tgColorBy: 'single', tgColor: '#8A8F98', tgMismatch: 'blend', tgGrey: '#C8CCD2', tgW: 0.8, tgOp: 80, tgStyle: 'solid', tgCurve: 0, tgGap: 140, tgWidth: 0, tgLabels: true, tgLines: {}, tgBridge: true, screenLines: 'visible', renderOpt: true, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
 
 // Default settings merged with saved ones, with the migrations that keep older sessions and projects working.
@@ -1927,15 +1963,30 @@ const SECTIONS_RAW = [
     { k: 'gmMixColor', type: 'color', label: 'Color of groups with several colors', enable: s => !!s.gmTable && s.gmCluster > 0, sub: true },
   ]},
   { title: 'Images and visual elements', custom: 'images' },
+  { title: 'Tanglegram', items: [
+    { k: 'tgOn', type: 'check', label: 'Show a tanglegram', enable: s => !tgWhy(s) },
+    { type: 'hint', text: s => { const w = tgWhy(s); return w ? w : ''; } },
+    { type: 'custom', build: tgBox },
+    { type: 'head', label: 'Lines' },
+    { k: 'tgFrom', type: 'seg', label: 'From', opts: [['label', 'The names'], ['tip', 'The tips']], enable: s => s.tgOn, sub: true },
+    { k: 'tgColorBy', type: 'select', label: 'Color', opts: [['single', 'One color'], ['highlight', 'As the highlights'], ['branch', 'As the branches']], enable: s => s.tgOn, sub: true },
+    { k: 'tgColor', type: 'color', label: 'Line color', enable: s => s.tgOn && s.tgColorBy === 'single', sub: true },
+    { k: 'tgMismatch', type: 'select', label: 'Where the colors differ', opts: [['blend', 'From one to the other'], ['grey', 'One neutral color']], enable: s => s.tgOn && s.tgColorBy !== 'single', sub: true },
+    { k: 'tgGrey', type: 'color', label: 'Neutral color', enable: s => s.tgOn && s.tgColorBy !== 'single', sub: true },
+    { k: 'tgW', type: 'number', label: 'Width', min: 0, max: 20, step: 0.1, unit: 'px', enable: s => s.tgOn, sub: true },
+    { k: 'tgOp', type: 'number', label: 'Opacity', min: 0, max: 100, step: 5, unit: '%', enable: s => s.tgOn, sub: true },
+    { k: 'tgStyle', type: 'seg', label: 'Style', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], enable: s => s.tgOn, sub: true },
+    { k: 'tgCurve', type: 'number', label: 'Curvature (0 for straight)', min: 0, max: 100, step: 5, unit: '%', enable: s => s.tgOn, sub: true },
+    { type: 'hint', text: s => s.tgOn ? 'Right-click a line to give it a color, width or style of its own.' : '' },
+    { type: 'head', label: 'Placement' },
+    { k: 'tgGap', type: 'number', label: 'Distance between the trees', min: 10, max: 2000, step: 5, unit: 'px', enable: s => s.tgOn, sub: true },
+    { k: 'tgWidth', type: 'number', label: 'Width (0 as this tree)', min: 0, max: 5000, step: 10, unit: 'px', enable: s => s.tgOn, sub: true },
+    { k: 'tgLabels', type: 'check', label: 'Names of its tips', enable: s => s.tgOn, sub: true },
+    { k: 'tgBridge', type: 'check', label: 'Join the highlights of the same clade', enable: s => s.tgOn, sub: true },
+    { type: 'hint', text: s => s.tgOn && s.tgBridge !== false ? 'A clade highlighted in both trees, with the very same tips, is joined across the gap: in one color, or from one color to the other.' : '' },
+  ]},
   { title: 'Page', where: 'page', open: true, items: [
-    { k: 'bg', type: 'color', label: 'Background color' },
-    { type: 'head', label: 'Colors' },
-    { k: 'paletteName', type: 'select', label: 'Palette', opts: PALETTE_OPTS.filter(o => o[0] !== 'custom') },
-    { type: 'hint', text: () => 'The colors offered in the menus and for new categories. Colors already in use do not change.' },
-    { k: 'cvdSim', type: 'select', label: 'Preview as seen with', opts: [['none', 'Normal vision'], ['deutan', 'Deuteranopia (red-green)'], ['protan', 'Protanopia (red-green)'], ['tritan', 'Tritanopia (blue-yellow)'], ['gray', 'No color (grayscale)']] },
-    { type: 'hint', text: s => s.cvdSim !== 'none' ? 'Only the screen changes (exported files keep the real colors).' : '' },
-    { type: 'head', label: 'Plot title' },
-    { k: 'title', type: 'text', label: 'Text', sub: true },
+    { k: 'title', type: 'text', label: 'Plot title', sub: true },
     { k: 'titleSize', type: 'number', label: 'Size', min: 4, max: 300, step: 1, unit: 'px', enable: s => !!s.title, sub: true },
     { k: 'titleV', type: 'seg', label: 'Vertical position', opts: [['top', 'Top'], ['bottom', 'Bottom']], enable: s => !!s.title, sub: true },
     { k: 'titleH', type: 'seg', label: 'Horizontal position', opts: [['left', 'Left'], ['center', 'Center'], ['right', 'Right']], enable: s => !!s.title, sub: true },
@@ -1943,7 +1994,19 @@ const SECTIONS_RAW = [
     { k: 'titleDy', type: 'range', label: 'Move up or down', min: -400, max: 400, step: 1, hmin: -10000, hmax: 10000, unit: 'px', enable: s => !!s.title, sub: true },
     { k: 'titleBold', type: 'check', label: 'Bold', enable: s => !!s.title, sub: true },
     { k: 'titleItalic', type: 'check', label: 'Italic', enable: s => !!s.title, sub: true },
-    { k: 'titleColor', type: 'color', label: 'Color', enable: s => !!s.title, sub: true }
+    { k: 'titleColor', type: 'color', label: 'Color', enable: s => !!s.title, sub: true },
+    { k: 'bg', type: 'color', label: 'Background color' },
+    { k: 'paletteName', type: 'select', label: 'Palette', opts: PALETTE_OPTS.filter(o => o[0] !== 'custom') },
+    { type: 'hint', text: () => 'The colors offered in the menus and for new categories. Colors already in use do not change.' },
+    { k: 'cvdSim', type: 'select', label: 'Color blind preview', opts: [['none', 'Normal vision'], ['deutan', 'Deuteranopia (red-green)'], ['protan', 'Protanopia (red-green)'], ['tritan', 'Tritanopia (blue-yellow)'], ['gray', 'No color (grayscale)']] },
+    { type: 'hint', text: s => s.cvdSim !== 'none' ? 'Only the screen changes (exported files keep the real colors).' : '' },
+    { k: 'renderOpt', type: 'check', label: 'Render optimization' },
+    { type: 'hint', text: s => s.renderOpt === false ? 'Turned off: every element is drawn, whatever its size and place. With very large trees, the app can get slow.' : 'Ways to view and edit very large trees quickly: only the elements in the view, or large enough to be seen, are drawn. Turning it off can lower the performance.' },
+    { k: 'screenLines', type: 'select', label: 'Very thin lines on screen', opts: [['visible', 'Always visible'], ['true', 'As exported']] },
+    { type: 'hint', text: s => s.screenLines === 'true' ? 'Lines keep their true width on screen, however far out the view: thin lines look faint or vanish, as they will in a small print of the figure.' : 'Zoomed far out, lines that would vanish are drawn one pixel wide, on screen only. Exports keep the true widths.' },
+    { k: 'lightMode', type: 'check', label: 'Lighten heavy elements while working' },
+    { type: 'hint', text: s => 'Additional visual elements stay where they are and can be moved, but are shown as light placeholders. This only takes their drawing off the screen to keep the app quick: they are still there, and exports draw them in full with their current options. Untick it to see and edit them again.' },
+    { type: 'custom', build: copyPartsBox },
   ]}
 ];
 // Side plot options appear only once a table with matching names is chosen
@@ -1992,7 +2055,14 @@ function buildSide() {
   // only Expand and Collapse: Info on hover has its own action
   foot.querySelectorAll('button[data-all]').forEach(b => b.onclick = () => b.dataset.all === '1' ? expandAllSections() : collapseAllSections()); side0.appendChild(foot);
   refreshVisibility();
-  if (again) { side0.scrollTop = wasTop; setTimeout(() => { side0.scrollTop = wasTop; }); setTimeout(() => { side0.scrollTop = wasTop; }, 60); }   // again once the boxes are filled
+  if (again) {   // its place again, every time its content changes size during the first second (boxes filled late, a heavy figure)
+    side0.scrollTop = wasTop; setTimeout(() => { side0.scrollTop = wasTop; }); setTimeout(() => { side0.scrollTop = wasTop; }, 60);
+    if (window.ResizeObserver && side0.firstElementChild) {
+      let moved = false; const stop = () => { ro.disconnect(); side0.removeEventListener('wheel', mark); side0.removeEventListener('pointerdown', mark); }, mark = () => { moved = true; stop(); };
+      const ro = new ResizeObserver(() => { if (!moved) side0.scrollTop = wasTop; });
+      [...side0.children].forEach(c => ro.observe(c)); side0.addEventListener('wheel', mark, { passive: true }); side0.addEventListener('pointerdown', mark); setTimeout(stop, 1000);   // not against the user scrolling
+    }
+  }
 }
 
 // Number box of the panel, with its unit inside.
@@ -2046,12 +2116,20 @@ function clearOwn(n, spec) {
   if (n.st) { delete n.st[key]; if (!Object.keys(n.st).length) n.st = null; }
 }
 // Shows under each panel option how many elements use their own value, with a button to undo them all.
+let OVR_PARSED = null;   // the specs of OVERRIDES, split once
+const ownP = (n, kind, key) => kind === 'prop' ? (key === 'bold' ? !!n.bold && !n.children.length : n[key] != null && n[key] !== '')
+  : (kind === 'tipst' && n.children.length) || (kind === 'nodest' && !n.children.length) ? false : !!(n.st && n.st[key] != null && n.st[key] !== '');
 function refreshOverrides() {
-  const els = allElements();
-  for (const [k, specs] of Object.entries(OVERRIDES)) {
+  // one walk over the elements for every row at once; elements with no value of their own (most of them) are passed at once
+  if (!OVR_PARSED) OVR_PARSED = Object.entries(OVERRIDES).map(([k, specs]) => [k, specs.map(sp => sp.split(':'))]);
+  const props = [...new Set(OVR_PARSED.flatMap(([, ps]) => ps.filter(p => p[0] === 'prop').map(p => p[1])))], counts = new Map(OVR_PARSED.map(([k]) => [k, 0]));
+  for (const n of allElements()) {
+    if (!n.st && !props.some(key => key === 'bold' ? n.bold : n[key] != null && n[key] !== '')) continue;
+    for (const [k, ps] of OVR_PARSED) if (ps.some(([kind, key]) => ownP(n, kind, key))) counts.set(k, counts.get(k) + 1);
+  }
+  for (const [k, count] of counts) {
     const row = document.querySelector(`.row[data-k="${k}"]`); if (!row) continue;
     const note = row.querySelector('.ovr'); if (!note) continue;
-    const count = els.filter(n => specs.some(sp => hasOwn(n, sp))).length;
     note.hidden = !count;
     if (count) note.querySelector('span').textContent = count === 1 ? '1 element uses its own value' : `${count} elements use their own value`;
   }
@@ -2309,6 +2387,8 @@ function changeSoon(it) { chItem = it; if (!chRaf) chRaf = requestAnimationFrame
 function renderSoon() { if (!rRaf) rRaf = requestAnimationFrame(() => { rRaf = 0; render(); }); }
 // Reacts to a panel change: redraws, refits when needed, saves and refreshes the panel.
 function changed(it) {
+  if (it && it.k === 'screenLines') setTimeout(applyView);
+  if (it && it.k === 'lightMode') { figImages.forEach(m => { delete m.lightOv; }); setTimeout(syncLightBox); }   // Page settings sets it for all, over any one by one
   if (it && it.k === 'ax2On' && settings.ax2On) { const main = settings.geoOn ? settings.geoPos : settings.axisPos; settings.ax2Pos = main === 'top' ? 'bottom' : 'top'; const r = allItems().find(x => x.k === 'ax2Pos'); if (r) syncControl(r); }   // the other side
   if (it && /^gm(Table|Lon|Lat)$/.test(it.k)) setTimeout(geoCheck, 50);   // points and map: do they match?
   if (it && it.k === 'brcTable') { const t = (settings.dataTables || []).find(x => x.id === settings.brcTable); settings.brcCol = t ? (numericCols(t).find(c => /rate/i.test(c)) || numericCols(t)[0] || '') : ''; }
@@ -2335,13 +2415,13 @@ function dataPanel() {
     <div class="btns">
       <button class="btn primary" id="loadTxt">Draw tree</button>
       <button class="btn" id="openBtn2" title="Open a Newick, NEXUS or plain-text tree file">Open tree</button>
-      <button class="btn small debug" id="debugTree" title="Temporary, for testing">Load test tree (debug)</button>
+      <button class="btn small" id="benchBtn" title="Times tree2go on this computer with a large tree and a large set of trees. Your work is kept.">Test performance</button>
     </div>
 `;
   setTimeout(() => {
     $('loadTxt').onclick = () => loadText($('nwkIn').value);
     $('openBtn2').onclick = () => $('fileIn').click();
-    $('debugTree').onclick = () => loadText(DEBUG_TREE);
+    $('benchBtn').onclick = () => runBench();
     $('nwkIn').addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') loadText($('nwkIn').value); });
   });
   return w;
@@ -2483,12 +2563,10 @@ function addTableFile(file) {
     if (!bin && !numericCols(t).length) { toast('No column with numbers or presence marks was found in ' + file.name); return; }
     if (tree) pushUndo(true);
     settings.dataTables = [...(settings.dataTables || []), t];
-    // what the table is most likely for: presence/absence → categories; values for internal nodes too → branch colors; otherwise → bars
-    const inner = tree ? (() => { const m = tableIndex(t); let k = 0; walkAll(tree, x => { if (x.children.length && x.name && m.has(normTip(x.name))) k++; }); return k; })() : 0;
-    // side plots start on None: the user chooses which table each one shows (branch colours still take a table with internal nodes)
-    if (inner > 0 && !bin) { settings.brcTable = t.id; settings.brcCol = numericCols(t).find(c => /rate/i.test(c)) || numericCols(t).find(c => c !== t.header[0]) || numericCols(t)[0]; }
+    // Nothing takes a table by itself: every plot and every style shown from a table starts on None, until the user chooses it.
+    // (A table can match a tree by chance: support values as names of internal nodes, or one tip, would colour branches unasked.)
     buildSide();
-    for (const d of document.querySelectorAll('#side details')) if (d.querySelector('#tabList') || (settings.brcTable === t.id ? d.querySelector('.row[data-k=brcTable]') : d.querySelector('#barCols, #catCols'))) d.open = true;
+    for (const d of document.querySelectorAll('#side details')) if (d.querySelector('#tabList')) d.open = true;
     dataChanged(file.name + ': ' + matchInfo(t));
   };
   r.onerror = () => toast('The file could not be read');
@@ -2864,11 +2942,15 @@ function kdeValues(S, k, positiveOnly) {
   if (k.src === 'files') { const [id, c] = String(k.col).split(KSEP); return nodeValues(S, id, c, positiveOnly); }
   return nodeValues(S, k.src, k.col, positiveOnly);
 }
+// Ages written in labels count from the age of the youngest tip, in the unit of the axis, as the time axis does.
+// Only the numbers shown change: the tree keeps its own heights.
+const AGE_KEY = /^(height|age)(_|$)/i;
+const ageOut = (v, S = settings) => S.axisOn ? (S.axisOffset || 0) + v * (S.axisUnit > 0 ? S.axisUnit : 1) : v;
 function nodeValues(S, src, col, positiveOnly) {
   const val = new Map(); if (!src || !col || !tree) return val;
   if (src === '__len') { walkAll(tree, x => { if (x.parent && typeof x.len === 'number' && isFinite(x.len) && (!positiveOnly || x.len > 0)) val.set(x, x.len); }); return val; }   // the branch lengths themselves
   if (src === '__sup') { walkAll(tree, x => { const v = x.children.length && x.parent ? supValue(x) : null; if (v != null && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, v); }); return val; }   // the support of every internal node
-  if (src === 'meta') { walkAll(tree, x => { const v = x.meta && x.meta[col]; if (typeof v === 'number' && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, v); }); return val; }
+  if (src === 'meta') { const age = AGE_KEY.test(col); walkAll(tree, x => { const v = x.meta && x.meta[col]; if (typeof v === 'number' && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, age ? ageOut(v, S) : v); }); return val; }   // ages from the youngest tip
   const t = (S.dataTables || []).find(x => x.id === src), ci = t ? t.header.indexOf(col) : -1; if (!t || ci < 0) return val;
   const m = tableIndex(t);
   walkAll(tree, x => { if (!x.name) return; const r = m.get(normTip(x.name)); const v = r ? cellNum(r[ci], t.delim) : null; if (v != null && (!positiveOnly || v > 0)) val.set(x, v); });
@@ -2948,7 +3030,11 @@ const treeSetRecord = () => treeSet && { name: treeSet.name, count: treeSet.coun
 // Rebuilds a tree set summary from saved data.
 const treeSetRevive = r => r && r.clades ? { name: r.name, count: r.count, total: r.total ?? r.count, burnin: r.burnin || 0, hasLen: r.hasLen, unrooted: !!r.unrooted, ref: r.ref || null, tot: r.tot || null, clades: new Map(r.clades.map(([k, n, ages, lens, sups]) => [k, { n, ages, lens: lens || [], sups: sups || [] }])) } : null;
 // Keeps the tree set summary in the browser.
-function persistTreeSet() { try { if (treeSet) localStorage.setItem('tree2go-trees', JSON.stringify(treeSetRecord())); else localStorage.removeItem('tree2go-trees'); } catch (e) { toast('The summary of the trees is too large to be kept between sessions, save a project to keep it.'); } }
+function persistTreeSet() {   // kept in the browser when it is free: the user does not wait for it
+  const run = () => persistTreeSetNow(); if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 2000 }); else setTimeout(run, 50);
+}
+function persistTreeSetNow() {
+  if (benchOn) return; try { if (treeSet) localStorage.setItem('tree2go-trees', JSON.stringify(treeSetRecord())); else localStorage.removeItem('tree2go-trees'); } catch (e) { toast('These trees are too large for the browser to keep after you close the app. Nothing is lost now: to keep them for next time, save a project with its trees.'); } }
 // Loads the tree set summary kept in the browser.
 function restoreTreeSet() { try { treeSet = treeSetRevive(JSON.parse(localStorage.getItem('tree2go-trees') || 'null')); } catch (e) { treeSet = null; } }
 // Independent copy of a tree.
@@ -3242,14 +3328,88 @@ async function exportName(ext, what, suffix = '') {
   return name + ext;
 }
 // Saves the project file: trees, tabs, settings, tables, images, SIMMAP and tree set summary.
-async function saveProject() {
-  if (!tree) return toast('Load a tree first');
-  const suggested = settings.projectName || (settings.title || 'tree').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || 'tree';
-  let name = await askName(suggested, { title: 'Save project', ext: '.tree2go.json', ok: 'Save project' });
-  if (name == null) return;
-  name = name.replace(/\.tree2(go|paper)\.json$|\.json$/i, '').replace(/[\\/:*?"<>|]+/g, '').trim() || 'tree';
-  settings.projectName = name; persist();
-  const proj = {
+/* ================= Performance test (Tree section) =================
+   Downloads two test files (a tree of 20,000 tips and a set of 10,000 trees of 50 tips), times what the app does with
+   them on this computer, then gives back the user's work as it was. Nothing is written in the browser meanwhile. */
+const BENCH_SRC = {
+  tree: ['content/bench/big20k.nwk', 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/bench/big20k.nwk'],
+  set: ['content/bench/set1000x1000.t', 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/bench/set1000x1000.t'],
+  set2: ['content/bench/set10000x100.t', 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/bench/set10000x100.t'],
+};
+// the times on the computer tree2go was tuned on, to compare with
+const BENCH_REF = { open: 1200, reroot: 646, ladder: 541, nwk: 34, svg: 2700, pdf: 3400, read: 7700, maj: 205, mcc: 640, read2: 5600, maj2: 108, mcc2: 691 };   // 1 processor core, about 4 GB of memory
+const benchNext = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+function benchWindow(title, html, closeLabel) {
+  $('cTitle').textContent = title; $('cText').innerHTML = html;
+  const cp = document.getElementById('benchCopy'); if (cp) cp.onclick = () => { const t = document.getElementById('benchText').value; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('The results are copied, as text'), () => { const a = document.getElementById('benchText'); a.hidden = false; a.select(); toast('Select and copy the text shown'); }); }; const m = $('confirmModal'); m.hidden = false;
+  $('cCancel').hidden = true; const x = m.querySelector('.box > .close'); if (x) x.hidden = true;
+  $('cOk').hidden = !closeLabel; $('cOk').disabled = false; $('cOk').className = 'btn primary'; $('cOk').textContent = closeLabel || '';
+  $('cOk').onclick = () => { m.hidden = true; $('cCancel').hidden = false; $('cOk').hidden = false; };
+  m.onclick = m.onkeydown = null;
+}
+async function runBench() {
+  if (!navigator.onLine) return benchWindow('Test performance', 'The test downloads its files from the internet, and this computer seems to be offline. Connect it and try again.', 'Close');
+  const ok = await askConfirm({ title: 'Test performance', ok: 'Run the test', okClass: 'primary', cancel: 'Cancel', focusOk: true, dismiss: true,
+    html: 'tree2go downloads three test files (about 38 MB: a tree of 20,000 tips, 1,000 trees of 1,000 tips and 10,000 trees of 100 tips) and times what it does with them on this computer. It takes a minute or two. Your work is kept and comes back as it was.' });
+  if (!ok) return;
+  const step = t => { $('cText').innerHTML = `<div class="benchrun">${t}</div>`; };
+  benchWindow('Testing performance', '', '');
+  step('Downloading the test files…');
+  let T = null, ST = null, ST2 = null;
+  try { const a = await fetchFirst(BENCH_SRC.tree), b = await fetchFirst(BENCH_SRC.set), c = await fetchFirst(BENCH_SRC.set2); T = a && a.text; ST = b && b.text; ST2 = c && c.text; } catch (e) { }
+  if (!T || !ST || !ST2) return benchWindow('Test performance', 'The test files could not be downloaded. The test needs an internet connection.', 'Close');
+  // the user's work, kept whole (the trees of a set too), and nothing written in the browser until it is back
+  const had = !!tree, snap = had ? projectObject() : null;
+  if (snap && treeSet && treeSet.trees && treeSet.trees.length > 1) snap.treesAll = { name: treeSet.name, recs: treeSet.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0]),
+    state: { skip: treeSet.skip || 0, burnin: treeSet.burnin || 0, mode: treeSet.mode, pct: treeSet.pct, shown: treeSet.shown, resample: treeSet.resample || null, clockScaled: !!treeSet.clockScaled } };
+  const keep = snap ? JSON.parse(JSON.stringify(snap)) : null;
+  benchOn = true; const R = {};
+  const time = async (key, label, fn) => { step(`${label}…`); await benchNext(); const a = performance.now(); await fn(); R[key] = performance.now() - a; };
+  const shown = async fn => { fn(); await benchNext(); };   // until the result is on screen
+  try {
+    await time('open', 'Opening a tree of 20,000 tips', () => shown(() => loadText(T)));
+    await new Promise(r => setTimeout(r, 400));
+    await time('reroot', 'Rerooting it', () => shown(() => { const L = leaves(tree), t = L[Math.floor(L.length / 3)]; tree = reroot(tree, t); setTree(tree, true); }));
+    await time('ladder', 'Ladderizing it', () => shown(() => { ladderize(tree, true); render(); }));
+    await time('nwk', 'Saving it as Newick', () => { toNewick(tree); });
+    await time('svg', 'Exporting it as SVG', () => { buildSVG(); });
+    await time('pdf', 'Exporting it as PDF', () => { const sv = buildSVG(); svgToPdf(sv, 595, []); });
+    await time('read', 'Reading 1,000 trees of 1,000 tips', () => shown(() => loadTreesTextNow(ST, 'Test trees')));
+    await time('maj', 'Building their majority-rule consensus', () => shown(() => { treeSet.mode = 'majority'; treeSet.pct = 50; refreshTreeSetBox(); const b = document.getElementById('tsBuild'); if (b) b.click(); }));
+    await time('mcc', 'Building their MCC tree', () => shown(() => { treeSet.mode = 'mcc'; refreshTreeSetBox(); const b = document.getElementById('tsBuild'); if (b) b.click(); }));
+    await time('read2', 'Reading 10,000 trees of 100 tips', () => shown(() => loadTreesTextNow(ST2, 'Test trees')));
+    await time('maj2', 'Building their majority-rule consensus', () => shown(() => { treeSet.mode = 'majority'; treeSet.pct = 50; refreshTreeSetBox(); const b = document.getElementById('tsBuild'); if (b) b.click(); }));
+    await time('mcc2', 'Building their MCC tree', () => shown(() => { treeSet.mode = 'mcc'; refreshTreeSetBox(); const b = document.getElementById('tsBuild'); if (b) b.click(); }));
+  } catch (e) { R.error = String(e && e.message || e); }
+  step('Giving back your work…'); await benchNext();
+  benchOn = false;
+  let restart = false;
+  try { if (keep) openProject(keep); else restart = true; } catch (e) { toast('Your work could not be given back: open your last saved project'); }
+  // the summary
+  const ms = v => v >= 1000 ? `${(v / 1000).toFixed(1)} s` : `${Math.round(v)} ms`;
+  const COMP = [['open', 'Open a tree of 20,000 tips'], ['reroot', 'Reroot it'], ['ladder', 'Ladderize it'], ['nwk', 'Save it as Newick'], ['svg', 'Export it as SVG'], ['pdf', 'Export it as PDF'],
+    ['read', 'Read 1,000 trees of 1,000 tips'], ['maj', 'Majority-rule consensus of them'], ['mcc', 'MCC tree of them'],
+    ['read2', 'Read 10,000 trees of 100 tips'], ['maj2', 'Majority-rule consensus of them'], ['mcc2', 'MCC tree of them']];
+  const ratios = COMP.map(([k]) => BENCH_REF[k] > 0 && R[k] > 0 ? R[k] / BENCH_REF[k] : null).filter(x => x);
+  const g = ratios.length ? Math.exp(ratios.reduce((a, b) => a + Math.log(b), 0) / ratios.length) : 1;
+  const verdict = g < 1.3 ? 'Fast: large trees and sets of trees will feel smooth.' : g < 2.5 ? 'Good: large trees take a moment, smaller ones feel smooth.' : 'Slow for very large files: lightening heavy elements (Page settings) and smaller samples of trees will help.';
+  const cores = navigator.hardwareConcurrency, mem = navigator.deviceMemory;
+  const machine = `${cores ? cores + (cores === 1 ? ' processor core' : ' processor cores') : 'processor cores not told by the browser'}${mem ? (mem >= 8 ? ', 8 GB of memory or more' : `, about ${mem} GB of memory`) : ''}`;
+  const grid = (title, rows) => `<div class="benchgrid"><b>${title}</b><b>Time</b><b>Reference</b>${rows.map(([k, l]) => `<span>${l}</span><span>${R[k] != null ? ms(R[k]) : '–'}</span><span>${BENCH_REF[k] ? ms(BENCH_REF[k]) : '–'}</span>`).join('')}</div>`;
+  const text = [`tree2go performance test (${new Date().toISOString().slice(0, 10)})`, `This computer: ${machine}. Browser: ${navigator.userAgent}`, '', 'Tests', ...COMP.map(([k, l]) => `${l}\t${R[k] != null ? ms(R[k]) : '-'}`), '', `Files: a tree of 20,000 tips (${Math.round(T.length / 1024)} KB), 1,000 trees of 1,000 tips (${(ST.length / 1048576).toFixed(1)} MB) and 10,000 trees of 100 tips (${(ST2.length / 1048576).toFixed(1)} MB)`].join('\n');
+  const html = `<div class="bench">
+    <p>${verdict} About ${g.toFixed(1)}× the time of the computer tree2go was tuned on (the reference: 1 processor core, about 4 GB of memory).</p>
+    ${grid('Tests', COMP)}${R.error ? `<p class="hint">One step stopped: ${esc(R.error)}.</p>` : ''}
+    <div class="btns"><button type="button" class="btn small" id="benchCopy">Copy results</button></div>
+    <textarea id="benchText" hidden>${esc(text)}</textarea></div>`;
+  if (restart) { try { sessionStorage.setItem('tree2go-bench', html); } catch (e) { } location.reload(); return; }   // no work was open: the app starts empty again, and shows the summary then
+  benchWindow('Performance', html, 'Close');
+}
+// The summary of a test that ended with the app starting again (no work was open).
+setTimeout(() => { let h = null; try { h = sessionStorage.getItem('tree2go-bench'); sessionStorage.removeItem('tree2go-bench'); } catch (e) { } if (h) benchWindow('Performance', h, 'Close'); }, 300);
+// Everything a project holds, as an object (Save project, and the copy kept while the performance test runs).
+function projectObject() {
+  return {
     format: 'tree2go-project', version: 1, saved: new Date().toISOString(),
     newick: toNewick(tree), tree: serialize(tree), settings, source: srcText, images: imageRecords(), smap: smapRecord(), trees: treeSetRecord(), ro: treeSetRO,
     alignments: alnSets.map(a => ({ name: a.name, len: a.len, type: a.type, seqs: [...a.seqs] })),
@@ -3257,18 +3417,43 @@ async function saveProject() {
     geo: [...geoStore],
     tabs: (() => { const r = tabsRecord(); if (r) for (const t of r.tabs) if (t.doc) t.doc.images = (t.doc.images || []).map(m => ({ ...m, src: imgStore.get(m.sid) })); return r; })()
   };
+}
+async function saveProject() {
+  if (!tree) return toast('Load a tree first');
+  const suggested = settings.projectName || (settings.title || 'tree').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || 'tree';
+  let name = await askName(suggested, { title: 'Save project', ext: '.tree2go.json', ok: 'Save project' });
+  if (name == null) return;
+  name = name.replace(/\.tree2(go|paper)\.json$|\.json$/i, '').replace(/[\\/:*?"<>|]+/g, '').trim() || 'tree';
+  settings.projectName = name; persist();
+  const proj = projectObject();
+
   // the same project without the attached files: tables, SIMMAP, MCMC log, alignments, pie charts and images
   const lite = { ...proj, settings: { ...settings, dataTables: [], pieData: null, pieOn: false, alnPick: '' }, smap: null, alignments: [], mcmc: null, images: [], geo: [],
     tabs: proj.tabs ? { ...proj.tabs, tabs: proj.tabs.tabs.map(t => t.doc ? { ...t, doc: { ...t.doc, images: [], settings: t.doc.settings ? { ...t.doc.settings, dataTables: [], pieData: null } : t.doc.settings } } : t) } : proj.tabs };
   const full = JSON.stringify(proj, null, 1), bare = JSON.stringify(lite, null, 1), size = t => { const b = new Blob([t]).size; return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; };
   const A = attachSummary(), imgs = figImages.length;
-  if (!A.list.length && !imgs) { saveFile(name + '.tree2go.json', full); return; }
+  // every tree of the set, so a burn-in, a consensus or one tree of it can be changed without the file
+  const allTrees = treeSet && treeSet.trees && treeSet.trees.length > 1 ? { name: treeSet.name, recs: treeSet.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0]),
+    state: { skip: treeSet.skip || 0, burnin: treeSet.burnin || 0, mode: treeSet.mode, pct: treeSet.pct, shown: treeSet.shown, resample: treeSet.resample || null, clockScaled: !!treeSet.clockScaled } } : null;
+  const treesText = allTrees ? JSON.stringify(allTrees) : '';
   const ok = await askConfirm({ title: 'Save project', ok: 'Save project', okClass: 'primary', focusOk: true,
-    html: `<label class="savechoice"><input type="radio" name="saveAtt" value="1" checked> <span><b>With the attached files</b> (${size(full)})<br>Anyone who opens it sees the same figure. It holds: ${[attachKinds(A), imgs ? `Images (${imgs})` : ''].filter(Boolean).join(', ')}.</span></label>
-      <label class="savechoice"><input type="radio" name="saveAtt" value="0"> <span><b>Without them</b> (${size(bare)})<br>The tree and every setting only. The files have to be attached again after opening it.</span></label>` });
+    html: `${!A.list.length && !imgs ? '<div hidden>' : ''}<label class="savechoice"><input type="radio" name="saveAtt" value="1" checked> <span><b>With the attached files</b> (${size(full)})<br>Anyone who opens it sees the same figure. It holds: ${[attachKinds(A), imgs ? `Images (${imgs})` : ''].filter(Boolean).join(', ')}.</span></label>
+      <label class="savechoice"><input type="radio" name="saveAtt" value="0"> <span><b>Without them</b> (${size(bare)})<br>The tree and every setting only. The files have to be attached again after opening it.</span></label>${!A.list.length && !imgs ? '</div>' : ''}${allTrees ? `
+      <label class="savechoice${A.list.length || imgs ? ' savetrees' : ''}"><input type="checkbox" id="saveTrees" checked> <span><b>With the ${allTrees.recs.length.toLocaleString('en')} trees of the set</b> (+${size(treesText)})<br>Without them, the summary tree is kept, but another burn-in, consensus or tree of the set needs the file again.</span></label>` : ''}
+      <div class="savefile${A.list.length || imgs || allTrees ? ' savetrees' : ''}">
+        <label class="savechoice"><input type="checkbox" id="saveCompact" checked> <span><b>Without indentation</b><br>Lighter, still plain text.</span></label>
+        <label class="savechoice"><input type="checkbox" id="saveGzip" checked> <span><b>Compressed</b><br>Much lighter (often several times), but not human-readable. tree2go opens it as any project.</span></label>
+      </div>` });
   if (!ok) return;
-  const withAtt = !document.querySelector('#confirmModal input[name=saveAtt][value="0"]').checked;
-  saveFile(name + '.tree2go.json', withAtt ? full : bare);
+  const r0 = document.querySelector('#confirmModal input[name=saveAtt][value="0"]'), withAtt = !(r0 && r0.checked), st = document.getElementById('saveTrees'), withTrees = !!(allTrees && st && st.checked);
+  const compact = !!(document.getElementById('saveCompact') || {}).checked, gz = !!(document.getElementById('saveGzip') || {}).checked;
+  const obj = withTrees ? { ...(withAtt ? proj : lite), treesAll: allTrees } : (withAtt ? proj : lite);
+  const txt = compact ? JSON.stringify(obj) : JSON.stringify(obj, null, 1);
+  if (!gz) return saveFile(name + '.tree2go.json', txt);
+  try {   // gzip, built into the browser
+    const bytes = new Uint8Array(await new Response(new Blob([txt]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+    saveFile(name + '.tree2go.json.gz', new Blob([bytes], { type: 'application/gzip' }));
+  } catch (e) { toast('This browser cannot compress files: saved without compression'); saveFile(name + '.tree2go.json', txt); }
 }
 // Opens a project file (and older formats).
 function openProject(o) {
@@ -3284,7 +3469,15 @@ function openProject(o) {
   srcText = o.source || o.newick || '';
   loadImageRecords(o.images); persistImages();
   smap = smapRevive(o.smap); persistSmap();
-  treeSet = treeSetRevive(o.trees); persistTreeSet(); treeSetRO = o.ro || null;
+  treeSet = treeSetRevive(o.trees); treeSetRO = o.ro || null;
+  if (o.treesAll && Array.isArray(o.treesAll.recs) && o.treesAll.recs.length > 1) {   // every tree of the set, saved with the project
+    try {
+      const trees = o.treesAll.recs.map(([nwk, nm, post, un]) => { const t = parseNewick(nwk); if (nm) t._name = nm; if (post != null) t._post = post; if (un) t._unrooted = true; return t; });
+      const S0 = o.treesAll.state || {}; treeSet = summarizeTrees(trees, o.treesAll.name || 'Trees', S0.burnin || 0);   // the burn-in, as a percentage
+      Object.assign(treeSet, { burnin: S0.burnin || treeSet.burnin, mode: S0.mode || 'majority', pct: S0.pct ?? 50, shown: S0.shown || 1, resample: S0.resample || null, clockScaled: !!S0.clockScaled });
+    } catch (e) { toast('The trees of the set could not be read back: the summary tree is kept'); }
+  }
+  persistTreeSet();
   if (o.tabs) for (const tb of o.tabs.tabs || []) if (tb.doc) tb.doc.images = (tb.doc.images || []).filter(m => m.src).map(m => { const { src, ...rest } = m; return { ...rest, sid: imgStoreAdd(src) }; });
   restoreTabs(o.tabs, treeSet);
   buildSide();
@@ -3295,6 +3488,7 @@ function openProject(o) {
 
 /* ================= Loading ================= */
 function setTree(t, keepView) {
+  hitsDefer = true;   // a tree opened: show it first, its click areas just after
   const need = Math.ceil(leafCount(t) * settings.fontSize * 1.2 / (2 * Math.PI) + 40);
   if (!keepView && need > settings.radius) setSetting('radius', Math.min(20000, Math.ceil(need / 10) * 10));
   tree = t; reindex(); sel.clear(); closePop(); runSearch();
@@ -3340,13 +3534,18 @@ let lastFileName = null;
 function readFile(file) {
   lastFileName = file.name;
   const r = new FileReader();
-  r.onload = () => {
-    const t = String(r.result), had = !!tree && !/^\s*\{/.test(t);   // a new tree (not a project) while files are attached
+  r.onload = async () => {
+    const u = new Uint8Array(r.result); let txt0;
+    if (u[0] === 0x1f && u[1] === 0x8b) {   // a compressed project (gzip)
+      try { txt0 = await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); }
+      catch (e) { return toast('This compressed file could not be read'); }
+    } else txt0 = new TextDecoder().decode(u);
+    const t = txt0, had = !!tree && !/^\s*\{/.test(t);   // a new tree (not a project) while files are attached
     const go = () => { const before = tree; loadText(t); if (had && tree && tree !== before) confirmAttachments(); };
     if (t.length > 1e6) { toast('Reading the trees, this can take a few seconds…'); setTimeout(go, 60); } else go();
   };
   r.onerror = () => toast('The file could not be read');
-  r.readAsText(file);
+  r.readAsArrayBuffer(file);   // bytes: a compressed project is read too
 }
 
 /* ================= Attachments when the tree changes ================= */
@@ -3409,7 +3608,9 @@ function mutate(fn, msg, refit) {
 }
 
 /* ================= Persistence ================= */
+let benchOn = false;   // the performance test is running: the browser keeps the user's work as it was
 function persist() {
+  if (benchOn) return;
   try { localStorage.setItem('tree2paper-v1', JSON.stringify({ tree: tree ? serialize(tree) : null, settings, src: srcText, ro: treeSetRO })); } catch (e) { }
   if (typeof persistTabs === 'function') persistTabs();
 }
@@ -3429,9 +3630,15 @@ function restore() {
 /* ================= Text measuring ================= */
 const mctx = document.createElement('canvas').getContext('2d');
 // Width of a text in px, measured on a canvas with the same font.
+// Widths of texts, remembered by font and text: the names are measured once, not at every drawing.
+const measureCache = new Map(); let measureFont = '';
+if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => measureCache.clear());   // a web font arrived: measure again
 function measure(txt, size, fam, italic, bold) {
-  mctx.font = `${italic ? 'italic ' : ''}${bold ? 'bold ' : ''}${size}px ${fam}`;
-  return mctx.measureText(txt).width;
+  const f = `${italic ? 'italic ' : ''}${bold ? 'bold ' : ''}${size}px ${fam}`;
+  let m = measureCache.get(f); if (!m) { if (measureCache.size > 60) measureCache.clear(); m = new Map(); measureCache.set(f, m); }
+  let w = m.get(txt);
+  if (w === undefined) { if (measureFont !== f) { mctx.font = f; measureFont = f; } w = mctx.measureText(txt).width; if (m.size > 300000) m.clear(); m.set(txt, w); }
+  return w;
 }
 
 /* ================= Geometry ================= */
@@ -3633,6 +3840,28 @@ function vertText(svgStr, S, tips) {
   // texts placed with x and y: a quarter turn back around that point
   return svgStr.replace(/<text\b(?![^>]*transform=)([^>]*?)\bx="([-\d.]+)"([^>]*?)\by="([-\d.]+)"([^>]*)>/g, (m, a, x, b, y, c) => /data-up=|data-keep=/.test(m) ? m : `<text${a}x="${x}"${b}y="${y}"${c} transform="rotate(90 ${x} ${y})">`);
 }
+let hitsLate = 0, hitsGen = 0, hitsDefer = false;
+/* Render optimization (Page settings): with a large tree, only what can be seen is drawn. Names too small to be read are
+   left out, and so are the names and click areas far from the view (beyond one screen around it). Branches are always
+   drawn, as they give the tree its shape. The view drawn is remembered: moving well out of it, or zooming far, draws again.
+   Exports and other full needs always draw everything. */
+const CULL_TIPS = 2000;
+let cullPause = false, cullOn = null;   // cullOn: the view drawn {x0, y0, x1, y1, k}, or null when everything is drawn
+function cullView() {
+  if (cullPause || settings.renderOpt === false || !tree) return null;
+  const W = svg.clientWidth || 1000, H = svg.clientHeight || 800, k = view.k || 1;
+  const x0 = -view.tx / k, y0 = -view.ty / k, w = W / k, h = H / k;
+  return { x0: x0 - w, y0: y0 - h, x1: x0 + 2 * w, y1: y0 + 2 * h, k };
+}
+const cullIn = (C, p) => !C || (p[0] >= C.x0 && p[0] <= C.x1 && p[1] >= C.y0 && p[1] <= C.y1);
+// After the view changed: draw again if it left the part drawn, or zoomed far enough to show or hide names.
+let cullT = 0;
+function cullCheck() {
+  if (!cullOn || cullPause) return;
+  const W = svg.clientWidth || 1000, H = svg.clientHeight || 800, k = view.k, x0 = -view.tx / k, y0 = -view.ty / k, x1 = x0 + W / k, y1 = y0 + H / k;
+  const out = x0 < cullOn.x0 || y0 < cullOn.y0 || x1 > cullOn.x1 || y1 > cullOn.y1, zoomed = k / cullOn.k > 2 || cullOn.k / k > 2;
+  if (out || zoomed) { clearTimeout(cullT); cullT = setTimeout(() => { if (cullOn) render(); }, 120); }
+}   // a frame waiting to build the click areas of a large tree, and which drawing they belong to
 function renderOnce() {
   alnSync();
   geoSyncCfg();   // the panel edits the map chosen in Geography
@@ -3861,7 +4090,7 @@ function renderOnce() {
     return m;
   };
   const split8 = c => /^#[0-9a-f]{8}$/i.test(c) ? [c.slice(0, 7), parseInt(c.slice(7), 16) / 255] : [c, 1];
-  const gradDefs = [];
+  const gradDefs = []; hlBoxes = [];   // where each highlight is drawn (the tanglegram joins them across)
   for (let n of vis) {
     if (!n.bg) continue;
     const op = stv(n, 'bgOp') ?? S.cladeOpacity;
@@ -3893,6 +4122,7 @@ function renderOnce() {
       let fill = hlBg;
       if (gr !== 'none') { const id = 'hg' + n.id; gradDefs.push(`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${f2(x0)}" y1="0" x2="${f2(x1)}" y2="0">${stops(0, gr === 'right')}</linearGradient>`); fill = `url(#${id})`; }
       bgL.push(`<rect x="${f2(x0)}" y="${f2(y0)}" width="${f2(x1 - x0)}" height="${f2(y1 - y0)}"${rr > 0 ? ` rx="${rr}"` : ''} fill="${fill}" opacity="${op}"/>`);
+      hlBoxes.push({ tips: new Set(leaves(n).map(l => normTip(l.name))), x1, y0, y1, c: bc, a: (gr === 'right' ? 0 : ba) * op });   // its right edge, color and opacity there
     }
   }
   if (gradDefs.length) bgL.unshift(`<defs>${gradDefs.join('')}</defs>`);
@@ -3904,6 +4134,7 @@ function renderOnce() {
   const netFull = S.netOn && S.netStyle === 'full' && !elbow && hasNet();
   const hybOf = n => netFull && n.hyb && n.hyb.length ? n.hyb[0] : null;
   const netMajorDrawn = [];   // major edges drawn, for the selection highlight
+  const CVH = tips.length > CULL_TIPS ? cullView() : null;   // render optimization: click areas near the view only
   for (const n of vis) {
     const p = n.parent;
     n._tp = null; n._lt = null;
@@ -3964,7 +4195,7 @@ function renderOnce() {
       const bsty = stv(n, 'bs') ?? (xb !== 'same' ? xb : S.lineStyle);
       const wv = widthOf(n);
       brL.push(`<path d="${d}" stroke="${strokeOf(n)}"${wv !== LW ? ` stroke-width="${f2(wv)}"` : ''}${dashFor(bsty, widthOf(n), stv(n, 'bdl') ?? S.lineDash, stv(n, 'bdg') ?? S.lineGap)}/>`);
-      hitL.push(`<path class="hit" d="${d}" stroke-width="${Math.max(10, widthOf(n) + 8)}" data-id="${n.id}" data-kind="branch"/>`);
+      if (!CVH || cullIn(CVH, nodeFigPt(n)) || (p && cullIn(CVH, nodeFigPt(p)))) hitL.push(`<path class="hit" d="${d}" stroke-width="${Math.max(10, widthOf(n) + 8)}" data-id="${n.id}" data-kind="branch"/>`);   // near the view only, with render optimization
     }
     if (n._tri) {
       let pts;
@@ -4004,9 +4235,17 @@ function renderOnce() {
   const visSet0 = new Set(vis), hitTri = new Set();
   for (const l of searchHits) { let x = l.parent; while (x) { if (x._tri && visSet0.has(x)) hitTri.add(x.id); x = x.parent; } }
   for (const n of tips) if (n._tri && hitTri.has(n.id) && n._tp) ovL.push(`<polygon points="${n._tp}" fill="#ffb137" fill-opacity=".35" stroke="#ffb137" stroke-width="2" stroke-linejoin="round"/>`);
+  // render optimization: a large tree draws only the names it can show (see cullView)
+  const CV = tips.length > CULL_TIPS ? cullView() : null; cullOn = CV;
   if (S.showTips) {
+    let lx0 = Infinity, ly0 = Infinity, lx1 = -Infinity, ly1 = -Infinity, cut = 0;
     for (const n of tips) {
       const txt = tipText(n); if (!txt) continue;
+      if (CV && (n._fs * CV.k < 1.5 || !cullIn(CV, nodeFigPt({ _px: n._lx, _py: n._ly })))) {   // too small to read, or far from the view
+        const a = (n._la || 0) * Math.PI / 180, ex = n._lx + Math.cos(a) * (n._lw || 0), ey = n._ly + Math.sin(a) * (n._lw || 0);
+        lx0 = Math.min(lx0, n._lx, ex); lx1 = Math.max(lx1, n._lx, ex); ly0 = Math.min(ly0, n._ly - n._fs / 2, ey - n._fs / 2); ly1 = Math.max(ly1, n._ly + n._fs / 2, ey + n._fs / 2);
+        n._lt = null; cut++; continue;
+      }
       const pl = lblPlace(n._lx, n._ly, n._la, S.labelOrient === 'outward'), t = pl.t, anchor = n._saAnchor && L === 'rect' ? n._saAnchor : pl.anchor;
       const col = n.labelColor || (S.labelsFollowClade && n._ec) || S.labelColor;
       const sty = (n._tri ? ' font-style="normal"' : stv(n, 'it') != null ? ` font-style="${stv(n, 'it') ? 'italic' : 'normal'}"` : '') + (n._fwt !== S.bold ? ` font-weight="${n._fwt ? 'bold' : 'normal'}"` : '') + (n._fs !== S.fontSize ? ` font-size="${n._fs}"` : '');
@@ -4016,6 +4255,7 @@ function renderOnce() {
       hitL.push(`<rect class="hitlabel" transform="${t}" x="${f2(rx)}" y="${f2(-n._fs * 0.6)}" width="${f2(n._lw + 4)}" height="${f2(n._fs * 1.2)}" data-id="${n.id}" data-kind="label"/>`);
       if (hitSet.has(n.id) || hitTri.has(n.id)) ovL.push(`<rect transform="${t}" x="${f2(rx)}" y="${f2(-n._fs * 0.65)}" width="${f2(n._lw + 4)}" height="${f2(n._fs * 1.3)}" rx="2" fill="#ffb137" opacity=".55"/>`);
     }
+    if (cut) lbL.push(`<rect x="${f2(lx0)}" y="${f2(ly0)}" width="${f2(lx1 - lx0)}" height="${f2(ly1 - ly0)}" fill="none" stroke="none" pointer-events="none"/>`);   // the room of the names left out
   }
 
   // Straight pieces of the tree, used by the image distance guides
@@ -4542,7 +4782,7 @@ function renderOnce() {
   for (const x of [...vis, ...gNodes]) x._dxe = null;
   const dPlot = L !== 'unrooted' && !sideHid('bar') ? dataPlot(S) : null;
   if (layered && dPlot) { sideOn.bar = true; sideW.bar = Math.max(1, S.dataWidth) + (S.dataValues ? S.dataValSize * 4 : 0) + 4; }   // until the bars are drawn
-  let dataEnd = -Infinity, dLegend = null, dAxis = null, barsReach = -Infinity, catDistLo = null;
+  let dataEnd = -Infinity, dLegend = null, dAxis = null, barsReach = -Infinity, catDistLo = null; tgBlock = { data: -Infinity, clade: -Infinity };
   let drawnEnd = alnEnd;   // where the side plots really end, for placing the scale bar, legends and title
   const dataGeo = new Map();   // selection id -> shapes, for the selection outline
   if (dPlot) {
@@ -4718,7 +4958,7 @@ function renderOnce() {
 
   // Clade name bars
   const labeled = sideHid('clade') ? [] : vis.filter(n => n.cladeLabel);
-  let barGapLo = null, cladeReach = -Infinity, curvedNeed = -Infinity, cladeOut = 0;
+  let barGapLo = null, cladeReach = -Infinity, curvedNeed = -Infinity, cladeOut = 0; tgBlock.data = dataEnd;
   const barGeo = new Map();
   if (labeled.length && L !== 'unrooted') {
     const lvl = new Map();
@@ -4768,6 +5008,7 @@ function renderOnce() {
     // own labels, so every bar keeps moving over the whole slider range.
     barLo = new Map();
     for (const n of labeled) cladeReach = Math.max(cladeReach, barExtent(n));
+    tgBlock.clade = cladeReach;
     // the clade names keep the width worked out beforehand, since the layers drawn before them already used it
     for (const n of labeled) barLo.set(n.id, outside ? -4 : aligned ? Math.ceil(ownEnd(n) + 4 - edge - (lvl.get(n) || 0) * step) : 2);
     if (outside) for (const n of labeled) cladeOut = Math.max(cladeOut, barExtent(n));
@@ -5214,7 +5455,8 @@ function renderOnce() {
     `<g>${isVertical(S) ? vertText(anL.join(''), S) : anL.join('')}</g>`,
     vert ? `</g><g>${anFixed.join('')}</g>` : '',
     `<g id="imgFront"></g>`,
-    `<g id="geoLinesOver"></g>`,   // the parts of those lines over their maps
+    `<g id="geoLinesOver"></g>`,
+    `<g id="tangle"></g>`,   // a tanglegram: the second tree and its lines   // the parts of those lines over their maps
     `<g id="arrows">${arrowsNow.svg}</g>`
   ].join(''));
   if (contentStr !== lastContentStr) { content.innerHTML = contentStr; lastContentStr = contentStr; }
@@ -5266,13 +5508,22 @@ function renderOnce() {
     if (cg.t) ovL.push(`<rect data-up="title" transform="${cg.t.tr}" x="-3" y="${f2(-cg.t.h / 2)}" width="${f2(cg.t.w)}" height="${f2(cg.t.h)}" rx="3" fill="${hl}" fill-opacity=".12" stroke="${hl}" stroke-width="1.3"/>`);
   }
   overlay.innerHTML = (isTurned(S) ? `<g transform="rotate(${treeTurn(S)})">${isVertical(S) ? vertText(ovL.join(''), S) : ovL.join('')}</g>` : ovL.join('')) + arrowsNow.hl;
-  for (const n of [...vis, ...gNodes]) hitL.push(`<circle class="hitpt" cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(Math.max(6, LW * 2))}" data-id="${n.id}" data-kind="node"/>`);
+  for (const n of [...vis, ...gNodes]) if (!CVH || cullIn(CVH, nodeFigPt(n))) hitL.push(`<circle class="hitpt" cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(Math.max(6, LW * 2))}" data-id="${n.id}" data-kind="node"/>`);
   const ih = imageHits();
   const treeHits = hitL.join('') + valHits.join('') + netLabHits.join('');
   const hitsStr = ih.back + (isTurned(S) ? `<g transform="rotate(${treeTurn(S)})">${isVertical(S) ? vertText(treeHits, S) : treeHits}</g>` : treeHits) + ih.front + pieHits.join('') + arrowsNow.hits + '<g id="hitExtra"></g>';
-  if (hitsStr !== lastHitsStr) { hits.innerHTML = hitsStr; lastHitsStr = hitsStr; }
-  const hitExtra = hits.querySelector('#hitExtra'); hitExtra.innerHTML = '';
-  hitExtra.insertAdjacentHTML('beforeend', pageItemsSvg() + freeItemsSvg());
+  // The click areas: at once for most trees; for a large one, just after the tree is painted, so it shows sooner
+  const extraStr = pageItemsSvg() + freeItemsSvg();
+  const gen = ++hitsGen, applyHits = () => {
+    if (gen !== hitsGen) return;   // only the areas of the latest drawing
+    hitsLate = 0;
+    if (hitsStr !== lastHitsStr) { hits.innerHTML = hitsStr; lastHitsStr = hitsStr; }
+    const hitExtra = hits.querySelector('#hitExtra'); if (hitExtra) { hitExtra.innerHTML = ''; hitExtra.insertAdjacentHTML('beforeend', extraStr); }
+  };
+  if (hitsLate) { cancelAnimationFrame(hitsLate); hitsLate = 0; }   // a later drawing replaces one still waiting
+  if (hitsDefer && hitsStr !== lastHitsStr && hitsStr.length > 400000) hitsLate = requestAnimationFrame(() => setTimeout(applyHits, 0));   // only when a tree is opened: redrawing at once is quicker overall
+  else applyHits();
+  hitsDefer = false;
   drawGuides();
 
   const nt = leafCount(tree);
@@ -5345,8 +5596,30 @@ function sector(r0, r1, a0, a1) {
 }
 
 /* ================= View: zoom and pan ================= */
+/* Moving around a large tree: while a zoom or a drag goes on, the figure is not drawn again at every step. The browser
+   keeps it as one picture (a CSS transform on the whole <svg>, done by the graphics card) and only scales and moves that
+   picture. When the gesture stops, the figure takes the new view and is drawn once, sharp again. */
+const NAV_TIPS = 3000;   // from this many tips: below it, drawing at every step is already smooth
+let nav = null, navCount = { t: null, n: 0 }, viewOn = { tx: 0, ty: 0, k: 1 };
+const navBig = () => { if (!tree) return false; if (navCount.t !== tree) navCount = { t: tree, n: leaves(tree).length }; return navCount.n > NAV_TIPS; };
+const svgRect = () => nav ? nav.rect : svg.getBoundingClientRect();   // during a gesture: where the <svg> is, before its picture was moved
+function moveView() {
+  if (!navBig()) return applyView();
+  if (!nav) { nav = { rect: svg.getBoundingClientRect(), t: 0 }; svg.style.transformOrigin = '0 0'; svg.style.willChange = 'transform'; }
+  const s = view.k / viewOn.k, dx = view.tx - viewOn.tx * s, dy = view.ty - viewOn.ty * s;
+  svg.style.transform = `translate(${dx}px,${dy}px) scale(${s})`;
+  clearTimeout(nav.t); nav.t = setTimeout(endMove, 350);   // a wheel sends its steps with pauses: one gesture until it truly stops
+}
+function endMove() {   // the gesture stopped: the figure takes the view, drawn once
+  if (!nav) return; clearTimeout(nav.t); nav = null;
+  svg.style.transform = ''; svg.style.willChange = ''; applyView();
+}
 function applyView() {
-  vp.setAttribute('transform', `translate(${f2(view.tx)},${f2(view.ty)}) scale(${view.k})`);
+  if (nav) { clearTimeout(nav.t); nav = null; svg.style.transform = ''; svg.style.willChange = ''; }   // a view set at once ends any gesture
+  vp.setAttribute('transform', `translate(${f2(view.tx)},${f2(view.ty)}) scale(${view.k})`); viewOn = { tx: view.tx, ty: view.ty, k: view.k };
+  cullCheck();   // render optimization: out of the part drawn, or zoomed far, draws again
+  // zoomed so far out that the lines would be thinner than half a pixel (a very large tree, fitted whole): drawn one pixel wide on screen
+  svg.classList.toggle('thinview', settings.screenLines !== 'true' && view.k * (settings.lineWidth || 1) < 0.15);   // below 0.15 px a line vanishes: drawn one pixel wide, unless the true widths are asked for
   if (applyView._k !== view.k) {
     applyView._k = view.k; clearTimeout(applyView._t);
     applyView._t = setTimeout(() => { if (tree && (selImg != null || focusFree || Object.keys(freeBoxes || {}).length)) render(); }, 180);
@@ -5358,17 +5631,21 @@ function fit() {
   const bb = content.getBBox(); const W = svg.clientWidth, H = svg.clientHeight;
   if (!bb.width || !W) return;
   const pad = 36;
-  const k = Math.min((W - pad * 2) / bb.width, (H - pad * 2) / bb.height, 4);
+  let k = Math.min((W - pad * 2) / bb.width, (H - pad * 2) / bb.height, 4);
   view.k = k; view.tx = W / 2 - (bb.x + bb.width / 2) * k; view.ty = H / 2 - (bb.y + bb.height / 2) * k;
+  // a figure of thousands of tips fitted whole would be a thin strip: a very tall one (rectangular) is fitted to the width,
+  // from its top, and a very wide one (vertical) to the height, from its left, like a long list to scroll through
+  if (bb.width * k < (W - pad * 2) * 0.25) { k = Math.min((W - pad * 2) / bb.width, 1); view.k = k; view.tx = W / 2 - (bb.x + bb.width / 2) * k; view.ty = pad - bb.y * k; }
+  else if (bb.height * k < (H - pad * 2) * 0.25) { k = Math.min((H - pad * 2) / bb.height, 1); view.k = k; view.ty = H / 2 - (bb.y + bb.height / 2) * k; view.tx = pad - bb.x * k; }
   applyView();
 }
 // Zooms around a point of the screen.
 function zoomAt(mx, my, f) {
   const k2 = clamp(view.k * f, 0.01, 80); f = k2 / view.k;
-  view.tx = mx - (mx - view.tx) * f; view.ty = my - (my - view.ty) * f; view.k = k2; applyView();
+  view.tx = mx - (mx - view.tx) * f; view.ty = my - (my - view.ty) * f; view.k = k2; moveView();
 }
 svg.addEventListener('wheel', e => {
-  e.preventDefault(); const r = svg.getBoundingClientRect();
+  e.preventDefault(); const r = svgRect();
   zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * (e.deltaMode ? 0.05 : 0.0018)));
 }, { passive: false });
 
@@ -5396,11 +5673,11 @@ svg.addEventListener('pointermove', e => {
   ptrs.set(e.pointerId, cur);
   if (ptrs.size === 1) {
     if (lpFired) return;
-    view.tx += cur.x - prev.x; view.ty += cur.y - prev.y; applyView();
+    view.tx += cur.x - prev.x; view.ty += cur.y - prev.y; moveView();
     if (downPos && Math.hypot(cur.x - downPos.x, cur.y - downPos.y) > 5) { panMoved = true; clearTimeout(lpTimer); }
   } else if (ptrs.size === 2 && pinch) {
     const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
-    const r = svg.getBoundingClientRect();
+    const r = svgRect();
     zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, (pinch.k * d / pinch.d) / view.k);
   }
 });
@@ -5460,7 +5737,7 @@ new MutationObserver(() => {
 }).observe(pop, { childList: true });
 let popPos = null, popPinned = false;
 // Closes the right-click menu.
-function closePop() { pop.classList.remove('on'); pop.innerHTML = ''; if (!popPinned) popPos = null; }
+function closePop() { pop.classList.remove('on'); pop.innerHTML = ''; if (!popPinned) popPos = null; if (typeof tgSel !== 'undefined' && tgSel != null) { tgSel = null; render(); } }
 // Sets or clears an own value of a node.
 function setSt(n, k, v) { n.st = n.st || {}; if (v == null || v === '') delete n.st[k]; else n.st[k] = v; if (!Object.keys(n.st).length) n.st = null; }
 // Value of a menu select: "" means the panel value.
@@ -5575,13 +5852,13 @@ function nodeLabelText(n, S = settings) {
     const f = x => (+x.toFixed(S.ancLabelDec)).toString(), ag = c.ages || [];
     if (src === 'ts:freq') return Math.round(100 * c.n / treeSet.count) + '%';
     if (!ag.length) return null;
-    if (src === 'ts:mean') return f(ag.reduce((a, b) => a + b, 0) / ag.length);
+    if (src === 'ts:mean') return f(ageOut(ag.reduce((a, b) => a + b, 0) / ag.length, S));
     const h = hpdOf(ag, 0.95);
-    return src === 'ts:median' ? f(h.med) : `[${f(h.lo)}, ${f(h.hi)}]`;
+    return src === 'ts:median' ? f(ageOut(h.med, S)) : `[${f(ageOut(h.lo, S))}, ${f(ageOut(h.hi, S))}]`;   // ages from the youngest tip
   }
   if (src === 'anc') { const c = smap && smap.states.length && ancKeys && smap.clades.get(ancKeys.get(n)); return c && c.node && c.node.length ? '{' + smap.states.map((st, i) => `${st}:${c.node[i].toFixed(S.ancLabelDec)}`).join(',') + '}' : null; }
   const v = n.meta && n.meta[src.slice(5)]; if (v == null) return null;
-  const f = x => typeof x === 'number' ? (+x.toFixed(S.ancLabelDec)).toString() : String(x);
+  const age = AGE_KEY.test(src.slice(5)), f = x => typeof x === 'number' ? (+(age ? ageOut(x, S) : x).toFixed(S.ancLabelDec)).toString() : String(x);   // ages from the youngest tip
   return Array.isArray(v) ? '[' + v.map(f).join(', ') + ']' : f(v);
 }
 // True when internal nodes have names that are not support values.
@@ -5681,10 +5958,33 @@ function pasteGroups(clip, T) {
   const map = { branch: T.branch, node: T.node, label: T.tip, length: T.len, support: T.sup, bar: T.bar, data: T.data, nlab: T.nlab, nbar: T.nbar };
   return [[clip.kind, map[clip.kind] || [], clip.data]];
 }
+// What Paste style applies, by groups of properties (Page settings, Copy style). Everything, unless unticked.
+const COPY_GROUPS = [['bcolor', 'Branch color', ['bc', 'color']], ['bwidth', 'Branch width', ['bw']], ['bstyle', 'Line style of the branches', ['bs', 'bdl', 'bdg']],
+  ['dots', 'Node dots (size, shape, color, border)', DOT_KEYS], ['highlight', 'Highlights', ['bg', ...CLADE_KEYS]], ['lfont', 'Font and size of the tip labels', ['fs', 'it', 'fw', 'onq', 'dg', 'xb']],
+  ['lcolor', 'Color of the tip labels', ['lc', 'bold']], ['values', 'Values on branches and nodes', [...LEN_KEYS, ...SUP_KEYS, ...NLAB_KEYS]], ['nbars', 'Node bars', NBAR_KEYS],
+  ['cbars', 'Clade name bars', BAR_KEYS], ['data', 'Data plots', DATA_KEYS]];
+const copyAllowed = k => { const cp = settings.copyParts || {}, g = COPY_GROUPS.find(x => x[2].includes(k)); return !g || cp[g[0]] !== false; };
+let copyPartsOpen = false;   // Copy style folds by itself, so what follows it stays outside
+function copyPartsBox() {
+  const w = document.createElement('div'); w.className = 'copywrap';
+  w.innerHTML = `<div class="subhead fold${copyPartsOpen ? ' open' : ''}" role="button" tabindex="0" aria-expanded="${copyPartsOpen}">Copy style</div>`;
+  const h = w.firstElementChild, d = document.createElement('div'); d.className = 'copyparts'; d.hidden = !copyPartsOpen; w.appendChild(d);
+  const tog = () => { copyPartsOpen = !copyPartsOpen; d.hidden = !copyPartsOpen; h.classList.toggle('open', copyPartsOpen); h.setAttribute('aria-expanded', String(copyPartsOpen)); };
+  h.addEventListener('click', tog); h.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tog(); } });
+  const fill = () => {
+    const cp = settings.copyParts || {};
+    d.innerHTML = `<p class="hint">What Paste style applies to the elements chosen: the look of each kind (their colors, widths, sizes and places), never their values. Unticked properties stay as they are.</p>${COPY_GROUPS.map(([k, lab]) => `<label class="opt"><input type="checkbox" data-cp="${k}" ${cp[k] !== false ? 'checked' : ''}> ${lab}</label>`).join('')}
+      <div class="btns"><button type="button" class="btn small" data-cpall="1">All</button><button type="button" class="btn small" data-cpall="0">None</button></div>`;
+    d.querySelectorAll('[data-cp]').forEach(i => i.onchange = () => { settings.copyParts = { ...(settings.copyParts || {}), [i.dataset.cp]: i.checked }; persist(); });
+    d.querySelectorAll('[data-cpall]').forEach(b => b.onclick = () => { settings.copyParts = Object.fromEntries(COPY_GROUPS.map(g => [g[0], b.dataset.cpall === '1'])); persist(); fill(); });
+  };
+  fill(); return w;
+}
 // Pastes a copied style on elements.
 function applyStyleData(n, kind, data) {
   n.st = n.st || {};
   for (const [k, v] of Object.entries(data)) {
+    if (!copyAllowed(k)) continue;   // a group of properties left out in Page settings
     if (kind === 'branch' && isGraft(n) && (k === 'bs' || k === 'bdl' || k === 'bdg')) continue;   // fossil branches stay dashed
     if (kind === 'cladeRoot' && (k === 'color' || k === 'bg')) { if (v == null) delete n[k]; else n[k] = v; continue; }   // properties of the clade itself
     if (k === 'lc') n.labelColor = v; else if (k === 'bold') n.bold = v; else n.st[k] = v;
@@ -5988,6 +6288,7 @@ function openEdit(cx, cy, keep) {
       if (netBlocked) actHint = (`<span class="hint">This branch is on or below a hybrid node: in a network the root cannot go there, since both parents of the hybrid node must stay above it.</span>`);
       if (dated) actHint = (`<span class="hint">Rerooting is not available on dated (ultrametric) trees: moving the root changes the ages of the nodes, so the tree has to be dated again with the new root.</span>`);
     }
+    if (single && single.children.length && !single.parent) acts.push(`<button class="btn small" data-a="copytree" title="Open the whole tree in a new tab, with the same look, to style or plot it otherwise">Copy tree to a new tab</button>`);
     if (single && single.children.length && single.parent) acts.push(`<button class="btn small" data-a="extract" title="Open this clade in a new tab. The full tree stays in its own tab.">Extract clade</button>`);
     if (single && S.layout === 'rect' && !isGraft(single)) acts.push(`<button class="btn small" data-a="mkpage" title="Export these rows as a page of their own">Make a page</button>`);
     if (single && single.parent) acts.push(`<button class="btn small danger" data-a="prune">${single.children.length ? 'Delete clade' : 'Delete tip'}</button>`);
@@ -6108,6 +6409,7 @@ function openEdit(cx, cy, keep) {
     else if (a === 'barremove') { mutate(() => T.bar.forEach(x => { x.cladeLabel = null; BAR_KEYS.forEach(k => setSt(x, k, null)); }), 'Clade name removed'); sel.clear(); closePop(); render(); }
     else if (a === 'reroot') { if (isUltrametric(tree)) { toast('Dated trees cannot be rerooted'); return; }
       if (netBlocksRoot(n)) { toast('In a network the root cannot go on or below a hybrid node: its two parents must stay above it.'); return; } mutate(() => { tree = reroot(tree, n); }, 'Tree rerooted', true); sel.clear(); closePop(); render(); }
+    else if (a === 'copytree') { closePop(); copyTreeToTab(); }
     else if (a === 'extract') { const sub = deserialize(serialize(n)); sub.len = null; sub.parent = null; openInTab(sub, n.cladeLabel || (n.name && !isSupport(n.name) ? disp(n.name) : `Clade (${leafCount(n)} tips)`), true); toast('The clade opens in a new tab. The full tree stays in its own tab.'); if (false) sel.clear(); closePop(); render(); }
     else if (a === 'prune') { mutate(() => { tree = prune(tree, n); }, n.children.length ? 'Clade deleted' : 'Tip deleted'); sel.clear(); closePop(); render(); }
     else if (a === 'copy') { navigator.clipboard?.writeText(toNewick(n)).then(() => toast('Newick copied'), () => toast('Copying is blocked in this browser')); }
@@ -6189,7 +6491,12 @@ function fallbackDownload(name, data) {
   } catch (e) { toast('This viewer does not allow downloads'); }
 }
 // The figure as a standalone SVG file.
-function buildSVG() {
+function buildSVG() {   // exports draw everything: heavy elements in full, and every name (render optimization paused)
+  const lt = figImages.some(isLightM), cu = !!cullOn; if (!lt && !cu) return buildSVGNow();
+  lightPause = true; cullPause = true; if (cu) render(); else placeImages();
+  try { return buildSVGNow(); } finally { lightPause = false; cullPause = false; if (cu) render(); else placeImages(); }
+}
+function buildSVGNow() {
   const bb = content.getBBox(); const pad = 24;
   const x = bb.x - pad, y = bb.y - pad, w = bb.width + pad * 2, h = bb.height + pad * 2;
   return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f2(x)} ${f2(y)} ${f2(w)} ${f2(h)}" width="${Math.ceil(w)}" height="${Math.ceil(h)}"><rect x="${f2(x)}" y="${f2(y)}" width="${f2(w)}" height="${f2(h)}" fill="${settings.bg}"/>${inlineKdes(content.innerHTML)}</svg>`;   // density plots go in as drawing
@@ -6477,8 +6784,19 @@ function svgToPdf(svgStr, ptW, imgData) {
     if (tf) out.push('q', ...tfOps(tf));
     const a = n => parseFloat(el.getAttribute(n) || 0);
     if (tag === 'g' || tag === 'svg') {
-      const cp = /^url\(#([^)]+)\)/.exec(el.getAttribute('clip-path') || ''), cr = cp && doc.getElementById(cp[1]) && doc.getElementById(cp[1]).querySelector('rect');
-      if (cr) { const ca = n => parseFloat(cr.getAttribute(n) || 0); out.push('q', `${N(ca('x'))} ${N(ca('y'))} ${N(ca('width'))} ${N(ca('height'))} re W n`); }
+      const cp = /^url\(#([^)]+)\)/.exec(el.getAttribute('clip-path') || ''), cr = cp && doc.getElementById(cp[1]) && doc.getElementById(cp[1]).querySelector('rect, ellipse, circle');
+      if (cr) {   // a rectangle, rounded or not, or an ellipse (masks of images): drawn with curves
+        const ca = n => parseFloat(cr.getAttribute(n) || 0), K = 0.5523, tg = cr.tagName.toLowerCase();
+        const ell = (cx, cy, rx, ry) => `${N(cx + rx)} ${N(cy)} m ${N(cx + rx)} ${N(cy + ry * K)} ${N(cx + rx * K)} ${N(cy + ry)} ${N(cx)} ${N(cy + ry)} c ${N(cx - rx * K)} ${N(cy + ry)} ${N(cx - rx)} ${N(cy + ry * K)} ${N(cx - rx)} ${N(cy)} c ${N(cx - rx)} ${N(cy - ry * K)} ${N(cx - rx * K)} ${N(cy - ry)} ${N(cx)} ${N(cy - ry)} c ${N(cx + rx * K)} ${N(cy - ry)} ${N(cx + rx)} ${N(cy - ry * K)} ${N(cx + rx)} ${N(cy)} c h`;
+        let path;
+        if (tg === 'ellipse') path = ell(ca('cx'), ca('cy'), ca('rx'), ca('ry'));
+        else if (tg === 'circle') path = ell(ca('cx'), ca('cy'), ca('r'), ca('r'));
+        else {
+          const x = ca('x'), y = ca('y'), w = ca('width'), h = ca('height'), r = Math.min(ca('rx') || ca('ry'), w / 2, h / 2);
+          path = r > 0 ? `${N(x + r)} ${N(y)} m ${N(x + w - r)} ${N(y)} l ${N(x + w - r + r * K)} ${N(y)} ${N(x + w)} ${N(y + r - r * K)} ${N(x + w)} ${N(y + r)} c ${N(x + w)} ${N(y + h - r)} l ${N(x + w)} ${N(y + h - r + r * K)} ${N(x + w - r + r * K)} ${N(y + h)} ${N(x + w - r)} ${N(y + h)} c ${N(x + r)} ${N(y + h)} l ${N(x + r - r * K)} ${N(y + h)} ${N(x)} ${N(y + h - r + r * K)} ${N(x)} ${N(y + h - r)} c ${N(x)} ${N(y + r)} l ${N(x)} ${N(y + r - r * K)} ${N(x + r - r * K)} ${N(y)} ${N(x + r)} ${N(y)} c h` : `${N(x)} ${N(y)} ${N(w)} ${N(h)} re`;
+        }
+        out.push('q', `${path} W n`);
+      }
       for (const c of el.children) walk(c, s);
       if (cr) out.push('Q');
     }
@@ -6733,7 +7051,7 @@ document.querySelectorAll('[data-split]').forEach(b => b.onclick = () => { setti
 // keep the Pages row in step every time the menu opens, whatever else the button does
 // Page settings: opens under its button, closes with a click elsewhere or Esc.
 document.body.appendChild($('pageSheet'));   // out of the dark header, so its buttons and texts look like the panel's
-$('pageBtn').addEventListener('click', e => { e.stopPropagation(); const sh = $('pageSheet'), open = sh.hidden; sh.hidden = !open;
+$('pageBtn').addEventListener('click', e => { e.stopPropagation(); const sh = $('pageSheet'), open = sh.hidden; sh.hidden = !open; if (open) setTimeout(syncLightBox);
   if (open) { const r = $('pageBtn').getBoundingClientRect(); sh.style.top = (r.bottom + 6) + 'px'; sh.style.left = Math.max(8, Math.min(r.left, innerWidth - sh.offsetWidth - 8)) + 'px'; } $('pageBtn').setAttribute('aria-expanded', String(open)); if (open) refreshVisibility(); });
 document.addEventListener('pointerdown', e => { const sh = $('pageSheet'); if (!sh.hidden && !sh.contains(e.target) && !$('pageBtn').contains(e.target) && !$('pop').contains(e.target)) { sh.hidden = true; $('pageBtn').setAttribute('aria-expanded', 'false'); } });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('pageSheet').hidden) { $('pageSheet').hidden = true; $('pageBtn').setAttribute('aria-expanded', 'false'); } });
@@ -7031,23 +7349,242 @@ function replaceImageFile(id, file) {
   r.readAsDataURL(file);
 }
 // Build the <image> nodes once and move them into the freshly drawn slots
+// Heavy elements while working (Page settings): images, density and LTT plots and maps keep their place and size and can be
+// moved, but show a light placeholder instead of their drawing and their options are locked. Exports always draw them in full.
+const lightOn = () => !!settings.lightMode;
+const isHeavy = m => !m.txt;
+let lightPause = false;   // while exporting, everything is drawn in full
+const isLightM = m => !lightPause && isHeavy(m) && (m.lightOv === 'on' || (lightOn() && m.lightOv !== 'off'));   // one by one, or all from Page settings
+const kindName = m => m.geo ? 'Map' : m.kde ? 'Density plot' : m.ltt ? 'LTT plot' : 'Image';
+// The placeholder of a lightened element: a small grey snapshot of how it last looked, its kind written while it is made.
+const lightSnaps = new Map();
+function lightHref(m) {
+  const src = imgStore.get(m.sid) || '', key = m.sid + '|' + src.length, c = lightSnaps.get(m.id);
+  if (c && c.key === key) return c.url || c.label;
+  const label = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${f2(m.w)}" height="${f2(m.h)}"><rect width="100%" height="100%" fill="#EEF0F3"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="Helvetica, Arial, sans-serif" font-size="${f2(Math.max(10, Math.min(28, m.h / 6)))}" fill="#8A93A0">[${kindName(m)}]</text></svg>`);
+  lightSnaps.set(m.id, { key, label, url: null });
+  const im = new Image();
+  im.onload = () => {
+    const W0 = im.naturalWidth || m.w, H0 = im.naturalHeight || m.h, k = Math.min(1, 480 / Math.max(W0, H0)), cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(W0 * k)); cv.height = Math.max(1, Math.round(H0 * k));
+    const ctx = cv.getContext('2d'); ctx.fillStyle = '#F4F5F7'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.filter = 'grayscale(1) opacity(0.45)'; ctx.drawImage(im, 0, 0, cv.width, cv.height);
+    try { const e = lightSnaps.get(m.id); if (e && e.key === key) { e.url = cv.toDataURL('image/png'); placeImages(); } } catch (err) { /* keeps its label */ }
+  };
+  im.src = src; return label;
+}
+const LIGHT_HREF_OLD = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><defs><pattern id="h" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#EEF0F3"/><rect width="3" height="8" fill="#E2E6EB"/></pattern></defs><rect width="40" height="40" fill="url(#h)"/></svg>');
+/* ================= Tanglegram: this tree and another one (another tab), face to face, their tips joined ================= */
+let hlBoxes = [], tgBlock = { data: -Infinity, clade: -Infinity }, tgGeom = [], tgCache = { key: null, t: null }, tgSel = null;   // tgSel: the line whose menu is open
+const tgTabIdx = (S = settings) => tabs.findIndex((t, i) => i !== tabIdx && t.id === S.tgTab);
+function tgOther() {   // the second tree, with its own style
+  const j = tgTabIdx(); if (j < 0 || !tabs[j].doc || !tabs[j].doc.tree) return null; const d = tabs[j].doc;
+  if (tgCache.key !== d.tree) tgCache = { key: d.tree, t: deserialize(d.tree) };
+  return { t: tgCache.t, S: freshSettings(d.settings), j };
+}
+function tgMatch(t2) {   // the same tips in both, or the tanglegram makes no sense
+  if (!tree || !t2) return { ok: false, onlyA: [], onlyB: [] };   // one of them not there yet (a project being opened)
+  const a = new Set(leaves(tree).map(l => normTip(l.name))), b = new Set(leaves(t2).map(l => normTip(l.name)));
+  const onlyA = [...a].filter(x => !b.has(x)), onlyB = [...b].filter(x => !a.has(x)); return { ok: !onlyA.length && !onlyB.length, onlyA, onlyB };
+}
+function tgRight() { const L = tree ? leaves(tree).filter(l => !l._hidden && l._py != null) : []; if (!L.length) return null;
+  return { x: Math.max(...L.map(l => settings.showTips && l._lw ? l._lx + l._lw : l._px)), y0: Math.min(...L.map(l => l._py)), y1: Math.max(...L.map(l => l._py)), L }; }
+function tgWhy(S = settings) {   // why it cannot be drawn now, if it cannot
+  if (!tree) return 'Open a tree first.';
+  if (S.layout !== 'rect' || (S.rectOrient && S.rectOrient !== 'horizontal')) return 'A tanglegram needs a rectangular tree, not turned (Layout).';
+  if (tgBlock.data > -Infinity) return 'Side plots take the space right of the tree, where the lines go: hide them in Side plots.';
+  if (tgBlock.clade > -Infinity) return 'Clade name bars take the space right of the tree, where the lines go: hide them, or use highlights to show the clades.';
+  const R = tgRight(); if (R) { const m = figImages.find(m => m.x + m.w > R.x && m.y < R.y1 + 20 && m.y + m.h > R.y0 - 20); if (m) return `${m.geo ? 'A map' : m.kde ? 'A density plot' : m.ltt ? 'An LTT plot' : m.txt ? 'A text' : 'An image'} is right of the tree: move it below or above it.`; }
+  return '';
+}
+const tgDash = (st, w) => st === 'dashed' ? ` stroke-dasharray="${f2(w * 4)} ${f2(w * 3)}"` : st === 'dotted' ? ` stroke-dasharray="0.1 ${f2(w * 2.6)}" stroke-linecap="round"` : '';
+function tangleSvg() { try { return tangleSvgNow(); } catch (e) { console.warn('tanglegram', e); tgGeom = []; return ''; } }   // never stops the drawing of the tree
+function tangleSvgNow() {
+  tgGeom = []; const S = settings; if (!S.tgOn || tgWhy(S)) return '';
+  const O = tgOther(); if (!O || !tgMatch(O.t).ok) return '';
+  const S2 = O.S, t2 = O.t, R = tgRight(); if (!R) return '';
+  // the second tree: its tips over the same height as this one's, mirrored, with its own style
+  const L2 = leaves(t2), step = L2.length > 1 ? (R.y1 - R.y0) / (L2.length - 1) : 0;
+  L2.forEach((l, i) => { l._ty = R.y0 + i * step; });
+  (function gy(x) { if (x.children.length) { x.children.forEach(gy); x._ty = (x.children[0]._ty + x.children[x.children.length - 1]._ty) / 2; } })(t2);
+  const useLen = S2.useLengths && hasLengths(t2); (function gd(x, d) { x._td = d; x.children.forEach(c => gd(c, d + (useLen ? (c.len || 0) : 1))); })(t2, 0);
+  if (!useLen) (function lv(x) { if (!x.children.length) return 0; const h = Math.max(...x.children.map(lv)) + 1; x._th = h; return h; })(t2);
+  const maxD = Math.max(...L2.map(l => l._td)) || 1, W1 = Math.max(...R.L.map(l => l._px)) - tree._px, W2 = S.tgWidth > 0 ? S.tgWidth : Math.max(40, W1);
+  const fs = S2.fontSize, fam = S2.fontFamily, it = !!S2.italic, off = S2.labelOffset ?? 5, show = S.tgLabels !== false;
+  const lw = show ? Math.max(0, ...L2.map(l => measure(disp(l.name), fs, fam, it, false))) : 0;
+  const xT = R.x + S.tgGap + lw + (show ? off : 0);   // where its youngest tips are
+  const X = x => xT + W2 * (useLen ? (maxD - x._td) / maxD : (x.children.length ? x._th / Math.max(1, t2._th) : 0));
+  const al = !!S2.align, LX = l => (al ? xT : X(l)) - off;   // where each name ends: in one column when its tab aligns them
+  const out = [], bgs = [], inh = new Map(), hl2 = [];
+  (function cc(x, c) { const col = (x.st && x.st.bc) || x.color || c; inh.set(x, col); x.children.forEach(k => cc(k, col)); })(t2, S2.lineColor);
+  const tipsOf = x => x.children.length ? x.children.flatMap(tipsOf) : [x];
+  // highlights of the second tree, from its clades to its names
+  walkAll(t2, x => { if (!x.bg || !x.children.length) return; const tp = tipsOf(x), a = Math.min(...tp.map(t => t._ty)) - step / 2, b = Math.max(...tp.map(t => t._ty)) + step / 2;
+    const opv = (x.st && x.st.bgOp != null ? x.st.bgOp : S2.cladeOpacity), op = opv > 1 ? opv / 100 : opv, x0 = Math.min(...tp.map(t => show ? LX(t) - lw : X(t))) - 4;
+    bgs.push(`<rect x="${f2(x0)}" y="${f2(a)}" width="${f2(X(x) - x0)}" height="${f2(b - a)}" fill="${x.bg}" fill-opacity="${f2(op)}"/>`);
+    hl2.push({ tips: new Set(tp.map(t => normTip(t.name))), x0, y0: a, y1: b, c: x.bg, a: op }); });
+  // its branches, as a rectangular tree turned to face this one
+  walkAll(t2, x => { const w = (x.st && x.st.bw) ?? S2.lineWidth, col = inh.get(x);
+    if (x.parent) out.push(`<path d="M${f2(X(x))},${f2(x._ty)}H${f2(X(x.parent))}" stroke="${col}" stroke-width="${f2(w)}" fill="none" stroke-linecap="square"/>`);
+    if (x.children.length > 1) { const c0 = x.children[0], c1 = x.children[x.children.length - 1]; out.push(`<path d="M${f2(X(x))},${f2(c0._ty)}V${f2(c1._ty)}" stroke="${inh.get(c0)}" stroke-width="${f2(w)}" fill="none" stroke-linecap="square"/>`); } });
+  if (show && al) for (const l of L2) if (X(l) > xT + 0.5) out.push(`<path d="M${f2(xT)},${f2(l._ty)}H${f2(X(l))}" stroke="#9AA0A6" stroke-width="0.6" fill="none"${S2.alignStyle === 'solid' ? '' : S2.alignStyle === 'dashed' ? ' stroke-dasharray="4 3"' : ' stroke-dasharray="1 2"'}/>`);   // guides to the aligned names
+  if (show) for (const l of L2) { const st = l.st || {}, f1 = st.fs ?? fs, i1 = st.it ?? it, b1 = st.fw ?? l.bold;   // each name with its own look too
+    out.push(`<text x="${f2(LX(l))}" y="${f2(l._ty)}" text-anchor="end" dominant-baseline="central" font-size="${f2(f1)}" font-family="${esc(fam)}"${i1 ? ' font-style="italic"' : ''}${b1 ? ' font-weight="bold"' : ''} fill="${st.lc || l.labelColor || '#222'}">${esc(disp(l.name))}</text>`); }
+  // bridges: a clade highlighted in both trees (the very same tips) is joined across the gap, one color or from one to the other
+  const bridges = [], bdefs = [];
+  if (S.tgBridge !== false) hlBoxes.forEach((A, i) => {
+    const B = hl2.find(h => h.tips.size === A.tips.size && [...A.tips].every(t => h.tips.has(t))); if (!B || B.x0 <= A.x1) return;
+    const same = A.c.toLowerCase() === B.c.toLowerCase() && Math.abs(A.a - B.a) < 0.01, pts = `${f2(A.x1)},${f2(A.y0)} ${f2(B.x0)},${f2(B.y0)} ${f2(B.x0)},${f2(B.y1)} ${f2(A.x1)},${f2(A.y1)}`;
+    if (same) bridges.push(`<polygon points="${pts}" fill="${A.c}" fill-opacity="${f2(A.a)}"/>`);
+    else { bdefs.push(`<linearGradient id="tgb${i}" gradientUnits="userSpaceOnUse" x1="${f2(A.x1)}" y1="0" x2="${f2(B.x0)}" y2="0"><stop offset="0" stop-color="${A.c}" stop-opacity="${f2(A.a)}"/><stop offset="1" stop-color="${B.c}" stop-opacity="${f2(B.a)}"/></linearGradient>`); bridges.push(`<polygon points="${pts}" fill="url(#tgb${i})"/>`); }
+  });
+  // the lines: from the end of each name here to the start of the same name there
+  const by2 = new Map(L2.map(l => [normTip(l.name), l])), hl = x => { for (let y = x; y; y = y.parent) if (y.bg) return y.bg; return null; };
+  const brc1 = x => { for (let y = x; y; y = y.parent) { const c = (y.st && y.st.bc) || (y === x && y._ec) || y.color; if (c) return c; } return S.lineColor; };   // the color of a branch here
+  const lines = [], defs = [], cv = Math.max(0, Math.min(100, S.tgCurve || 0)) / 100;
+  R.L.forEach((l, i) => {
+    const k = normTip(l.name), r = by2.get(k); if (!r) return;
+    const ax = S.tgFrom === 'tip' || !(S.showTips && l._lw) ? l._px : l._lx + l._lw + 3, ay = l._py, bx = S.tgFrom === 'tip' ? X(r) : (show ? LX(r) - measure(disp(r.name), fs, fam, it, false) : X(r)) - 3, by = r._ty;   // from the end of its own name
+    const ov = (S.tgLines || {})[k] || {};
+    let c1 = null, c2 = null;
+    if (S.tgColorBy === 'highlight') { c1 = hl(l); c2 = hl(r); } else if (S.tgColorBy === 'branch') { c1 = brc1(l); c2 = inh.get(r); }
+    let stroke = S.tgColor;
+    if (S.tgColorBy !== 'single') {
+      if (c1 && c2 && c1.toLowerCase() === c2.toLowerCase()) stroke = c1;
+      else if (c1 && c2) { if (S.tgMismatch === 'grey') stroke = S.tgGrey; else { defs.push(`<linearGradient id="tgg${i}" gradientUnits="userSpaceOnUse" x1="${f2(ax)}" y1="${f2(ay)}" x2="${f2(bx)}" y2="${f2(by)}"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`); stroke = `url(#tgg${i})`; } }
+      else if (c1 || c2) stroke = c1 || c2;   // a color on one side only: that one
+    }
+    if (ov.c) stroke = ov.c;
+    const w = ov.w ?? S.tgW, st = ov.st || S.tgStyle, kx = (bx - ax) * 0.5 * cv;
+    const d = cv > 0 ? `M${f2(ax)},${f2(ay)}C${f2(ax + kx)},${f2(ay)} ${f2(bx - kx)},${f2(by)} ${f2(bx)},${f2(by)}` : `M${f2(ax)},${f2(ay)}L${f2(bx)},${f2(by)}`;
+    lines.push(`<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${f2(w)}" stroke-opacity="${f2((S.tgOp ?? 80) / 100)}"${tgDash(st, w)}/>`);
+    tgGeom.push({ k, name: l.name, d });
+  });
+  return (defs.length || bdefs.length ? `<defs>${defs.join('')}${bdefs.join('')}</defs>` : '') + `<g>${bgs.join('')}${bridges.join('')}</g><g>${lines.join('')}</g><g>${out.join('')}</g>`;
+}
+// The note under the second tree: whether the tips match, and how many differ when they do not. Kept up to date at each drawing.
+function tgStatus() {
+  const el = document.getElementById('tgMsg'); if (!el) return;
+  let O = null, M = null; try { O = tree ? tgOther() : null; M = O ? tgMatch(O.t) : null; } catch (e) { O = M = null; }
+  el.classList.toggle('warn', !!(M && !M.ok));
+  el.textContent = !O ? 'The second tree is another tab, with its own style and highlights: open one, copy this tree to a new tab (right-click its root) or load a file.'
+    : M.ok ? `${leaves(O.t).length} tips, the same in both trees.`
+    : `The tips differ: ${M.onlyA.length ? `${M.onlyA.length} only in this tree` : ''}${M.onlyA.length && M.onlyB.length ? ' and ' : ''}${M.onlyB.length ? `${M.onlyB.length} only in the second one` : ''}.`;
+}
+// Crossings: the pairs of tips in a different order on each side (inversions), counted in n log n.
+function tgCross(o1, o2) { const pos = new Map(o1.map((k, i) => [k, i])), a = o2.map(k => pos.get(k)).filter(v => v != null);
+  const ms = v => { if (v.length < 2) return [v, 0]; const m = v.length >> 1, [l, x] = ms(v.slice(0, m)), [r, y] = ms(v.slice(m)); let c = x + y, i = 0, j = 0; const o = []; while (i < l.length && j < r.length) { if (l[i] <= r[j]) o.push(l[i++]); else { o.push(r[j++]); c += l.length - i; } } return [o.concat(l.slice(i), r.slice(j)), c]; };
+  return ms(a)[1]; }
+// Untangling: each node turned when that lowers the crossings, over and over until none does.
+function tgUntangle(both) {
+  const O = tgOther(); if (!O || !tgMatch(O.t).ok) return toast('Choose a second tree with the same tips first');
+  const t2 = O.t, ord = t => leaves(t).map(l => normTip(l.name)), before = tgCross(ord(tree), ord(t2));
+  if (both) pushUndo();
+  let cur = before;
+  for (let pass = 0; pass < 12 && cur > 0; pass++) {
+    let better = false;
+    for (const [T, other] of both ? [[t2, tree], [tree, t2]] : [[t2, tree]]) walkAll(T, x => { if (x.children.length < 2) return; x.children.reverse(); const c = tgCross(ord(T === tree ? tree : other), ord(T === tree ? t2 : T)); if (c < cur) { cur = c; better = true; } else x.children.reverse(); });
+    if (!better) break;
+  }
+  const d = tabs[O.j].doc; d.tree = serialize(t2); d.src = toNewick(t2); tgCache = { key: d.tree, t: t2 };
+  render(); persist(); toast(`Crossings: ${before} → ${cur}`);
+}
+// The panel box: the second tree, whether its tips match, and untangling.
+function tgBox() {
+  const d = document.createElement('div'); d.className = 'treetools';
+  const fill = () => {
+    const others = tabs.map((t, i) => [t, i]).filter(([t, i]) => i !== tabIdx); let O = null, M = null; try { O = tree ? tgOther() : null; M = O ? tgMatch(O.t) : null; } catch (e) { O = M = null; }   // never stops the panel
+    const nSet = treeSet && treeSet.trees ? treeSet.trees.length : 0;
+    d.innerHTML = `<div class="row"><label for="tgSrc">Second tree</label><select id="tgSrc">${others.length ? '' : '<option value="">None</option>'}${others.map(([t]) => `<option value="${t.id}" ${t.id === settings.tgTab ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></div>
+      <div class="btns"><button type="button" class="btn small" data-tg="file">Load a tree file in a new tab</button>${nSet > 1 ? `<button type="button" class="btn small" data-tg="set">Open a tree of the set</button>` : ''}</div>
+      <p class="hint" id="tgMsg"></p>
+      ${O && M && M.ok ? `<div class="btns"><button type="button" class="btn small" data-tg="un2">Untangle (turn the second tree)</button><button type="button" class="btn small" data-tg="un">Untangle both</button></div>` : ''}
+      <input type="file" id="tgFile" hidden>`;
+    const sel = d.querySelector('#tgSrc'); if (sel && !settings.tgTab && others.length) { settings.tgTab = others[0][0].id; }
+    setTimeout(tgStatus);
+    if (sel) sel.onchange = () => { settings.tgTab = +sel.value || 0; tgCache.key = null; persist(); render(); fill(); };
+    d.querySelectorAll('[data-tg]').forEach(b => b.onclick = () => {
+      ensureTabs(); const a = b.dataset.tg, back = tabIdx;   // the tabs exist before the one to come back to is noted
+      if (a === 'un2' || a === 'un') return tgUntangle(a === 'un');
+      if (a === 'file') { const f = d.querySelector('#tgFile'); f.onchange = () => { const file = f.files[0]; if (!file) return; const r = new FileReader(); r.onload = () => { try { const t = parseTreeFile(r.result).trees[0]; const keep = tabs[back] ? tabs[back].id : null; openInTab(t, file.name.replace(/\.[^.]+$/, ''), false); const id = tabs[tabIdx].id; switchTab(tabs.findIndex(x => x.id === keep)); settings.tgTab = id; tgCache.key = null; persist(); buildSide(); render(); toast('Loaded in a new tab, and set as the second tree'); } catch (err) { toast('This file has no readable tree'); } }; r.readAsText(file); }; f.click(); }
+      if (a === 'set') {   // which tree of the set: in the app's own window, not the browser's
+        askConfirm({ title: 'A tree of the set', ok: 'Open it', okClass: 'primary', cancel: 'Cancel', focusOk: true, dismiss: true,
+          html: `It opens in a new tab and becomes the second tree of the tanglegram.<div class="rsform"><span>Tree</span><div class="ctl"><input class="num boxed" type="number" id="tgSetN" min="1" max="${nSet}" step="1" value="1"><span class="hint">of ${nSet.toLocaleString('en')}</span></div></div><p class="hint rsmsg" id="tgSetMsg"></p>` })
+          .then(ok => {
+            if (!ok) return; const n = Math.round(+$('tgSetN').value); if (!(n >= 1 && n <= nSet)) return;
+            const keep = tabs[back] ? tabs[back].id : null; openInTab(treeOfRec(treeSet.trees[n - 1]), `Tree ${n} of the set`, false);
+            const id = tabs[tabIdx].id; switchTab(tabs.findIndex(x => x.id === keep)); settings.tgTab = id; tgCache.key = null; persist(); buildSide(); render();
+          });
+        setTimeout(() => { const i = $('tgSetN'), msg = $('tgSetMsg'); if (!i) return;
+          const check = () => { const v = +i.value, bad = !(Number.isInteger(v) && v >= 1 && v <= nSet); $('cOk').disabled = bad; msg.classList.toggle('warn', bad); msg.textContent = bad ? `Choose a tree from 1 to ${nSet.toLocaleString('en')}.` : ''; };
+          i.addEventListener('input', check); i.select(); check(); });
+      }
+    });
+  };
+  fill(); return d;
+}
+// One line on its own: its color, width and style (right-click it).
+const TG_SPEC = [{ k: 'c', label: 'Color', type: 'color' }, { k: 'w', label: 'Width', type: 'num', unit: 'px' }, { k: 'st', label: 'Style', type: 'sel', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] }];
+function openTgLine(k, name, cx, cy, keep) {
+  if (tgSel !== k) { tgSel = k; render(); }   // shown, so it is clear which one it is
+  const ov = (settings.tgLines || {})[k] || {}, keepScroll = keep ? pop.scrollTop : 0;
+  pop.innerHTML = `<button class="close" aria-label="Close">×</button><div class="dragh" title="Drag to move"><h3>Line of ${esc(disp(name))}</h3><div class="meta">One line of the tanglegram. Its other look is set in Tanglegram.</div></div>
+    <div class="part"><b>This line</b>${ctlRows(TG_SPEC, key => ({ v: ov[key] ?? ({ c: settings.tgColor, w: settings.tgW, st: settings.tgStyle })[key], own: ov[key] != null }))}<div class="btns"><button class="btn small" data-tgr="1">Back to the look of all</button></div></div>`;
+  pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
+  wireCtl(TG_SPEC, (key, v) => { pushUndo(true); settings.tgLines = { ...(settings.tgLines || {}) }; const o = { ...(settings.tgLines[k] || {}) }; if (v == null) delete o[key]; else o[key] = key === 'w' ? Math.max(0, +v || 0) : v; settings.tgLines[k] = o; render(); persist(); openTgLine(k, name, cx, cy, true); });
+  pop.querySelector('[data-tgr]').onclick = () => { pushUndo(true); settings.tgLines = { ...(settings.tgLines || {}) }; delete settings.tgLines[k]; render(); persist(); openTgLine(k, name, cx, cy, true); };
+  pop.querySelector('.close').onclick = closePop;
+}
+svg.addEventListener('pointerdown', e => {   // a click on a line selects it, and a click elsewhere lets it go
+  if (e.button !== 0) return; const t = e.target.closest && e.target.closest('[data-tgl]');
+  if (t) { e.preventDefault(); e.stopImmediatePropagation(); const g = tgGeom[+t.dataset.tgl]; if (g && tgSel !== g.k) { sel.clear(); selImg = null; tgSel = g.k; render(); } return; }
+  if (tgSel != null && !(e.target.closest && e.target.closest('#pop'))) { tgSel = null; closePop(); render(); }
+}, true);
+svg.addEventListener('contextmenu', e => {
+  const t = e.target.closest && e.target.closest('[data-tgl]'); if (!t) return;
+  e.preventDefault(); e.stopImmediatePropagation(); const g = tgGeom[+t.dataset.tgl]; if (g) openTgLine(g.k, g.name, e.clientX, e.clientY);
+}, true);
+// Copy the whole tree to a new tab: the same tree and look, to style or plot it otherwise.
+function copyTreeToTab() {
+  ensureTabs(); const d0 = captureTab(); tabs[tabIdx].doc = d0;
+  const d = { ...d0, settings: { ...JSON.parse(JSON.stringify(d0.settings)), tgOn: false, tgTab: 0, tgLines: {} }, undo: [], redo: [], images: d0.images.map(m => ({ ...m })), view: { ...d0.view } };   // no tanglegram of its own
+  tabs.push({ id: ++tabUid, name: `${tabs[tabIdx].name} (copy)`, doc: null }); tabIdx = tabs.length - 1; tabs[tabIdx - 0].doc = null;
+  applyTab(d); toast('The tree is copied to a new tab');
+}
+const imgWraps = new Map();   // the group of each image
+// The box in Page settings: ticked when every heavy element is lightened, empty when none, a dash (partly) when only some.
+function syncLightBox() {
+  const inp = document.querySelector('#pageSheet .row[data-k="lightMode"] input'); if (!inp) return;
+  const hv = figImages.filter(isHeavy), n = hv.filter(m => !lightPause && (m.lightOv === 'on' || (lightOn() && m.lightOv !== 'off'))).length;
+  inp.indeterminate = n > 0 && n < hv.length; inp.checked = hv.length > 0 && n === hv.length;
+}
 function placeImages() {
   refreshKdes();   // density plots follow the current values and colours
+  { const tg = content.querySelector('#tangle'); if (tg) tg.innerHTML = tangleSvg(); tgStatus(); }
   { const L = geoLinesSvg(), gl = content.querySelector('#gmLines'), go = content.querySelector('#geoLinesOver'); if (gl) gl.innerHTML = L.under; if (go) go.innerHTML = L.over; }   // lines to the points of the maps, now in place
   const back = content.querySelector('#imgBack'), front = content.querySelector('#imgFront');
-  for (const id of [...imgEls.keys()]) if (!imgById(id)) { imgEls.get(id).remove(); imgEls.delete(id); }   // a deleted image leaves the canvas too
+  for (const id of [...imgEls.keys()]) if (!imgById(id)) { imgEls.get(id).remove(); imgEls.delete(id); const w = imgWraps.get(id); if (w) { w.remove(); imgWraps.delete(id); } }   // a deleted image leaves the canvas too
   for (const m of figImages) {
     let el = imgEls.get(m.id);
     if (!el) { el = document.createElementNS('http://www.w3.org/2000/svg', 'image'); el.setAttribute('preserveAspectRatio', 'none'); imgEls.set(m.id, el); }
-    const src = imgStore.get(m.sid); if (el.getAttribute('href') !== src) el.setAttribute('href', src);
+    let wr = imgWraps.get(m.id); if (!wr) { wr = document.createElementNS('http://www.w3.org/2000/svg', 'g'); imgWraps.set(m.id, wr); } if (el.parentNode !== wr) wr.appendChild(el);   // its group: turning, flipping and its mask
+    const src = isLightM(m) ? lightHref(m) : imgStore.get(m.sid); if (el.getAttribute('href') !== src) el.setAttribute('href', src);   // a placeholder while lightened
     el.setAttribute('x', f2(m.x)); el.setAttribute('y', f2(m.y)); el.setAttribute('width', f2(m.w)); el.setAttribute('height', f2(m.h));
     if (m.op < 1) el.setAttribute('opacity', m.op); else el.removeAttribute('opacity');
     const cx = m.x + m.w / 2, cy = m.y + m.h / 2, tf = [];
     if (m.rot) tf.push(`rotate(${f2(m.rot)} ${f2(cx)} ${f2(cy)})`);
     if (m.fx || m.fy) tf.push(`translate(${f2(cx)} ${f2(cy)}) scale(${m.fx ? -1 : 1} ${m.fy ? -1 : 1}) translate(${f2(-cx)} ${f2(-cy)})`);
-    if (tf.length) el.setAttribute('transform', tf.join(' ')); else el.removeAttribute('transform');
-    (m.layer === 'back' ? back : front)?.appendChild(el);
+    el.removeAttribute('transform'); if (tf.length) wr.setAttribute('transform', tf.join(' ')); else wr.removeAttribute('transform');
+    const mk = !m.geo && !m.kde && !m.ltt && !m.txt && m.mask && m.mask !== 'none' ? m.mask : '';
+    let cp = wr.querySelector(':scope > clipPath');
+    if (mk) {
+      if (!cp) { cp = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath'); cp.id = 'imclip' + m.id; wr.insertBefore(cp, el); }
+      const r = mk === 'round' ? Math.min(m.w, m.h) / 2 * Math.min(100, Math.max(0, m.maskR ?? 15)) / 100 : 0;
+      cp.innerHTML = mk === 'circle' ? `<ellipse cx="${f2(m.x + m.w / 2)}" cy="${f2(m.y + m.h / 2)}" rx="${f2(m.w / 2)}" ry="${f2(m.h / 2)}"/>` : `<rect x="${f2(m.x)}" y="${f2(m.y)}" width="${f2(m.w)}" height="${f2(m.h)}" rx="${f2(r)}" ry="${f2(r)}"/>`;
+      wr.setAttribute('clip-path', `url(#imclip${m.id})`);
+    } else { if (cp) cp.remove(); wr.removeAttribute('clip-path'); }
+    (m.layer === 'back' ? back : front)?.appendChild(wr);
   }
+  syncLightBox();
 }
 // Click areas of the images, with the handles to resize and rotate the selected one.
 function imageHits() {
@@ -7055,13 +7592,17 @@ function imageHits() {
   for (const m of figImages) {
     const tr = m.rot ? ` transform="rotate(${f2(m.rot)} ${f2(m.x + m.w / 2)} ${f2(m.y + m.h / 2)})"` : '';
     (m.layer === 'back' ? back : front).push(`<rect class="imghit" data-img="${m.id}" x="${f2(m.x)}" y="${f2(m.y)}" width="${f2(m.w)}" height="${f2(m.h)}"${tr}/>`);
-    if (m.geo && m._geoPts && m._geoPts.length) {   // the points of a map: each one its own click and hover area
+    if (m.geo && m._geoPts && m._geoPts.length && !isLightM(m)) {   // the points of a map: each one its own click and hover area
       const sx = m.w / m.nw, sy = m.h / m.nh;
       (m.layer === 'back' ? back : front).push(`<g${tr}>` + m._geoPts.map((q, i) => (geoSel.has(m.id + '|' + q.key) ? `<circle cx="${f2(m.x + q.x * sx)}" cy="${f2(m.y + q.y * sy)}" r="${f2(q.r * sx + 3 / k)}" fill="none" stroke="var(--accent)" stroke-width="${f2(3 / k)}" opacity=".6" pointer-events="none"/>` : '') + `<circle class="geopt" data-geopt="${m.id}:${i}" cx="${f2(m.x + q.x * sx)}" cy="${f2(m.y + q.y * sy)}" r="${f2(Math.max(q.r * sx, 3 / k))}"/>`).join('') + '</g>');   // a selected point shows a halo
     }
   }
   const m = selImg != null && imgById(selImg);
-  if (m) {
+  tgGeom.forEach(g => { if (g.k === tgSel) front.push(`<path d="${g.d}" fill="none" stroke="#3E63DD" stroke-opacity=".45" stroke-width="${f2(6 / k)}" stroke-linecap="round" pointer-events="none"/>`); });   // the line whose menu is open
+  tgGeom.forEach((g, i) => front.push(`<path d="${g.d}" fill="none" stroke="#000" stroke-opacity="0" stroke-width="${f2(8 / k)}" pointer-events="stroke" data-tgl="${i}" style="cursor:pointer"><title>${esc(disp(g.name))}: click to select it, right-click for its look</title></path>`));   // the lines of a tanglegram
+  for (const x of figImages) if (isLightM(x) && x.id !== selImg) { const tr = x.rot ? ` transform="rotate(${f2(x.rot)} ${f2(x.x + x.w / 2)} ${f2(x.y + x.h / 2)})"` : ''; front.push(`<g${tr} pointer-events="none"><rect x="${f2(x.x)}" y="${f2(x.y)}" width="${f2(x.w)}" height="${f2(x.h)}" fill="none" stroke="#9AA3AE" stroke-width="${f2(1.2 / k)}" stroke-dasharray="${f2(5 / k)} ${f2(4 / k)}"/></g>`); }   // lightened: a grey dashed frame until shown again
+  if (m && isLightM(m)) { const tr = m.rot ? ` transform="rotate(${f2(m.rot)} ${f2(m.x + m.w / 2)} ${f2(m.y + m.h / 2)})"` : ''; front.push(`<g${tr} pointer-events="none"><rect x="${f2(m.x)}" y="${f2(m.y)}" width="${f2(m.w)}" height="${f2(m.h)}" fill="none" stroke="#27408B" stroke-width="${f2(1.5 / k)}" stroke-dasharray="${f2(5 / k)} ${f2(4 / k)}"/></g>`); }   // lightened: moved only, no handles
+  else if (m) {
     const tr = m.rot ? ` transform="rotate(${f2(m.rot)} ${f2(m.x + m.w / 2)} ${f2(m.y + m.h / 2)})"` : '';
     const corners = { nw: [m.x, m.y], ne: [m.x + m.w, m.y], sw: [m.x, m.y + m.h], se: [m.x + m.w, m.y + m.h] };
     front.push(`<g${tr} pointer-events="none"><rect x="${f2(m.x)}" y="${f2(m.y)}" width="${f2(m.w)}" height="${f2(m.h)}" fill="none" stroke="#27408B" stroke-width="${f2(1.5 / k)}" stroke-dasharray="${f2(5 / k)} ${f2(3 / k)}"/></g>`);
@@ -7334,6 +7875,7 @@ function openImage(cx, cy, keep) {
     if (a === 'natural') commit(() => { m.h = m.w * m.nh / m.nw; });
     else if (a === 'fx') commit(() => { m.fx = !m.fx; });
     else if (a === 'fy') commit(() => { m.fy = !m.fy; });
+    else if (a === 'light') { m.lightOv = isLightM(m) ? 'off' : 'on'; imgChanged(); openImage(cx, cy, true); }
     else if (a === 'dup') { if (tree) pushUndo(); const c = { ...m, id: ++imgUid, x: m.x + 20, y: m.y + 20 }; figImages.push(c); selImg = c.id; imgChanged('Image duplicated'); openImage(0, 0, true); }
     else if (a === 'del') { if (tree) pushUndo(); figImages = figImages.filter(x => x !== m); selImg = null; closePop(); imgChanged('Image deleted'); }
   });
@@ -7361,9 +7903,18 @@ function openImage(cx, cy, keep) {
     const spec = [{ k: 'line', label: 'Line color', type: 'color' }, { k: 'lw', label: 'Line width', type: 'num', unit: 'px' }, { k: 'fill', label: 'Fill', type: 'color' }, { k: 'fillOp', label: 'Fill opacity', type: 'num', unit: '%' },
       { k: 'area', label: 'Area', type: 'sel', opts: [['all', 'The whole map'], ['points', 'Around the points'], ['custom', 'Custom']] }, { k: 'pad', label: 'Margin around the points', type: 'num', unit: '%' }, { k: 'scale', label: 'Scale 1:', type: 'num' },
       { k: 'frame', label: 'Frame', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] }, { k: 'frameColor', label: 'Frame color', type: 'color' }];
-    pop.querySelector('.part').insertAdjacentHTML('beforebegin', `<div class="part"><b>Map</b><div class="kv"><span>Name</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" id="geoTitleIn" value="${esc(geoTitle(m))}" aria-label="Name of the map"></div>${ctlRows(spec, key => ({ v: key === 'scale' ? Math.round(geoScaleOf(m)) : m.geo[key], own: false }))}<p class="hint">${m.geo.area === 'custom' ? 'With the map selected, Ctrl + drag moves its view and Ctrl + scroll zooms in and out. The scale is the one of the figure at its size (96 px per inch), true at the center of the map. ' : ''}Its points, projection and lines are set in Geography, with this map chosen in Map.</p></div>`);
+    const tkSpec = [{ k: 'tkStep', label: 'Every (0 for automatic)', type: 'num', unit: g && g.deg ? '°' : '' }, ...(g && g.deg ? [{ k: 'tkFmt', label: 'Format', type: 'sel', opts: [['dec', 'Decimal degrees (N, S, E, W)'], ['sign', 'Decimal degrees (+ and −)'], ['dms', 'Degrees, minutes, seconds']] }] : []),
+      { k: 'tkDec', label: 'Decimals', type: 'num' }, { k: 'tkLen', label: 'Tick length', type: 'num', unit: 'px' }, { k: 'tkW', label: 'Tick width', type: 'num', unit: 'px' },
+      { k: 'tkGap', label: 'Space to the numbers', type: 'num', unit: 'px' }, { k: 'tkFs', label: 'Text size', type: 'num', unit: 'px' }, { k: 'tkColor', label: 'Color', type: 'color' }];
+    const tkDef = { tkStep: 0, tkFmt: 'dec', tkDec: 0, tkLen: 4, tkW: 0.8, tkGap: 2, tkFs: 9, tkColor: '#333333' };
+    pop.querySelector('.part').insertAdjacentHTML('beforebegin', `<div class="part"><b>Map</b><div class="kv"><span>Name</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" id="geoTitleIn" value="${esc(geoTitle(m))}" aria-label="Name of the map"></div>${ctlRows(spec, key => ({ v: key === 'scale' ? Math.round(geoScaleOf(m)) : m.geo[key], own: false }))}<p class="hint">${m.geo.area === 'custom' ? 'With the map selected, Ctrl + drag moves its view and Ctrl + scroll zooms in and out. The scale is the one of the figure at its size (96 px per inch), true at the center of the map. ' : ''}Its points, projection and lines are set in Geography, with this map chosen in Map.</p></div><div class="part"><b>Coordinates</b><div class="kv"><span>Edges</span><span class="tkedges">${[['b', 'Bottom'], ['l', 'Left'], ['t', 'Top'], ['r', 'Right']].map(([e, l]) => `<label class="opt"><input type="checkbox" data-tke="${e}" ${(m.geo.tk || '').includes(e) ? 'checked' : ''}> ${l}</label>`).join('')}</span></div>${(m.geo.tk || '') ? ctlRows(tkSpec, key => ({ v: m.geo[key] ?? tkDef[key], own: false })) : ''}</div>`);
+    { const ps = [...pop.querySelectorAll('.part > b')].find(b => b.textContent === 'Position and size');
+      if (ps) { ps.insertAdjacentHTML('afterend', `<div class="kv"><span>Proportions</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><select class="psel" data-free aria-label="Proportions"><option value="0"${m.free ? '' : ' selected'}>Locked</option><option value="1"${m.free ? ' selected' : ''}>Free</option></select></div>${m.free ? '<p class="hint">The map shows more or less of its area to fill the frame, never stretched.</p>' : ''}`);
+        ps.parentNode.querySelector('[data-free]').onchange = e => { pushUndo(); m.free = e.target.value === '1'; imgChanged(); openImage(cx, cy, true); }; } }
+    pop.querySelectorAll('[data-tke]').forEach(i => i.onchange = () => { pushUndo(); m.geo.tk = [...pop.querySelectorAll('[data-tke]:checked')].map(x => x.dataset.tke).join(''); imgChanged(); openImage(cx, cy, true); });
     { const ti = pop.querySelector('#geoTitleIn'); ti.addEventListener('change', () => { m.geo.title = ti.value.trim() || m.geo.title; if (h3) h3.textContent = m.geo.title; persist(); buildSide(); }); }
-    wireCtl(spec, (key, v) => { pushUndo(); if (key === 'scale') { geoSetScale(m, v); openImage(cx, cy, true); return; } if (key === 'area' && v === 'custom' && !m.geo.view && m._geoBox) m.geo.view = [...m._geoBox]; if (key === 'fillOp') v = clamp(v, 0, 100); if (key === 'lw' || key === 'pad') v = Math.max(0, v); m.geo[key] = v; imgChanged(); openImage(cx, cy, true); });
+    if (m.geo.tk) wireCtl(tkSpec, (key, v) => { pushUndo(); if (key !== 'tkFmt' && key !== 'tkColor') v = Math.max(0, +v || 0); m.geo[key] = v; geoSoon(); });
+    wireCtl(spec, (key, v) => { pushUndo(); if (key === 'scale') { geoSetScale(m, v); openImage(cx, cy, true); return; } if (key === 'area' && v === 'custom' && !m.geo.view && m._geoBox) m.geo.view = [...m._geoBox]; if (key === 'fillOp') v = clamp(v, 0, 100); if (key === 'lw' || key === 'pad') v = Math.max(0, v); m.geo[key] = v; if (key === 'area') { imgChanged(); openImage(cx, cy, true); } else geoSoon(); });   // the menu is built again only when its hint changes
   }
   if (m.txt || m.kde) {   // items the app draws: a title that says what they are
     const h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta');
@@ -7395,6 +7946,22 @@ function openImage(cx, cy, keep) {
     const ti = pop.querySelector('[data-kdetitle]');
     ti.addEventListener('change', () => { pushUndo(); m.kde.title = ti.value; imgChanged(); });
     ti.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ti.blur(); } });
+  }
+  if (!m.geo && !m.kde && !m.ltt && !m.txt && !isLightM(m)) {   // an image: a circle, or rounded corners, without changing the image
+    const look = [...pop.querySelectorAll('.part > b')].find(b => b.textContent === 'Look');
+    const mspec = [{ k: 'mask', label: 'Shape', type: 'sel', opts: [['none', 'As it is'], ['circle', 'Circle or ellipse'], ['round', 'Rounded corners']] }, ...(m.mask === 'round' ? [{ k: 'maskR', label: 'Corner radius', type: 'num', unit: '%' }] : [])];
+    if (look) { look.parentNode.insertAdjacentHTML('beforeend', ctlRows(mspec, key => ({ v: key === 'mask' ? (m.mask || 'none') : (m.maskR ?? 15), own: false })) + '<p class="hint">Only masks the image: the original stays whole.</p>');
+      wireCtl(mspec, (key, v) => { pushUndo(); if (key === 'maskR') v = Math.max(0, Math.min(100, +v || 0)); m[key] = v; imgChanged(); if (key === 'mask') openImage(cx, cy, true); }); }
+  }
+  if (isHeavy(m)) {   // lighten this one, or show it again
+    const dup = pop.querySelector('[data-ia="dup"]');
+    if (dup) dup.insertAdjacentHTML('beforebegin', `<button class="btn small" data-ia="light">${isLightM(m) ? 'Show this one' : 'Lighten this one'}</button>`);
+    const lb = pop.querySelector('[data-ia="light"]'); if (lb) lb.onclick = e => { e.stopPropagation(); m.lightOv = isLightM(m) ? 'off' : 'on'; imgChanged(); openImage(cx, cy, true); };   // added after the menu wired its buttons
+  }
+  if (isLightM(m)) {   // lightened: it can be moved, nothing else
+    pop.querySelector('.dragh').insertAdjacentHTML('afterend', `<p class="rsnote">This ${kindName(m).toLowerCase()} is lightened: it can be moved, and its other options come back when it is shown again.</p>`);
+    pop.querySelectorAll('.part').forEach(pt => { const t = (pt.querySelector(':scope > b') || {}).textContent || ''; if (t && !/^(Position and size|Size)$/.test(t)) pt.classList.add('lightlock'); });
+    pop.querySelectorAll('[data-im="w"], [data-im="h"], [data-free]').forEach(i => { const kv = i.closest('.kv'); if (kv) kv.classList.add('lightlock'); });
   }
 }
 // Updates the list of images in the panel.
@@ -8192,11 +8759,12 @@ function altNames(S) {
   const out = new Map(); if (!tree || !S.labelSrcTable) return out;
   const dec = S.labelSrcDec ?? 3, fmt = v => v !== '' && v != null && isFinite(+v) ? String(+(+v).toFixed(dec)) : String(v).trim();
   if (S.labelSrcTable === 'meta') {
-    for (const n of leaves(tree)) { const v = n.meta && n.meta[S.labelSrcCol]; if (v != null && v !== true && v !== '') out.set(n, Array.isArray(v) ? `[${v.map(fmt).join(', ')}]` : fmt(v)); }
+    const age = AGE_KEY.test(S.labelSrcCol || ''), fa = v => age && typeof v === 'number' ? fmt(ageOut(v, S)) : fmt(v);   // ages from the youngest tip
+    for (const n of leaves(tree)) { const v = n.meta && n.meta[S.labelSrcCol]; if (v != null && v !== true && v !== '') out.set(n, Array.isArray(v) ? `[${v.map(fa).join(', ')}]` : fa(v)); }
   } else if (S.labelSrcTable === 'calc') {
     const d = new Map(); let H = 0;
     (function g(x, acc) { d.set(x, acc); if (!x.children.length) H = Math.max(H, acc); x.children.forEach(c => g(c, acc + (c.len || 0))); })(tree, 0);
-    for (const n of leaves(tree)) { const v = S.labelSrcCol === 'len' ? n.len : H - d.get(n); if (v != null && isFinite(v)) out.set(n, fmt(Math.abs(v) < 1e-9 ? 0 : v)); }
+    for (const n of leaves(tree)) { const v = S.labelSrcCol === 'len' ? n.len : ageOut(H - d.get(n), S); if (v != null && isFinite(v)) out.set(n, fmt(Math.abs(v) < 1e-9 ? 0 : v)); }   // a tip's age from the youngest tip
   } else {
     const t = (S.dataTables || []).find(x => x.id === S.labelSrcTable), ci = t ? t.header.indexOf(S.labelSrcCol) : -1;
     if (!t || ci < 1) return out;
@@ -8273,9 +8841,18 @@ function selectMatches() {
 }
 
 /* ================= Style templates: the look of a figure, without its tree or data ================= */
-const STYLE_SKIP = new Set(['gmMap', 'neRes', 'neLayers', 'gpAge', 'gpModel', 'gmTable', 'gmLon', 'gmLat', 'gmColorVar', 'gmSizeVar', 'gmPts', 'alnPick', 'pieData', 'arrows', 'dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
+const STYLE_SKIP = new Set(['renderOpt', 'screenLines', 'tgTab', 'tgLines', 'lightMode', 'copyParts', 'gmMap', 'neRes', 'neLayers', 'gpAge', 'gpModel', 'gmTable', 'gmLon', 'gmLat', 'gmColorVar', 'gmSizeVar', 'gmPts', 'alnPick', 'pieData', 'arrows', 'dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
   'pages', 'legendPos', 'legendText', 'scaleX', 'scaleY', 'scaleFree', 'title', 'projectName', 'exportName', 'exportSizeMode', 'exportWidthVal', 'axisCustom', 'nbarSrc', 'nlabSrc', 'supportSource']);
 // Saves a style template: every setting except the tree and its data.
+// The menus Import and Save of the header.
+for (const [b, mn] of [['impMenuBtn', 'impMenu'], ['saveMenuBtn', 'saveMenu']]) {
+  $(b).addEventListener('click', e => { e.stopPropagation(); const open = $(mn).hidden; document.querySelectorAll('.expmenu').forEach(x => { x.hidden = true; }); $(mn).hidden = !open; $(b).setAttribute('aria-expanded', String(open)); });
+  $(mn).addEventListener('click', () => { $(mn).hidden = true; $(b).setAttribute('aria-expanded', 'false'); });
+}
+document.addEventListener('click', e => { if (!(e.target.closest && e.target.closest('.expwrap'))) for (const mn of ['impMenu', 'saveMenu']) $(mn).hidden = true; });
+$('saveStyleTop').addEventListener('click', () => saveStyle());
+$('impStyleTop').addEventListener('click', () => { if (!tree) return toast('Open a tree first'); $('styleInTop').click(); });
+$('styleInTop').addEventListener('change', e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = () => applyStyleText(r.result); r.readAsText(f); } e.target.value = ''; });
 async function saveStyle() {
   const style = Object.fromEntries(Object.entries(settings).filter(([k]) => !STYLE_SKIP.has(k)));
   const name = await askName((settings.exportName || 'my-style'), { title: 'Save style template', ext: '.tree2go-style.json', ok: 'Save' });
@@ -8375,6 +8952,7 @@ function openInTab(t, name, inherit) {
   tabs[tabIdx].doc = captureTab();
   const st = JSON.parse(JSON.stringify(settings));
   st.pages = []; st.legendPos = {}; st.scaleFree = false; st.scaleX = st.scaleY = null;   // rows and positions belong to the old tree
+  st.tgOn = false; st.tgTab = 0; st.tgLines = {};   // a new tab has no tanglegram of its own
   if (st.layout === 'rect' && !(st.rootStub > 0)) st.rootStub = 24;   // the clade's own branch, where its support and age are written
   const d = { tree: serialize(t), src: toNewick(t), settings: st, undo: [], redo: [], images: [], view: { ...view },
     treeSet: inherit ? treeSet : null, ro: inherit && treeSet ? { from: tabs[tabIdx].name } : null };
@@ -8423,7 +9001,7 @@ function restoreTabs(rec, setHere) {
   refreshTabs();
 }
 // Keeps the tabs in the browser.
-function persistTabs() { try { const r = tabsRecord(); if (r) localStorage.setItem('tree2go-tabs', JSON.stringify(r)); else localStorage.removeItem('tree2go-tabs'); } catch (e) { } }
+function persistTabs() { if (benchOn) return; try { const r = tabsRecord(); if (r) localStorage.setItem('tree2go-tabs', JSON.stringify(r)); else localStorage.removeItem('tree2go-tabs'); } catch (e) { } }
 
 /* ================= Markdown reader for the About and Reference windows =================
    A small reader for the Markdown that about.md and reference.md use: headings (with ids for links), paragraphs (two
@@ -8448,10 +9026,11 @@ function mdToHtml(md, base) {
   // id of a heading, as GitHub makes it, so links like (#time-axis) work
   const slug = t => t.replace(/<[^>]+>/g, '').replace(/[`*]/g, '').toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s/g, '-');
   const lines = String(md).replace(/\r/g, '').replace(/<!--[\s\S]*?-->/g, '').split('\n'), out = [];   // HTML comments are notes for whoever edits the file
-  const startsBlock = l => /^(#{1,6}\s|```|\s*\||\s*>|\s*([-*+]|\d+\.)\s|\s*<(div|p|table|ul|ol|h\d|blockquote|pre|figure|details)\b)/i.test(l);
+  const startsBlock = l => /^(#{1,6}\s|```|\s*\||\s*>|\s*([-*+]|\d+\.)\s|\s*<\/?(div|p|table|ul|ol|h\d|blockquote|pre|figure|details|summary)\b)/i.test(l);
   for (let i = 0; i < lines.length;) {
     const l = lines[i]; let m;
     if (!l.trim()) { i++; continue; }
+    if (/^\s*(<details\b[^>]*>|<\/details>|<summary>.*<\/summary>)\s*$/i.test(l)) { out.push(l.trim()); i++; continue; }   // a folding group: its marks alone, the Markdown inside read as usual
     if ((m = /^(#{1,6})\s+(.*)$/.exec(l))) { const h = m[1].length; out.push(`<h${h} id="${slug(m[2])}">${inline(m[2])}</h${h}>`); i++; continue; }
     if (/^```/.test(l)) { const b = []; i++; while (i < lines.length && !/^```/.test(lines[i])) b.push(lines[i++]); i++; out.push(`<pre><code>${esc0(b.join('\n'))}</code></pre>`); continue; }
     if (/^(-{3,}|\*{3,})\s*$/.test(l)) { out.push('<hr>'); i++; continue; }
@@ -8475,6 +9054,13 @@ function mdToHtml(md, base) {
   }
   return out.join('\n');
 }
+// A link inside the guide opens the folded groups around its target first, so the jump lands on it.
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('.helpBody a[href*="#"]'); if (!a) return;
+  const id = decodeURIComponent((a.getAttribute('href') || '').split('#').pop() || ''), t = id && document.getElementById(id); if (!t) return;
+  for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
+  e.preventDefault(); t.scrollIntoView({ block: 'start' });
+});
 // Reads a text file from the first source that answers. Relative paths first when the app is on the web.
 async function fetchFirst(urls) {
   for (const url of urls.filter(Boolean)) {
@@ -8823,6 +9409,7 @@ function kdeScale(mode) {
 const rampOf = (stops, q) => { q = clamp(q, 0, 1) * (stops.length - 1); const i = Math.min(stops.length - 2, Math.floor(q)), u = q - i, c0 = hexRGB(stops[i]), c1 = hexRGB(stops[i + 1]); return rgbHex(c0.map((c, j) => c + (c1[j] - c) * u)); };
 const dashOf = (kind, w) => kind === 'dashed' ? ` stroke-dasharray="${f2(w * 3.5)} ${f2(w * 2.2)}"` : kind === 'dotted' ? ` stroke-dasharray="0.01 ${f2(w * 2.2)}" stroke-linecap="round"` : '';
 // The SVG of a density plot: Gaussian kernel with Silverman's bandwidth (times the smoothing), and an axis under it.
+let kdeGradN = 0;   // gradients of the density plots, each with its own id
 function kdeSvg(k) {
   const S = settings, W = 320, H = 180, fam = 'Helvetica, Arial, sans-serif';
   const raw = [...kdeValues(S, k, k.log).values()].filter(Number.isFinite);
@@ -8867,12 +9454,12 @@ function kdeSvg(k) {
     // each colour is mixed with the page background by the fill opacity, so the strips are solid and leave no seams
     const bgc = hexRGB(/^#[0-9a-f]{6}$/i.test(S.bg || '') ? S.bg : '#ffffff');
     const col = v => { const vv = k.log ? 10 ** v : v, c = hexRGB(rampOf(sc.stops, sc.b > sc.a ? (sc.f(vv) - sc.a) / (sc.b - sc.a) : 0.5)); return rgbHex(c.map((x, j) => bgc[j] + (x - bgc[j]) * k.fillOp)); };
-    let strips = '';
-    for (let i = 0; i < G; i++) {
-      const [x0, d0] = grid[i], [x1, d1] = grid[i + 1];
-      strips += `<path d="M${f2(X(x0))},${f2(base)}L${f2(X(x0))},${f2(Y(d0))}L${f2(X(x1) + 0.35)},${f2(Y(d1))}L${f2(X(x1) + 0.35)},${f2(base)}Z" fill="${col((x0 + x1) / 2)}"/>`;
-    }
-    areaSvg = `<g>${strips}</g>`;
+    // one shape filled with a gradient through the colour of each value: no strips, so no seams in any viewer or in a PDF
+    const xa = X(grid[0][0]), xb = X(grid[G][0]), id = 'kdeg' + (++kdeGradN), step = Math.max(1, Math.ceil(G / 160));
+    let stops = '', d = `M${f2(xa)},${f2(base)}`;
+    for (let i = 0; i <= G; i++) { const [x, dv] = grid[i]; d += `L${f2(X(x))},${f2(Y(dv))}`; if (i % step === 0 || i === G) stops += `<stop offset="${((X(x) - xa) / Math.max(1e-9, xb - xa)).toFixed(4)}" stop-color="${col(x)}"/>`; }
+    d += `L${f2(xb)},${f2(base)}Z`;
+    areaSvg = `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs><path d="${d}" fill="url(#${id})"/>`;
   }
   let ax = '';
   if (k.axis) {
@@ -8921,12 +9508,14 @@ function inlineKdes(str) {
   for (const m of figImages) if (m.geo || m.kde || m.ltt || m.txt) {
     const src = imgStore.get(m.sid); if (!src) continue;
     const body = itemSvg(m).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, ''), cx = m.x + m.w / 2, cy = m.y + m.h / 2, tf = [];
-    if (m.rot) tf.push(`rotate(${f2(m.rot)} ${f2(cx)} ${f2(cy)})`);
-    if (m.fx || m.fy) tf.push(`translate(${f2(cx)} ${f2(cy)}) scale(${m.fx ? -1 : 1} ${m.fy ? -1 : 1}) translate(${f2(-cx)} ${f2(-cy)})`);
+    void cx; void cy;   // turned and flipped by its group
     tf.push(`translate(${f2(m.x)} ${f2(m.y)}) scale(${(m.w / m.nw).toFixed(5)} ${(m.h / m.nh).toFixed(5)})`);
     const g = `<g transform="${tf.join(' ')}"${m.op < 1 ? ` opacity="${m.op}"` : ''}>${body}</g>`;
-    const esc0 = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    str = str.replace(new RegExp(`<image[^>]*href="${esc0}"[^>]*>(</image>)?`), () => g);
+    // found as plain text, not with a regular expression: a detailed map is too long for one
+    const at = str.indexOf(`href="${src}"`); if (at < 0) continue;
+    const a = str.lastIndexOf('<image', at); let b = str.indexOf('>', at + src.length + 7); if (a < 0 || b < 0) continue; b++;
+    if (str.startsWith('</image>', b)) b += 8;
+    str = str.slice(0, a) + g + str.slice(b);
   }
   return str;
 }
@@ -8937,12 +9526,12 @@ function refreshKdes() {
     const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(d.svg)));
     if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
   }
-  for (const m of figImages) if (m.geo) {   // a map keeps the shape of its projection
+  for (const m of figImages) if (m.geo && !isLightM(m)) {   // a map keeps the shape of its projection (not drawn while lightened)
     const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(geoSvg(m))));
     if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
-    if (!m.free && m.nw) m.h = m.w * m.nh / m.nw;
+    if (!m.free && m.nw) m.h = m.w * m.nh / m.nw;   // locked: the frame follows the map; free: the map fills the frame
   }
-  for (const m of figImages) if (m.kde || m.ltt) {
+  for (const m of figImages) if ((m.kde || m.ltt) && !isLightM(m)) {
     if (m.ltt && m.w > 0) { m.nw = 360; m.nh = Math.round(360 * m.h / m.w); }   // drawn at the shape of the image
     const src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(itemSvg(m))));
     if (imgStore.get(m.sid) !== src) imgStore.set(m.sid, src);
@@ -8995,9 +9584,27 @@ const imgAnchorPts = m => ({ nw: [m.x, m.y], n: [m.x + m.w / 2, m.y], ne: [m.x +
 const nodeFigPt = n => { const t = treeTurn(settings); if (!t) return [n._px, n._py]; const A = t * Math.PI / 180, c = Math.cos(A), s0 = Math.sin(A); return [n._px * c - n._py * s0, n._px * s0 + n._py * c]; };   // where a node is drawn, also on a turned tree
 // A node is anchored by its tips (its name for a tip), so the anchor survives undo, reloading and rerooting.
 const nodeKey = n => n.children.length ? 'c:' + leaves(n).map(l => l.name).sort().join('|') : 't:' + n.name;
+// Points of a clade name bar, read from its click areas: the start, middle and end of the bar, and its name. In figure
+// coordinates, through the transforms of the drawing (a turned tree too).
+function barPts(n) {
+  const els = n ? [...hits.querySelectorAll(`[data-kind="bar"][data-id="${n.id}"]`)] : []; if (!els.length) return null;
+  const base = vp.getCTM(); if (!base) return null; const iv = base.inverse(), out = {};
+  const at = (el, x, y) => { const M = iv.multiply(el.getCTM()); return [M.a * x + M.c * y + M.e, M.b * x + M.d * y + M.f]; };
+  const bar = els[0]; if (bar.getTotalLength) { const L = bar.getTotalLength(); for (const [k, t] of [['start', 0], ['mid', 0.5], ['end', 1]]) { const q = bar.getPointAtLength(L * t); out[k] = at(bar, q.x, q.y); } }
+  const lab = els[1]; if (lab) { if (lab.tagName === 'rect') { const x = +lab.getAttribute('x'), y = +lab.getAttribute('y'), w = +lab.getAttribute('width'), h = +lab.getAttribute('height'); out.label = at(lab, x + w / 2, y + h / 2); } else if (lab.getTotalLength) { const q = lab.getPointAtLength(lab.getTotalLength() / 2); out.label = at(lab, q.x, q.y); } }
+  return out;
+}
+// Three points along the name of a tip, in figure coordinates: where it starts, its middle and where it ends.
+function labelAnchorPts(n) {
+  if (n._lx == null || !(n._lw > 0)) return null; const a = (n._la || 0) * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a), L = n._lw;
+  const at = t => nodeFigPt({ _px: n._lx + c * L * t, _py: n._ly + sn * L * t });
+  return { start: at(0), end: at(1) };   // the start or the end of a name
+}
 function arrowEndPt(E, keys) {
   if (E.an && E.an.t === 'node') { const n = keys.get(E.an.key); if (n && n._px != null) [E.x, E.y] = nodeFigPt(n); }
   else if (E.an && E.an.t === 'img') { const m = imgById(E.an.id), p = m && imgAnchorPts(m)[E.an.p]; if (p) [E.x, E.y] = p; else delete E.an; }
+  else if (E.an && E.an.t === 'cbar') { const P = barPts(keys.get(E.an.key)); if (P && P[E.an.p]) [E.x, E.y] = P[E.an.p]; }   // a clade name bar or its name
+  else if (E.an && E.an.t === 'label') { const n = keys.get(E.an.key), P = n && settings.showTips && labelAnchorPts(n); if (P) [E.x, E.y] = P[E.an.p] || P.end; }   // the name of a tip
   return [E.x, E.y];
 }
 // Drawn last, over the figure and its images (never turned with a vertical tree). Returns the drawing and its click areas.
@@ -9038,6 +9645,8 @@ function arrowSnapAt(p) {
   const lim = 12 / view.k; let best = null, bd = lim;
   for (const m of figImages) for (const [k, q] of Object.entries(imgAnchorPts(m))) { const dd = Math.hypot(q[0] - p[0], q[1] - p[1]); if (dd < bd) { bd = dd; best = { an: { t: 'img', id: m.id, p: k }, x: q[0], y: q[1] }; } }
   if (tree) for (const n of nodeById.values()) if (n._px != null) { const q = nodeFigPt(n), dd = Math.hypot(q[0] - p[0], q[1] - p[1]); if (dd < bd) { bd = dd; best = { an: { t: 'node', key: nodeKey(n) }, x: q[0], y: q[1] }; } }
+  if (tree) for (const el of hits.querySelectorAll('[data-kind="bar"]')) { if (el.previousElementSibling && el.previousElementSibling.dataset && el.previousElementSibling.dataset.kind === 'bar' && el.previousElementSibling.dataset.id === el.dataset.id) continue; const n = nodeById.get(+el.dataset.id), P = barPts(n); if (P) for (const [k, q] of Object.entries(P)) { const dd = Math.hypot(q[0] - p[0], q[1] - p[1]); if (dd < bd) { bd = dd; best = { an: { t: 'cbar', key: nodeKey(n), p: k }, x: q[0], y: q[1] }; } } }   // the clade name bars and their names
+  if (tree && settings.showTips) for (const n of leaves(tree)) { const P = labelAnchorPts(n); if (P) for (const [k, q] of Object.entries(P)) { const dd = Math.hypot(q[0] - p[0], q[1] - p[1]); if (dd < bd) { bd = dd; best = { an: { t: 'label', key: nodeKey(n), p: k }, x: q[0], y: q[1] }; } } }   // the names of the tips
   return best;
 }
 function addArrow() {
@@ -9083,7 +9692,7 @@ const ARROW_SPEC = [
 function openArrowMenu(id, cx, cy, keep) {
   const A = arrowById(id); if (!A) return;
   const keepScroll = keep ? pop.scrollTop : 0;
-  const where = E => !E.an ? 'free' : E.an.t === 'img' ? `anchored to the image “${esc((imgById(E.an.id) || {}).name || 'image')}”` : `anchored to ${E.an.key.startsWith('t:') ? esc(disp(E.an.key.slice(2))) : 'a node'}`;
+  const where = E => !E.an ? 'free' : E.an.t === 'cbar' ? (E.an.p === 'label' ? 'anchored to the name of a clade bar' : 'anchored to a clade name bar') : E.an.t === 'label' ? `anchored to the name of ${E.an.key.startsWith('t:') ? esc(disp(E.an.key.slice(2))) : 'a tip'}` : E.an.t === 'img' ? `anchored to the image “${esc((imgById(E.an.id) || {}).name || 'image')}”` : `anchored to ${E.an.key.startsWith('t:') ? esc(disp(E.an.key.slice(2))) : 'a node'}`;
   pop.innerHTML = `<button class="close" aria-label="Close">×</button>
     <div class="dragh" title="Drag to move"><h3>Arrow</h3><div class="meta">Start ${where(A.a)}, end ${where(A.b)}. Drag an end onto a node or an image point to anchor it.</div></div>
     <div class="part"><b>This arrow</b>${ctlRows(ARROW_SPEC, k => ({ v: A[k], own: false }))}
@@ -9181,13 +9790,14 @@ function treeStats() {
   // shape
   const cnt = new Map(); (function g(x) { cnt.set(x, x.children.length ? x.children.reduce((a, c) => a + g(c), 0) : 1); return cnt.get(x); })(tree);
   add('Shape', 'Cherries', I.filter(x => x.children.length === 2 && x.children.every(c => !c.children.length)).length, 'Pairs of tips that are each other\u2019s closest relatives');
+  // Colless and Sackin, normalized only: 0 in the most balanced tree of that size, 1 in a ladder-like one, so trees of any size compare
   if (deg.every(d => d === 2) && n > 2) {
     const colless = I.reduce((a, x) => a + Math.abs(cnt.get(x.children[0]) - cnt.get(x.children[1])), 0);
-    add('Shape', 'Colless index', colless, 'Imbalance: the sum, over the nodes, of the difference between the tips on each side (0 in a perfectly balanced tree)');
-    add('Shape', 'Colless index (normalized)', fmtS(colless / ((n - 1) * (n - 2) / 2)), 'The Colless index over its largest possible value (0 balanced, 1 for a ladder-like tree)');
-  }
-  let sackin = 0; (function g(x, d) { if (!x.children.length) sackin += d; x.children.forEach(c => g(c, d + 1)); })(tree, 0);
-  add('Shape', 'Sackin index', sackin, 'The sum of the number of nodes between each tip and the root (larger in unbalanced trees)');
+    add('Shape', 'Colless index (normalized)', fmtS(colless / ((n - 1) * (n - 2) / 2)), 'The sum, over the nodes, of the difference between the tips on each side, over its largest possible value: 0 balanced, 1 for a ladder-like tree');
+    let sackin = 0; (function g(x, d) { if (!x.children.length) sackin += d; x.children.forEach(c => g(c, d + 1)); })(tree, 0);
+    const k = Math.floor(Math.log2(n)), sMin = n * (k + 2) - 2 ** (k + 1), sMax = n * (n + 1) / 2 - 1;
+    add('Shape', 'Sackin index (normalized)', fmtS(sMax > sMin ? (sackin - sMin) / (sMax - sMin) : 0), 'The sum of the nodes between each tip and the root, between its smallest (balanced) and largest (ladder-like) possible values: 0 balanced, 1 for a ladder-like tree');
+  } else if (n > 2) add('Shape', 'Colless and Sackin (normalized)', '\u2013', 'They need a fully bifurcating tree: resolve its polytomies first');
   // support values
   const sup = I.filter(x => x.parent && isSupport(x.name)).map(x => parseFloat(String(x.name).split('/')[0])).filter(Number.isFinite);
   if (sup.length) {
@@ -9688,16 +10298,30 @@ function geoSvg(m) {
     if (pts.length) { let a0 = Infinity, b0 = Infinity, a1 = -Infinity, b1 = -Infinity; for (const [x, y] of pts) { if (x < a0) a0 = x; if (x > a1) a1 = x; if (y < b0) b0 = y; if (y > b1) b1 = y; }
       const mx = Math.max((a1 - a0), (b1 - b0) * 0.5, 1e-6) * (k.pad ?? 10) / 100, my = Math.max((b1 - b0), (a1 - a0) * 0.5, 1e-6) * (k.pad ?? 10) / 100; x0 = a0 - mx; x1 = a1 + mx; y0 = b0 - my; y1 = b1 + my; }
   }
-  const H = Math.max(60, Math.round((W - 2 * pad) * (y1 - y0) / Math.max(1e-9, x1 - x0) + 2 * pad));
+  let H = Math.max(60, Math.round((W - 2 * pad) * (y1 - y0) / Math.max(1e-9, x1 - x0) + 2 * pad));
   if (k.area === 'custom' && k.view) [x0, y0, x1, y1] = k.view;   // a view of its own
+  // coordinates on the edges chosen: margins outside the frame for their ticks and numbers
+  const tk = k.tk || '', tkLen = k.tkLen ?? 4, tkGap = k.tkGap ?? 2, tkFs = k.tkFs ?? 9, tkCh = (k.tkFmt === 'dms' ? 10 : 6) + Math.max(0, k.tkDec ?? 0);
+  const mT = tk.includes('t') ? tkLen + tkGap + tkFs + 3 : 0, mB = tk.includes('b') ? tkLen + tkGap + tkFs + 3 : 0, mLR = tkLen + tkGap + tkFs * 0.58 * tkCh + 3;
+  const mL = tk.includes('l') ? mLR : 0, mR = tk.includes('r') ? mLR : 0;
+  if (m.free && m.w > 0 && m.h > 0) {   // proportions unlocked: the frame takes the shape set, and the map shows more of its area to fill it, never stretched
+    H = Math.max(60, Math.round(m.h / m.w * (W + mL + mR) - mT - mB));
+    const a = (H - 2 * pad) / (W - 2 * pad), bw = x1 - x0, bh = y1 - y0;
+    if (bh / bw < a) { const cy = (y0 + y1) / 2, h2 = bw * a / 2; y0 = cy - h2; y1 = cy + h2; } else { const cx = (x0 + x1) / 2, w2 = bh / a / 2; x0 = cx - w2; x1 = cx + w2; }
+    if (k.area === 'custom') k.view = [x0, y0, x1, y1];   // a custom view keeps the shape of the frame
+  }
   m._geoBox = [x0, y0, x1, y1];
   const sc = (W - 2 * pad) / Math.max(1e-9, x1 - x0), X = x => pad + (x - x0) * sc, Y = y => pad + (y1 - y) * sc;
-  m.nw = W; m.nh = H;
+  const Wt = W + mL + mR, Ht = H + mT + mB;
+  m.nw = Wt; m.nh = Ht; m._geoFrame = { x0: (mL + pad) / Wt, x1: (mL + W - pad) / Wt, y0: (mT + pad) / Ht, y1: (mT + H - pad) / Ht };   // where the map area sits in the image
   const pathOf = (rs, closed) => { let d = ''; for (const r of rs) { r.forEach(([x, y], i) => { d += `${i ? 'L' : 'M'}${f2(X(x))},${f2(Y(y))}`; }); if (closed) d += 'Z'; } return d; };
-  let d = g.kind === 'point' || geoCache.layers ? '' : pathOf(geoCache.parts, g.kind === 'poly');
-  let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><clipPath id="gclip${m.id}"><rect width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#gclip${m.id})">`;
+  const boxKey = [x0, y0, x1, y1, sc].map(v => (+v).toFixed(6)).join(',');
+  if (geoCache.boxKey !== boxKey) { geoCache.paths = new Map(); geoCache.boxKey = boxKey; }   // outlines kept while the projection and the view stay
+  const pathOfC = (tag, rs, closed) => { let v = geoCache.paths.get(tag); if (v == null) { v = pathOf(rs, closed); geoCache.paths.set(tag, v); } return v; };
+  let d = g.kind === 'point' || geoCache.layers ? '' : pathOfC('main', geoCache.parts, g.kind === 'poly');
+  let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${f2(Wt)}" height="${f2(Ht)}" viewBox="0 0 ${f2(Wt)} ${f2(Ht)}"><g transform="translate(${f2(mL)},${f2(mT)})"><defs><clipPath id="gclip${m.id}"><rect width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#gclip${m.id})">`;
   if (geoCache.layers) for (const L of ['land', 'countries', 'lakes', 'coast', 'rivers']) {   // Natural Earth: each layer with its own look
-    const l = geoCache.layers.find(x => x.role === L); if (!l) continue; const dd = pathOf(l.parts, l.kind === 'poly');
+    const l = geoCache.layers.find(x => x.role === L); if (!l) continue; const dd = pathOfC(L, l.parts, l.kind === 'poly');
     if (L === 'land' || L === 'countries') out += `<path d="${dd}" fill="${k.fill}" fill-opacity="${k.fillOp / 100}" fill-rule="evenodd" stroke="${k.line}" stroke-width="${f2(L === 'countries' ? k.lw * 0.7 : k.lw)}" stroke-linejoin="round"/>`;
     else if (L === 'lakes') out += `<path d="${dd}" fill="${k.water || '#9CC3E0'}" stroke="none"/>`;
     else out += `<path d="${dd}" fill="none" stroke="${L === 'rivers' ? k.water || '#9CC3E0' : k.line}" stroke-width="${f2(L === 'rivers' ? k.lw * 0.8 : k.lw)}" stroke-linejoin="round"/>`;
@@ -9706,6 +10330,7 @@ function geoSvg(m) {
   else if (d) out += `<path d="${d}" fill="${g.kind === 'poly' ? k.fill : 'none'}" fill-opacity="${g.kind === 'poly' ? k.fillOp / 100 : 0}" fill-rule="evenodd" stroke="${k.line}" stroke-width="${f2(k.lw)}" stroke-linejoin="round"/>`;
   out += '</g>';
   // the points: one per place; records closer than the radius (in the units of the map) together, with how many there are
+  out += `<g clip-path="url(#gclip${m.id})">`;   // the points too stay inside the frame
   const rows = geoRowsShown(S, geoRows(S)); m._geoPts = [];
   if (rows.length) {
     const Pp = g.deg ? geoProjector(S.gmProj) : (x, y) => [x, y], places = new Map();
@@ -9741,11 +10366,13 @@ function geoSvg(m) {
       const o = own[gr.key] || {}, col = o.c || (cs.size > 1 ? S.gmMixColor : [...cs][0]), r = gr.r0, shp = o.sh || S.gmShape, bw = o.bw ?? S.gmBorderW, n = gr.recs.length;   // a point's own style first   // a group of several colours takes the colour set for mixed groups
       out += shapeSvg(gr.X, gr.Y, r, shp, ` fill="${col}" fill-opacity="${f2(S.gmOp / 100)}"${bw > 0 ? ` stroke="${o.b || S.gmBorder}" stroke-width="${f2(bw)}"` : ''}`);
       if (S.gmCluster > 0 && S.gmCount && n > 1) out += `<text x="${f2(gr.X)}" y="${f2(gr.Y)}" text-anchor="middle" dominant-baseline="central" font-size="${f2(Math.max(7, r * 0.95))}" font-weight="600" fill="#ffffff" font-family="Helvetica, Arial, sans-serif">${n}</text>`;
-      m._geoPts.push({ key: gr.key, x: gr.X, y: gr.Y, r, n, col, lon: gr.x, lat: gr.y, names: [...new Set(gr.recs.map(p => p.name))] });
+      m._geoPts.push({ key: gr.key, x: gr.X + mL, y: gr.Y + mT, r, n, col, lon: gr.x, lat: gr.y, names: [...new Set(gr.recs.map(p => p.name))] });   // in the image, past its margins
     }
   }
-  if (k.frame) out += `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" fill="none" stroke="${k.frameColor}" stroke-width="1"/>`;   // the frame over everything
-  return out + '</svg>';
+  out += '</g>';
+  if (k.frame || tk) out += `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" fill="none" stroke="${k.frameColor}" stroke-width="1"/>`;   // the frame over everything (always with coordinates)
+  if (tk) out += geoTicksSvg(k, g, S, { x0, y0, x1, y1, sc, pad, W, H, X, Y, tkLen, tkGap, tkFs });
+  return out + '</g></svg>';
 }
 // Deep time, with the GPlates Web Service: points moved by a plate model to where they were at an age, and the
 // coastlines of that age. All or nothing: every point drawn is reconstructed, or none. Needs internet.
@@ -9868,13 +10495,60 @@ function geoSyncCfg() {
 }
 const geoCfg = m => ({ ...settings, ...(m.geo.cfg || {}) });   // the settings a map is drawn with
 const geoTitle = m => m.geo.title || 'Map';
+// Coordinates on the edges of a map. For each longitude, where its meridian crosses the bottom (or top) of the frame,
+// and for each latitude, where its parallel crosses its left (or right) side: found by bisection, so curved meridians
+// (Equal Earth, Mollweide) and a custom view work as well as straight ones. Planar maps get their own units.
+function geoTicksSvg(k, g, S, F) {
+  const { x0, y1, sc, pad, W, H, X, Y, tkLen, tkGap, tkFs } = F, tk = k.tk || '', col = k.tkColor || '#333333', lw = k.tkW ?? 0.8, dec = Math.max(0, k.tkDec ?? 0);
+  const eL = x0 - pad / sc, eR = x0 + (W - pad) / sc, eT = y1 + pad / sc, eB = y1 - (H - pad) / sc;   // the frame, in projected units
+  const P = g.deg ? geoProjector(S.gmProj) : (x, y) => [x, y], fam = 'Helvetica, Arial, sans-serif';
+  const dms = (v, pos, neg) => { const h = v > 1e-9 ? pos : v < -1e-9 ? neg : '', a = Math.abs(v); if (k.tkFmt === 'sign') return `${v < -1e-9 ? '−' : ''}${a.toFixed(dec)}°`; if (k.tkFmt !== 'dms') return `${a.toFixed(dec)}°${h}`; let d = Math.floor(a), mi = Math.floor((a - d) * 60), se = Math.round(((a - d) * 60 - mi) * 60); if (se === 60) { se = 0; mi++; } if (mi === 60) { mi = 0; d++; } return `${d}°${String(mi).padStart(2, '0')}′${String(se).padStart(2, '0')}″${h}`; };   // decimal degrees with the decimals asked, 50.00°N   // 50°00′00″N
+  const fmtX = v => g.deg ? dms(v, 'E', 'W') : (+v.toFixed(dec)).toLocaleString('en'), fmtY = v => g.deg ? dms(v, 'N', 'S') : (+v.toFixed(dec)).toLocaleString('en');
+  const bis = (f, lo, hi, target) => { let a = lo, b = hi, fa = f(a) - target, fb = f(b) - target; if (fa * fb > 0) return Math.abs(fa) < Math.abs(fb) ? lo : hi; for (let i = 0; i < 50; i++) { const m = (a + b) / 2, fm = f(m) - target; if (fa * fm <= 0) { b = m; fb = fm; } else { a = m; fa = fm; } } return (a + b) / 2; };   // past the end of the world: where it ends
+  const out = [], tick = (x1t, y1t, x2t, y2t) => out.push(`<path d="M${f2(x1t)},${f2(y1t)}L${f2(x2t)},${f2(y2t)}" stroke="${col}" stroke-width="${f2(lw)}"/>`);
+  const text = (x, y, t, anchor, base) => out.push(`<text x="${f2(x)}" y="${f2(y)}" text-anchor="${anchor}" dominant-baseline="${base}" font-size="${f2(tkFs)}" fill="${col}" font-family="${fam}">${esc(t)}</text>`);
+  // the values: every so many degrees (or units), automatic or as set
+  let xs = [], ys = [];
+  if (g.deg) {
+    const lonAt = (yy, xx) => { const la = bis(l => P(0, l)[1], -89.99, 89.99, yy); return la; };
+    const lonSpan = Math.max(1, Math.min(360, ((eR - eL) / Math.max(1e-9, P(1, 0)[0] - P(0, 0)[0])))), latSpan = Math.max(1, Math.min(180, (eT - eB) / Math.max(1e-9, P(0, 1)[1] - P(0, 0)[1])));
+    const sx = k.tkStep > 0 ? k.tkStep : niceNum(lonSpan / 5), sy = k.tkStep > 0 ? k.tkStep : niceNum(latSpan / 4);
+    for (let v = Math.ceil(-180 / sx - 1e-9) * sx; v <= 180 + 1e-9; v += sx) xs.push(+v.toFixed(6)); for (let v = Math.ceil(-90 / sy - 1e-9) * sy; v <= 90 + 1e-9; v += sy) ys.push(+v.toFixed(6));   // multiples of the interval: 0°, 50°E, 50°W…
+  } else {
+    const sx = k.tkStep > 0 ? k.tkStep : niceNum((eR - eL) / 5), sy = k.tkStep > 0 ? k.tkStep : niceNum((eT - eB) / 4);
+    for (let v = Math.ceil(eL / sx) * sx; v <= eR; v += sx) xs.push(v); for (let v = Math.ceil(eB / sy) * sy; v <= eT; v += sy) ys.push(v);
+  }
+  for (const side of ['b', 't']) if (tk.includes(side)) {   // meridians crossing the bottom or the top of the frame
+    const ey = side === 'b' ? eB : eT, sy = side === 'b' ? H : 0, dir = side === 'b' ? 1 : -1; let last = -Infinity;
+    for (const v of xs) {
+      let px;
+      if (g.deg) { const la = bis(l => P(v, l)[1], -89.99, 89.99, ey); if (la == null) continue; px = P(v, la)[0]; } else px = v;
+      if (px < eL - 1e-9 || px > eR + 1e-9) continue; const x = X(px), w = fmtX(v).length * tkFs * 0.58;
+      if (x - w / 2 < last + 4) continue; last = x + w / 2;   // where meridians crowd (as at the top of Mollweide), only those with room
+      tick(x, sy, x, sy + dir * tkLen); text(x, sy + dir * (tkLen + tkGap), fmtX(v), 'middle', dir > 0 ? 'hanging' : 'alphabetic');
+    }
+  }
+  for (const side of ['l', 'r']) if (tk.includes(side)) {   // parallels crossing the left or the right side
+    const ex = side === 'l' ? eL : eR, sx = side === 'l' ? 0 : W, dir = side === 'l' ? -1 : 1; let last = Infinity;
+    for (const v of ys) {
+      let py;
+      if (g.deg) { const lo = bis(l => P(l, v)[0], -180, 180, ex); if (lo == null) continue; py = P(lo, v)[1]; } else py = v;
+      if (py < eB - 1e-9 || py > eT + 1e-9) continue; const y = Y(py);
+      if (y > last - tkFs - 2) continue; last = y;   // parallels too close together: only those with room
+      tick(sx, y, sx + dir * tkLen, y); text(sx + dir * (tkLen + tkGap), y, fmtY(v), dir > 0 ? 'start' : 'end', 'central');
+    }
+  }
+  return out.join('');
+}
+let geoRaf = 0; const geoSoon = () => { if (!geoRaf) geoRaf = requestAnimationFrame(() => { geoRaf = 0; imgChanged(); }); };   // quick changes, one drawing a frame
 // The scale of a map as 1:X: ground metres per metre of the figure at its size (96 px per inch), at its centre.
 // Projected units: degrees (Equirectangular), radians of the sphere (the others), metres (planar maps).
 const geoUnitM = m => { const g = geoStore.get(m.geo.id), C = geoCfg(m); return !g || !g.deg ? 1 : C.gmProj === 'equirect' ? 111319.49 : 6371008.8; };
-function geoScaleOf(m) { const b = m._geoBox; if (!b || !m.w) return 0; const unitsPerPx = (b[2] - b[0]) / (m.w * 584 / 600); return unitsPerPx * geoUnitM(m) / (0.0254 / 96); }
+const geoAreaW = m => m.w * (m._geoFrame ? m._geoFrame.x1 - m._geoFrame.x0 : 584 / 600);   // the width of the map area in the figure
+function geoScaleOf(m) { const b = m._geoBox; if (!b || !m.w) return 0; const unitsPerPx = (b[2] - b[0]) / geoAreaW(m); return unitsPerPx * geoUnitM(m) / (0.0254 / 96); }
 function geoSetScale(m, X) {
   X = +X; if (!(X > 0) || !m._geoBox) return; const b = m._geoBox, cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, asp = (b[3] - b[1]) / Math.max(1e-12, b[2] - b[0]);
-  const w = X * (0.0254 / 96) * (m.w * 584 / 600) / geoUnitM(m), h = w * asp;
+  const w = X * (0.0254 / 96) * geoAreaW(m) / geoUnitM(m), h = w * asp;
   if (tree) pushUndo(); m.geo.area = 'custom'; m.geo.view = [cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2]; imgChanged();
 }
 // Ctrl + drag moves the view of the selected map inside its frame, and Ctrl + scroll zooms it, as in a GIS.
@@ -9884,7 +10558,7 @@ const geoStartView = m => { if (m.geo.area !== 'custom' || !m.geo.view) { m.geo.
 window.addEventListener('pointerdown', e => {   // on the window, before the canvas handles Ctrl-clicks
   if (!e.ctrlKey || e.button !== 0 || !svg.contains(e.target)) return; const m = geoMapAt(e); if (!m) return;
   e.preventDefault(); e.stopImmediatePropagation(); if (tree) pushUndo();
-  const v0 = [...geoStartView(m)], [sx, sy] = geoFigXY(e), u = (v0[2] - v0[0]) / (m.w * 584 / 600); let raf = 0;
+  const v0 = [...geoStartView(m)], [sx, sy] = geoFigXY(e), u = (v0[2] - v0[0]) / geoAreaW(m); let raf = 0;
   const move = ev => { const [fx, fy] = geoFigXY(ev), dx = (fx - sx) * u, dy = (fy - sy) * u; m.geo.view = [v0[0] - dx, v0[1] + dy, v0[2] - dx, v0[3] + dy]; if (!raf) raf = requestAnimationFrame(() => { raf = 0; imgChanged(); }); };
   const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); imgChanged(); persist(); };
   window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
@@ -9894,7 +10568,7 @@ svg.addEventListener('wheel', e => {
   if (!e.ctrlKey) return; const m = geoMapAt(e); if (!m) return;
   e.preventDefault(); e.stopImmediatePropagation();
   if (Date.now() - geoWheelT > 600 && tree) pushUndo(); geoWheelT = Date.now();
-  const v = geoStartView(m), [fx, fy] = geoFigXY(e), px = v[0] + (fx - m.x) / m.w * (v[2] - v[0]), py = v[3] - (fy - m.y) / m.h * (v[3] - v[1]), f = Math.pow(1.0015, e.deltaY);
+  const v = geoStartView(m), [fx, fy] = geoFigXY(e), F = m._geoFrame || { x0: 0, x1: 1, y0: 0, y1: 1 }, px = v[0] + (((fx - m.x) / m.w - F.x0) / (F.x1 - F.x0)) * (v[2] - v[0]), py = v[3] - (((fy - m.y) / m.h - F.y0) / (F.y1 - F.y0)) * (v[3] - v[1]), f = Math.pow(1.0015, e.deltaY);
   m.geo.view = [px - (px - v[0]) * f, py - (py - v[1]) * f, px + (v[2] - px) * f, py + (v[3] - py) * f]; imgChanged();
 }, { capture: true, passive: false });
 // A map as an image of the figure, numbered, with settings of its own (fresh ones, or the age and model of its coastlines).

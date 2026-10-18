@@ -1,8 +1,12 @@
 # tree2go options reference guide
 
-Every option of the left panel, section by section, in the same order as in the app. Many options only appear once something they depend on is turned on: the column **Appears when** says what. Options can also be set for single elements from their `Right-click` menu (see [Right-click menus](#right-click-menus)). Sections and their subsections (marked ›) fold: subsections start closed, and the open ones are remembered while their section is closed. `Collapse` closes everything, and `Expand` opens the sections and keeps their subsections as they were. Until a tree is open, every section but Tree and Attachments is greyed out.
+Every tree2go option, grouped as in the app, with the left panel section by section, the header menus, the `Right-click` menus and what you can do on the canvas. Each group folds. The **Appears when** column says what an option needs before it shows up, and single elements can also be set from their `Right-click` menu.
+
+In the panel, sections and their subsections (marked ›) fold, and the open ones are remembered. `Collapse` closes everything, and `Expand` opens the sections and keeps their subsections as they were. Until a tree is open, every section but Tree and Attachments is grayed out.
 
 ## Contents
+
+**Left panel**
 
 - [Tree](#tree)
 - [Layout](#layout)
@@ -24,22 +28,39 @@ Every option of the left panel, section by section, in the same order as in the 
 - [Split into pages](#split-into-pages)
 - [Geography](#geography)
 - [Images and visual elements](#images-and-visual-elements)
+- [Tanglegram](#tanglegram)
+
+**Header menus**
+
+- [Import and Save](#import-and-save)
 - [Page settings](#page-settings)
 - [Export](#export)
+
+**Right-click and canvas**
+
 - [Right-click menus](#right-click-menus)
 - [On the canvas](#on-the-canvas)
 
+---
+
+<details open class="refgroup">
+<summary><strong style="font-size:1.5em">Left panel</strong></summary>
+
+> The left panel sets the look of the whole tree at once. A change there applies to every element of that kind, so all the branches, all the tip labels or all the clade bars change together. This is where a figure gets its general style, section by section.
+
 ## Tree
 
-Load or paste a tree (Newick and NEXUS are recognized from their content, whatever the file extension). A file with many trees (for example a BEAST or MrBayes posterior) opens as a tree set. When the annotations of a file were rewritten by another program in a way that breaks them, tree2go says where and offers to load it with the keys repaired: it matches the braces and rebuilds the names of the keys. Values that were removed from the file, such as rates, cannot be recovered.
+Load or paste a tree (Newick and NEXUS are recognized from their content, whatever the file extension). A file with many trees (for example a BEAST or MrBayes posterior) opens as a tree set. If another program has rewritten a file's annotations in a way that breaks them, tree2go shows where and offers to repair the keys when loading it. It matches the braces and rebuilds the key names. Values that were removed from the file, such as rates, cannot be recovered.
 
-A file with more than 10,000 trees opens a window before reading them: a burn-in, and how many trees to keep after it (a number or a percentage, evenly spaced or at random with a seed), so only the trees kept are read. A sample of 10,000 trees is more than enough for summary trees. If more trees are asked than are left after the burn-in, the window says so and does not load them. The trees can also all be read, and closing the window (×, a click outside, or Esc) loads nothing. The Tree set part then says, in a red box, how the trees were resampled, from how many, and with which burn-in, so that another burn-in is not applied by mistake. Clock trees of MrBayes carry their branch lengths in substitutions per site, with the clock rate of each tree in its header ([&clockrate = …]): each tree is divided by its own clock rate, so the ages of the summary trees are in time units, as in the consensus of MrBayes.
+Before reading a file with more than 10,000 trees, tree2go opens a window where you set a burn-in and how many trees to keep after it (a number or a percentage, evenly spaced or at random with a seed), so only the trees you keep are read. A sample of 10,000 trees is more than enough for summary trees. If you ask for more trees than remain after the burn-in, the window says so and does not load them. You can also read all the trees, and closing the window loads nothing. The Tree set part then shows, in a red box, how the trees were resampled, from how many, and with which burn-in, so that another burn-in is not applied by mistake. MrBayes clock trees carry their branch lengths in substitutions per site, with each tree's clock rate in its header `[&clockrate = …]`, tree2go divides each tree by its own clock rate, so the ages of the summary trees are in time units, as in the MrBayes consensus.
+
+`Test performance` times tree2go on this computer with a tree of 20,000 tips, 1,000 trees of 1,000 tips and 10,000 trees of 100 tips (about 38 MB of extra data to download). It measures opening, rerooting, ladderizing and exporting the tree (Newick, SVG, PDF), and reading each tree set and building its majority-rule consensus and MCC tree. Each result is shown next to the time on the computer tree2go was tuned on. `Copy results` copies them as text. Your work is kept and comes back as it was. The test needs an internet connection.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Burn-in` | Share of the first trees of the chain left out of every summary. | 0 to 99% | 0% | A file with several trees is open |
 | `Show tree number` | Shows one sampled tree of the file, by its position. | Number | 1 | A file with several trees is open |
-| `Summary tree` | How the trees of the file are summarized into one. | Majority rule¹<br>Strict consensus²<br>Maximum compatible³<br>Maximum clade credibility (MCC)⁴<br>Maximum a posteriori (MAP)⁵ | Majority rule | A file with several trees is open, **MAP** needs the posterior of each tree in the file (as a `.p` or `. log` file in Attachments) |
+| `Summary tree` | How the trees of the file are summarized into one. | Majority rule¹<br>Strict consensus²<br>Maximum compatible³<br>Maximum clade credibility (MCC)⁴<br>Maximum a posteriori (MAP)⁵ | Majority rule | A file with several trees is open, **MAP** needs the posterior of each tree in the file (as a `.p` or `.log` file in Attachments) |
 | `Clades in more than` | Clades must be found in more than this share of the trees to be kept. | 50 to 100% | 50% | `Summary tree` is **Majority rule** |
 | `Node ages` | How the MCC tree gets its node ages from all the trees. | Median<br>Mean | Median | `Summary tree` is **MCC** |
 | `Build summary tree` | Builds and shows the chosen summary tree. |  |  | A file with several trees is open |
@@ -60,12 +81,12 @@ The shape of the tree and its overall size.
 |:---|:---|:---|:---|:---|
 | `Shape`¹ | Overall form of the tree. | Rectangular<br>Circular<br>Fan<br>Unrooted | Rectangular |  |
 | `Orientation` | Horizontal, with the tips on the right, vertical, with the tips on top and the root at the bottom, or custom, turned by any angle. The time axis, the scale bar and the clade names turn with the tree, legends and the title do not. Split into pages works on horizontal trees only. | Horizontal<br>Vertical<br>Custom | Horizontal | `Shape` is **Rectangular** |
-| `Angle` | Turns the tree clockwise: 0° is horizontal, 270° vertical with the tips on top. At other angles the text turns with the tree, and pages and alignment guides are off, as on circular trees. | 0 to 359° | 0° | `Shape` is **Rectangular**, `Orientation` is **Custom** |
+| `Angle` | Turns the tree clockwise, where 0° is horizontal and 270° is vertical with the tips on top. At other angles the text turns with the tree, and pages and alignment guides are off, as on circular trees. | 0 to 359° | 0° | `Shape` is **Rectangular**, `Orientation` is **Custom** |
 | `Scale bar on a vertical tree` | Turns with the tree, vertical like the branches it measures, or stays horizontal under the root. Both measure the same, since the figure keeps one scale in both directions. The time axis always turns with the tree. | Turns with the tree<br>Horizontal | Turns with the tree | `Shape` is **Rectangular**, `Orientation` is **Vertical**, `Show scale bar` is **On**, `Show time axis (dated trees)` is **Off** |
 | `Text on a vertical tree` | Vertical: every text reads from bottom to top. Horizontal: the tip names read at 45 degrees and the values of nodes and branches across, beside their branch. The number of the scale bar always follows its bar, and the texts of the side plots (category names, heatmap titles, bar values and bar scale) always stay upright. | Vertical<br>Horizontal | Vertical | `Shape` is **Rectangular**, `Orientation` is **Vertical** |
 | `Use branch lengths` | Draws branches proportional to their lengths, when **Off** the tree is a cladogram. | On<br>Off | On |  |
 | `Order nodes`² | Sorts every node by clade size, once, for the whole tree. | Increasing<br>Decreasing |  |  |
-| `Rename tips from a file…` | Renames many tips at once from a file with two columns: the current name, then the new name. Column headers are optional. | File |  |  |
+| `Rename tips from a file…` | Renames many tips at once from a two-column file, with the current name first and the new name second. Column headers are optional. | File |  |  |
 | `Width` | Horizontal size of the tree, without labels. | 80 to 4000 px | 700 px | **Rectangular** layout |
 | `Height` | Vertical distance between neighboring tips. | 3 to 80 px | 18 px | **Rectangular** layout |
 | `Radius` |  | 40 to 3000 px | 320 px | **Circular**, **Fan** or **Unrooted** layout |
@@ -80,7 +101,7 @@ The shape of the tree and its overall size.
 
 ## Tree cloud
 
-The trees of a dated posterior sample, after the burn-in, drawn faintly on the tip order and the time axis of the tree shown: dense where they agree, spread where they differ. It needs a file with several dated trees and a rectangular tree. Its branches follow the angle and the rounded corners of the tree, and it turns with it.
+Draws the trees of a dated posterior sample (after the burn-in) faintly behind the current tree, using its tip order and time axis. The cloud looks dense where the trees agree and spread out where they differ. It needs a file with several dated trees and a rectangular tree. Its branches follow the angle and the rounded corners of the tree, and it turns with it.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -104,7 +125,7 @@ Width, color and line style of every branch (a value given to a branch from its 
 | `Line width` |  | 1 to 20 px | 1 px |  |
 | `Branch color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F |  |
 | `Line ends` | Shape of the ends of every line. | Round<br>Square | Round |  |
-| `Branch angle` | Angle at which branches leave their node: 90° is the classic square tree, lower values slant them. | 45 to 90° | 90° | **Rectangular** layout |
+| `Branch angle` | Angle at which branches leave their node. At 90° you get the classic square tree, and lower values slant them. | 45 to 90° | 90° | **Rectangular** layout |
 | `Rounded corners` | Rounds the bend where a branch turns toward its child. | 0 to 30 px | 0 px | **Rectangular** layout |
 | `Line style` |  | Solid<br>Dashed<br>Dotted | Solid |  |
 | `Dash length (also fossils)` | Used by dashed branches and by grafted fossils. | 1 to 30 px | 5 px |  |
@@ -114,8 +135,8 @@ Width, color and line style of every branch (a value given to a branch from its 
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Value`¹ | The annotation of the tree or the column of a table that sets the colors. One list: the branch length (raw) first, then every annotation of the tree and every column of the tables (with the table name). | List | None |  |
-| `Palette` | The colors of the scale: your own, or a standard palette such as Viridis or Inferno. Those marked ✓ stay distinguishable with the common forms of color blindness. | Custom colors<br>tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Custom colors | `Value` is set |
+| `Value`¹ | The tree annotation or table column that sets the colors. They all come in one list, with the branch length (raw) first, then every tree annotation and every table column (with the table name). | List | None |  |
+| `Palette` | The scale colors, either your own or a standard palette such as Viridis or Inferno. Those marked ✓ stay distinguishable with the common forms of color blindness. | Custom colors<br>tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Custom colors | `Value` is set |
 | `Reverse the colors` | Runs the palette the other way, low values taking the colors of the high ones. | On<br>Off | Off | `Value` is set |
 | `Hue shift` | Turns the hue of every color of the palette. | −180 to 180° | 0° | `Value` is set |
 | `Low values` |  | Color | <img src="img/colors/2C7BB6.svg" alt="#2C7BB6" align="absmiddle"> #2C7BB6 | `Value` is set, `Palette` is **Custom colors** |
@@ -133,7 +154,7 @@ Width, color and line style of every branch (a value given to a branch from its 
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Value`¹ | The annotation of the tree or the column of a table that sets the widths. One list: the branch length (raw) first, then every annotation of the tree and every column of the tables (with the table name). | List | None |  |
+| `Value`¹ | The tree annotation or table column that sets the widths. They all come in one list, with the branch length (raw) first, then every tree annotation and every table column (with the table name). | List | None |  |
 | `Thinnest` | Width of the branch with the lowest value. | 0.1 to 10 px | 0.5 px | `Value` is set |
 | `Thickest` | Width of the branch with the highest value. | 0.5 to 20 px | 5 px | `Value` is set |
 | `Logarithmic scale (log₁₀)` | Uses the base-10 logarithm of the values for the widths, so each tenfold step gets the same share. The legend shows the values themselves. | On<br>Off | Off | `Value` is set |
@@ -150,12 +171,12 @@ Labels with the length or annotations for each branch.
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Show a value on each branch` | Writes a number on every branch. | On<br>Off | Off |  |
-| `Value` | One list: the branch length (raw) first, then every annotation of the tree and every column of the tables (with the table name). | List | Branch length | `Show a value on each branch` is **On** |
+| `Value` | One list with the branch length (raw) first, then every tree annotation and every table column (with the table name). | List | Branch length | `Show a value on each branch` is **On** |
 | `Decimals` |  | 0, 1, 2, 3, 4, 5, 6 | 3 | `Show a value on each branch` is **On** |
 | `Text size` |  | 1 to 100 px | 8 px | `Show a value on each branch` is **On** |
-| `Color of the values` | One color for all, or the color of each branch: its color by data, a clade color or the line color, or a color from a parameter of its own, whatever the color of the branches. | One color<br>Like their branch<br>By data | One color | `Show a value on each branch` is **On** |
-| `Colored by` | The parameter that gives the colors: branch length (raw), an annotation of the tree or a column of a table. | List | Branch length (raw) | `Show a value on each branch` is **On**, `Color of the values` is **By data** |
-| `Palette` | Colors of the scale. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show a value on each branch` is **On**, `Color of the values` is **By data** |
+| `Color of the values` | One color for all, the color of each branch (its color by data, a clade color or the line color), or a color from a parameter of its own, whatever the color of the branches. | One color<br>Like their branch<br>By data | One color | `Show a value on each branch` is **On** |
+| `Colored by` | The parameter that gives the colors, such as branch length (raw), a tree annotation or a table column. | List | Branch length (raw) | `Show a value on each branch` is **On**, `Color of the values` is **By data** |
+| `Palette` | Scale colors. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show a value on each branch` is **On**, `Color of the values` is **By data** |
 | `Reverse the colors` |  | On<br>Off | Off | `Show a value on each branch` is **On**, `Color of the values` is **By data** |
 | `Color` |  | Color | <img src="img/colors/666666.svg" alt="#666666" align="absmiddle"> #666666 | `Show a value on each branch` is **On**, `Color of the values` is **One color** |
 | `Position on branch` | Where along the branch the value is written. | Left<br>Center<br>Right | Center | `Show a value on each branch` is **On** |
@@ -169,7 +190,7 @@ Dots on tips and internal nodes.
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Dots on tips` |  | On<br>Off | Off |  |
-| `Tip dot shape` | Shape of the dots on the tips. Any dot can take its own shape from its right-click menu. | Circle<br>Square<br>Triangle<br>Diamond<br>Star | Circle | `Dots on tips` is **On** |
+| `Tip dot shape` | Shape of the dots on the tips. Any dot can take its own shape from its `Right-click` menu. | Circle<br>Square<br>Triangle<br>Diamond<br>Star | Circle | `Dots on tips` is **On** |
 | `Tip dot size` |  | 0.5 to 12 px | 3 px | `Dots on tips` is **On** |
 | `Dots on internal nodes` |  | On<br>Off | Off |  |
 | `Node dot shape` | Shape of the dots on the internal nodes. | Circle<br>Square<br>Triangle<br>Diamond<br>Star | Circle | `Dots on internal nodes` is **On** |
@@ -180,14 +201,14 @@ Dots on tips and internal nodes.
 | `Dot border` |  | Solid<br>Dashed<br>Dotted<br>None | None | `Dots on tips` is **On**, `Dots on internal nodes` is **On** |
 | `Border color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Dots on tips` is **On**, `Dots on internal nodes` is **On**, `Dot border` is not **None** |
 | `Border width` |  | 0.05 to 50 px | 1 px | `Dots on tips` is **On**, `Dots on internal nodes` is **On**, `Dot border` is not **None** |
-| `Number of dashes or dots` | For dashed or dotted borders, how many go around the dot. | 1 to 60 | 12 | `Dots on tips` is **On**, `Dots on internal nodes` is **On**, `Dot border` is **Dashed** or **Dotted** |
+| `Number of dashes or dots` | How many dashes or dots go around the dot. | 1 to 60 | 12 | `Dots on tips` is **On**, `Dots on internal nodes` is **On**, `Dot border` is **Dashed** or **Dotted** |
 
 ### › Dots by data
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Value`¹ | The annotation of the tree or the column of a table that sets the dots. One list: the branch length (raw) first, then every annotation of the tree and every column of the tables (with the table name). | List | None |  |
-| `Palette` | The colors of the scale: your own, or a standard palette such as Viridis or Inferno. Those marked ✓ stay distinguishable with the common forms of color blindness. | Custom colors<br>tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Custom colors | `Value` is set, `Color by the value` is **On** |
+| `Value`¹ | The tree annotation or table column that sets the dots. They all come in one list, with the branch length (raw) first, then every tree annotation and every table column (with the table name). | List | None |  |
+| `Palette` | The scale colors, either your own or a standard palette such as Viridis or Inferno. Those marked ✓ stay distinguishable with the common forms of color blindness. | Custom colors<br>tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Custom colors | `Value` is set, `Color by the value` is **On** |
 | `Reverse the colors` | Runs the palette the other way, low values taking the colors of the high ones. | On<br>Off | Off | `Value` is set, `Color by the value` is **On** |
 | `Hue shift` | Turns the hue of every color of the palette. | −180 to 180° | 0° | `Value` is set, `Color by the value` is **On** |
 | `Color by the value` | Colors each dot along a scale from its value. | On<br>Off | On | `Value` is set |
@@ -213,8 +234,8 @@ Support values, other values read from the tree (such as ages or probabilities),
 | `Decimals` | Decimals of the numbers written, or as they are written in the file. | As written<br>0, 1, 2, 3 | As written | `Show as` is **Number** |
 | `Size` |  | 1 to 100 px | 9 px | `Show as` is **Number** or **Circles**, `Which values` is **Above a threshold** |
 | `Color of the values` | One color for all, or the color of the branch leading to each node, or a color from a parameter of its own, whatever the color of the branches. | One color<br>Like their branch<br>By data | One color | `Show as` is **Number** |
-| `Colored by` | The parameter that gives the colors: branch length (raw), an annotation of the tree or a column of a table. | List | Branch length (raw) | `Show as` is **Number**, `Color of the values` is **By data** |
-| `Palette` | Colors of the scale. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show as` is **Number**, `Color of the values` is **By data** |
+| `Colored by` | The parameter that gives the colors, such as branch length (raw), a tree annotation or a table column. | List | Branch length (raw) | `Show as` is **Number**, `Color of the values` is **By data** |
+| `Palette` | Scale colors. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show as` is **Number**, `Color of the values` is **By data** |
 | `Reverse the colors` |  | On<br>Off | Off | `Show as` is **Number**, `Color of the values` is **By data** |
 | `Color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show as` is not **Hidden**, `Which values` is **Above a threshold**, `Color of the values` is **One color** |
 | `Bigger circles for higher values` | Circle size grows with the support. | On<br>Off | Off | `Show as` is **Circles**, `Which values` is **Above a threshold** |
@@ -232,7 +253,7 @@ Support values, other values read from the tree (such as ages or probabilities),
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Show`¹ | Value written next to each node: names, annotations or summaries of the trees. | List |  |  |
+| `Show`¹ | Value written next to each node, such as names, annotations or tree set summaries. | List |  |  |
 | `Show as` | Writes each value, or draws a circle whose color and size can follow it. | Number<br>Circles | Number | `Show` is set |
 | `Color by the value` | Colors each circle along a scale from its value. | On<br>Off | On | `Show` is set, `Show as` is **Circles** |
 | `Low values` |  | Color | <img src="img/colors/2C7BB6.svg" alt="#2C7BB6" align="absmiddle"> #2C7BB6 | `Show` is set, `Show as` is **Circles**, `Color by the value` is **On** |
@@ -245,8 +266,8 @@ Support values, other values read from the tree (such as ages or probabilities),
 | `Decimals` |  | 0, 1, 2, 3, 4, 5, 6 | 2 | `Show` is set, `Show as` is **Number** |
 | `Text size` |  | 1 to 100 px | 9 px | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
 | `Color of the values` | One color for all, or the color of the branch leading to each node, or a color from a parameter of its own, whatever the color of the branches. | One color<br>Like their branch<br>By data | One color | `Show` is set, `Show as` is **Number** |
-| `Colored by` | The parameter that gives the colors: branch length (raw), an annotation of the tree or a column of a table. | List | Branch length (raw) | `Show` is set, `Show as` is **Number**, `Color of the values` is **By data** |
-| `Palette` | Colors of the scale. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show` is set, `Show as` is **Number**, `Color of the values` is **By data** |
+| `Colored by` | The parameter that gives the colors, such as branch length (raw), a tree annotation or a table column. | List | Branch length (raw) | `Show` is set, `Show as` is **Number**, `Color of the values` is **By data** |
+| `Palette` | Scale colors. Those marked ✓ stay distinguishable with the common forms of color blindness. | tree2go<br>Okabe-Ito ✓<br>Paul Tol bright ✓<br>Viridis ✓<br>Inferno ✓<br>Magma ✓<br>Plasma ✓<br>Cividis ✓<br>Turbo<br>Spectral<br>Blue to red ✓ | Viridis | `Show` is set, `Show as` is **Number**, `Color of the values` is **By data** |
 | `Reverse the colors` |  | On<br>Off | Off | `Show` is set, `Show as` is **Number**, `Color of the values` is **By data** |
 | `Color` |  | Color | <img src="img/colors/6A6A6A.svg" alt="#6A6A6A" align="absmiddle"> #6A6A6A | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** or `Color by the value` is **Off**, `Color of the values` is **One color** |
 | `Position` | Side of the node, or the middle of its branch. | Left<br>Centered on the branch<br>Right | Left | `Show` is set, `Stack with the support values` is not **After the support (a / b)**, `Show as` is **Number** |
@@ -260,7 +281,7 @@ Support values, other values read from the tree (such as ages or probabilities),
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Draw`¹ | Uncertainty drawn on each node: an interval from the tree or the ages from a trees file. | List |  |  |
+| `Draw`¹ | Uncertainty drawn on each node, either an interval from the tree or the ages from a trees file. | List |  |  |
 | `Show the ages as` | Full distribution of the ages, or only its HPD interval. | Violin<br>HPD bar | Violin | `Draw` is set |
 | `Height` | Thickness of the bar, or height of the violin on each side. | 1 to 40 px | 6 px | `Draw` is set |
 | `Color` |  | Color | <img src="img/colors/5B8DEF.svg" alt="#5B8DEF" align="absmiddle"> #5B8DEF | `Draw` is set |
@@ -269,7 +290,7 @@ Support values, other values read from the tree (such as ages or probabilities),
 | `Border color` |  | Color | <img src="img/colors/2F5D8C.svg" alt="#2F5D8C" align="absmiddle"> #2F5D8C | `Draw` is set, `Border` is not **None** |
 | `Border width` |  | 0.05 to 50 px | 0.8 px | `Draw` is set, `Border` is not **None** |
 | `Mirror the density on both sides of the branch` | Draws the violin above and below the branch. | On<br>Off | On | `Draw` is set, `Show the ages as` is not **HPD bar** |
-| `Smoothing` | Bandwidth of the density: lower keeps more detail, higher gives a smoother curve. | 0.2 to 3× | 1× | `Draw` is set, `Show the ages as` is not **HPD bar** |
+| `Smoothing` | Bandwidth of the density. Lower values keep more detail and higher values give a smoother curve. | 0.2 to 3× | 1× | `Draw` is set, `Show the ages as` is not **HPD bar** |
 | `Show the HPD inside the violin` | Draws the HPD interval as a thin bar over the violin. | On<br>Off | Off | `Draw` is set, `Show the ages as` is not **HPD bar** |
 | `HPD interval` | Share of the ages the interval holds. | 90%, 95%, 99% | 95% | `Draw` is set, `Show the ages as` is **HPD bar**, `Show the HPD inside the violin` is **On** |
 | `HPD thickness` |  | 0.5 to 20 px | 3 px | `Draw` is set, `Show the ages as` is not **HPD bar**, `Show the HPD inside the violin` is **On** |
@@ -287,7 +308,7 @@ Support values, other values read from the tree (such as ages or probabilities),
 
 ### › Pie charts
 
-Pie charts on the tips and on named internal nodes, from a file: one per line as *Name | {A:0.3, B:0.7}*, as in the SIMMAP files, or a table with the names in the first column and one column per category. Internal nodes go by their names in the tree, as for the other attachments. Each pie adds up to 1, and the tip names move out to make room for it, as they also do for the SIMMAP pies on the tips.
+Pie charts on the tips and on named internal nodes, read from a file. The file can have one pie per line as *Name | {A:0.3, B:0.7}*, as in SIMMAP files, or be a table with the names in the first column and one column per category. Internal nodes go by their names in the tree, as for the other attachments. Each pie adds up to 1, and the tip names move out to make room for it, as they also do for the SIMMAP pies on the tips.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -299,16 +320,16 @@ Pie charts on the tips and on named internal nodes, from a file: one per line as
 | `Border color` |  | Color | <img src="img/colors/333333.svg" alt="#333333" align="absmiddle"> #333333 | `Show the pies` is **On**, `Border width` is above 0 |
 | `Show legend` |  | On<br>Off | On | `Show the pies` is **On** |
 | `Legend title` |  | Text |  | `Show the pies` is **On**, `Show legend` is **On** |
-| Category colors | One color for each category of the file. | Color | Palette colors | A pie file is loaded |
+| `Category colors` | One color for each category of the file. | Color | Palette colors | A pie file is loaded |
 
 ## Tip labels
 
-The names at the tips: font, size, style, color, and where the names come from.
+The names at the tips, with their font, size, style, color, and where they come from.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Show tip names` |  | On<br>Off | On |  |
-| `Show` | What the tips show: their names, or any value in one list (branch length, age, the annotations of the tips such as height or rate, and the columns of the tables). | List | The names in the tree | `Show tip names` is **On** |
+| `Show` | What the tips show, either their names or any value from one list (branch length, age, the annotations of the tips such as height or rate, and the columns of the tables). | List | The names in the tree | `Show tip names` is **On** |
 | `Keep the name, with the value after it` |  | On<br>Off | Off | `Show` is not **The names in the tree** |
 | `Decimals` |  | 0 to 4 | 2 | `Show` is not **The names in the tree** |
 | `Font size` |  | 1 to 200 px | 12 px |  |
@@ -361,7 +382,7 @@ Add a highlight from the `Right-click` menu of a branch or a clade (these option
 | `Names on circular and fan trees` | Names pointing outward, or written along the arc. | Radial<br>Curved along the arc | Radial | **Circular** or **Fan** layout, `Show the names next to the bars` is **On** |
 | `Position along the arc` | Where a curved name sits along its bar. | Start<br>Center<br>End | Center | **Circular** or **Fan** layout, `Show the names next to the bars` is **On**, `Names on circular and fan trees` is **Curved along the arc** |
 | `Clade bar width` |  | 1 to 12 px | 3 px |  |
-| `Line up the clade bars in one column`¹ | Puts every bar at the same distance | On<br>Off | On |  |
+| `Line up the clade bars in one column`¹ | Puts every bar at the same distance. | On<br>Off | On |  |
 | `Clade bar distance from the previous element` | Space between the clade name bars and the layer before it in `Layers`. Changing it moves the clade name bars and every layer after it together, as one block, and making it smaller brings them back the same way. | −200 to 200 px | 6 px |  |
 | `Clade name distance from bar` |  | 0 to 60 px | 6 px |  |
 | `Clade name size` |  | 1 to 200 px | 13 px |  |
@@ -373,7 +394,7 @@ Add a highlight from the `Right-click` menu of a branch or a clade (these option
 
 ## Fossils
 
-Extinct tips and grafted fossils (fossils can be added from the `Right-click` menu of a branch). Mark a tip as extinct, or add a fossil lineage to a branch, from the `Right-click` menu.
+Extinct tips and grafted fossils. Mark a tip as extinct, or add a fossil lineage to a branch, from its `Right-click` menu.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -381,7 +402,7 @@ Extinct tips and grafted fossils (fossils can be added from the `Right-click` me
 | `Tolerance` | Tips this close to the present still count as living. | 0 to 5 % of the height | 0.5 % of the height | `Tips that end before the present are extinct` is **On** |
 | `Add † after the names of extinct tips and fossils` |  | On<br>Off | On |  |
 
-¹ For dated trees: when the youngest tip is above 0, as in a fossil-only tree, every tip is extinct (`Right-click` a tip to change it by hand).  
+¹ In dated trees, when the youngest tip is above 0, as in a fossil-only tree, every tip is extinct (`Right-click` a tip to change it by hand).  
 
 ### › Sampled ancestors
 
@@ -401,7 +422,7 @@ Extinct tips and grafted fossils (fossils can be added from the `Right-click` me
 
 ## Phylogenetic networks
 
-Networks written in extended Newick (eNewick), as PhyloNet, SNaQ or Dendroscope write them. A node with two parents appears twice with the same label: `#H` (hybridization), `#LGT` (lateral gene transfer) or `#R` (recombination). The occurrence with a subtree, like `(6)#H7`, is the hybrid node, the one that receives, and the bare `#H7` hangs from the donor lineage. A hybrid node has two parents: the major edge brings most of its genome (γ above 0.5), the minor edge the rest, as in introgression. Without the minor edges, what remains is the major tree, drawn with solid lines. A network cannot be rerooted on or below a hybrid node, since both of its parents must stay above it. Gamma (γ), the last field of `name:length:support:γ`, is the share of the genome inherited through each line. Click a line or its value to select it, and right-click it to change only that one. Save Newick writes the network back in eNewick.
+Networks written in extended Newick (eNewick), as PhyloNet, SNaQ or Dendroscope write them. A node with two parents appears twice with the same label: `#H` (hybridization), `#LGT` (lateral gene transfer) or `#R` (recombination). The occurrence with a subtree, like `(6)#H7`, is the hybrid node, the one that receives, and the bare `#H7` hangs from the donor lineage. A hybrid node has two parents. The major edge brings most of its genome (γ above 0.5) and the minor edge brings the rest, as in introgression. Without the minor edges, what remains is the major tree, drawn with solid lines. A network cannot be rerooted on or below a hybrid node, since both of its parents must stay above it. Gamma (γ), the last field of `name:length:support:γ`, is the share of the genome inherited through each line. Click a line or its value to select it, and `Right-click` it to change only that one. Save Newick writes the network back in eNewick.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -448,7 +469,7 @@ The bar that gives the scale of the branch lengths, for trees without a time axi
 | `Show scale bar`¹ | A bar showing a length in branch units. | On<br>Off | On |  |
 | `Length` | Automatic picks a round length, custom uses your own. | Automatic<br>Custom | Automatic | `Show scale bar` is **On** |
 | `Bar length` |  | 10⁻⁹ to 10⁹ | 0.1 | `Show scale bar` is **On**, `Length` is **Custom** |
-| `Unit` | Written after the number, centred with it on the bar: Ma, subs./site or any text. | Text |  | `Show scale bar` is **On** |
+| `Unit` | Written after the number and centered with it on the bar, for example Ma, subs./site or any text. | Text |  | `Show scale bar` is **On** |
 | `Decimals` |  | Auto, 0, 1, 2, 3, 4 | Automatic | `Show scale bar` is **On** |
 | `Vertical position` |  | Top<br>Bottom | Bottom | `Show scale bar` is **On**, the bar is locked on the canvas |
 | `Horizontal position` |  | Left<br>Center<br>Right | Left | `Show scale bar` is **On**, the bar is locked on the canvas |
@@ -469,7 +490,7 @@ An axis of ages for dated trees, with the geologic time scale, guide lines and s
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Show time axis (dated trees)`¹ | Adds an axis of ages under the tree. | On<br>Off | Off | `Use branch lengths` turned **On** |
-| `Position` | Below or above the tree, with its ticks and ages outwards. On vertical trees, Bottom is on the right and Top on the left. With the geologic time scale, the axis goes with its boxes instead. | Bottom<br>Top | Bottom | `Show time axis (dated trees)` is **On**, rectangular trees, no geologic time scale |
+| `Position` | Below or above the tree, with its ticks and ages outward. On vertical trees, Bottom is on the right and Top on the left. With the geologic time scale, the axis goes with its boxes instead. | Bottom<br>Top | Bottom | `Show time axis (dated trees)` is **On**, rectangular trees, no geologic time scale |
 
 ¹ Needs branch lengths in time units.  
 
@@ -477,7 +498,7 @@ An axis of ages for dated trees, with the geologic time scale, guide lines and s
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Age of the youngest tip`¹ | Age where the axis starts. | −10⁶ to 10⁶ | 0 | `Show time axis (dated trees)` is **On** |
+| `Age of the youngest tip`¹ | Age where the axis starts. The ages written in labels count from it too, as the axis does. This includes node and branch age annotations (height, age, and their medians, means and intervals), the ages of tree sets and the ages of the tips. Only the numbers shown change, the tree keeps its own heights. | −10⁶ to 10⁶ | 0 | `Show time axis (dated trees)` is **On** |
 | `Time units per branch length unit`² | Factor that turns branch lengths into ages. | 10⁻⁹ to 10⁹ | 1 | `Show time axis (dated trees)` is **On** |
 | `Axis title` |  | Text | Ma | `Show time axis (dated trees)` is **On** |
 | `Show units next to the youngest value` | Writes the units after the first number of the axis. | On<br>Off | Off | `Show time axis (dated trees)` is **On** |
@@ -541,7 +562,7 @@ Boundaries follow the GSA Geologic Time Scale v. 6.0.
 
 ### › Second axis
 
-A plain second axis with the same ages and ticks of its own, for example every 10 above an axis every 50, on either side of the tree: it starts on the side opposite the axis already there. It stacks beyond whatever is already on its side. The grid follows the main axis.
+A plain second axis with the same ages but its own ticks, for example every 10 above an axis every 50. It can go on either side of the tree and starts on the side opposite the axis already there. It stacks beyond whatever is already on its side. The grid follows the main axis.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -555,7 +576,7 @@ A plain second axis with the same ages and ticks of its own, for example every 1
 
 ## Ancestral reconstructions
 
-Ancestral states from a SIMMAP file: pie charts on the nodes and colored branches.
+Ancestral states from a SIMMAP file, shown as pie charts on the nodes and colored branches.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -582,17 +603,19 @@ Ancestral states from a SIMMAP file: pie charts on the nodes and colored branche
 | `Show a legend` |  | On<br>Off | On |  |
 
 ¹ Each branch is split into short stretches, and each stretch is drawn with the states whose posterior probability there reaches this threshold. With 50%, a state present in at least half of the maps is drawn alone.  
-² Used only where no state reaches the dominance threshold: every state at or above this threshold is drawn, alternating as stripes, and the less probable ones are left out. When no state reaches it either, the most probable state is drawn. 
+² Used only where no state reaches the dominance threshold. There, every state at or above this threshold is drawn, alternating as stripes, and the less probable ones are left out. When no state reaches it either, the most probable state is drawn. 
 
 ## Attachments
 
-Tables (CSV or TSV) and other files that add data to the tree. Rows are matched to tips and internal nodes by name. When another tree is opened while files are attached, tree2go says how many tips of the new tree each file matches, and asks whether to keep them or remove them all. Attached tables are not chosen for the side plots by themselves: each side plot starts on None. Projects can be saved with the attached files (tables, SIMMAP, MCMC log, alignments, pie charts and images), so that anyone who opens them sees the same figure, or without them, and the window shows the size of each.
+Tables (CSV or TSV) and other files that add data to the tree. Rows are matched to tips and internal nodes by name. When another tree is opened while files are attached, tree2go says how many tips of the new tree each file matches, and asks whether to keep them or remove them all. Projects can be saved with the attached files (tables, SIMMAP, MCMC log, alignments, pie charts and images), so that anyone who opens them sees the same figure, or without them, and the window shows the size of each.
+
+Attached tables are never used automatically. Every plot and every style drawn from a table starts on None until you choose it, so a table that matches a tree by chance (a tip, or support values read as names of internal nodes) changes nothing.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Add file` | Adds data tables to the tree: CSV, TSV or text files whose first column holds the names. FASTA alignments too: they are listed with the other files and shown from Side plots, Alignment. | File |  |  |
+| `Add file` | Adds data tables to the tree, as CSV, TSV or text files whose first column holds the names. It also takes FASTA alignments, which are listed with the other files and shown from Side plots, Alignment. | File |  |  |
 | `Table list` | The attached tables, with how many names of each one match the tree and a button to remove it. | List |  | A table is added |
-| `MCMC log` | Posterior of each sampled tree, needed for the MAP tree: the `.log` of BEAST2 or the `.p` file of MrBayes. | File |  | A trees file is open |
+| `MCMC log` | Posterior of each sampled tree, needed for the MAP tree. Use the BEAST2 `.log` or the MrBayes `.p` file. | File |  | A trees file is open |
 
 ## Side plots
 
@@ -600,12 +623,11 @@ Bars, categories and a heatmap drawn next to the tips, from the attached tables.
 
 ### › Layers
 
-The side plots are layers next to the tips: the first in the list is the nearest to the tree, and each one starts where the one before it ends. Drag a layer or use its arrows to move it, and its eye to hide it: a hidden layer keeps its table and settings but is not drawn and takes no room, and its options are greyed out until it is shown again. Layers not in use are listed greyed as *not in use*, and layers that the layout of the tree does not draw (the alignment and the heatmap on circular and fan trees) as *not visible*. With the clade names first, their bars go right after the tip names. On circular and fan trees the clade name bars always go around the outside, whatever their place in the list.
+The side plots are layers next to the tips. The first in the list is the nearest to the tree, and each one starts where the one before it ends. Drag a layer or use its arrows to move it, and click its eye to hide it. A hidden layer keeps its table and settings but is not drawn and takes no room, and its options are grayed out until it is shown again. Layers not in use are listed grayed out as *not in use*, and layers that the layout of the tree does not draw (the alignment and the heatmap on circular and fan trees) as *not visible*. With the clade names first, their bars go right after the tip names. On circular and fan trees the clade name bars always go around the outside, whatever their place in the list.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Layers` | The order of the side plots from the tips outwards, and which ones are shown. | Alignment<br>Bars<br>Categories<br>Heatmap<br>Clade names | Alignment > Bars > Categories > Heatmap > Clade names | Always |
-
+| `Layers` | The order of the side plots from the tips outward, and which ones are shown. | Alignment<br>Bars<br>Categories<br>Heatmap<br>Clade names | Alignment > Bars > Categories > Heatmap > Clade names | Always |
 
 ### › Bars
 
@@ -669,7 +691,7 @@ The side plots are layers next to the tips: the first in the list is the nearest
 |:---|:---|:---|:---|:---|
 | `Table (heatmap)` | Table with the values of the heatmap. | A table that matches the tree | None | A table is attached |
 | `Columns (heatmap)` | Numeric columns, one column of colored cells each. | List |  | A table is chosen for the heatmap |
-| `Colour scale` | One color scale per column, or one for all columns. | Each column<br>All columns | Each column | A table is chosen for the heatmap |
+| `Color scale` | One color scale per column, or one for all columns. | Each column<br>All columns | Each column | A table is chosen for the heatmap |
 | `Low values` |  | Color | <img src="img/colors/2C7BB6.svg" alt="#2C7BB6" align="absmiddle"> #2C7BB6 | A table is chosen for the heatmap |
 | `Use a middle color` | Adds a third color for values in the middle of the range. | On<br>Off | On | A table is chosen for the heatmap |
 | `Middle values` |  | Color | <img src="img/colors/FFFFBF.svg" alt="#FFFFBF" align="absmiddle"> #FFFFBF | A table is chosen for the heatmap, `Use a middle color` is **On** |
@@ -688,14 +710,14 @@ The side plots are layers next to the tips: the first in the list is the nearest
 
 ### › Alignment
 
-A sequence alignment (FASTA) next to the tips, matched by name. The cells are square, as tall as the rows, so the width decides how many sites fit. When more sites are asked than fit, the rows become a barcode where each column is compared with its most common residue. Protein alignments are found by themselves: when fewer than 90% of the letters (gaps and N aside) are A, C, G, T or U, the file is read as protein. Their residues are colored by chemistry, in eight groups like the Clustal scheme, each with its own color: hydrophobic, positive, negative, polar, cysteine, glycine, proline and aromatic. Ambiguous letters (X, B, Z…) take the color for other or ambiguous ones.
+A sequence alignment (FASTA) next to the tips, matched by name. The cells are square, as tall as the rows, so the width decides how many sites fit. When more sites are asked than fit, the rows become a barcode where each column is compared with its most common residue. Protein alignments are detected automatically. When fewer than 90% of the letters (gaps and N aside) are A, C, G, T or U, the file is read as protein. Their residues are colored by chemistry, in eight groups like the Clustal scheme, each with its own color: hydrophobic, positive, negative, polar, cysteine, glycine, proline and aromatic. Ambiguous letters (X, B, Z…) take the color for other or ambiguous ones.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Alignment` | The alignment shown next to the tips, among the ones loaded in Attachments. A loaded alignment is not shown until it is chosen here. | None<br>The alignments loaded | None | An alignment is loaded |
 | `From site` |  | 1 to the length | 1 bp | `Alignment` is not **None** |
 | `To site` |  | 1 to the length | Last bp | `Alignment` is not **None** |
-| `Width` | Space for the alignment: it sets how many sites fit as squares. | 20 to 2000 px | 300 px | `Alignment` is not **None** |
+| `Width` | Space for the alignment, which sets how many sites fit as squares. | 20 to 2000 px | 300 px | `Alignment` is not **None** |
 | `Cell size (% of the row)` |  | 20 to 100% | 100% | `Alignment` is not **None** |
 | `Distance from the previous element` | Space between the alignment and the layer before it in `Layers`. Changing it moves the alignment and every layer after it together, as one block, and making it smaller brings them back the same way. | 0 to 200 px | 10 px | `Alignment` is not **None** |
 | `Site numbers` |  | On<br>Off | On | `Alignment` is not **None** |
@@ -759,7 +781,7 @@ Split a long rectangular tree into pages of the same width, each with a small ma
 | `Split the rest into pages` | Makes pages for every row that has none. |  |  |  |
 | `Split the tree into … pages` | Splits the whole tree into this number of pages. | Number | 2 |  |
 | `Save pages as PDF` | One PDF with a page per section. |  |  | The tree has pages |
-| `PNG (.zip)`<br>`SVG (.zip)` | One image per page, in a .zip. |  |  | The tree has pages |
+| `PNG (.zip)`<br>`SVG (.zip)` | One image per page, in a `.zip`. |  |  | The tree has pages |
 
 ### › Look
 
@@ -786,16 +808,16 @@ Split a long rectangular tree into pages of the same width, each with a small ma
 
 ## Geography
 
-Maps for the figure, from a file of your own or downloaded, with the records of a table drawn on them. Each map is an image that moves, aligns and shows guides like any other, numbered, and drawn behind the tree. Its `Right-click` menu sets its name, its lines, fill, the area shown (the whole map, only around the points with a margin, or a custom view), its scale as 1:X and a frame. With the map selected, `Ctrl` + drag moves its view inside its frame and `Ctrl` + scroll zooms in and out, as in a GIS, and the area becomes custom. Each map has its own points, projection, styles and lines: the options below `Map` belong to the map chosen there, and appear once a map is on the figure. The points of coastlines from GPlates are reconstructed to their age and plate model by themselves. The map and its points must use the same coordinate system: both in degrees (WGS84), projected together, or both in the same planar system (metres), drawn as they are. When they may not match (latitudes beyond ±90°, degrees against metres, or most points outside the map), a window says so, with what the .prj file of the map says.
+Maps for the figure, from a file of your own or downloaded, with the records of a table drawn on them. Each map is an image that moves, aligns and shows guides like any other, numbered, and drawn behind the tree. Its `Right-click` menu sets its name, its lines, fill, the area shown (the whole map, only around the points with a margin, or a custom view), its scale as 1:X, a frame and coordinates. Its proportions can be unlocked (`Position and size`, `Proportions`). The frame then takes any shape, and the map shows more or less of its area to fill it, centered and never stretched. With the map selected, `Ctrl` + drag moves its view inside its frame and `Ctrl` + scroll zooms in and out, as in a GIS, and the area becomes custom. Each map has its own points, projection, styles and lines. The options below `Map` belong to the map chosen there, and appear once a map is on the figure. Points on GPlates coastline maps are automatically reconstructed to the map's age and plate model. The map and its points must use the same coordinate system, either both in degrees (WGS84), projected together, or both in the same planar system (meters), drawn as they are. When they may not match (latitudes beyond ±90°, degrees against meters, or most points outside the map), a window says so, with what the `.prj` file of the map says.
 
 ### › Add a map
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Map from a shapefile…` | Reads a `.shp` file, or a `.zip` with its `.shp`, `.dbf` and `.prj`. Very detailed maps are simplified as they load. |  |  | Always |
-| Load from`Natural Earth` | Downloads one layer (land, countries or coastlines) at the resolution chosen, as a map. Needs internet once: the map is then kept in the app, and in projects saved with their attached files. | 1:110 million<br>1:50 million<br>1:10 million<br>Land<br>Countries<br>Coastlines | 1:110 million, land | Always, internet conection is available |
-| Load the `Coastlines of the past (GPlates)` | Downloads the coastlines of an age and a plate model as a map (0 to 1000 Ma). Its points are reconstructed to the same age and model. | Scotese 2016 (PALEOMAP)<br>Müller et al. (2019)<br>Merdith et al. (2021) | 50 Ma, Scotese 2016 (PALEOMAP) | Always, internet conection is available |
-| Maps loaded | Every map loaded, each in its own box, with its number of shapes and its units (degrees or planar units). A map deleted from the figure stays loaded: `Show it on the figure` brings it back, and `Add it again as a new map` adds another copy with settings of its own. `Remove` unloads it. |  |  | A map is loaded |
+| `Load from Natural Earth` | Downloads one layer (land, countries or coastlines) at the resolution chosen, as a map. Once loaded, the map is kept in the app, and in projects saved with their attached files. | 1:110 million<br>1:50 million<br>1:10 million<br>Land<br>Countries<br>Coastlines | 1:110 million, land | Internet connection available |
+| `Load the Coastlines of the past (GPlates)` | Downloads the coastlines of an age and a plate model as a map (0 to 1000 Ma). Its points are reconstructed to the same age and model. | Scotese 2016 (PALEOMAP)<br>Müller et al. (2019)<br>Merdith et al. (2021) | 50 Ma, Scotese 2016 (PALEOMAP) | Internet connection available |
+| `Maps loaded` | Every map loaded, each in its own box, with its number of shapes and its units (degrees or planar units). A map deleted from the figure stays loaded. `Show it on the figure` brings it back, and `Add it again as a new map` adds another copy with settings of its own. `Remove` unloads it. |  |  | A map is loaded |
 
 ### › Map
 
@@ -803,6 +825,20 @@ Maps for the figure, from a file of your own or downloaded, with the records of 
 |:---|:---|:---|:---|:---|
 | `Map` | The map whose options are shown below. | None<br>The maps on the figure | The last one added | Always |
 | `Projection (maps in degrees)` | How a map in degrees, and its points, are drawn on the plane. Maps in a planar system are drawn as they are. | Equal Earth (EPSG:8857)<br>Equirectangular (EPSG:4326)<br>Mercator (EPSG:3857)<br>Mollweide (ESRI:54009) | Equal Earth (EPSG:8857) | A map is on the figure |
+
+### › Coordinates of a map
+
+From the `Right-click` menu of a map you can add ticks with their coordinates on the chosen edges, outside its frame (shown with them). In degrees, each meridian and parallel is placed where it crosses the frame, so they follow any projection and a custom view. Where they would overlap, as at the top of Mollweide, only those with room are written. Planar maps get the coordinates in their own units.
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Edges` | Where the coordinates go. | Bottom<br>Left<br>Top<br>Right | None | Always |
+| `Every (0 for automatic)` | Degrees (or units) between two ticks. | 0 and up | 0 | An edge is chosen |
+| `Format` | 45.50°W, −45.50° (the sign gives the side, without letters), or 45°30′00″W, always written in full. | Decimal degrees (N, S, E, W)<br>Decimal degrees (+ and −)<br>Degrees, minutes, seconds | Decimal degrees | An edge is chosen, a map in degrees |
+| `Decimals` |  | 0 and up | 0 | An edge is chosen |
+| `Tick length` and `Tick width` |  | px | 4 px and 0.8 px | An edge is chosen |
+| `Space to the numbers` |  | px | 2 px | An edge is chosen |
+| `Text size` and `Color` |  | px<br>Color | 9 px, <img src="img/colors/333333.svg" alt="#333333" align="absmiddle"> #333333 | An edge is chosen |
 
 ### › Points
 
@@ -820,9 +856,9 @@ One row per record, with the species in the first column, as attached in Attachm
 | `Value for the size` | A column of the records, a tip annotation of the tree, or a column of another table (by species). | None<br>The columns and annotations found | None | `Table` is chosen, `Size` is **By a value** |
 | `Smallest` |  | 0.5 to 40 px | 2.5 px | `Table` is chosen, `Size` is not **One size** |
 | `Largest` |  | 0.5 to 60 px | 12 px | `Table` is chosen, `Size` is not **One size**, or with grouping |
-| `Color` | One color, the color of the named clade of the species, the color of the highlight of its clade, a color per category, or a gradient along a value. Species outside any named or highlighted clade, or without a value, are grey. | One color<br>By named clade<br>As the highlight of its clade<br>By a category<br>By a value (gradient) | One color | `Table` is chosen |
+| `Color` | One color, the color of the named clade of the species, the color of the highlight of its clade, a color per category, or a gradient along a value. Species outside any named or highlighted clade, or without a value, are gray. | One color<br>By named clade<br>As the highlight of its clade<br>By a category<br>By a value (gradient) | One color | `Table` is chosen |
 | `Point color` |  | Color | <img src="img/colors/C8553D.svg" alt="#C8553D" align="absmiddle"> #C8553D | `Table` is chosen, `Color` is **One color** |
-| `Value for the color` | As the value for the size, and independent of it: the color and the size can follow different values. | None<br>The columns and annotations found | None | `Table` is chosen, `Color` is **By a category** or **By a value** |
+| `Value for the color` | Works like the value for the size but is independent of it, so the color and the size can follow different values. | None<br>The columns and annotations found | None | `Table` is chosen, `Color` is **By a category** or **By a value** |
 | `Palette` |  | The palettes of the app | Viridis | `Table` is chosen, `Color` is **By a value** |
 | `Reverse the colors` |  | On<br>Off | Off | `Table` is chosen, `Color` is **By a value** |
 | `Opacity` |  | 5 to 100% | 85% | `Table` is chosen |
@@ -846,9 +882,9 @@ One row per record, with the species in the first column, as attached in Attachm
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Neighbourhood radius (map units, 0 for none)` | Records closer than this become one point. In the units of the map: degrees for maps in degrees, the units of the planar system (usually metres) otherwise. | 0 and up | 0 | `Table` is chosen |
-| `Number of records on grouped points` |  | On<br>Off | On | `Table` is chosen, `Neighbourhood radius` is above 0 |
-| `Color of groups with several colors` | A grouped point whose records have different colors takes this one. | Color | <img src="img/colors/9AA0A6.svg" alt="#9AA0A6" align="absmiddle"> #9AA0A6 | `Table` is chosen, `Neighbourhood radius` is above 0 |
+| `Neighborhood radius (map units, 0 for none)` | Records closer than this become one point. It uses the map units, so degrees for maps in degrees, and otherwise the units of the planar system (usually meters). | 0 and up | 0 | `Table` is chosen |
+| `Number of records on grouped points` |  | On<br>Off | On | `Table` is chosen, `Neighborhood radius` is above 0 |
+| `Color of groups with several colors` | A grouped point whose records have different colors takes this one. | Color | <img src="img/colors/9AA0A6.svg" alt="#9AA0A6" align="absmiddle"> #9AA0A6 | `Table` is chosen, `Neighborhood radius` is above 0 |
 
 ## Images and visual elements
 
@@ -860,45 +896,103 @@ Pictures (PNG or JPG) placed on the page¹.
 | `Add label` | A text you can place anywhere, for example a name inside the tree. It moves, aligns with branches, labels and clades, shows distance guides and takes arrows like an image, and is exported as text. `Right-click` it to write it and choose its size, color, bold, italic and typeface. |  |  | A tree is loaded |
 | `Add density plot` | A density plot (or histogram) of a value of the tree or of a table, drawn by the app as an image that moves, resizes and aligns like the others. `Right-click` it to choose the values and its look. `Values from` picks the origin: **From tree** (branch lengths and Support values when the nodes have them), **Tree annotations** (such as rates or HPD) or **Attached files** (a column of a table). Its fill can follow the color scale of the branches or of the dots. |  |  | A tree is loaded |
 | `Add LTT plot` | A lineages-through-time plot of a tree with ages, drawn by the app as an image that moves, resizes and aligns like the others. It counts lineages cumulatively (every lineage that has appeared) or alive at each time, at every event or in time bins, and can hold several lines, each for the whole tree or a named clade, with or without fossils and with its own name in the legend. The tree can show faintly behind, and the plot can be stretched freely. Its time axis takes the ages of the tips, or the age of the youngest tip set in Time axis. `Right-click` it to add lines and change its look. |  |  | A tree is loaded |
-| `Draw arrow` | An arrow to point at something. Drag it by its body, or drag an end onto a node or one of the nine points of an image to anchor it there: when they move, the arrow follows. `Right-click` it for its look. |  |  | A tree is loaded |
+| `Draw arrow` | An arrow to point at something. Drag it by its body to move it, or drag one of its ends to anchor it to a node, to the start or the end of the name of a tip, to the start, middle or end of a clade name bar or to its name, or to any of the nine points of an image or of any other visual element (text labels, density and LTT plots, maps). An anchored end follows what it is attached to when it moves. `Right-click` it for its look. |  |  | A tree is loaded |
 | `Image list` | Click a row to select its image. |  |  | An image is added |
 | `Replace` | Swaps the picture, keeping its place and width. |  |  | An image is added |
 | `Remove` |  |  |  | An image is added |
 
-¹ Drag an image to move it, drag a corner to resize it (proportions are kept), or just outside a corner to rotate it. `Right-click` it for position, size, opacity, rotation, mirror, layer and alignment. On rectangular trees, dotted guides show the distance to the nearest branch, tip label or axis, click a number to type an exact distance. Arrow keys move it 1 px (10 px with Shift). To align it, select the image, `Shift-click` a branch, label or clade, and `Right-click` the image for more options. Alignment works better with rectangular views.
+¹ Drag an image to move it, drag a corner to resize it (proportions are kept), or just outside a corner to rotate it. `Right-click` it for position, shape, size, opacity, rotation, mirror, layer and alignment. On rectangular trees, dotted guides show the distance to the nearest branch, tip label or axis, click a number to type an exact distance. Arrow keys move it 1 px (10 px with `Shift`). To align it, select the image, `Shift-click` a branch, label or clade, and `Right-click` the image for more options. Alignment works better with rectangular views.
+
+## Tanglegram
+
+This tree and another one face to face, their tips joined by lines. The second tree is another tab, with its own look and highlights. To get one, open a tree of the set in a tab, load a file in a new tab, or copy this tree to a new tab (`Right-click` its root, `Copy tree to a new tab`) and change it there. Both trees must have the same tips, or the box says how many are found in one only, and the tanglegram waits until they match.
+
+It needs a rectangular tree that is not turned, with the space to the right of the tree free of side plots, clade name bars, images or other visual elements (these can be moved below or above the tree). The note says what is in the way. With highlights of the same colors on both sides, the two trees read as one.
+
+`Untangle` turns the nodes of the second tree (or of both) one by one, keeping each turn that lowers the number of crossing lines, until none lowers it any more. It writes how many crossings there were and are left.
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Show a tanglegram` |  | On<br>Off | Off | The conditions above are met |
+| `Second tree` | The tab drawn on the right. | The other tabs | The first other tab | A second tab is open |
+
+### › Lines
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `From` | Where the lines start and end, at the end of each name (or each tip) on each side. | The names<br>The tips | The names | `Show a tanglegram` is **On** |
+| `Color` | One color, or the color of the highlight (or of the branch) each tip is in, on each side. | One color<br>As the highlights<br>As the branches | One color | `Show a tanglegram` is **On** |
+| `Where the colors differ` | When both sides have a color and they differ, use a gradient from one to the other, or one neutral color. A tip with a color on one side only takes that color, and one with none the line color. | From one to the other<br>One neutral color | From one to the other | `Color` is not **One color** |
+| `Width`, `Opacity` and `Style` |  | px, %<br>Solid, Dashed, Dotted | 0.8 px, 80 %, Solid | `Show a tanglegram` is **On** |
+| `Curvature (0 for straight)` | Bends the lines into an S. | 0 to 100 % | 0 | `Show a tanglegram` is **On** |
+
+A click selects a line (it shows in blue), like the branches. `Right-click` a line to give it a color, width or style of its own, and `Back to the look of all` to undo it. The second tree keeps the look of its tab, aligned names with their guides included.
+
+### › Placement
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Distance between the trees` | The room for the lines. | 10 to 2000 px | 140 px | `Show a tanglegram` is **On** |
+| `Width (0 as this tree)` |  | 0 to 5000 px | 0 | `Show a tanglegram` is **On** |
+| `Names of its tips` | Written facing the lines. | On<br>Off | On | `Show a tanglegram` is **On** |
+| `Join the highlights of the same clade` | A clade highlighted in both trees, with the very same tips, is joined across the gap between them, in its color when both sides share it, or from one color to the other. A highlight that fades toward the lines joins from its faded edge. | On<br>Off | On | `Show a tanglegram` is **On** |
+
+</details>
+
+<details open class="refgroup">
+<summary><strong style="font-size:1.5em">Header menus</strong></summary>
+
+> The header menus handle the work as a whole, such as opening and saving projects and styles, the page settings, and exporting the figure, the tree or its trees.
+
+## Import and Save
+
+The `Import` ▾ and `Save` ▾ menus of the header open or save a project or a style.
+
+| Item | What it holds |
+|:---|:---|
+| `Project` | The trees and everything that goes with them, including tabs, look, tables, alignments, maps, images and, if chosen, every tree of a set. |
+| `Style` | Every option of the left panel that can go to another tree, such as the look of the branches, labels, axes and clade name bars. Options tied to one tree (its clades, tables, maps and images) stay out. A style applied to another tree sets those options there, so clade bars named later already take that look. |
+
+### Saving a project
+
+The window shown when a project is saved.
+
+| Option | Description | Default |
+|:---|:---|:---|
+| `With the attached files` or `Without them` | With them, anyone who opens the project sees the same figure. Without them, the files have to be attached again after opening it. | With the attached files |
+| `With the N trees of the set` | Every tree of the set. Opened again, another burn-in, consensus, tree of the set, DensiTree or export of the trees needs no file. Without them, the project keeps the summary tree, with its supports and ages. | On |
+| `Without indentation` | Lighter, still plain text. | On |
+| `Compressed` | Much lighter, often many times, but not human-readable. A compressed project ends in `.tree2go.json.gz` and opens as any other. | On |
 
 ## Page settings
 
-In the **Page settings** menu of the header, next to Export.
-
-Background, palette, color vision preview and plot title.
+The `Page settings` menu of the header holds the plot title, the background, the palette, the color blind preview and the lightening of heavy elements, then `Copy style`, the only part that folds.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
+| `Plot title` | A title over or under the figure. Its other options appear once it has a text. | Text |  |  |
+| `Size` |  | 4 to 300 px | 18 px | `Plot title` is set |
+| `Vertical position` |  | Top<br>Bottom | Top | `Plot title` is set |
+| `Horizontal position` |  | Left<br>Center<br>Right | Left | `Plot title` is set |
+| `Move sideways` and `Move up or down` |  | −400 to 400 px | 0 px | `Plot title` is set |
+| `Bold` and `Italic` |  | On<br>Off | On, Off | `Plot title` is set |
+| `Color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Plot title` is set |
 | `Background color` |  | Color | <img src="img/colors/FFFFFF.svg" alt="#FFFFFF" align="absmiddle"> #FFFFFF |  |
+| `Palette` | Colors offered in the menus and for new categories. Colors already in use do not change. | Tree2go<br>Okabe-Ito (color blind safe)<br>Paul Tol bright (color blind safe)<br>Viridis (color blind safe)<br>Inferno (color blind safe)<br>Magma (color blind safe)<br>Plasma (color blind safe)<br>Cividis (color blind safe) | Tree2go |  |
+| `Color blind preview` | Shows the figure as seen with a color vision deficiency, on screen only. | Normal vision<br>Deuteranopia (red-green)<br>Protanopia (red-green)<br>Tritanopia (blue-yellow)<br>No color (grayscale) | Normal vision |  |
+| `Render optimization` | Lets you view and edit very large trees (more than 2,000 tips) quickly by drawing only the elements that are in view, or large enough to be seen. Names too small to be read, and names and click areas far from the view, are left out until the view gets to them. Branches are always drawn. Exports always draw everything. Turning it off can lower the performance. | On<br>Off | On |  |
+| `Very thin lines on screen` | Zoomed far out, lines that would vanish are drawn one pixel wide (on screen only), or keep their true width, as they will look in a small print of the figure. | Always visible<br>As exported | Always visible |  |
+| `Lighten heavy elements while working`¹ | Shows images, density and LTT plots and maps as light placeholders, to keep the app quick. | On<br>Off | Off |  |
 
-### › Colors
+¹ Lightened elements stay where they are and can be moved, but not resized. Each shows a gray snapshot of how it last looked, framed by a gray dashed line. They are still there, and exports draw them in full with their current options. One element can also be lightened, or shown again, from its `Right-click` menu (`Lighten this one`, `Show this one`). The box shows a tick when all are lightened, a dash when only some are, and is empty when none are. A click on a dash lightens them all, and a click on a tick shows them all again.
+
+### › Copy style
+
+What `Paste style` applies, by groups of properties. It copies the look of each kind of element (colors, widths, sizes, places), never their values or data. Unticked groups stay as they are on the elements a style is pasted on, so only the color of the branches can be pasted, for example, or the branches and the nodes but not the labels.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Palette`¹ | Colors offered in the menus and for new categories. | Tree2go<br>Okabe-Ito (color blind safe)<br>Paul Tol bright (color blind safe)<br>Viridis (color blind safe)<br>Inferno (color blind safe)<br>Magma (color blind safe)<br>Plasma (color blind safe)<br>Cividis (color blind safe)<br>Turbo<br>Spectral<br>Blue to red (color blind safe) | Tree2go |  |
-| `Preview as seen with` | Shows the figure as seen with a color vision deficiency, on screen only. | Normal vision<br>Deuteranopia (red-green)<br>Protanopia (red-green)<br>Tritanopia (blue-yellow)<br>No color (grayscale) | Normal vision |  |
-
-¹ The colors offered in the menus and for new categories (colors already in use do not change).  
-
-### › Plot title
-
-| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
-|:---|:---|:---|:---|:---|
-| `Text` |  | Text |  |  |
-| `Size` |  | 4 to 300 px | 18 px | `Text` is set |
-| `Vertical position` |  | Top<br>Bottom | Top | `Text` is set |
-| `Horizontal position` |  | Left<br>Center<br>Right | Left | `Text` is set |
-| `Move sideways` |  | −400 to 400 px | 0 px | `Text` is set |
-| `Move up or down` |  | −400 to 400 px | 0 px | `Text` is set |
-| `Bold` |  | On<br>Off | On | `Text` is set |
-| `Italic` |  | On<br>Off | Off | `Text` is set |
-| `Color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Text` is set |
+| `Groups of properties` | Branch color, branch width, line style of the branches, node dots (size, shape, color, border), highlights, font and size of the tip labels, color of the tip labels, values on branches and nodes, node bars, clade name bars and data plots. `All` and `None` tick or untick them all. | On<br>Off | On | Always |
 
 ## Export
 
@@ -913,22 +1007,29 @@ Save the figure, the tree or a style template.
 | `Resolution` |  | 36 to 2400 dpi | 300 dpi |  |
 | `Units` |  | px<br>cm<br>in | px |  |
 | `Width`<br>`Height` | Final size of the figure, changing one keeps the proportions. |  | Natural size |  |
-| `Save Newick` | The tree as it is now: names, rooting, order. |  |  |  |
+| `Save Newick` | The tree as it is now, with its names, rooting and order. |  |  |  |
 | `Save NEXUS` | Same tree, with branch colors for FigTree and its annotations. |  |  |  |
-| `Save the trees (Newick)` and `Save the trees (NEXUS)` | The trees of the sample after the burn-in (and as resampled when read): one tree per line in Newick, or as NEXUS with a note on where they come from. Also in `Export`, Trees of the sample. |  |  | A file with several trees is open |
+| `Save the trees (Newick)` and `Save the trees (NEXUS)` | The trees of the sample after the burn-in (and as resampled when read), one tree per line in Newick, or as NEXUS with a note on where they come from. Also in `Export`, Trees of the sample. |  |  | A file with several trees is open |
 | `Save style…` | Saves the look of the figure, without its tree or data. |  |  |  |
 | `Apply a style…` | Gives a saved look to the current tree. |  |  |  |
 | `Reset visual settings` | Back to the default look (names, lengths, collapsed clades, clade names, fossils and tables are kept). |  |  |  |
 
+</details>
+
+<details open class="refgroup">
+<summary><strong style="font-size:1.5em">Right-click and canvas</strong></summary>
+
+> A `Right-click` sets one element on its own, or the ones selected: a branch, a clade, a tip label, a legend, an image… Values set there win over the left panel, which gives almost complete control over the look of every part of the figure. The canvas is where elements are selected, moved and zoomed.
+
 ## Right-click menus
 
-`Right-click` any element (on a Mac: `Control-click`) to edit just that element, or everything selected. Values set here win over the panel, the small ↶ next to a field returns it to the left-panel value. The left-panel shows how many elements use their own value, with a button to undo them all.
+`Right-click` any element (on a Mac: `Control-click`) to edit just that element, or everything selected. Values set here win over the panel, the small ↶ next to a field returns it to the left-panel value. The left panel shows how many elements use their own value, with a button to undo them all.
 
 | Element&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | What you can change&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |---|---|
 | Empty part of the canvas | Tree statistics: tips and nodes, polytomies, rooting, reticulations, branch lengths, ages, fossils and sampled ancestors, tree shape (cherries¹, Colless² and Sackin³ indices, γ⁴), support values and the tree set it comes from |
 | Branch | Color, width, line style, branch length label, grafting a fossil, reroot here, extract clade, make a page, copy Newick, delete |
-| Clade | Clade color, highlight background (opacity, start at root, stem or crown, end, gradient, corners), collapse, make a polytomy of the whole clade (and undo it), rotate its children (the order of the children of this node), rotate the clade (turned over on its own axis, the order reversed at every node inside it), ladderize, height and fill when collapsed, clade name bar |
+| Clade | Clade color, highlight background (opacity, start at root, stem or crown, end, gradient, corners), collapse, make a polytomy of the whole clade (and undo it), copy the whole tree to a new tab (on the root, where Extract clade does not apply), rotate its children (the order of the children of this node), rotate the clade (turned over on its own axis, the order reversed at every node inside it), ladderize, height and fill when collapsed, clade name bar |
 | Tip label | Font size, color, style, weight, open nomenclature qualifiers (cf., aff., sp.), extinct tip |
 | Node | Dot size, shape, fill, color and border, support label, other node labels, node bars, make a polytomy of its children (and undo it) |
 | Grafted fossil | Ages, split the lineage, add fossils to a split, delete |
@@ -938,7 +1039,7 @@ Save the figure, the tree or a style template.
 | Page box | Rows of the page, look of its tree map, alignment |
 | Image | Position, size, opacity, rotation, mirror, layer, alignment |
 | Label | Text, size, color, bold, italic, typeface, opacity, rotation, mirror, layer, alignment |
-| Density plot | Values from (From tree, Tree annotations or Attached files) and Value, logarithmic scale (base 10), cut below and above (where the curve stops, since a density spills past the data, density curve shown or hidden, histogram with its bin width (empty for automatic, in log₁₀ units with the logarithmic scale), color and opacity, smoothing, one color or the colors of the branches or dots (offered only when they are colored by the same values the plot shows, and also applied to the histogram), fill and opacity, line color, width and style, axis with its color, width, text size, spacing and title |
+| Density plot | Values from (From tree, Tree annotations or Attached files) and Value, logarithmic scale (base 10), cut below and above (where the curve stops, since a density spills past the data), density curve shown or hidden, histogram with its bin width (empty for automatic, in log₁₀ units with the logarithmic scale), color and opacity, smoothing, one color or the colors of the branches or dots (offered only when they are colored by the same values the plot shows, and also applied to the histogram), fill and opacity, line color, width and style, axis with its color, width, text size, spacing and title |
 | LTT plot | Count (cumulative or lineages alive), time bins (0 for every event), white background, logarithmic lineages axis, the tree behind with its color, line width and opacity, legend, axis color, width, text size, titles and their spaces to the axes. For each line: its name in the legend, the whole tree or a named clade, fossils included or left out, color, width and style. Lines can be added or removed |
 | Arrow | Color, width, opacity, line style, arrow heads and their size, curvature, space from the anchor at each end, free an anchored end, delete |
 | Reticulation | Color, width, arrows and their size, straight or curved line, where it starts and ends along its branches, show its value |
@@ -948,8 +1049,8 @@ Save the figure, the tree or a style template.
 | Any element | Copy style, paste style, reset style |
 
 ¹ Cherries: pairs of tips that are each other's closest relatives, hanging from the same node.  
-² Colless index: a measure of imbalance that adds, over every node, the difference between the number of tips on its two sides. It is 0 for a perfectly balanced tree. Normalized, it goes from 0 (balanced) to 1 (a ladder-like tree).  
-³ Sackin index: another measure of imbalance that adds, over every tip, the number of nodes between it and the root. It is larger in unbalanced trees.  
+² Colless index (normalized): imbalance, the difference between the tips on each side added over every node, over its largest possible value, so 0 for a balanced tree (with an even number of tips) and 1 for a ladder-like one. Colless is not shifted by its smallest value, so with an odd number of tips even the most balanced tree is above 0. Needs a fully bifurcating tree.  
+³ Sackin index (normalized): another measure of imbalance, the number of nodes between each tip and the root added over every tip, set between 0 for a balanced tree and 1 for a ladder-like one. Needs a fully bifurcating tree.  
 ⁴ γ (gamma) statistic (Pybus & Harvey, 2000): when the branching happened along the tree. Below 0, most branching happened early, near the root, and above 0 late, near the tips. Below −1.645, diversification slowed down significantly over time (one-tailed test at 5%). Only for dated, fully bifurcating trees whose tips all reach the present.
 
 ## On the canvas
@@ -959,9 +1060,11 @@ Save the figure, the tree or a style template.
 | Select | Click an element (`Shift-click` to add more) |
 | Select mode | Element (single)<br>Clade (`Shift-click` extends the selection to the most recent common ancestor)<br>MRCA (pick two tips) |
 | Find tips | Type a name or a pattern with * and ? (`Enter` selects the matches, `Shift+Enter` their clade) |
-| Info on hover | Button at the bottom of the panel: tips, branch length and support of the branch under the mouse |
+| Info on hover | Button at the bottom of the panel that shows the tips, branch length and support of the branch under the mouse |
 | Move a legend, the scale bar or a page tree map | Hover it and click its lock, then drag it, arrow keys move it 1 px (10 px with `Shift`) |
-| Zoom and move | Mouse wheel to zoom, drag the empty canvas to move, buttons at the bottom right to fit |
+| Zoom and move | Mouse wheel to zoom, drag the empty canvas to move, buttons at the bottom right to fit. With more than 3,000 tips, the figure moves as one picture while the gesture goes on, so it stays smooth, and is drawn sharp again when it stops. A tree too tall to fit whole (thousands of tips) opens fitted to the width, from its top, and zoomed far out its lines stay one pixel wide on screen |
 | Tabs | Extract clade (`Right-click` menu of a clade) opens the clade in a new tab, with the same style. Supports, ages and frequencies come from the full tree as they were, and the clade keeps its own branch to show them. Click a tab to switch, double-click it to rename it, the × of the active tab closes it. The tab of the full tree cannot be closed |
 | Undo<br>Redo | `Ctrl+Z`<br>`Ctrl+Shift+Z` (`Cmd+Shift+Z` on a Mac) |
 | Clear the selection | `Esc` |
+
+</details>
