@@ -904,11 +904,11 @@ function fmtName(s) {
   return s;
 }
 // Writes a tree (or clade) back to Newick with names, internal labels and branch lengths.
-function toNewick(root) {
+function toNewick(root, original) {   // original: renamed tips written with their original names
   function w(n, isRoot) {
     let str = '';
     if (n.children.length) str = '(' + n.children.map(c => w(c, false)).join(',') + ')';
-    str += fmtName(nm(n));   // the name shown: a renamed tip is written with its new name
+    str += fmtName(original ? n.name : nm(n));   // the name shown (a renamed tip, its new name), or the original one
     let len = n.len;
     const num = x => +x.toPrecision(10), split = t => len == null ? [null, null] : [len * (1 - t), len * t];
     // a donor point splits the branch: the node below it, and beside it the bare #label with its gamma
@@ -3165,27 +3165,13 @@ function resetForNewTree() {
 // a file read as text: one tree, or many
 // A file with very many trees: before reading them, offer a burn-in and a resample, so only the trees kept are read.
 function countTreeLines(txt) { const nex = /begin\s+trees\s*;/i.test(txt), re = nex ? /^[ \t]*u?tree\s/gim : /^[ \t]*(\[[^\]\n]*\][ \t]*)*\(/gm; let n = 0; while (re.exec(txt)) n++; return { n, nex }; }
-function loadTreesText(txt, name) {
-  const C = txt.length > 2e5 ? countTreeLines(txt) : { n: 0 };
-  if (C.n <= 10000) return loadTreesTextNow(txt, name);
-  askConfirm({ title: `${C.n.toLocaleString('en')} trees`, ok: 'Load the trees kept', okClass: 'primary', cancel: 'Load them all', focusOk: true, dismiss: true,
+// The window of the burn-in and resample, for a file of C.n trees: gives null (closed), false (load them all) or the choices.
+function resampleDialog(C) {
+  const p = askConfirm({ title: `${C.n.toLocaleString('en')} trees`, ok: 'Load the trees kept', okClass: 'primary', cancel: 'Load them all', focusOk: true, dismiss: true,
     html: `This file has many trees, and reading them all takes a while. A burn-in and a resample read only the trees kept.
       <div class="rsform"><span>Burn-in</span><div class="ctl"><span class="numwrap"><input class="num boxed" type="number" id="rsBurn" min="0" max="99" step="1" value="25"><span class="unit">%</span></span></div>
       <span>Keep</span><div class="ctl"><select id="rsKind"><option value="n">A number of trees</option><option value="pct">A percentage</option></select><input class="num boxed" type="number" id="rsN" min="1" step="1" value="${Math.min(10000, Math.round(C.n * 0.75))}"></div>
-      <span>Which trees</span><div class="ctl"><select id="rsMode"><option value="even">Evenly spaced</option><option value="random">At random</option></select><span id="rsSeedW" hidden>Seed <input class="num boxed" type="number" id="rsSeed" min="0" step="1" value="123"></span></div></div><p class="hint rsmsg" id="rsMsg"></p>` })
-    .then(ok => {
-      if (ok === null) return;   // closed: nothing is loaded
-      if (!ok) return loadTreesTextNow(txt, name);
-      const b = clamp(+$('rsBurn').value || 0, 0, 99), kind = $('rsKind').value, mode = $('rsMode').value, seed = +$('rsSeed').value || 0;
-      const lines = txt.split('\n'), re = C.nex ? /^[ \t]*u?tree\s/i : /^[ \t]*(\[[^\]]*\][ \t]*)*\(/, idx = []; lines.forEach((l, i) => { if (re.test(l)) idx.push(i); });
-      const post = idx.slice(Math.floor(idx.length * b / 100)), want = kind === 'pct' ? Math.round(post.length * clamp(+$('rsN').value || 0, 0, 100) / 100) : Math.round(+$('rsN').value || 0), K = clamp(want, 1, post.length);
-      let pick;
-      if (mode === 'random') { let a = seed >>> 0; const rnd = () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; const p = post.slice(); for (let i = 0; i < K; i++) { const j = i + Math.floor(rnd() * (p.length - i)); [p[i], p[j]] = [p[j], p[i]]; } pick = new Set(p.slice(0, K)); }
-      else pick = new Set([...Array(K)].map((_, i) => post[Math.floor(i * post.length / K)]));
-      const keepAll = new Set(idx), out = lines.filter((l, i) => !keepAll.has(i) || pick.has(i)).join('\n');
-      loadTreesTextNow(out, name);
-      if (treeSet) { treeSet.resample = { total: idx.length, burnin: b, from: post.length, kept: K, mode, seed: mode === 'random' ? seed : null }; persistTreeSet(); refreshTreeSetBox(); toast(`${K.toLocaleString('en')} of ${idx.length.toLocaleString('en')} trees read`); }
-    });
+      <span>Which trees</span><div class="ctl"><select id="rsMode"><option value="even">Evenly spaced</option><option value="random">At random</option></select><span id="rsSeedW" hidden>Seed <input class="num boxed" type="number" id="rsSeed" min="0" step="1" value="123"></span></div></div><p class="hint rsmsg" id="rsMsg"></p>` });
   setTimeout(() => {
     const m = $('rsMode'), w = $('rsSeedW'); if (m && w) m.onchange = () => { w.hidden = m.value !== 'random'; };
     // how many trees are left after the burn-in, and whether the number asked can be kept
@@ -3199,6 +3185,68 @@ function loadTreesText(txt, name) {
     ['rsBurn', 'rsKind', 'rsN'].forEach(id => { const el = $(id); if (el) { el.addEventListener('input', check); el.addEventListener('change', check); } });
     check();
   });
+  return p.then(ok => ok === null ? null : !ok ? false : { b: clamp(+$('rsBurn').value || 0, 0, 99), kind: $('rsKind').value, val: +$('rsN').value || 0, mode: $('rsMode').value, seed: +$('rsSeed').value || 0 });
+}
+// The trees kept: list holds the trees in order (their lines, or their positions in the file); o, the choices of the window.
+function pickTrees(list, o) {
+  const post = list.slice(Math.floor(list.length * o.b / 100)), want = o.kind === 'pct' ? Math.round(post.length * clamp(o.val, 0, 100) / 100) : Math.round(o.val), K = clamp(want, 1, post.length), mode = o.mode, seed = o.seed;
+  let pick;
+  if (mode === 'random') { let a = seed >>> 0; const rnd = () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; const p = post.slice(); for (let i = 0; i < K; i++) { const j = i + Math.floor(rnd() * (p.length - i)); [p[i], p[j]] = [p[j], p[i]]; } pick = new Set(p.slice(0, K)); }
+  else pick = new Set([...Array(K)].map((_, i) => post[Math.floor(i * post.length / K)]));
+  return { pick, K, from: post.length };
+}
+const noteResample = (o, total, r) => { if (treeSet) { treeSet.resample = { total, burnin: o.b, from: r.from, kept: r.K, mode: o.mode, seed: o.mode === 'random' ? o.seed : null }; persistTreeSet(); refreshTreeSetBox(); toast(`${r.K.toLocaleString('en')} of ${total.toLocaleString('en')} trees read`); } };
+function loadTreesText(txt, name) {
+  const C = txt.length > 2e5 ? countTreeLines(txt) : { n: 0 };
+  if (C.n <= 10000) return loadTreesTextNow(txt, name);
+  resampleDialog(C).then(o => {
+    if (o === null) return;   // closed: nothing is loaded
+    if (!o) return loadTreesTextNow(txt, name);
+    const lines = txt.split('\n'), re = C.nex ? /^[ \t]*u?tree\s/i : /^[ \t]*(\[[^\]]*\][ \t]*)*\(/, idx = []; lines.forEach((l, i) => { if (re.test(l)) idx.push(i); });
+    const r = pickTrees(idx, o), keepAll = new Set(idx), out = lines.filter((l, i) => !keepAll.has(i) || r.pick.has(i)).join('\n');
+    loadTreesTextNow(out, name); noteResample(o, idx.length, r);
+  });
+}
+/* A tree file too large to read whole (more than BIG_TREES bytes): browsers cannot hold it as one text. It is read in
+   pieces, twice: once to count its trees, and once to keep only the trees chosen in the window. Memory then depends
+   on the trees kept, not on the size of the file. Each tree ends at its semicolon. */
+const BIG_TREES = 150e6;
+async function streamTrees(file, keep, onPart) {
+  const rd = file.stream().pipeThrough(new TextDecoderStream()).getReader();
+  const isTree = st => /^\s*u?tree\s/i.test(st) || /^\s*(\[[^\]]*\]\s*)*\(/.test(st);
+  let buf = '', n = 0, inTrees = false, read = 0; const head = [], kept = [], tail = [];
+  for (;;) {
+    const { value, done } = await rd.read();
+    if (value) { buf += value; read += value.length; }
+    let i, at = 0;
+    while ((i = buf.indexOf(';', at)) >= 0) {
+      const st = buf.slice(at, i + 1); at = i + 1;
+      if (isTree(st)) { if (keep && keep.has(n)) kept.push(st); n++; inTrees = true; }
+      else if (keep) (inTrees ? tail : head).push(st);
+    }
+    buf = buf.slice(at);
+    if (onPart) onPart(read, n);
+    if (done) break;
+  }
+  return { n, nex: /begin\s+trees\s*;/i.test(head.join('')), text: keep ? head.join('') + kept.join('') + tail.join('') + buf : null };
+}
+async function readBigTrees(file) {
+  const name = file.name, mb = file.size / 1048576;
+  try {
+    toast(`Counting the trees of a large file (${Math.round(mb).toLocaleString('en')} MB)…`);
+    const C = await streamTrees(file, null);
+    if (!C.n) return toast('No trees were found in this file');
+    const all = { b: 0, kind: 'pct', val: 100, mode: 'even', seed: 0 };
+    const o = C.n > 10000 ? await resampleDialog(C) : all;
+    if (o === null) return;   // closed: nothing is loaded
+    const r = pickTrees([...Array(C.n).keys()], o || all);
+    toast(`Reading ${r.K.toLocaleString('en')} trees…`);
+    const got = await streamTrees(file, r.pick);
+    loadTreesTextNow(got.text, name);
+    if (o) noteResample(o, C.n, r);
+  } catch (e) {
+    toast(e instanceof RangeError ? 'Too many trees for this browser to hold at once: read fewer of them (burn-in and resample).' : 'This file could not be read: ' + (e.message || e));
+  }
 }
 function loadTreesTextNow(txt, name) {
   const P = parseTreeFile(txt);
@@ -3546,15 +3594,19 @@ function loadText(txt, opts) {
 }
 let lastFileName = null;
 // Reads a tree file chosen by the user.
-function readFile(file) {
+async function readFile(file) {
   lastFileName = file.name;
+  if (file.size > BIG_TREES && file.stream && typeof TextDecoderStream !== 'undefined') {
+    const sig = new Uint8Array(await file.slice(0, 2).arrayBuffer());
+    if (!(sig[0] === 0x1f && sig[1] === 0x8b)) return readBigTrees(file);   // not a compressed project: a large tree file
+  }
   const r = new FileReader();
   r.onload = async () => {
     const u = new Uint8Array(r.result); let txt0;
     if (u[0] === 0x1f && u[1] === 0x8b) {   // a compressed project (gzip)
       try { txt0 = await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); }
       catch (e) { return toast('This compressed file could not be read'); }
-    } else txt0 = new TextDecoder().decode(u);
+    } else { try { txt0 = new TextDecoder().decode(u); } catch (e) { return toast('This file is too large for the browser to read whole.'); } }
     const t = txt0, had = !!tree && !/^\s*\{/.test(t);   // a new tree (not a project) while files are attached
     const go = () => { const before = tree; loadText(t); if (had && tree && tree !== before) confirmAttachments(); };
     if (t.length > 1e6) { toast('Reading the trees, this can take a few seconds…'); setTimeout(go, 60); } else go();
@@ -8897,8 +8949,18 @@ function applyStyleText(text) {
 /* ================= Export the edited tree: Newick, or NEXUS with FigTree colours ================= */
 async function exportTree(kind) {
   if (!tree) return toast('Load a tree first');
+  // renamed tips: written with their new names, as shown, or with their original ones, as in the data and the source file
+  const renamed = leaves(tree).filter(n => n.label).length; let original = false;
+  if (renamed) {
+    const ok = await askConfirm({ title: 'Names of the renamed tips', ok: 'Export', okClass: 'primary', cancel: 'Cancel', focusOk: true, dismiss: true,
+      html: `${renamed === 1 ? '1 tip was' : renamed + ' tips were'} renamed. Write ${renamed === 1 ? 'it' : 'them'} with:
+        <label class="savechoice"><input type="radio" name="expNames" value="new" checked> <span><b>The new names</b><br>As shown in the figure.</span></label>
+        <label class="savechoice"><input type="radio" name="expNames" value="orig"> <span><b>The original names</b><br>As in the file the tree was read from, and in its tables and other data.</span></label>` });
+    if (!ok) return;
+    original = (document.querySelector('input[name="expNames"]:checked') || {}).value === 'orig';
+  }
   const fname = await exportName(kind === 'nexus' ? '.nex' : '.nwk', kind === 'nexus' ? 'tree as NEXUS' : 'tree as Newick'); if (!fname) return;
-  if (kind !== 'nexus') return saveFile(fname, toNewick(tree) + '\n');
+  if (kind !== 'nexus') return saveFile(fname, toNewick(tree, original) + '\n');
   const q = s => /^[A-Za-z0-9_.\-]+$/.test(s) ? s : `'${String(s).replace(/'/g, "''")}'`;
   const ann = n => {
     const parts = [];
@@ -8909,12 +8971,12 @@ async function exportTree(kind) {
   };
   const w = (n, root) => {
     let s = n.children.length ? '(' + n.children.map(c => w(c, false)).join(',') + ')' : '';
-    if (nm(n)) s += q(nm(n));   // the names shown
+    { const lab = original ? n.name : nm(n); if (lab) s += q(lab); }   // the names shown, or the original ones
     s += ann(n);
     if (n.len != null && !root) s += ':' + (+n.len.toPrecision(10));
     return s;
   };
-  const tips = leaves(tree).map(n => q(nm(n) || ''));
+  const tips = leaves(tree).map(n => q((original ? n.name : nm(n)) || ''));
   saveFile(fname, `#NEXUS\nbegin taxa;\n\tdimensions ntax=${tips.length};\n\ttaxlabels\n${tips.map(t => '\t' + t).join('\n')}\n;\nend;\n\nbegin trees;\n\ttree tree_1 = [&R] ${w(tree, true)};\nend;\n`);
 }
 
