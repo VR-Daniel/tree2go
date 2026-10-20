@@ -908,7 +908,7 @@ function toNewick(root) {
   function w(n, isRoot) {
     let str = '';
     if (n.children.length) str = '(' + n.children.map(c => w(c, false)).join(',') + ')';
-    str += fmtName(n.name);
+    str += fmtName(nm(n));   // the name shown: a renamed tip is written with its new name
     let len = n.len;
     const num = x => +x.toPrecision(10), split = t => len == null ? [null, null] : [len * (1 - t), len * t];
     // a donor point splits the branch: the node below it, and beside it the bare #label with its gamma
@@ -954,7 +954,7 @@ const graftHost = n => { while (n && n.parent) n = n.parent; return n ? n._host 
 function newGraft(name, fa) { const x = mk(name); x._gr = true; x.fa = fa; return x; }
 // Turns a tree into plain data for undo, saving and projects (with styles, fossils and annotations).
 function serialize(n) {
-  const o = { n: n.name, l: n.len };
+  const o = { n: n.name, l: n.len }; if (n.label) o.lb = n.label;   // the new name of a renamed tip
   if (n.collapsed) o.co = 1; if (n.color) o.c = n.color; if (n.bg) o.b = n.bg; if (n.labelColor) o.lc = n.labelColor; if (n.cladeLabel) o.cl = n.cladeLabel; if (n.bold) o.bo = 1;
   if (n.st && Object.keys(n.st).length) o.s = n.st;
   if (n.ex) o.ex = 1;
@@ -973,7 +973,7 @@ function serialize(n) {
 // Rebuilds a tree from the data written by serialize.
 function deserialize(o, parent = null) {
   const n = mk(o.n || '', o.l ?? null);
-  n.parent = parent; n.collapsed = !!o.co; n.color = o.c || null; n.bg = o.b || null; n.labelColor = o.lc || null; n.cladeLabel = o.cl || null; n.bold = false;
+  n.label = o.lb || null; n.parent = parent; n.collapsed = !!o.co; n.color = o.c || null; n.bg = o.b || null; n.labelColor = o.lc || null; n.cladeLabel = o.cl || null; n.bold = false;
   n.st = o.s ? { ...o.s } : null;
   if (o.bo && !o.k) { n.st = n.st || {}; if (n.st.fw == null) n.st.fw = true; }
   n.ex = !!o.ex; n.noEx = !!o.nx; n.fa = o.fa ?? null; n.bud = o.bu ?? null;
@@ -1342,6 +1342,9 @@ const realR = r => radFlip == null ? r : Math.max(0, radFlip - r);
 const polar = (r, a) => polar0(realR(r), a);
 // A name as shown: underscores become spaces.
 const disp = s => settings.underscores ? String(s).replace(/_/g, ' ') : String(s);
+// The name shown for a node. A renamed tip keeps its original name underneath, as the key that links it to tables,
+// alignments, plots and maps, and shows its new name (label) everywhere else, Newick exports included.
+const nm = n => n ? (n.label != null && n.label !== '' ? n.label : n.name) : '';
 // Count with its word in singular or plural ("1 tip", "3 tips").
 const plural = (k, one, many) => k === 1 ? '1 ' + one : k + ' ' + many;
 
@@ -3380,7 +3383,7 @@ async function runBench(auto) {   // auto: opened with ?bench=auto, the test run
     await time('ladder', 'Ladderizing it', () => shown(() => { ladderize(tree, true); render(); }));
     await time('nwk', 'Saving it as Newick', () => { toNewick(tree); });
     await time('svg', 'Exporting it as SVG', () => { buildSVG(); });
-    await time('pdf', 'Exporting it as PDF', () => { const sv = buildSVG(); svgToPdf(sv, 595, []); });
+    await time('pdf', 'Exporting it as PDF', async () => { const sv = buildSVG(); await svgToPdf(sv, 595, []); });
     await time('read', 'Reading 1,000 trees of 1,000 tips', () => shown(() => loadTreesTextNow(ST, 'Test trees')));
     await time('maj', 'Building their majority-rule consensus', () => shown(() => { treeSet.mode = 'majority'; treeSet.pct = 50; refreshTreeSetBox(); const b = document.getElementById('tsBuild'); if (b) b.click(); }));
     await time('mcc', 'Building their MCC tree', () => shown(() => { treeSet.mode = 'mcc'; refreshTreeSetBox(); const b = document.getElementById('tsBuild'); if (b) b.click(); }));
@@ -3943,7 +3946,7 @@ function renderOnce() {
   const extLine = new Set(), allFossil = vis.filter(n => !n.children.length).every(isExt);
   (function ex(n) { if (!n.children.length || n._tri) { const e = !n.children.length ? isExt(n) : leaves(n).every(isExt); if (e) extLine.add(n); return e; } let all = true; for (const c of n.children) if (!ex(c)) all = false; if (all) extLine.add(n); return all; })(tree);
   const altN = altNames(S);
-  const tipText = n => n._tri ? (stv(n, 'tl') ? disp(stv(n, 'tl')) + (S.triCount ? ` (${leafCount(n)})` : '') : n.name && !isSupport(n.name) ? disp(n.name) + (S.triCount ? ` (${leafCount(n)})` : '') : (S.triCount ? leafCount(n) + ' tips' : '')) : disp(altN.get(n) ?? n.name);
+  const tipText = n => n._tri ? (stv(n, 'tl') ? disp(stv(n, 'tl')) + (S.triCount ? ` (${leafCount(n)})` : '') : n.name && !isSupport(n.name) ? disp(nm(n)) + (S.triCount ? ` (${leafCount(n)})` : '') : (S.triCount ? leafCount(n) + ' tips' : '')) : disp(n.label || (altN.get(n) ?? n.name));   // a name given by hand, then the column of names chosen, then the original
   let maxLW = 0;
   for (const n of tips) {
     n._fs = stv(n, 'fs') ?? S.fontSize;
@@ -4048,7 +4051,7 @@ function renderOnce() {
       x._fs = stv(x, 'fs') ?? S.fontSize;
       x._it = stv(x, 'it') ?? S.italic;
       x._dag = stv(x, 'dg') ?? S.fossilDagger;
-      x._txt = disp(x.name || 'Fossil');
+      x._txt = disp(nm(x) || 'Fossil');
       x._q = stv(x, 'onq') ?? S.openNom;
       x._fwt = stv(x, 'fw') ?? S.bold;
       x._lw = S.showTips ? nameWidth(x._txt, x._fs, fam, x._it, x._fwt, x._q) + (x._dag ? measure('†', x._fs * 0.7, fam, false, false) + 1 : 0) : 0;
@@ -4411,7 +4414,7 @@ function renderOnce() {
         valHits.push(`<circle class="hitpt" cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(Math.max(r, 5))}" data-id="${n.id}" data-kind="support"/>`);
       }
     } else if (!isS && n.name && !isSupport(n.name) && S.showInternal) {
-      anL.push(`<text x="${f2(n._px + 4)}" y="${f2(n._py - 4)}" font-size="${f2(S.fontSize * 0.85)}" fill="${S.labelColor}" font-family="${esc(fam)}">${esc(disp(n.name))}</text>`);
+      anL.push(`<text x="${f2(n._px + 4)}" y="${f2(n._py - 4)}" font-size="${f2(S.fontSize * 0.85)}" fill="${S.labelColor}" font-family="${esc(fam)}">${esc(disp(nm(n)))}</text>`);
     }
   }
   {
@@ -5792,7 +5795,7 @@ function placePop(cx, cy, keep) {
 // Title of the right-click menu for a node (tip, internal node, root...).
 const nodeTitle = n => {
   const isLeaf = !n.children.length;
-  return n.name ? (isSupport(n.name) && !isLeaf ? 'Internal node (support ' + n.name + ')' : disp(n.name)) : (n.parent ? 'Internal node' : 'Root');
+  return n.name ? (isSupport(n.name) && !isLeaf ? 'Internal node (support ' + n.name + ')' : disp(nm(n))) : (n.parent ? 'Internal node' : 'Root');
 };
 // Row of palette colors with a custom color button.
 function swatches(key, pal, cur, dis) {
@@ -5815,7 +5818,7 @@ const BR_KEYS = ['bc', 'bw', 'bs', 'bdl', 'bdg'], LEN_KEYS = ['lv', 'la', 'lm', 
   DOT_KEYS = ['dot', 'dsh', 'df', 'dc', 'dbs', 'dbc', 'dbw', 'dbn'], SUP_KEYS = ['svm', 'sa', 'sm', 'sdy', 'ss', 'sc'], NLAB_KEYS = ['nlv', 'na', 'nm', 'ndy', 'ns', 'nc'], NBAR_KEYS = ['nbv', 'nbh', 'nbc', 'nbo', 'nbbc', 'nbbw'], CLADE_KEYS = ['bgOp', 'triF', 'triH', 'bgS', 'bgE', 'bgG', 'bgR'],
   BAR_KEYS = ['barC', 'barTC', 'barOff', 'barTO', 'barW', 'barFs', 'barB', 'barI', 'barNH', 'barTM', 'barTA', 'barTD'], DATA_KEYS = ['dtc', 'dto'];
 // Short name of a node for messages (its name, or its tips).
-const nodeLabel = n => (n.name && !(n.children.length && isSupport(n.name))) ? disp(n.name) : (n.parent ? 'internal node' : 'root');
+const nodeLabel = n => (n.name && !(n.children.length && isSupport(n.name))) ? disp(nm(n)) : (n.parent ? 'internal node' : 'root');
 // First letter in upper case.
 const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
 // A node and all its descendants, as a list.
@@ -5857,7 +5860,7 @@ function nodeLabelSrc(S) { const v = S.nlabSrc || ''; return v === 'anc' && !sma
 // Text of Other node labels for a node: names, annotations, SIMMAP states or tree set summaries (ages, HPD, frequency).
 function nodeLabelText(n, S = settings) {
   const src = nodeLabelSrc(S); if (!src) return null;
-  if (src === 'names') return n.name && !isSupport(n.name) ? disp(n.name) : null;
+  if (src === 'names') return n.name && !isSupport(n.name) ? disp(nm(n)) : null;
   if (src === 'part2') { const p = isSupport(n.name) ? String(n.name).split('/') : []; return p.length > 1 ? p[1] : null; }
   if (src.startsWith('ts:')) {
     const c = treeSet && ancKeys && treeSet.clades.get(ancKeys.get(n)); if (!c) return null;
@@ -6048,7 +6051,7 @@ function openEdit(cx, cy, keep) {
   const g = (arr, k) => T[arr].length ? stv(T[arr][0], k) : null;
 
   let title;
-  if (entries.length === 1 && isGraft(n0) && e0.kind !== 'clade') title = n0.children.length ? 'Fossil clade' : 'Fossil: ' + disp(n0.name || 'Fossil');
+  if (entries.length === 1 && isGraft(n0) && e0.kind !== 'clade') title = n0.children.length ? 'Fossil clade' : 'Fossil: ' + disp(nm(n0) || 'Fossil');
   else if (entries.length === 1) {
     const lab = nodeLabel(n0);
     title = { fossil: 'Fossil lineages', branch: n0.parent ? 'Branch to ' + lab : 'Root connector', node: cap1(lab), label: cap1(lab), clade: 'Clade of ' + lab, length: 'Branch length value', support: 'Support value', nlab: 'Node label', nbar: 'Node bar', bar: 'Clade name: ' + (n0.cladeLabel || ''), data: n0.children.length ? 'Data bars: ' + (n0.cladeLabel || lab) : 'Data bar: ' + lab }[e0.kind];
@@ -6105,7 +6108,7 @@ function openEdit(cx, cy, keep) {
     if (T.internalReal.length) h += `<div class="kv"><span>Fill when collapsed</span>${esel('triF', 'internalReal', [['1', 'Filled'], ['0', 'Empty']], S.triFill)}</div>`;
     if (single && single.children.length) h += `<div class="grp"><span>Name when collapsed</span><div class="inline"><input type="text" id="pTriName" value="${esc(stv(single, 'tl') || '')}" placeholder="${esc(leafCount(single) + ' tips')}"><button class="btn small" data-a="triname">Apply</button></div></div>`;
     if (single) {
-      if (e0.kind !== 'clade') h += `<div class="grp"><span>${single.children.length ? 'Name or support' : 'Name'}</span><div class="inline"><input type="text" id="pName" value="${esc(single.name)}"><button class="btn small" data-a="rename">Apply</button></div></div>
+      if (e0.kind !== 'clade') h += `<div class="grp"><span>${single.children.length ? 'Name or support' : 'Name'}</span><div class="inline"><input type="text" id="pName" value="${esc(single.children.length ? single.name : nm(single))}"><button class="btn small" data-a="rename">Apply</button></div></div>
       ${single.parent && !isGraft(single) ? `<div class="grp"><span>Branch length</span><div class="inline"><input type="text" id="pLen" value="${single.len ?? ''}" inputmode="decimal" placeholder="none"><button class="btn small" data-a="setlen">Apply</button></div></div>` : ''}`;
       if (!isGraft(single)) h += `<div class="grp"><span>Clade name (side bar)</span><div class="inline"><input type="text" id="pClade" value="${esc(single.cladeLabel || '')}" placeholder="e.g. Primates"><button class="btn small" data-a="cladename">Apply</button></div></div>`;
       if (single.cladeLabel) h += `<span class="hint">Right-click the clade name bar to style it.</span>`;
@@ -6130,7 +6133,7 @@ function openEdit(cx, cy, keep) {
     const gs = fosNode.grafts || [];
     parts.push(`<div class="part"><b>Graft a fossil onto this branch</b>
       ${datedOk ? `<span class="hint">This branch spans ${fmtNum(aOld)}–${fmtNum(aYoung)} ${esc(unitT)}.</span>` : '<span class="hint">Fossils need a dated tree: turn on "Use branch lengths".</span>'}
-      ${gs.length ? `<div class="glist">${gs.map((G, i) => `<div class="inline"><span class="gname">${esc(disp(G.name || (G.children.length ? 'Fossil clade' : 'Fossil')))}</span><button class="btn small danger" data-gdel="${i}">Remove</button></div>`).join('')}</div>` : ''}
+      ${gs.length ? `<div class="glist">${gs.map((G, i) => `<div class="inline"><span class="gname">${esc(disp(nm(G) || (G.children.length ? 'Fossil clade' : 'Fossil')))}</span><button class="btn small danger" data-gdel="${i}">Remove</button></div>`).join('')}</div>` : ''}
       ${datedOk ? `<div class="fos fos-new">
         <div class="inline"><input type="text" id="fNewName" placeholder="Fossil name" aria-label="New fossil name"></div>
         <div class="kv"><span>Fossil age (upper limit)</span>${ageBox('id="fNewAge"', '', '', 'Fossil age')}</div>
@@ -6185,7 +6188,7 @@ function openEdit(cx, cy, keep) {
       <div class="kv"><span>Vertical offset</span>${num('sady', 'tip', 0, 'px')}</div>
       <div class="kv"><span>Horizontal offset</span>${num('sadx', 'tip', 0, 'px')}</div>` : ''}
       ${(() => {
-        const withQ = T.tip.filter(n => hasQualifier(disp(n.name || '')));
+        const withQ = T.tip.filter(n => hasQualifier(disp(nm(n) || '')));
         const italicAll = T.tip.every(n => stv(n, 'it') ?? S.italic);
         if (!withQ.length) return '';
         return `<div class="kv${italicAll ? '' : ' off'}"><span>Qualifiers (cf., aff., sp.)</span>${esel('onq', 'tip', [['1', 'Upright'], ['0', 'Italic']], S.openNom)}</div>
@@ -6381,7 +6384,7 @@ function openEdit(cx, cy, keep) {
     else if (a === 'rotateAll') { const under = (a, d) => { for (let x = d.parent; x; x = x.parent) if (x === a) return true; return false; }, tops = T.internal.filter(x => !T.internal.some(y => y !== x && under(y, x))); apply(tops, x => walkAll(x, y => { if (y.children.length) y.children.reverse(); })); }   // the clade mirrored
     else if (a === 'ladder') apply(T.internal, x => ladderize(x, false));
     else if (a === 'expandSub') apply(T.internal, x => walkAll(x, y => { y.collapsed = false; }));
-    else if (a === 'rename') apply([n], x => { x.name = pop.querySelector('#pName').value.trim(); });
+    else if (a === 'rename') apply([n], x => { const v = pop.querySelector('#pName').value.trim(); if (x.children.length) x.name = v; else x.label = v && v !== x.name ? v : null; });   // a tip keeps its original name as the key of its data
     else if (a === 'setlen') { const v = pop.querySelector('#pLen').value.trim(); if (v !== '' && isNaN(parseFloat(v))) { toast('Enter a number, or leave it empty'); return; } apply([n], x => { x.len = v === '' ? null : parseFloat(v); }); }
     else if (a === 'cladename') apply([n], x => { x.cladeLabel = pop.querySelector('#pClade').value.trim() || null; });
     else if (a === 'addfossil') {
@@ -6422,7 +6425,7 @@ function openEdit(cx, cy, keep) {
     else if (a === 'reroot') { if (isUltrametric(tree)) { toast('Dated trees cannot be rerooted'); return; }
       if (netBlocksRoot(n)) { toast('In a network the root cannot go on or below a hybrid node: its two parents must stay above it.'); return; } mutate(() => { tree = reroot(tree, n); }, 'Tree rerooted', true); sel.clear(); closePop(); render(); }
     else if (a === 'copytree') { closePop(); copyTreeToTab(); }
-    else if (a === 'extract') { const sub = deserialize(serialize(n)); sub.len = null; sub.parent = null; openInTab(sub, n.cladeLabel || (n.name && !isSupport(n.name) ? disp(n.name) : `Clade (${leafCount(n)} tips)`), true); toast('The clade opens in a new tab. The full tree stays in its own tab.'); if (false) sel.clear(); closePop(); render(); }
+    else if (a === 'extract') { const sub = deserialize(serialize(n)); sub.len = null; sub.parent = null; openInTab(sub, n.cladeLabel || (n.name && !isSupport(n.name) ? disp(nm(n)) : `Clade (${leafCount(n)} tips)`), true); toast('The clade opens in a new tab. The full tree stays in its own tab.'); if (false) sel.clear(); closePop(); render(); }
     else if (a === 'prune') { mutate(() => { tree = prune(tree, n); }, n.children.length ? 'Clade deleted' : 'Tip deleted'); sel.clear(); closePop(); render(); }
     else if (a === 'copy') { navigator.clipboard?.writeText(toNewick(n)).then(() => toast('Newick copied'), () => toast('Copying is blocked in this browser')); }
     else if (a === 'reset') {
@@ -6450,7 +6453,7 @@ function runSearch() {
   const q = $('search').value.trim().toLowerCase();
   searchHits = [];
   const rx = searchRegex(q);
-  if (q && tree) for (const l of leaves(tree)) if (rx ? rx.test(l.name) || rx.test(disp(l.name)) : l.name.toLowerCase().includes(q) || disp(l.name).toLowerCase().includes(q)) searchHits.push(l);
+  if (q && tree) for (const l of leaves(tree)) if (rx ? rx.test(l.name) || rx.test(disp(nm(l))) : l.name.toLowerCase().includes(q) || disp(nm(l)).toLowerCase().includes(q)) searchHits.push(l);
   const hidden = searchHits.filter(l => { let x = l.parent; while (x) { if (x.collapsed) return true; x = x.parent; } return false; }).length;
   const sc = $('searchCount');
   sc.textContent = q ? (searchHits.length ? plural(searchHits.length, 'match', 'matches') + (hidden ? `, ${hidden} inside collapsed clades` : '') + (searchHits.length === 1 ? '. Press Enter to select it.' : '. Enter selects them, Shift+Enter selects their clade.') : 'No tips match') : '';
@@ -6595,7 +6598,7 @@ function tiffEncode(rgba, W, H, dpi) {
 
 /* Vector PDF from the exported SVG. Covers what tree2go draws: paths (M L H V C A Z), rect,
    circle, polygon, line and text with the 14 standard PDF fonts, opacity and dashes. */
-function svgToPdf(svgStr, ptW, imgData) {
+async function svgToPdf(svgStr, ptW, imgData) {   // async: the contents of each page are compressed (Flate), as in other programs
   /* A small PDF writer for the SVG of the figure (vector output, no library):
      1. each page's SVG is parsed and walked element by element, keeping the inherited style (fill, stroke, opacity,
         font, transforms);
@@ -6612,7 +6615,9 @@ function svgToPdf(svgStr, ptW, imgData) {
   const setupPage = pg => {
     doc = new DOMParser().parseFromString(pg.svg, 'image/svg+xml'); root = doc.documentElement;
     [vx, vy, vw, vh] = root.getAttribute('viewBox').split(/[\s,]+/).map(Number);
-    k = pg.ptW ? pg.ptW / vw : 0.75; Wp = vw * k; Hp = vh * k;
+    k = pg.ptW ? pg.ptW / vw : 0.75;
+    const longest = Math.max(vw, vh) * k; if (longest > 14400) k *= 14400 / longest;   // Acrobat cuts pages over 200 inches: scaled to fit, still vector
+    Wp = vw * k; Hp = vh * k;
     out = [`${N(k)} 0 0 ${N(-k)} ${N(-vx * k)} ${N((vy + vh) * k)} cm`];
   };
   const fonts = new Map(), gstates = new Map();
@@ -6866,10 +6871,16 @@ function svgToPdf(svgStr, ptW, imgData) {
   for (const href of usedImgs) { const d = imgData.get(href); const imNum = nextNum++; const smNum = d.alpha ? nextNum++ : null; imgObjs.push({ d, imNum, smNum }); }
   const xobj = imgObjs.length ? ` /XObject << ${imgObjs.map(o => `/${o.d.name} ${o.imNum} 0 R`).join(' ')} >>` : '';
   const resources = `/Resources << /Font << ${fontObjs.map(o => `/${o.res} ${o.num} 0 R`).join(' ')} >> /ExtGState << ${gsObjs.map(o => `/${o.res} ${o.num} 0 R`).join(' ')} >>${xobj} >>`;
-  done.forEach((d, i) => {
+  const deflate = async str => {   // Flate (zlib), built into the browser: about a quarter of the size
+    if (typeof CompressionStream === 'undefined') return null;
+    try { const u8 = new Uint8Array(str.length); for (let i = 0; i < str.length; i++) u8[i] = str.charCodeAt(i) & 0xFF;
+      return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer()); } catch (e) { return null; }
+  };
+  for (let i = 0; i < done.length; i++) {
+    const d = done[i], z = await deflate(d.stream);
     objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${N(d.Wp)} ${N(d.Hp)}] ${resources} /Contents ${4 + 2 * i} 0 R >>`);
-    objs.push(`<< /Length ${d.stream.length} >>\nstream\n${d.stream}\nendstream`);
-  });
+    objs.push(z ? `<< /Length ${z.length} /Filter /FlateDecode >>\nstream\n${bytesToStr(z)}\nendstream` : `<< /Length ${d.stream.length} >>\nstream\n${d.stream}\nendstream`);
+  }
   for (const o of [...fontObjs, ...gsObjs]) objs.push(o.body);
   for (const o of imgObjs) {
     const { d } = o, px = d.rgb, al = d.alpha;
@@ -6888,7 +6899,7 @@ function svgToPdf(svgStr, ptW, imgData) {
 async function exportPDF() {
   if (!tree) return toast('Load a tree first');
   const fname = await exportName('.pdf', 'PDF'); if (!fname) return;
-  try { const P = exportPlan(), svgStr = buildSVG(); const imgs = await pdfImageData(svgStr); saveFile(fname, new Blob([svgToPdf(svgStr, P.inW * 72, imgs)], { type: 'application/pdf' })); }
+  try { const P = exportPlan(), svgStr = buildSVG(); const imgs = await pdfImageData(svgStr); saveFile(fname, new Blob([await svgToPdf(svgStr, P.inW * 72, imgs)], { type: 'application/pdf' })); }
   catch (e) { console.error(e); toast('The PDF could not be created'); }
 }
 // Exports the figure as PNG, with its resolution written in the file.
@@ -7422,7 +7433,7 @@ function tangleSvgNow() {
   if (!useLen) (function lv(x) { if (!x.children.length) return 0; const h = Math.max(...x.children.map(lv)) + 1; x._th = h; return h; })(t2);
   const maxD = Math.max(...L2.map(l => l._td)) || 1, W1 = Math.max(...R.L.map(l => l._px)) - tree._px, W2 = S.tgWidth > 0 ? S.tgWidth : Math.max(40, W1);
   const fs = S2.fontSize, fam = S2.fontFamily, it = !!S2.italic, off = S2.labelOffset ?? 5, show = S.tgLabels !== false;
-  const lw = show ? Math.max(0, ...L2.map(l => measure(disp(l.name), fs, fam, it, false))) : 0;
+  const lw = show ? Math.max(0, ...L2.map(l => measure(disp(nm(l)), fs, fam, it, false))) : 0;
   const xT = R.x + S.tgGap + lw + (show ? off : 0);   // where its youngest tips are
   const X = x => xT + W2 * (useLen ? (maxD - x._td) / maxD : (x.children.length ? x._th / Math.max(1, t2._th) : 0));
   const al = !!S2.align, LX = l => (al ? xT : X(l)) - off;   // where each name ends: in one column when its tab aligns them
@@ -7440,7 +7451,7 @@ function tangleSvgNow() {
     if (x.children.length > 1) { const c0 = x.children[0], c1 = x.children[x.children.length - 1]; out.push(`<path d="M${f2(X(x))},${f2(c0._ty)}V${f2(c1._ty)}" stroke="${inh.get(c0)}" stroke-width="${f2(w)}" fill="none" stroke-linecap="square"/>`); } });
   if (show && al) for (const l of L2) if (X(l) > xT + 0.5) out.push(`<path d="M${f2(xT)},${f2(l._ty)}H${f2(X(l))}" stroke="#9AA0A6" stroke-width="0.6" fill="none"${S2.alignStyle === 'solid' ? '' : S2.alignStyle === 'dashed' ? ' stroke-dasharray="4 3"' : ' stroke-dasharray="1 2"'}/>`);   // guides to the aligned names
   if (show) for (const l of L2) { const st = l.st || {}, f1 = st.fs ?? fs, i1 = st.it ?? it, b1 = st.fw ?? l.bold;   // each name with its own look too
-    out.push(`<text x="${f2(LX(l))}" y="${f2(l._ty)}" text-anchor="end" dominant-baseline="central" font-size="${f2(f1)}" font-family="${esc(fam)}"${i1 ? ' font-style="italic"' : ''}${b1 ? ' font-weight="bold"' : ''} fill="${st.lc || l.labelColor || '#222'}">${esc(disp(l.name))}</text>`); }
+    out.push(`<text x="${f2(LX(l))}" y="${f2(l._ty)}" text-anchor="end" dominant-baseline="central" font-size="${f2(f1)}" font-family="${esc(fam)}"${i1 ? ' font-style="italic"' : ''}${b1 ? ' font-weight="bold"' : ''} fill="${st.lc || l.labelColor || '#222'}">${esc(disp(nm(l)))}</text>`); }
   // bridges: a clade highlighted in both trees (the very same tips) is joined across the gap, one color or from one to the other
   const bridges = [], bdefs = [];
   if (S.tgBridge !== false) hlBoxes.forEach((A, i) => {
@@ -7455,7 +7466,7 @@ function tangleSvgNow() {
   const lines = [], defs = [], cv = Math.max(0, Math.min(100, S.tgCurve || 0)) / 100;
   R.L.forEach((l, i) => {
     const k = normTip(l.name), r = by2.get(k); if (!r) return;
-    const ax = S.tgFrom === 'tip' || !(S.showTips && l._lw) ? l._px : l._lx + l._lw + 3, ay = l._py, bx = S.tgFrom === 'tip' ? X(r) : (show ? LX(r) - measure(disp(r.name), fs, fam, it, false) : X(r)) - 3, by = r._ty;   // from the end of its own name
+    const ax = S.tgFrom === 'tip' || !(S.showTips && l._lw) ? l._px : l._lx + l._lw + 3, ay = l._py, bx = S.tgFrom === 'tip' ? X(r) : (show ? LX(r) - measure(disp(nm(r)), fs, fam, it, false) : X(r)) - 3, by = r._ty;   // from the end of its own name
     const ov = (S.tgLines || {})[k] || {};
     let c1 = null, c2 = null;
     if (S.tgColorBy === 'highlight') { c1 = hl(l); c2 = hl(r); } else if (S.tgColorBy === 'branch') { c1 = brc1(l); c2 = inh.get(r); }
@@ -7611,7 +7622,7 @@ function imageHits() {
   }
   const m = selImg != null && imgById(selImg);
   tgGeom.forEach(g => { if (g.k === tgSel) front.push(`<path d="${g.d}" fill="none" stroke="#3E63DD" stroke-opacity=".45" stroke-width="${f2(6 / k)}" stroke-linecap="round" pointer-events="none"/>`); });   // the line whose menu is open
-  tgGeom.forEach((g, i) => front.push(`<path d="${g.d}" fill="none" stroke="#000" stroke-opacity="0" stroke-width="${f2(8 / k)}" pointer-events="stroke" data-tgl="${i}" style="cursor:pointer"><title>${esc(disp(g.name))}: click to select it, right-click for its look</title></path>`));   // the lines of a tanglegram
+  tgGeom.forEach((g, i) => front.push(`<path d="${g.d}" fill="none" stroke="#000" stroke-opacity="0" stroke-width="${f2(8 / k)}" pointer-events="stroke" data-tgl="${i}" style="cursor:pointer"><title>${esc(disp(nm(g)))}: click to select it, right-click for its look</title></path>`));   // the lines of a tanglegram
   for (const x of figImages) if (isLightM(x) && x.id !== selImg) { const tr = x.rot ? ` transform="rotate(${f2(x.rot)} ${f2(x.x + x.w / 2)} ${f2(x.y + x.h / 2)})"` : ''; front.push(`<g${tr} pointer-events="none"><rect x="${f2(x.x)}" y="${f2(x.y)}" width="${f2(x.w)}" height="${f2(x.h)}" fill="none" stroke="#9AA3AE" stroke-width="${f2(1.2 / k)}" stroke-dasharray="${f2(5 / k)} ${f2(4 / k)}"/></g>`); }   // lightened: a grey dashed frame until shown again
   if (m && isLightM(m)) { const tr = m.rot ? ` transform="rotate(${f2(m.rot)} ${f2(m.x + m.w / 2)} ${f2(m.y + m.h / 2)})"` : ''; front.push(`<g${tr} pointer-events="none"><rect x="${f2(m.x)}" y="${f2(m.y)}" width="${f2(m.w)}" height="${f2(m.h)}" fill="none" stroke="#27408B" stroke-width="${f2(1.5 / k)}" stroke-dasharray="${f2(5 / k)} ${f2(4 / k)}"/></g>`); }   // lightened: moved only, no handles
   else if (m) {
@@ -7790,7 +7801,7 @@ function openCatPop(cx, cy, keep) {
       const o = (settings.catCell || {})[selCell] || {}, S = settings;
       const segB = [['', 'Default'], ['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted'], ['none', 'None']].map(([a, b]) => `<button type="button" data-v="${a}" aria-pressed="${(o.bs ?? '') === a}">${b}</button>`).join('');
       const st = o.bs ?? S.catBorderStyle, off = st === 'none';
-      return `<div class="part"><b>This shape: ${esc(disp(tip.name))}</b>
+      return `<div class="part"><b>This shape: ${esc(disp(nm(tip)))}</b>
       <div class="grp"><span>Border</span><div class="seg" data-cbs="1">${segB}</div></div>
       <div class="grp${off ? ' off' : ''}"><span>Border color</span>${swatches('catcb', PALETTE, o.bc || S.catBorderColor, off)}</div>
       <div class="kv${off ? ' off' : ''}"><span>Border width</span><span class="numwrap"><input class="num boxed" type="number" step="any" data-cb="bw" value="${o.bw ?? ''}" placeholder="${S.catBorderWidth}"${off ? ' disabled' : ''}><span class="u">px</span></span></div>
@@ -8056,7 +8067,7 @@ const PAGE_SORT = () => [...(settings.pages || [])].sort((a, b) => (a.s0 ?? 0) -
 // Number of a page, from the top.
 function pageNumber(id) { return PAGE_SORT().findIndex(p => p.id === id) + 1; }
 // Name of the tip in a row.
-function rowName(slot) { const id = pageRows && pageRows.owners[slot], n = id != null && nodeById.get(id); return n ? disp(n.name || (n.children.length ? 'collapsed clade' : '')) : ''; }
+function rowName(slot) { const id = pageRows && pageRows.owners[slot], n = id != null && nodeById.get(id); return n ? disp(nm(n) || (n.children.length ? 'collapsed clade' : '')) : ''; }
 // The page that already holds some of these rows, if any.
 function overlapsPage(s0, s1, skipId) { return PAGE_SORT().find(p => p.id !== skipId && !(s1 < p.s0 || s0 > p.s1)); }
 // Adds a page over a range of rows.
@@ -8275,7 +8286,7 @@ async function exportPages(fmt) {
   try {
     if (fmt === 'pdf') {
       const imgs = await pdfImageData(list.map(p => p.svg).join(''));
-      saveFile(fname, new Blob([svgToPdf(list.map(p => ({ svg: p.svg, ptW: p.w * ptScale })), null, imgs)], { type: 'application/pdf' }));
+      saveFile(fname, new Blob([await svgToPdf(list.map(p => ({ svg: p.svg, ptW: p.w * ptScale })), null, imgs)], { type: 'application/pdf' }));
     } else if (fmt === 'svg') {
       saveFile(fname, zipFiles(list.map((p, i) => ({ name: `page-${i + 1}.svg`, data: new TextEncoder().encode(p.svg) }))));
     } else if (fmt === 'tif') {
@@ -8615,7 +8626,7 @@ svg.addEventListener('pointerdown', e => {
 
 /* ================= Information on hover (button at the bottom of the panel) ================= */
 function nodeInfo(n) {
-  const title = n.children.length ? (n.name && !isSupport(n.name) ? disp(n.name) : n.parent ? 'Internal node' : 'Root') : disp(n.name || 'Tip');
+  const title = n.children.length ? (n.name && !isSupport(n.name) ? disp(nm(n)) : n.parent ? 'Internal node' : 'Root') : disp(nm(n) || 'Tip');
   const parts = [n.children.length ? leafCount(n) + ' tips' : 'Tip'];
   if (n.len != null) parts.push('branch ' + fmtNum(n.len));
   const sv = n.children.length ? supValue(n) : null;
@@ -8674,10 +8685,10 @@ function renameFromText(text) {
   const pairs = rows.filter(r => r.length >= 2 && r[0] && r[1]);
   if (!pairs.length) return toast('The file needs two columns: the current name and the new name');
   const norm = v => String(v).replace(/_/g, ' ').trim().toLowerCase();
-  const tips = leaves(tree), byName = new Map(tips.map(n => [norm(n.name || ''), n]));
+  const tips = leaves(tree), byName = new Map([...tips.map(n => [norm(n.name || ''), n]), ...tips.filter(n => n.label).map(n => [norm(n.label), n])]);   // the name shown or the original one
   const hits = pairs.filter(([a]) => byName.has(norm(a)));
   if (!hits.length) return toast('None of the names in the file matched a tip');
-  mutate(() => { for (const [a, b] of hits) byName.get(norm(a)).name = b; });
+  mutate(() => { for (const [a, b] of hits) { const n = byName.get(norm(a)); n.label = b !== n.name ? b : null; } });   // new labels: the original names keep the links to the data
   const header = !byName.has(norm(pairs[0][0])) ? 1 : 0;   // an unmatched first row is taken as the column titles
   const missing = pairs.length - header - hits.length;
   toast(`${hits.length} ${hits.length === 1 ? 'tip' : 'tips'} renamed${missing ? `, ${missing} ${missing === 1 ? 'name was' : 'names were'} not found` : ''}`);
@@ -8783,7 +8794,7 @@ function altNames(S) {
     const m = tableIndex(t);
     for (const n of leaves(tree)) { const r = m.get(normTip(n.name || '')); const v = r && r[ci] != null ? String(r[ci]).trim() : ''; if (v) out.set(n, v); }
   }
-  if (S.labelSrcBoth) for (const [n, v] of out) out.set(n, `${disp(n.name || '')}  ${v}`);   // the name, then the value
+  if (S.labelSrcBoth) for (const [n, v] of out) out.set(n, `${disp(nm(n) || '')}  ${v}`);   // the name, then the value
   return out;
 }
 
@@ -8898,12 +8909,12 @@ async function exportTree(kind) {
   };
   const w = (n, root) => {
     let s = n.children.length ? '(' + n.children.map(c => w(c, false)).join(',') + ')' : '';
-    if (n.name) s += q(n.name);
+    if (nm(n)) s += q(nm(n));   // the names shown
     s += ann(n);
     if (n.len != null && !root) s += ':' + (+n.len.toPrecision(10));
     return s;
   };
-  const tips = leaves(tree).map(n => q(n.name || ''));
+  const tips = leaves(tree).map(n => q(nm(n) || ''));
   saveFile(fname, `#NEXUS\nbegin taxa;\n\tdimensions ntax=${tips.length};\n\ttaxlabels\n${tips.map(t => '\t' + t).join('\n')}\n;\nend;\n\nbegin trees;\n\ttree tree_1 = [&R] ${w(tree, true)};\nend;\n`);
 }
 
@@ -10665,9 +10676,9 @@ function fillMrcaList() {
   const box = $('mrcaList'), q = normTip($('mrcaFind').value);
   if (!tree) { box.innerHTML = '<p class="hint">Load a tree first.</p>'; return; }
   const tips = []; walkAll(tree, x => { if (!x.children.length) tips.push(x); });
-  tips.sort((a, b) => disp(a.name).localeCompare(disp(b.name)));
-  const shown = tips.filter(x => !q || normTip(x.name).includes(q)).slice(0, 400);
-  box.innerHTML = shown.length ? shown.map(x => `<label class="mrcaitem"><input type="checkbox" data-id="${x.id}"${mrcaPick.has(x.id) ? ' checked' : ''}><span>${esc(disp(x.name))}</span></label>`).join('') : '<p class="hint">No tip matches.</p>';
+  tips.sort((a, b) => disp(nm(a)).localeCompare(disp(nm(b))));
+  const shown = tips.filter(x => !q || normTip(nm(x)).includes(q) || normTip(x.name).includes(q)).slice(0, 400);
+  box.innerHTML = shown.length ? shown.map(x => `<label class="mrcaitem"><input type="checkbox" data-id="${x.id}"${mrcaPick.has(x.id) ? ' checked' : ''}><span>${esc(disp(nm(x)))}</span></label>`).join('') : '<p class="hint">No tip matches.</p>';
   box.querySelectorAll('input').forEach(cb => cb.onchange = () => {
     const id = +cb.dataset.id;
     if (cb.checked) mrcaPick.add(id); else mrcaPick.delete(id);
@@ -10677,7 +10688,7 @@ function fillMrcaList() {
       mrcaPick.clear(); closeMrca();
       if (!m) return;
       selOne(m.id, 'clade'); closePop(); render();
-      toast(`Clade of ${disp(a.name)} and ${disp(b.name)}: ${plural(leafCount(m), 'tip', 'tips')}`);
+      toast(`Clade of ${disp(nm(a))} and ${disp(nm(b))}: ${plural(leafCount(m), 'tip', 'tips')}`);
     }
   });
 }
