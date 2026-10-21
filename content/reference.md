@@ -73,6 +73,18 @@ Before reading a file with more than 10,000 trees, or any tree file larger than 
 
 With unrooted trees (no clock), the branch lengths of the majority-rule, strict and maximum compatible trees are the mean length of each branch over the trees that contain it, as in MrBayes.  
 
+### › Reading properties
+
+For files with several trees: how tree2go keeps its copy of each tree (used to show another tree, pick the MCC or MAP tree, draw the tree cloud and export the set). They take effect with the next file opened. Supports, ages and summary trees are computed from the file at full precision.
+
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
+|:---|:---|:---|:---|:---|
+| `Significant digits of branch lengths`¹ | Precision of the branch lengths in the copy kept of each tree. | 1 to 10 | 6 |  |
+| `Keep the trees in a compact binary form`² | Keeps each tree as numbers (topology, branch lengths, tip numbers and supports) instead of text, which takes about half the memory. | On<br>Off | On |  |
+
+¹ Fewer than 6 digits can round short branches, or make them zero, while more digits keep more precision but take more memory and time with many trees.  
+² Without it each tree is kept as text, as in earlier versions. Networks are always kept as text.  
+
 ## Layout
 
 The shape of the tree and its overall size.
@@ -410,7 +422,7 @@ Extinct tips and grafted fossils. Mark a tip as extinct, or add a fossil lineage
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Show tips on zero-length branches as sampled ancestors`¹ | Draws sampled ancestors of fossilized birth-death trees as dots on their branch. A tree counts as drawn in time when several living tips end together at the present, or, for trees of fossils only, when it has tips on branches of exactly zero or the node heights of BEAST. In a tree of substitutions a zero-length tip is just a very short branch, so the option is greyed out. | On<br>Off | On | The tree is drawn in time |
+| `Show tips on zero-length branches as sampled ancestors`¹ | Draws sampled ancestors of fossilized birth-death trees as dots on their branch. A tree counts as drawn in time when several living tips end together at the present, or, for trees of fossils only, when it has tips on branches of exactly zero, the node heights of BEAST, or the names BEAST gives the trees of its posterior sample (`STATE_0`, `STATE_1000`…). In a tree of substitutions a zero-length tip is just a very short branch, so the option is greyed out. | On<br>Off | On | The tree is drawn in time |
 | `Dot size` |  | 0.5 to 10 px | 3 px | `Show tips on zero-length branches as sampled ancestors` is **On**, on a tree drawn in time |
 | `Dot color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Show tips on zero-length branches as sampled ancestors` is **On**, on a tree drawn in time |
 | `Names` | Side of the branch where their names go. | Above the branch<br>Below the branch | Above the branch | `Show tips on zero-length branches as sampled ancestors` is **On**, on a tree drawn in time |
