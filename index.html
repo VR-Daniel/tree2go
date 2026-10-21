@@ -905,13 +905,14 @@ function fmtName(s) {
   return s;
 }
 // Writes a tree (or clade) back to Newick with names, internal labels and branch lengths.
+let nwkDigits = 10;   // significant digits of branch lengths written by toNewick
 function toNewick(root, original) {   // original: renamed tips written with their original names
   function w(n, isRoot) {
     let str = '';
     if (n.children.length) str = '(' + n.children.map(c => w(c, false)).join(',') + ')';
     str += fmtName(original ? n.name : nm(n));   // the name shown (a renamed tip, its new name), or the original one
     let len = n.len;
-    const num = x => +x.toPrecision(10), split = t => len == null ? [null, null] : [len * (1 - t), len * t];
+    const num = x => +x.toPrecision(nwkDigits), split = t => len == null ? [null, null] : [len * (1 - t), len * t];
     // a donor point splits the branch: the node below it, and beside it the bare #label with its gamma
     const annot = m => m && Object.keys(m).length ? '[&' + Object.entries(m).map(([k, v]) => `${k}=${Array.isArray(v) ? '{' + v.join(',') + '}' : typeof v === 'string' ? `"${v}"` : v}`).join(',') + ']' : '';
     for (const d of n.don || []) { const [lo, hi] = split(d.t ?? 0.5); str = `(${str}${lo != null && !d.nl ? ':' + num(lo) : ''},#${d.k}${annot(d.meta)}:${d.len ?? ''}:${d.sup ?? ''}:${d.g ?? ''})`; len = hi; }
@@ -1254,6 +1255,7 @@ const dotStops = S => palStops(S.dotPalette, [S.dotLow, S.dotHigh], S.dotRev, S.
 const GEO_MODELS = [['PALEOMAP', 'Scotese 2016 (PALEOMAP)'], ['MULLER2019', 'Müller et al. (2019)'], ['MERDITH2021', 'Merdith et al. (2021)']];
 const GEO_PROJ = [['equalearth', 'Equal Earth (EPSG:8857)'], ['equirect', 'Equirectangular (EPSG:4326)'], ['mercator', 'Mercator (EPSG:3857)'], ['mollweide', 'Mollweide (ESRI:54009)']];
 const DEFAULTS = {
+  readDigits: 6, readBinary: true,   // reading properties of files with several trees
   layout: 'rect', useLengths: true, width: 700, spacing: 18, radius: 320, innerRadius: 0, circSpan: 360, fanSpan: 180, rotation: 0, rootStub: 0,
   lineWidth: 1, lineColor: '#1f1f1f', lineCap: 'round', branchAngle: 90, branchRound: 0, lineStyle: 'solid', lineDash: 5, lineGap: 3,
   fossilDagger: true, extinctBranch: 'dashed', xbDash: true, fossilAuto: true, fossilAutoTol: 0.5, fossilStyle: 'dashed',
@@ -1368,7 +1370,12 @@ const DEC_OPTS = [0, 1, 2, 3, 4, 5, 6].map(x => [x, String(x)]);
      refit    the view is fitted again after a change (the size of the figure changed) */
 const SECTIONS_RAW = [
   { title: 'Tree', open: true, custom: 'data', items: [
-    { type: 'custom', build: treeSetBox }
+    { type: 'custom', build: treeSetBox },
+    { type: 'head', label: 'Reading properties' },
+    { k: 'readDigits', type: 'range', label: 'Significant digits of branch lengths', min: 1, max: 10, step: 1, hmin: 1, hmax: 10 },
+    { type: 'hint', text: s => (s.readDigits ?? 6) < 6 ? 'Fewer than 6 digits can round short branches, or make them zero, in the trees kept from the file.' : (s.readDigits ?? 6) > 6 ? 'More digits keep more precision, but take more memory and time with many trees.' : '' },
+    { k: 'readBinary', type: 'check', label: 'Keep the trees in a compact binary form' },
+    { type: 'hint', text: s => 'For files with several trees. They apply to the copy kept of each tree (to show another tree, pick the MCC or MAP tree, draw the tree cloud or export the set) and take effect with the next file you open. Supports, ages and summary trees are computed from the file at full precision.' + (s.readBinary === false ? ' Without the binary form each tree is kept as text, as in earlier versions.' : '') }
   ]},
   { title: 'Layout', items: [
     { k: 'layout', type: 'seg', opts: [['rect', 'Rectangular'], ['circular', 'Circular'], ['fan', 'Fan'], ['unrooted', 'Unrooted']], refit: true, enable: () => !figImages.some(m => !m.geo) },   // maps do not lock the shape: their lines follow the tips on any layout
@@ -2986,7 +2993,8 @@ function nodeHeights(t) {   // height of every node above the youngest tip, if t
 // A time tree (clock or tip-dated, such as FBD): several tips, at least 10% of them, end at the same, greatest distance
 // from the root, where the present is. In a tree of substitutions (no clock) the tips end at scattered distances.
 // Trees of fossils only have no tips at the present: their sampled ancestors (tips on branches of exactly zero, as the
-// FBD model writes them) or the node heights written by BEAST tell them apart.
+// FBD model writes them), the node heights written by BEAST, or the names BEAST gives the trees of its posterior sample
+// (tree STATE_0, STATE_1000…, which carry no heights), tell them apart. No program without a clock names trees so.
 function isTimeTree(t) {
   if (!t) return false;
   const ds = []; let ok = true;
@@ -3000,7 +3008,8 @@ function isTimeTree(t) {
     if (!x.children.length && x.parent && x.len === 0 && x.parent.children.some(c => c !== x && !(c.len === 0 && !c.children.length))) sa = true;
     if (x.meta && x.meta.height != null) hb = true;
   });
-  return mx > 0 && (sa || hb);
+  const beast = /^STATE_\d+$/i.test(t._name || '');   // a tree of the posterior sample of BEAST: always a time tree
+  return mx > 0 && (sa || hb || beast);
 }
 // sampled ancestors apply only to a tree drawn in time; otherwise their options stay on screen, greyed out
 const saAvail = s => !!tree && s.useLengths && treeInTime(tree);
@@ -3008,6 +3017,54 @@ function treeInTime(t) {
   if (!t) return false;
   if (treeSet && treeSet.dated === false) return false;   // the set was read as trees of substitutions (or unrooted)
   return isTimeTree(t);
+}
+// Compact binary copy of a tree of a set, in preorder, with the smallest arrays that fit:
+// the number of children of every node (1 byte, or 2 in huge polytomies), the branch lengths (Float32, about 7
+// significant digits, or Float64 above 7), the tips as numbers into the shared list of names (2 bytes, or 4 beyond
+// 65,535 names), and the labels of internal nodes: whole supports from 0 to 254 in 1 byte, other numbers in a Float32
+// array, text only when they are not numbers. Tips must already carry their numbers as names. Networks keep the text form.
+const treeHasNetwork = t => { let y = false; walkAll(t, x => { if ((x.don && x.don.length) || (x.hyb && x.hyb.length)) y = true; }); return y; };
+const NUM_RE = /^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/;
+function encodeTreeBin(t, dg) {
+  const nodes = []; walkAll(t, x => nodes.push(x));
+  const n = nodes.length, f64 = dg > 7, inner = nodes.filter(x => x.children.length), leafN = n - inner.length;
+  const maxK = Math.max(...inner.map(x => x.children.length), 0), maxT = Math.max(...nodes.filter(x => !x.children.length).map(x => +x.name), 0);
+  const kids = maxK < 256 ? new Uint8Array(n) : new Uint16Array(n), L = f64 ? new Float64Array(n) : new Float32Array(n);
+  const tips = maxT < 65536 ? new Uint16Array(leafN) : new Uint32Array(leafN);
+  const labs = inner.map(x => x.name || ''), anyLab = labs.some(Boolean), allNum = labs.every(v => !v || NUM_RE.test(v));
+  const small = anyLab && allNum && labs.every(v => !v || (Number.isInteger(+v) && +v >= 0 && +v <= 254));
+  const sv = !anyLab || !allNum ? null : small ? new Uint8Array(inner.length).fill(255) : new Float32Array(inner.length).fill(NaN);
+  const lab = anyLab && !allNum ? labs : null;
+  let ti = 0, ii = 0;
+  nodes.forEach((x, i) => {
+    kids[i] = x.children.length;
+    L[i] = x.len == null ? NaN : +(+x.len).toPrecision(dg);
+    if (!x.children.length) tips[ti++] = +x.name;
+    else { if (sv && labs[ii]) sv[ii] = +labs[ii]; ii++; }
+  });
+  return { kids, L, tips, sv, lab, dg, small };
+}
+function decodeTreeBin(b, names) {
+  const { kids, L, tips, sv, lab, dg, small } = b; let p = 0, tp = 0, ip = 0;
+  const node = () => {
+    const i = p++, x = mk(), v = L[i];
+    x.len = Number.isNaN(v) ? null : +v.toPrecision(dg);
+    if (!kids[i]) x.name = names[tips[tp++]];
+    else {
+      const j = ip++;
+      if (sv) { const w = sv[j]; if (small ? w !== 255 : !Number.isNaN(w)) x.name = String(small ? w : +w.toPrecision(7)); }
+      else if (lab && lab[j]) x.name = lab[j];
+    }
+    return x;
+  };
+  const root = node(), st = kids[0] ? [[root, kids[0]]] : [];   // without recursion, so very deep trees are safe
+  while (st.length) {
+    const top = st[st.length - 1], c = node(), k = kids[p - 1];
+    c.parent = top[0]; top[0].children.push(c);
+    if (--top[1] === 0) st.pop();
+    if (k) st.push([c, k]);
+  }
+  return root;
 }
 function compactTrees(all) {
   // unrooted trees (MrBayes without a clock, [&U], or a basal trichotomy): splits instead of rooted clades
@@ -3035,10 +3092,13 @@ function compactTrees(all) {
       if (x.children.length && x.parent) { const v = treeSup(x); if (v != null) sp[i] = v; }
       i++;
     }
-    const lv = leaves(t), orig = lv.map(l => l.name);
+    const lv = leaves(t), orig = lv.map(l => l.name), dg = clamp(Math.round(settings.readDigits || 6), 1, 10);
     lv.forEach(l => { let j = nameIdx.get(l.name); if (j == null) { j = names.length; names.push(l.name); nameIdx.set(l.name, j); } l.name = String(j); });
-    const cnwk = toNewick(t, true); lv.forEach((l, q) => { l.name = orig[q]; });
-    const rec = { cnwk, names, _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i) };
+    let cnwk = null, bin = null;
+    if (settings.readBinary !== false && !treeHasNetwork(t)) bin = encodeTreeBin(t, dg);
+    else { nwkDigits = dg; try { cnwk = toNewick(t, true); } finally { nwkDigits = 10; } }
+    lv.forEach((l, q) => { l.name = orig[q]; });
+    const rec = { cnwk, bin, names, _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i) };
     Object.defineProperty(rec, 'nwk', { get() { return toNewick(treeOfRec(this), true); } });   // the full Newick, rebuilt only when asked (export, project)
     recs.push(rec);
   }
@@ -3063,7 +3123,7 @@ function aggregateTrees(C, name, burnin = 0) {
 const summarizeTrees = (all, name, burnin = 0) => aggregateTrees(compactTrees(all), name, burnin);
 // Rebuilds one sampled tree from its compact record.
 // a tree of the set: its compact Newick with numbered tips, given back its names
-const treeOfRec = r => { if (!r.cnwk) return parseNewick(r.nwk); const t = parseNewick(r.cnwk); for (const l of leaves(t)) { const j = +l.name; if (Number.isInteger(j) && r.names[j] != null) l.name = r.names[j]; } return t; };
+const treeOfRec = r => { if (r.bin) return decodeTreeBin(r.bin, r.names); if (!r.cnwk) return parseNewick(r.nwk); const t = parseNewick(r.cnwk); for (const l of leaves(t)) { const j = +l.name; if (Number.isInteger(j) && r.names[j] != null) l.name = r.names[j]; } return t; };
 // The summary of a tree set as plain data, to keep it between sessions.
 const treeSetRecord = () => treeSet && { name: treeSet.name, count: treeSet.count, total: treeSet.total, burnin: treeSet.burnin, hasLen: treeSet.hasLen, unrooted: !!treeSet.unrooted, ref: treeSet.ref || null, tot: treeSet.tot || null, clades: [...treeSet.clades].map(([k, o]) => [k, o.n, o.ages, o.lens || [], o.sups || []]) };
 // Rebuilds a tree set summary from saved data.
@@ -3202,7 +3262,7 @@ function refreshTreeSetBox() {
 // loaded so they can be used again, but their options are reset too. Images belong to the old figure and go.
 function resetForNewTree() {
   if (tree) pushUndo(true);
-  settings = freshSettings({ dataTables: settings.dataTables, pieData: settings.pieData, pieColors: settings.pieColors });   // attached files stay: tables and pie charts
+  settings = freshSettings({ dataTables: settings.dataTables, pieData: settings.pieData, pieColors: settings.pieColors, readDigits: settings.readDigits, readBinary: settings.readBinary });   // attached files stay: tables and pie charts
   figImages = []; selImg = null; selCat = selCell = null; persistImages(); refreshImageList();
   buildSide();
 }
