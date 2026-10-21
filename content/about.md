@@ -8,7 +8,8 @@ As someone who spends a lot of time making figures look good, I’ve often run i
 
 tree2go runs directly in your browser, with or without an internet connection. It can be run directly from my [GitHub repository](https://github.com/VR-Daniel/tree2go) or downloaded as a single HTML file that opens like any regular webpage. It is fully self-contained, meaning it does not rely on any external resources to work. It is free, open, and unrestricted: there is no registration or subscription, and all of its features are available to everyone.
 
-At just ~815 KB, tree2Go is still nearly three times smaller than DOOM, one of the most iconic video games ever made (~2.2 MB). And if DOOM has been ported to ATMs, calculators, printers, and even pregnancy tests, then pretty much any modern piece of hardware should be able to run tree2Go.
+At just ~922 KB, tree2Go is still less than half the size of DOOM, one of the most iconic video games ever made (~2.2 MB). And if DOOM has been ported to ATMs, calculators, printers, and even pregnancy tests, then pretty much any modern piece of hardware should be able to run tree2Go.
+
 <p class="signature">Daniel</p>
 
 #### How to use it
@@ -27,4 +28,4 @@ If you use tree2go in a publication, we would appreciate it if you cite it as:
   Vásquez-Restrepo, J. D. & Simões, T. R. (2026). <i>tree2go: An interactive browser-based phylogenetic tree viewer and editor</i> [Software]. GitHub. <a href="https://github.com/VR-Daniel/tree2go">https://github.com/VR-Daniel/tree2go</a>
 </div>
 
-tree2go is shared under a <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA 4.0</a>: it can be shared and modified with credit to its authors, for non-commercial purposes only, and any modified version must be shared under the same license.
+tree2go source code is licensed under the <a href="https://www.gnu.org/licenses/agpl-3.0.html">GNU AGPL-3.0</a>. All related documentation, assets, and materials are shared under a <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA 4.0 International license (CC BY-NC-SA 4.0)</a>: they can be shared and modified with credit to the authors, for non-commercial purposes only, and any modified version must be shared under the same license.
