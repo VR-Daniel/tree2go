@@ -501,6 +501,7 @@ details.needtree > :not(summary){opacity:.45; pointer-events:none; user-select:n
 .benchrun{padding:14px 0; color:var(--ink)} .bench p{margin:0 0 10px}
 .benchgrid{display:grid; grid-template-columns:1fr auto auto; gap:6px 18px; margin:6px 0 12px; font-size:13px} .benchgrid b{font-weight:600; border-bottom:1px solid var(--line); padding-bottom:4px} .benchgrid span:nth-child(3n+2), .benchgrid span:nth-child(3n){text-align:right; font-variant-numeric:tabular-nums}
 .rsmsg{margin:14px 0 16px; line-height:1.45}
+.tpicker .rsnote{margin:0}
 .rsnote{margin:8px 0; padding:8px 10px; border-radius:8px; font-size:12.5px; line-height:1.45; color:var(--ink); background:rgba(200,85,61,.09); border:1px solid rgba(200,85,61,.32)}
 .rsform{display:grid; grid-template-columns:auto 1fr; gap:10px 12px; align-items:center; margin-top:12px} .rsform label{display:contents} .rsform label > :not(span:first-child){justify-self:start}
 .rsform .ctl{display:flex; align-items:center; gap:8px; flex-wrap:wrap} .rsform .num.boxed{width:90px; height:32px}
@@ -1619,19 +1620,20 @@ const SECTIONS_RAW = [
     { type: 'hint', text: () => 'Mark a tip as extinct, or add a fossil lineage to a branch, from the right-click menu.' },
     { k: 'fossilAuto', type: 'check', label: 'Tips that end before the present are extinct' },
     { type: 'hint', text: s => s.fossilAuto ? 'For dated trees. When the youngest tip is above 0, as in a fossil-only tree, every tip is extinct. Right-click a tip to change it by hand.' : '' },
-    { k: 'fossilAutoTol', type: 'range', label: 'Tolerance', min: 0, max: 5, step: 0.1, hmax: 50, unit: '% of the height', enable: s => s.fossilAuto, sub: true },
+    { k: 'fossilAutoTol', type: 'range', label: 'Tolerance (% of the tree height)', min: 0, max: 5, step: 0.1, hmax: 50, unit: '%', enable: s => s.fossilAuto, sub: true },
     { k: 'fossilDagger', type: 'check', label: 'Add † after the names of extinct tips and fossils' },
-    { type: 'head', label: 'Sampled ancestors' },
-    { k: 'saOn', type: 'check', label: 'Show tips on zero-length branches as sampled ancestors' },
-    { type: 'hint', text: s => s.saOn ? 'Fossilized birth-death analyses write sampled ancestors as tips on branches of length zero. Each one is drawn as a dot on the branch of its descendants, with its name next to it.' : '' },
-    { k: 'saDot', type: 'range', label: 'Dot size', min: 0.5, max: 10, step: 0.5, hmax: 100, unit: 'px', enable: s => s.saOn, sub: true },
-    { k: 'saColor', type: 'color', label: 'Dot color', enable: s => s.saOn, sub: true },
-    { k: 'saLabelPos', type: 'seg', label: 'Names', opts: [['above', 'Above the branch'], ['below', 'Below the branch']], enable: s => s.saOn, sub: true },
-    { k: 'saLabelAlign', type: 'seg', label: 'Align the names with their dot', opts: [['left', 'Left'], ['center', 'Center'], ['right', 'Right']], enable: s => s.saOn, sub: true },
-    { k: 'saLabelDy', type: 'number', label: 'Distance from the branch', min: -50, max: 200, step: 0.5, unit: 'px', enable: s => s.saOn, sub: true },
-    { type: 'hint', text: s => s.saOn ? 'Right-click the name of one sampled ancestor to move only that one, for example when it overlaps another name.' : '' },
     { k: 'extinctBranch', type: 'seg', label: 'Branches of extinct tips', opts: [['same', 'Same'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] },
-    { type: 'hint', text: () => 'Grafted fossil lineages are always drawn dashed, using the dash length and gap from Branches.' }
+    { type: 'hint', text: () => 'Grafted fossil lineages are always drawn dashed, using the dash length and gap from Branches.' },
+    { type: 'head', label: 'Sampled ancestors' },
+    { k: 'saOn', type: 'check', label: 'Show tips on zero-length branches as sampled ancestors', enable: s => saAvail(s), keepOff: s => !saAvail(s) },
+    { type: 'hint', text: s => tree && !(s.useLengths && treeInTime(tree)) ? 'Only for trees drawn in time, such as fossilized birth-death trees: in a tree of substitutions a zero-length tip is just a very short branch.' : '' },
+    { type: 'hint', text: s => s.saOn && saAvail(s) ? 'Fossilized birth-death analyses write sampled ancestors as tips on branches of length zero. Each one is drawn as a dot on the branch of its descendants, with its name next to it.' : '' },
+    { k: 'saDot', type: 'range', label: 'Dot size', min: 0.5, max: 10, step: 0.5, hmax: 100, unit: 'px', enable: s => s.saOn && saAvail(s), keepOff: s => !saAvail(s), sub: true },
+    { k: 'saColor', type: 'color', label: 'Dot color', enable: s => s.saOn && saAvail(s), keepOff: s => !saAvail(s), sub: true },
+    { k: 'saLabelPos', type: 'seg', label: 'Names', opts: [['above', 'Above the branch'], ['below', 'Below the branch']], enable: s => s.saOn && saAvail(s), keepOff: s => !saAvail(s), sub: true },
+    { k: 'saLabelAlign', type: 'seg', label: 'Align the names with their dot', opts: [['left', 'Left'], ['center', 'Center'], ['right', 'Right']], enable: s => s.saOn && saAvail(s), keepOff: s => !saAvail(s), sub: true },
+    { k: 'saLabelDy', type: 'number', label: 'Distance from the branch', min: -50, max: 200, step: 0.5, unit: 'px', enable: s => s.saOn && saAvail(s), keepOff: s => !saAvail(s), sub: true },
+    { type: 'hint', text: s => s.saOn && saAvail(s) ? 'Right-click the name of one sampled ancestor to move only that one, for example when it overlaps another name.' : '' }
   ]},
   { title: 'Phylogenetic networks', items: [
     { type: 'hint', text: s => hasNet() ? '' : 'Open a network in extended Newick (eNewick), as written by PhyloNet, SNaQ or Dendroscope. Reticulations are marked with #H (hybridization), #LGT (lateral gene transfer) or #R (recombination).' },
@@ -2301,7 +2303,7 @@ function refreshVisibility() {
     if (!row) continue;
     const on = it.enable ? !!it.enable(settings) : true;
     // an option that depends on another one that is off is hidden, so only what applies is on screen
-    row.hidden = (it.show ? !it.show(settings) : false) || (!on && !KEEP_OFF.has(it.k));
+    row.hidden = (it.show ? !it.show(settings) : false) || (!on && !KEEP_OFF.has(it.k) && !(it.keepOff && it.keepOff(settings)));
     row.classList.toggle('off', !on);
     const rb = row.querySelector('.rst'); if (rb) rb.classList.toggle('hide', sameVal(settings[it.k], DEFAULTS[it.k]));
     row.querySelectorAll('input,select,button:not(.rst)').forEach(el => el.disabled = !on || el.hasAttribute('data-lock'));
@@ -2981,11 +2983,38 @@ function nodeHeights(t) {   // height of every node above the youngest tip, if t
 }
 // Read every tree once: keep its text (to rebuild it when needed), the clades it contains (as numbers) and their ages.
 // The burn-in and every summary then work on these small arrays instead of on the whole trees.
+// A time tree (clock or tip-dated, such as FBD): several tips, at least 10% of them, end at the same, greatest distance
+// from the root, where the present is. In a tree of substitutions (no clock) the tips end at scattered distances.
+// Trees of fossils only have no tips at the present: their sampled ancestors (tips on branches of exactly zero, as the
+// FBD model writes them) or the node heights written by BEAST tell them apart.
+function isTimeTree(t) {
+  if (!t) return false;
+  const ds = []; let ok = true;
+  (function g(x, d) { if (!x.children.length) { ds.push(d); return; } for (const y of x.children) { if (y.len == null) { ok = false; return; } g(y, d + y.len); } })(t, 0);
+  if (!ok || ds.length < 3) return false;
+  const mx = Math.max(...ds), tol = Math.max(1e-9, mx * 1e-6), n = ds.filter(d => mx - d <= tol).length;
+  if (mx > 0 && n >= Math.max(3, ds.length * 0.1)) return true;
+  if (t.children.length !== 2) return false;
+  let sa = false, hb = false;
+  walkAll(t, x => {
+    if (!x.children.length && x.parent && x.len === 0 && x.parent.children.some(c => c !== x && !(c.len === 0 && !c.children.length))) sa = true;
+    if (x.meta && x.meta.height != null) hb = true;
+  });
+  return mx > 0 && (sa || hb);
+}
+// sampled ancestors apply only to a tree drawn in time; otherwise their options stay on screen, greyed out
+const saAvail = s => !!tree && s.useLengths && treeInTime(tree);
+function treeInTime(t) {
+  if (!t) return false;
+  if (treeSet && treeSet.dated === false) return false;   // the set was read as trees of substitutions (or unrooted)
+  return isTimeTree(t);
+}
 function compactTrees(all) {
   // unrooted trees (MrBayes without a clock, [&U], or a basal trichotomy): splits instead of rooted clades
   const unrooted = all.filter(t => t._unrooted || t.children.length >= 3).length > all.length / 2;
   const ref = unrooted ? leaves(all[0]).map(l => l.name).sort((a, b) => normTip(a) < normTip(b) ? -1 : 1)[0] : null;
   const keyIdx = new Map(), keyList = [], tipsOf = new Map(), recs = []; let hasLen = true;
+  const names = [], nameIdx = new Map();   // the tip names once; each tree keeps numbers in their place
   const tot = (() => { let a = 0, b = 0; const L = leaves(all[0]); for (const l of L) { const h = tipHash(l.name); a = (a + h[0]) >>> 0; b = (b + h[1]) >>> 0; } return [a, b, L.length]; })();
   for (const t of all) {
     const keys = treeCladeKeys(t, ref, tot), H = nodeHeights(t); if (!H) hasLen = false;
@@ -3006,9 +3035,15 @@ function compactTrees(all) {
       if (x.children.length && x.parent) { const v = treeSup(x); if (v != null) sp[i] = v; }
       i++;
     }
-    recs.push({ nwk: toNewick(t), _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i) });
+    const lv = leaves(t), orig = lv.map(l => l.name);
+    lv.forEach(l => { let j = nameIdx.get(l.name); if (j == null) { j = names.length; names.push(l.name); nameIdx.set(l.name, j); } l.name = String(j); });
+    const cnwk = toNewick(t, true); lv.forEach((l, q) => { l.name = orig[q]; });
+    const rec = { cnwk, names, _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i) };
+    Object.defineProperty(rec, 'nwk', { get() { return toNewick(treeOfRec(this), true); } });   // the full Newick, rebuilt only when asked (export, project)
+    recs.push(rec);
   }
-  return { recs, keyList, tipsOf, unrooted, ref, hasLen, tot };
+  const sample = all.slice(0, 50), dated = hasLen && !unrooted && sample.filter(isTimeTree).length > sample.length / 4;
+  return { recs, keyList, tipsOf, unrooted, ref, hasLen, tot, dated };
 }
 // Counts every clade (and collects its ages) over the trees after the burn-in, from the compact records.
 function aggregateTrees(C, name, burnin = 0) {
@@ -3022,12 +3057,13 @@ function aggregateTrees(C, name, burnin = 0) {
       if (r.sups && Number.isFinite(r.sups[i])) o.sups.push(+r.sups[i].toPrecision(6));
     }
   }
-  return { name, count: all.length - skip, total: all.length, burnin, skip, hasLen: C.hasLen, clades, trees: all, tips: C.tipsOf, unrooted: C.unrooted, ref: C.ref, tot: C.tot, C };
+  return { name, count: all.length - skip, total: all.length, burnin, skip, hasLen: C.hasLen, dated: C.dated, clades, trees: all, tips: C.tipsOf, unrooted: C.unrooted, ref: C.ref, tot: C.tot, C };
 }
 // Reads a list of trees and summarizes them (compactTrees, then aggregateTrees).
 const summarizeTrees = (all, name, burnin = 0) => aggregateTrees(compactTrees(all), name, burnin);
 // Rebuilds one sampled tree from its compact record.
-const treeOfRec = r => parseNewick(r.nwk);
+// a tree of the set: its compact Newick with numbered tips, given back its names
+const treeOfRec = r => { if (!r.cnwk) return parseNewick(r.nwk); const t = parseNewick(r.cnwk); for (const l of leaves(t)) { const j = +l.name; if (Number.isInteger(j) && r.names[j] != null) l.name = r.names[j]; } return t; };
 // The summary of a tree set as plain data, to keep it between sessions.
 const treeSetRecord = () => treeSet && { name: treeSet.name, count: treeSet.count, total: treeSet.total, burnin: treeSet.burnin, hasLen: treeSet.hasLen, unrooted: !!treeSet.unrooted, ref: treeSet.ref || null, tot: treeSet.tot || null, clades: [...treeSet.clades].map(([k, o]) => [k, o.n, o.ages, o.lens || [], o.sups || []]) };
 // Rebuilds a tree set summary from saved data.
@@ -3054,24 +3090,26 @@ function consensusTree(pct, compat) {
   }
   keep.sort((a, b) => b.tips.length - a.tips.length);
   const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+  const ageOf = a => T.heights === 'mean' ? mean(a) : median(a);   // same choice as the MCC tree; the violins mark the median
   const root = keep[0]; if (!root || root.tips.length < 3) throw new Error('No clade is shared by enough trees.');
-  const R = mk(); R._age = mean(root.o.ages);
+  const R = mk(); R._age = ageOf(root.o.ages);
   const owner = new Map(root.tips.map(t => [t, R]));
   for (const c of keep.slice(1)) {
     if (c.tips.length < 2) continue;
     const P = owner.get(c.tips[0]); if (!P) continue;
-    const N = mk(); N._age = mean(c.o.ages); N.parent = P; P.children.push(N);
+    const N = mk(); N._age = ageOf(c.o.ages); N.parent = P; P.children.push(N);
     for (const t of c.tips) owner.set(t, N);
   }
   for (const t of root.tips) {
     const P = owner.get(t), L = mk(t); L.parent = P; P.children.push(L);
-    const tk = cladeKey(...tipHash(t), 1), o = T.clades.get(tk); L._age = o ? mean(o.ages) : 0;
+    const tk = cladeKey(...tipHash(t), 1), o = T.clades.get(tk); L._age = o ? ageOf(o.ages) : 0;
     if (o && o.lens && o.lens.length && o.lens.filter(v => v === 0).length > o.lens.length / 2) L._saKeep = true;
   }
   // sampled ancestors (zero-length tips in most trees) stay so, as in the MCC tree: their node takes their age
-  walkAll(R, x => { if (x._saKeep && x.parent) x.parent._age = x._age; });
-  if (T.hasLen && !T.unrooted) walkAll(R, x => { if (x.parent) x.len = Math.max(0, (x.parent._age ?? 0) - (x._age ?? 0)); });
-  else if (T.hasLen) { const keysR = treeCladeKeys(R, T.ref, T.tot); for (const [x, k] of keysR) if (x.parent) { const o = T.clades.get(k); x.len = o && o.lens && o.lens.length ? mean(o.lens) : 0; } }
+  if (T.dated !== false) walkAll(R, x => { if (x._saKeep && x.parent) x.parent._age = x._age; });
+  if (T.hasLen && !T.unrooted && T.dated !== false) walkAll(R, x => { if (x.parent) x.len = Math.max(0, (x.parent._age ?? 0) - (x._age ?? 0)); });
+  else if (T.hasLen) { const keysR = treeCladeKeys(R, T.unrooted ? T.ref : null, T.tot); for (const [x, k] of keysR) if (x.parent) { const o = T.clades.get(k); x.len = o && o.lens && o.lens.length ? mean(o.lens) : 0; } }
   walkAll(R, x => { delete x._age; delete x._saKeep; });
   return R;
 }
@@ -3088,7 +3126,7 @@ function sampleSummary(kind, heights) {
   }
   if (!pick) throw new Error(kind === 'map' ? 'No posterior values for these trees. Attach the .log of BEAST2 or the .p file of MrBayes.' : 'No tree to choose from.');
   const R = treeOfRec(pick);
-  if (kind === 'mcc' && T.hasLen) {
+  if (kind === 'mcc' && T.hasLen && T.dated !== false) {   // a tree of substitutions keeps the branch lengths of the chosen tree
     const age = new Map(), keys = treeCladeKeys(R, T.unrooted ? T.ref : null), avg = a => heights === 'mean' ? a.reduce((x, y) => x + y, 0) / a.length : hpdOf(a, 0.95).med;
     // sampled ancestors (tips on a zero-length branch in the chosen tree) stay sampled ancestors, as in TreeAnnotator:
     // the node they sit on takes their age, so their branch stays at zero
@@ -3122,22 +3160,28 @@ function refreshTreeSetBox() {
   const raw = !!treeSet.trees;
   d.innerHTML = `<div class="subhead">Several trees</div>
     <p class="hint">${esc(treeSet.name)}: ${plural(treeSet.total ?? treeSet.count, 'tree', 'trees')}${treeSet.unrooted ? ', unrooted (clades are read as splits, and node ages need a clock)' : treeSet.hasLen ? ', with branch lengths' : ''}${treeSet.burnin ? `, ${treeSet.count} used after the burn-in` : ''}.${raw ? '' : ' Open the file again to pick another tree, change the burn-in or build a consensus.'}</p>
-    ${treeSet.resample ? `<p class="rsnote">These ${treeSet.resample.kept.toLocaleString('en')} trees were resampled (${treeSet.resample.mode === 'random' ? `at random, seed ${treeSet.resample.seed}` : 'evenly spaced'}) from the ${treeSet.resample.from.toLocaleString('en')} left after a burn-in of ${treeSet.resample.burnin}% of ${treeSet.resample.total.toLocaleString('en')} trees. A burn-in here would drop some of the trees kept.</p>` : ''}
-    <div class="row${raw ? '' : ' off'}"><label for="tsBurn">Burn-in</label><span class="numwrap"><input class="num" id="tsBurn" type="number" min="0" max="99" step="1" value="${treeSet.burnin || 0}"${raw ? '' : ' disabled'}><span class="u">%</span></span></div>
+    ${treeSet.resample ? `<p class="rsnote">These ${treeSet.resample.kept.toLocaleString('en')} trees were resampled (${treeSet.resample.mode === 'random' ? `at random, seed ${treeSet.resample.seed}` : 'evenly spaced'}) from the ${treeSet.resample.from.toLocaleString('en')} left after a burn-in of ${treeSet.resample.burnin}% of ${treeSet.resample.total.toLocaleString('en')} trees. A burn-in here would drop some of the trees kept.</p>${treeSet.burnin ? `<p class="rsnote">A second burn-in of ${treeSet.burnin}% was applied here: ${treeSet.count.toLocaleString('en')} of these ${treeSet.resample.kept.toLocaleString('en')} trees are used.</p>` : ''}` : ''}
+    <div class="row${raw ? '' : ' off'}"><label for="tsBurn">Burn-in</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsBurn" type="number" min="0" max="99" step="1" value="${treeSet.burnin || 0}"${raw ? '' : ' disabled'}><span class="u">%</span></span><button class="btn small" id="tsBurnApply"${raw ? '' : ' disabled'}>Apply</button></span></div>
     <p class="hint">The first trees of the file, left out of every summary: summary trees, support values and age densities.</p>
     <div class="row${raw ? '' : ' off'}"><label for="tsIdx">Show tree number</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsIdx" type="number" min="1" max="${treeSet.total ?? treeSet.count}" step="1" value="${treeSet.shown || 1}"${raw ? '' : ' disabled'}><span class="u"></span></span><button class="btn small" id="tsShow"${raw ? '' : ' disabled'}>Show</button></span></div>
     <div class="row${raw ? '' : ' off'}"><label for="tsKind">Summary tree</label><select id="tsKind"${raw ? '' : ' disabled'}>${[['majority', 'Majority rule'], ['strict', 'Strict consensus'], ['allcompat', 'Maximum compatible'], ['mcc', 'Maximum clade credibility (MCC)'], ['map', 'Maximum a posteriori (MAP)']].map(([v, l]) => `<option value="${v}"${(treeSet.mode || 'majority') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
     <p class="hint">${({ majority: 'Keeps the clades found in more than the chosen share of the trees.', strict: 'Keeps only the clades found in every tree.', allcompat: 'The majority-rule tree plus the less frequent clades that do not conflict with it (allcompat in MrBayes).', mcc: 'Maximum clade credibility: the sampled tree whose clades are, together, the most frequent, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.', map: treeSet.trees && treeSet.trees.some(t => treePost(t) != null) ? `Maximum a posteriori: the sampled tree with the highest posterior probability${mcmcLog ? ` (from ${mcmcLog.name})` : ''}.` : 'Maximum a posteriori: needs the posterior of each tree. BEAST writes it in the trees file, for BEAST2 or MrBayes attach the .log or .p file in Attachments.' })[treeSet.mode || 'majority']}</p>
     ${(treeSet.mode || 'majority') === 'majority' ? `<div class="row sub"><label for="tsPct">Clades in more than</label><span class="numwrap"><input class="num" id="tsPct" type="number" min="50" max="100" step="1" value="${treeSet.pct ?? 50}"><span>%</span></span></div>` : ''}
-    ${treeSet.mode === 'mcc' && treeSet.hasLen ? `<div class="row sub"><label for="tsHeights">Node ages</label><select id="tsHeights"><option value="median"${treeSet.heights !== 'mean' ? ' selected' : ''}>Median</option><option value="mean"${treeSet.heights === 'mean' ? ' selected' : ''}>Mean</option></select></div>` : ''}
+    ${treeSet.mode !== 'map' && treeSet.hasLen && !treeSet.unrooted ? `<div class="row sub"><label for="tsHeights">Node ages</label><select id="tsHeights"><option value="median"${treeSet.heights !== 'mean' ? ' selected' : ''}>Median</option><option value="mean"${treeSet.heights === 'mean' ? ' selected' : ''}>Mean</option></select></div>` : ''}
     <div class="btns"><button class="btn" id="tsBuild"${raw ? '' : ' disabled'}>Build summary tree</button></div>`;
   if (!raw) return;
   const idx = d.querySelector('#tsIdx');
   d.querySelector('#tsShow').onclick = () => { const i = clamp(Math.round(+idx.value || 1), 1, treeSet.total); treeSet.shown = i; showFromSet(treeOfRec(treeSet.trees[i - 1]), `Tree ${i} of ${treeSet.total}`); };
-  d.querySelector('#tsBurn').addEventListener('change', e => {
-    const b = clamp(Math.round(+e.target.value || 0), 0, 99), keep = { shown: treeSet.shown, mode: treeSet.mode, pct: treeSet.pct };
+  const burnIn = d.querySelector('#tsBurn');
+  burnIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); d.querySelector('#tsBurnApply').click(); } });
+  d.querySelector('#tsBurnApply').addEventListener('click', () => {
+    const e = { target: burnIn };
+    // what the set already was (how it was resampled when read, its options) is kept with the new burn-in
+    const b = clamp(Math.round(+e.target.value || 0), 0, 99), keep = { shown: treeSet.shown, mode: treeSet.mode, pct: treeSet.pct, heights: treeSet.heights, built: treeSet.built, resample: treeSet.resample, clockScaled: treeSet.clockScaled };
     treeSet = Object.assign(aggregateTrees(treeSet.C, treeSet.name, b), keep);
-    persistTreeSet(); render(); refreshTreeSetBox(); toast(`Burn-in ${b}%: ${plural(treeSet.count, 'tree', 'trees')} used`);
+    persistTreeSet(); render(); refreshTreeSetBox();
+    if (treeSet.shown == null && treeSet.built && treeSet.trees) { $('tsBuild').click(); toast(`Burn-in ${b}%: ${plural(treeSet.count, 'tree', 'trees')} used, summary tree rebuilt`); }
+    else toast(`Burn-in ${b}%: ${plural(treeSet.count, 'tree', 'trees')} used`);
   });
   idx.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); d.querySelector('#tsShow').click(); } });
   d.querySelector('#tsKind').onchange = e => { treeSet.mode = e.target.value; refreshTreeSetBox(); };
@@ -3146,7 +3190,7 @@ function refreshTreeSetBox() {
   d.querySelector('#tsBuild').onclick = () => {
     const m = treeSet.mode || 'majority', pct = m === 'strict' ? 100 : clamp(treeSet.pct ?? 50, 50, 100);
     try {
-      treeSet.shown = null;
+      treeSet.shown = null; treeSet.built = true;
       if (m === 'map' && !treeSet.trees.some(t => treePost(t) != null)) { toast('Attach the .log of BEAST2 or the .p file of MrBayes in Attachments to build the MAP tree.'); return; }
       if (m === 'mcc' || m === 'map') showFromSet(sampleSummary(m, treeSet.heights || 'median'), m === 'mcc' ? 'Maximum clade credibility tree' : 'Maximum a posteriori tree');
       else if (m === 'allcompat') showFromSet(consensusTree(50, true), 'Maximum compatible tree');
@@ -3168,7 +3212,7 @@ function countTreeLines(txt) { const nex = /begin\s+trees\s*;/i.test(txt), re = 
 // The window of the burn-in and resample, for a file of C.n trees: gives null (closed), false (load them all) or the choices.
 function resampleDialog(C) {
   const p = askConfirm({ title: `${C.n.toLocaleString('en')} trees`, ok: 'Load the trees kept', okClass: 'primary', cancel: 'Load them all', focusOk: true, dismiss: true,
-    html: `This file has many trees, and reading them all takes a while. A burn-in and a resample read only the trees kept.
+    html: `${C.mb ? `This file is large (${Math.round(C.mb).toLocaleString('en')} MB)` : 'This file has many trees'}, and reading them all takes a while. A burn-in and a resample read only the trees kept.
       <div class="rsform"><span>Burn-in</span><div class="ctl"><span class="numwrap"><input class="num boxed" type="number" id="rsBurn" min="0" max="99" step="1" value="25"><span class="unit">%</span></span></div>
       <span>Keep</span><div class="ctl"><select id="rsKind"><option value="n">A number of trees</option><option value="pct">A percentage</option></select><input class="num boxed" type="number" id="rsN" min="1" step="1" value="${Math.min(10000, Math.round(C.n * 0.75))}"></div>
       <span>Which trees</span><div class="ctl"><select id="rsMode"><option value="even">Evenly spaced</option><option value="random">At random</option></select><span id="rsSeedW" hidden>Seed <input class="num boxed" type="number" id="rsSeed" min="0" step="1" value="123"></span></div></div><p class="hint rsmsg" id="rsMsg"></p>` });
@@ -3195,7 +3239,7 @@ function pickTrees(list, o) {
   else pick = new Set([...Array(K)].map((_, i) => post[Math.floor(i * post.length / K)]));
   return { pick, K, from: post.length };
 }
-const noteResample = (o, total, r) => { if (treeSet) { treeSet.resample = { total, burnin: o.b, from: r.from, kept: r.K, mode: o.mode, seed: o.mode === 'random' ? o.seed : null }; persistTreeSet(); refreshTreeSetBox(); toast(`${r.K.toLocaleString('en')} of ${total.toLocaleString('en')} trees read`); } };
+const noteResample = (o, total, r) => { if (treeSet && !(o.b === 0 && r.K >= total)) { treeSet.resample = { total, burnin: o.b, from: r.from, kept: r.K, mode: o.mode, seed: o.mode === 'random' ? o.seed : null }; persistTreeSet(); refreshTreeSetBox(); toast(`${r.K.toLocaleString('en')} of ${total.toLocaleString('en')} trees read`); } };
 function loadTreesText(txt, name) {
   const C = txt.length > 2e5 ? countTreeLines(txt) : { n: 0 };
   if (C.n <= 10000) return loadTreesTextNow(txt, name);
@@ -3237,7 +3281,7 @@ async function readBigTrees(file) {
     const C = await streamTrees(file, null);
     if (!C.n) return toast('No trees were found in this file');
     const all = { b: 0, kind: 'pct', val: 100, mode: 'even', seed: 0 };
-    const o = C.n > 10000 ? await resampleDialog(C) : all;
+    const o = await resampleDialog({ ...C, mb });   // a file this large always offers a burn-in and a resample, whatever its number of trees
     if (o === null) return;   // closed: nothing is loaded
     const r = pickTrees([...Array(C.n).keys()], o || all);
     toast(`Reading ${r.K.toLocaleString('en')} trees…`);
@@ -3712,6 +3756,7 @@ function measure(txt, size, fam, italic, bold) {
 function computeLayout() {
   const S = settings, R = tree;
   const useLen = S.useLengths && hasLengths(R);
+  const timeTreeNow = useLen && treeInTime(R);   // sampled ancestors only make sense in a tree drawn in time
   const dflt = useLen ? 0 : 1;
   (function h(n) { let m = 0, md = 0; for (const c of n.children) { h(c); m = Math.max(m, c._fh + 1); md = Math.max(md, (useLen ? (c.len ?? 0) : 1) + c._md); } n._fh = m; n._md = md; })(R);
   (function vh(n) { if (n.collapsed || !n.children.length) { n._vh = n.collapsed ? n._fh : 0; return; } let m = 0; for (const c of n.children) { vh(c); m = Math.max(m, c._vh + 1); } n._vh = m; })(R);
@@ -3729,7 +3774,7 @@ function computeLayout() {
     const kids = tri ? [] : n.children;
     n._tri = tri;
     n._sa = false;
-    if (!kids.length && S.saOn && useLen && n.parent && n.len != null && Math.abs(n.len) < 1e-9 && n.parent.children.some(c => c !== n && !(c.len != null && Math.abs(c.len) < 1e-9 && !c.children.length))) {
+    if (!kids.length && S.saOn && useLen && timeTreeNow && n.parent && n.len != null && Math.abs(n.len) < 1e-9 && n.parent.children.some(c => c !== n && !(c.len != null && Math.abs(c.len) < 1e-9 && !c.children.length))) {
       n._sa = true; n._w = 0; n._dEnd = n._d; n._y = null;   // placed once its parent's row is known
     } else if (!kids.length) {
       const w = tri ? (stv(n, 'triH') ?? S.triSlots) : 1;
