@@ -52,17 +52,17 @@ In the panel, sections and their subsections (marked ›) fold, and the open one
 
 Load or paste a tree (Newick and NEXUS are recognized from their content, whatever the file extension). A file with many trees (for example a BEAST or MrBayes posterior) opens as a tree set. If another program has rewritten a file's annotations in a way that breaks them, tree2go shows where and offers to repair the keys when loading it. It matches the braces and rebuilds the key names. Values that were removed from the file, such as rates, cannot be recovered.
 
-Before reading a file with more than 10,000 trees, tree2go opens a window where you set a burn-in and how many trees to keep after it (a number or a percentage, evenly spaced or at random with a seed), so only the trees you keep are read. A sample of 10,000 trees is more than enough for summary trees. If you ask for more trees than remain after the burn-in, the window says so and does not load them. You can also read all the trees, and closing the window loads nothing. The Tree set part then shows, in a red box, how the trees were resampled, from how many, and with which burn-in, so that another burn-in is not applied by mistake. MrBayes clock trees carry their branch lengths in substitutions per site, with each tree's clock rate in its header `[&clockrate = …]`, tree2go divides each tree by its own clock rate, so the ages of the summary trees are in time units, as in the MrBayes consensus. Files larger than 150 MB are read in pieces: tree2go counts their trees first, then reads only the trees kept, so a posterior of hundreds of thousands of trees can be opened with a burn-in and a resample. Reading them all at once is limited by the memory of the browser.
+Before reading a file with more than 10,000 trees, or any tree file larger than 150 MB, tree2go opens a window where you set a burn-in and how many trees to keep after it (a number or a percentage, evenly spaced or at random with a seed), so only the trees you keep are read. A sample of 10,000 trees is more than enough for summary trees. If you ask for more trees than remain after the burn-in, the window says so and does not load them. You can also read all the trees, and closing the window loads nothing. The Tree set part then shows, in a red box, how the trees were resampled, from how many, and with which burn-in, so that another burn-in is not applied by mistake. MrBayes clock trees carry their branch lengths in substitutions per site, with each tree's clock rate in its header `[&clockrate = …]`, tree2go divides each tree by its own clock rate, so the ages of the summary trees are in time units, as in the MrBayes consensus. Files larger than 150 MB are read in pieces: tree2go counts their trees first, then reads only the trees kept, so a posterior of hundreds of thousands of trees can be opened with a burn-in and a resample. Reading them all at once is limited by the memory of the browser.
 
 `Test performance` times tree2go on this computer with a tree of 20,000 tips, 1,000 trees of 1,000 tips and 10,000 trees of 100 tips (about 38 MB of extra data to download). Its button shows in this section when the app is opened with `?bench=manual` at the end of its address (for example `https://vr-daniel.github.io/tree2go/?bench=manual`). It measures opening the tree, zooming in, zooming out and moving it (each until the view is sharp and still), rerooting, ladderizing and exporting it (Newick, SVG, PDF), and reading each tree set and building its majority-rule consensus and MCC tree. Each result is shown next to the time on the computer tree2go was tuned on. `Copy results` copies them as text. Your work is kept and comes back as it was. The test needs an internet connection.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Burn-in` | Share of the first trees of the chain left out of every summary. | 0 to 99% | 0% | A file with several trees is open |
+| `Burn-in` | Share of the first trees of the chain left out of every summary, applied with `Apply` (or `Enter`). Applying it rebuilds the summary tree on screen, so the tree and its age densities use the same trees. When the trees were already resampled while reading the file, the note on that resample stays, and a second note gives this second burn-in and the trees it leaves. | 0 to 99% | 0% | A file with several trees is open |
 | `Show tree number` | Shows one sampled tree of the file, by its position. | Number | 1 | A file with several trees is open |
 | `Summary tree` | How the trees of the file are summarized into one. | Majority rule¹<br>Strict consensus²<br>Maximum compatible³<br>Maximum clade credibility (MCC)⁴<br>Maximum a posteriori (MAP)⁵ | Majority rule | A file with several trees is open, **MAP** needs the posterior of each tree in the file (as a `.p` or `.log` file in Attachments) |
 | `Clades in more than` | Clades must be found in more than this share of the trees to be kept. | 50 to 100% | 50% | `Summary tree` is **Majority rule** |
-| `Node ages` | How the MCC tree gets its node ages from all the trees. | Median<br>Mean | Median | `Summary tree` is **MCC** |
+| `Node ages` | How the summary tree gets its node ages from all the trees. The median matches the center of the age densities drawn on the nodes. | Median<br>Mean | Median | `Summary tree` is not **MAP**, and the trees are dated and rooted |
 | `Build summary tree` | Builds and shows the chosen summary tree. |  |  | A file with several trees is open |
 
 ¹ Majority rule: keeps every clade found in more than the chosen share of the trees (more than half by default), and gives each one that share as its support.  
@@ -399,26 +399,26 @@ Extinct tips and grafted fossils. Mark a tip as extinct, or add a fossil lineage
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Tips that end before the present are extinct`¹ | In dated trees, marks tips that do not reach the present as fossils. | On<br>Off | On |  |
-| `Tolerance` | Tips this close to the present still count as living. | 0 to 5 % of the height | 0.5 % of the height | `Tips that end before the present are extinct` is **On** |
+| `Tolerance (% of the tree height)` | Tips this close to the present still count as living. | 0 to 5% | 0.5% | `Tips that end before the present are extinct` is **On** |
 | `Add † after the names of extinct tips and fossils` |  | On<br>Off | On |  |
+| `Branches of extinct tips`² | Line style of extinct lineages. | Same<br>Dashed<br>Dotted | Dashed |  |
 
 ¹ In dated trees, when the youngest tip is above 0, as in a fossil-only tree, every tip is extinct (`Right-click` a tip to change it by hand).  
+² Grafted fossil lineages are always drawn dashed, using the dash length and gap from Branches.  
 
 ### › Sampled ancestors
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
-| `Show tips on zero-length branches as sampled ancestors`¹ | Draws sampled ancestors of fossilized birth-death trees as dots on their branch. | On<br>Off | On |  |
-| `Dot size` |  | 0.5 to 10 px | 3 px | `Show tips on zero-length branches as sampled ancestors` is **On** |
-| `Dot color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Show tips on zero-length branches as sampled ancestors` is **On** |
-| `Names` | Side of the branch where their names go. | Above the branch<br>Below the branch | Above the branch | `Show tips on zero-length branches as sampled ancestors` is **On** |
-| `Align the names with their dot` |  | Left<br>Center<br>Right | Right | `Show tips on zero-length branches as sampled ancestors` is **On** |
-| `Distance from the branch`² | Space between the branch and the names. | −50 to 200 px | 0 px | `Show tips on zero-length branches as sampled ancestors` is **On** |
-| `Branches of extinct tips`³ | Line style of extinct lineages. | Same<br>Dashed<br>Dotted | Dashed |  |
+| `Show tips on zero-length branches as sampled ancestors`¹ | Draws sampled ancestors of fossilized birth-death trees as dots on their branch. A tree counts as drawn in time when several living tips end together at the present, or, for trees of fossils only, when it has tips on branches of exactly zero or the node heights of BEAST. In a tree of substitutions a zero-length tip is just a very short branch, so the option is greyed out. | On<br>Off | On | The tree is drawn in time |
+| `Dot size` |  | 0.5 to 10 px | 3 px | `Show tips on zero-length branches as sampled ancestors` is **On**, on a tree drawn in time |
+| `Dot color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Show tips on zero-length branches as sampled ancestors` is **On**, on a tree drawn in time |
+| `Names` | Side of the branch where their names go. | Above the branch<br>Below the branch | Above the branch | `Show tips on zero-length branches as sampled ancestors` is **On**, on a tree drawn in time |
+| `Align the names with their dot` |  | Left<br>Center<br>Right | Right | `Show tips on zero-length branches as sampled ancestors` is **On**, on a tree drawn in time |
+| `Distance from the branch`² | Space between the branch and the names. | −50 to 200 px | 0 px | `Show tips on zero-length branches as sampled ancestors` is **On**, on a tree drawn in time |
 
 ¹ Fossilized birth-death analyses write sampled ancestors as tips on branches of length zero. Each one is drawn as a dot on the branch of its descendants, with its name next to it.  
 ² `Right-click` the name of one sampled ancestor to move only that one, for example when it overlaps another name.  
-³ Grafted fossil lineages are always drawn dashed, using the dash length and gap from Branches.  
 
 ## Phylogenetic networks
 
