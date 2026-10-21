@@ -3133,7 +3133,67 @@ function persistTreeSet() {   // kept in the browser when it is free: the user d
   const run = () => persistTreeSetNow(); if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 2000 }); else setTimeout(run, 50);
 }
 function persistTreeSetNow() {
-  if (benchOn) return; try { if (treeSet) localStorage.setItem('tree2go-trees', JSON.stringify(treeSetRecord())); else localStorage.removeItem('tree2go-trees'); } catch (e) { toast('These trees are too large for the browser to keep after you close the app. Nothing is lost now: to keep them for next time, save a project with its trees.'); } }
+  if (benchOn) return;
+  if (!treeSet) { try { localStorage.removeItem('tree2go-trees'); } catch (e) { } dropKeptTrees(); return; }
+  const T = treeSet, warn = () => toast('These trees are too large for the browser to keep after you close the app. Nothing is lost now: to keep them for next time, save a project with its trees.');
+  let summaryKept = true; try { localStorage.setItem('tree2go-trees', JSON.stringify(treeSetRecord())); } catch (e) { summaryKept = false; try { localStorage.removeItem('tree2go-trees'); } catch (e2) { } }
+  (typeof CompressionStream !== 'undefined' ? keepTrees(T) : Promise.reject()).catch(() => { if (!summaryKept) warn(); });   // the warning only when nothing could be kept
+}
+// A tree set rebuilt from every one of its trees (as a project or the browser keeps them) and its state: burn-in, summary, resample.
+function setFromAll(all, S0 = {}) {
+  const trees = all.recs.map(([nwk, nm, post, un]) => { const t = parseNewick(nwk); if (nm) t._name = nm; if (post != null) t._post = post; if (un) t._unrooted = true; return t; });
+  const T = summarizeTrees(trees, all.name || 'Trees', S0.burnin || 0);   // the burn-in, as a percentage
+  Object.assign(T, { burnin: S0.burnin || T.burnin, mode: S0.mode || 'majority', pct: S0.pct ?? 50, shown: S0.shown || 1, resample: S0.resample || null, clockScaled: !!S0.clockScaled });
+  return T;
+}
+// Every tree of the set and its state, as a project keeps them.
+const allTreesOf = T => T && T.trees && T.trees.length > 1 ? { name: T.name, recs: T.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0]) } : null;
+const setState = T => ({ skip: T.skip || 0, burnin: T.burnin || 0, mode: T.mode, pct: T.pct, shown: T.shown, resample: T.resample || null, clockScaled: !!T.clockScaled });
+/* Every tree of a set, kept between sessions in IndexedDB. The summary of the set stays in localStorage, where it is read
+   at once; localStorage holds only a few MB, so the trees themselves (for the MCC tree, another burn-in or one tree of the
+   set) go to IndexedDB, compressed, as a project keeps them, and come back a moment after the app opens. One set only:
+   replaced by the next, removed with it. They are written once per set; its state (burn-in, summary) goes apart, small.
+   If IndexedDB is not there (some private windows), the app behaves as before. */
+const IDB = { name: 'tree2go', store: 'sets', key: 'set' }, setIds = new WeakMap();
+function idbDo(mode, fn) {
+  return new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error('no IndexedDB'));
+    const q = indexedDB.open(IDB.name, 1);
+    q.onupgradeneeded = () => q.result.createObjectStore(IDB.store);
+    q.onerror = () => rej(q.error);
+    q.onsuccess = () => { const db = q.result; let out;
+      try { const tx = db.transaction(IDB.store, mode), r = fn(tx.objectStore(IDB.store)); tx.oncomplete = () => { db.close(); res(r && r.result); }; tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); }; }
+      catch (e) { db.close(); rej(e); } };
+  });
+}
+const dropKeptTrees = () => { try { localStorage.removeItem('tree2go-trees-id'); localStorage.removeItem('tree2go-trees-state'); } catch (e) { } idbDo('readwrite', st => st.delete(IDB.key)).catch(() => { }); };
+async function keepTrees(T) {   // the trees of the set, once per set; its state at every change
+  const all = allTreesOf(T); if (!all) return true;   // a set read back from its summary only: what is kept stays
+  localStorage.setItem('tree2go-trees-state', JSON.stringify(setState(T)));
+  let id = setIds.get(T.trees);
+  if (id && localStorage.getItem('tree2go-trees-id') === id) return true;   // these trees are kept already
+  id = id || Date.now().toString(36) + Math.random().toString(36).slice(2, 8); setIds.set(T.trees, id);
+  const blob = await new Response(new Blob([JSON.stringify(all)]).stream().pipeThrough(new CompressionStream('gzip'))).blob();
+  if (treeSet !== T) return true;   // another set came meanwhile
+  await idbDo('readwrite', st => st.put({ id, blob }, IDB.key));
+  localStorage.setItem('tree2go-trees-id', id);
+  return true;
+}
+// After the app opens: the trees kept in IndexedDB, if they belong to the set of this session.
+async function restoreKeptTrees() {
+  let id = null, S0 = {}; try { id = localStorage.getItem('tree2go-trees-id'); S0 = JSON.parse(localStorage.getItem('tree2go-trees-state') || '{}'); } catch (e) { }
+  if (!id || !tree) return;
+  const t0 = tree, rec = await idbDo('readonly', st => st.get(IDB.key)).catch(() => null);
+  if (!rec || rec.id !== id || tree !== t0) return;   // not the trees of this set, or a new tree came meanwhile
+  try {
+    const all = JSON.parse(await new Response(rec.blob.stream().pipeThrough(new DecompressionStream('gzip'))).text());
+    if (tree !== t0) return;
+    toast(`Reading back the ${all.recs.length.toLocaleString('en')} trees of the set…`); await new Promise(r => setTimeout(r, 60));
+    const T = setFromAll(all, S0); setIds.set(T.trees, id); treeSet = T;
+    refreshTreeSetBox(); buildSide(); render();
+    toast(`The ${all.recs.length.toLocaleString('en')} trees of the set are back`);
+  } catch (e) { }
+}
 // Loads the tree set summary kept in the browser.
 function restoreTreeSet() { try { treeSet = treeSetRevive(JSON.parse(localStorage.getItem('tree2go-trees') || 'null')); } catch (e) { treeSet = null; } }
 // Independent copy of a tree.
@@ -3638,11 +3698,8 @@ function openProject(o) {
   smap = smapRevive(o.smap); persistSmap();
   treeSet = treeSetRevive(o.trees); treeSetRO = o.ro || null;
   if (o.treesAll && Array.isArray(o.treesAll.recs) && o.treesAll.recs.length > 1) {   // every tree of the set, saved with the project
-    try {
-      const trees = o.treesAll.recs.map(([nwk, nm, post, un]) => { const t = parseNewick(nwk); if (nm) t._name = nm; if (post != null) t._post = post; if (un) t._unrooted = true; return t; });
-      const S0 = o.treesAll.state || {}; treeSet = summarizeTrees(trees, o.treesAll.name || 'Trees', S0.burnin || 0);   // the burn-in, as a percentage
-      Object.assign(treeSet, { burnin: S0.burnin || treeSet.burnin, mode: S0.mode || 'majority', pct: S0.pct ?? 50, shown: S0.shown || 1, resample: S0.resample || null, clockScaled: !!S0.clockScaled });
-    } catch (e) { toast('The trees of the set could not be read back: the summary tree is kept'); }
+    try { treeSet = setFromAll(o.treesAll, o.treesAll.state); }
+    catch (e) { toast('The trees of the set could not be read back: the summary tree is kept'); }
   }
   persistTreeSet();
   if (o.tabs) for (const tb of o.tabs.tabs || []) if (tb.doc) tb.doc.images = (tb.doc.images || []).filter(m => m.src).map(m => { const { src, ...rest } = m; return { ...rest, sid: imgStoreAdd(src) }; });
@@ -10829,6 +10886,7 @@ function askConfirm(o = {}) {
 }
 $('clearBtn').onclick = async () => {
   if (!(await askConfirm())) return;
+  await idbDo('readwrite', st => st.delete(IDB.key)).catch(() => { });   // the trees kept between sessions too
   try { for (const k of Object.keys(localStorage)) if (/^tree2(go|paper)/.test(k)) localStorage.removeItem(k); } catch (e) { }
   location.reload();
 };
@@ -10876,6 +10934,7 @@ const had = restore();
 restoreImages();
 restoreSmap();
 restoreTreeSet();
+setTimeout(() => restoreKeptTrees(), 400);   // every tree of the set, kept in IndexedDB, a moment later
 try { const r = JSON.parse(localStorage.getItem('tree2paper-v1') || 'null'); treeSetRO = r && r.ro || null; restoreTabs(JSON.parse(localStorage.getItem('tree2go-tabs') || 'null'), treeSet); } catch (e) { }
 try { if (localStorage.getItem('tree2paper-side') === '0' && !mobile()) app.classList.add('collapsed'); } catch (e) { }
 buildSide();
