@@ -824,13 +824,17 @@ function parseNewick(src) {
     i = nex.index + t.index + t[0].length;
   }
   let pend = null;   // annotations read from a [&...] comment, waiting for their node
+  // The text is scanned by character codes, and each name or length is cut out in one piece (slice) once its end is
+  // found, instead of being built character by character: about a third quicker on large files, same result.
+  const isSpace = c => c === 32 || c === 10 || c === 13 || c === 9;   // space, newline, return, tab
+  const isStop = c => c === 40 || c === 41 || c === 44 || c === 58 || c === 59 || c === 91;   // ( ) , : ; [
   function skip() {
     while (i < n) {
-      const c = s[i];
-      if (c === ' ' || c === '\n' || c === '\r' || c === '\t') i++;
-      else if (c === '[') {
+      const c = s.charCodeAt(i);
+      if (isSpace(c)) i++;
+      else if (c === 91) {   // [
         const j = s.indexOf(']', i); if (j < 0) throw new Error('A comment "[" is never closed.');
-        if (s[i + 1] === '&') { try { pend = { ...(pend || {}), ...parseMeta(s.slice(i + 1, j)) }; } catch (e) { } }
+        if (s.charCodeAt(i + 1) === 38) { try { pend = { ...(pend || {}), ...parseMeta(s.slice(i + 1, j)) }; } catch (e) { } }   // [&
         i = j + 1;
       }
       else break;
@@ -838,7 +842,8 @@ function parseNewick(src) {
   }
   function label() {
     skip();
-    if (s[i] === "'" || s[i] === '"') {
+    const c0 = s.charCodeAt(i);
+    if (c0 === 39 || c0 === 34) {   // ' or "
       const q = s[i++]; let out = '';
       while (i < n) {
         if (s[i] === q) { if (s[i + 1] === q) { out += q; i += 2; continue; } i++; break; }
@@ -846,17 +851,18 @@ function parseNewick(src) {
       }
       return out;
     }
-    let out = '';
-    while (i < n && !'(),:;['.includes(s[i])) out += s[i++];
-    return out.trim();
+    const st = i;
+    while (i < n && !isStop(s.charCodeAt(i))) i++;
+    return i > st ? s.slice(st, i).trim() : '';
   }
   let lastGamma = null, lastSup = null;
   // 'length', or 'length:support:gamma' as networks write it (any field can be empty: #H7:::0.33)
   function length() {
     skip();
-    if (s[i] !== ':') return null;
-    i++; skip(); let t = '';
-    while (i < n && !'(),;[ \n\r\t'.includes(s[i])) t += s[i++];
+    if (s.charCodeAt(i) !== 58) return null;   // :
+    i++; skip(); const st = i;
+    while (i < n) { const c = s.charCodeAt(i); if ((isStop(c) && c !== 58) || isSpace(c)) break; i++; }
+    let t = s.slice(st, i);
     const parts = t.split(':'); t = parts[0];
     if (parts.length > 2 && parts[2] !== '' && isFinite(+parts[2])) lastGamma = +parts[2];
     if (parts.length > 1 && parts[1] !== '' && isFinite(+parts[1])) lastSup = +parts[1];
@@ -926,6 +932,11 @@ function toNewick(root, original) {   // original: renamed tips written with the
   return w(root, true) + ';';
 }
 
+// The largest or smallest value of a list, with any fixed values given after it. Written as a loop: Math.max(...list)
+// passes every element as an argument, and the browsers stop at some 65,000 (Safari) to 125,000 (Chrome) of them,
+// so a tree beyond that many tips failed to open.
+function maxOf(a, ...rest) { if (!Array.isArray(a) && !ArrayBuffer.isView(a)) a = [...a]; let m = Math.max(...rest); for (let i = 0; i < a.length; i++) { const v = +a[i]; if (v !== v) return NaN; if (v > m) m = v; } return m; }
+function minOf(a, ...rest) { if (!Array.isArray(a) && !ArrayBuffer.isView(a)) a = [...a]; let m = Math.min(...rest); for (let i = 0; i < a.length; i++) { const v = +a[i]; if (v !== v) return NaN; if (v < m) m = v; } return m; }
 // Visits a node and all its descendants, parents before children.
 function walkAll(n, f) { const st = [n]; while (st.length) { const x = st.pop(); f(x); for (let k = x.children.length - 1; k >= 0; k--) st.push(x.children[k]); } }
 // The tips below a node, in drawing order.
@@ -1024,7 +1035,7 @@ function isUltrametric(t) {
   const ds = []; let ok = true;
   (function g(x, d) { if (!x.children.length) { ds.push(d); return; } for (const y of x.children) { if (y.len == null) { ok = false; return; } g(y, d + y.len); } })(t, 0);
   if (!ok || ds.length < 2) return false;
-  const mx = Math.max(...ds), mn = Math.min(...ds);
+  const mx = maxOf(ds), mn = minOf(ds);
   return mx > 0 && (mx - mn) <= mx * 1e-5;
 }
 // Roots the tree at the midpoint of its longest tip-to-tip path.
@@ -2284,14 +2295,14 @@ function buildCats(row) {
 // Which support range a value falls in. By default ranges are [from, to), and the highest one is closed.
 function catFor(vp, cats, lowIn) {
   if (!cats || !cats.length) return null;
-  const maxTo = Math.max(...cats.map(c => c.to)), minFrom = Math.min(...cats.map(c => c.from));
+  const maxTo = maxOf(cats.map(c => c.to)), minFrom = minOf(cats.map(c => c.from));
   return cats.find(c => lowIn
     ? vp >= c.from && (vp < c.to || (c.to === maxTo && vp <= c.to))
     : vp <= c.to && (vp > c.from || (c.from === minFrom && vp >= c.from))) || null;
 }
 // Legend text for a range, written as the values it covers when the bounds are whole numbers
 function catLabel(c, cats, lowIn) {
-  const maxTo = Math.max(...cats.map(x => x.to)), minFrom = Math.min(...cats.map(x => x.from));
+  const maxTo = maxOf(cats.map(x => x.to)), minFrom = minOf(cats.map(x => x.from));
   const whole = Number.isInteger(c.from) && Number.isInteger(c.to);
   let a = c.from, b = c.to;
   if (whole) { if (lowIn && c.to !== maxTo) b = c.to - 1; if (!lowIn && c.from !== minFrom) a = c.from + 1; }
@@ -3000,7 +3011,7 @@ function isTimeTree(t) {
   const ds = []; let ok = true;
   (function g(x, d) { if (!x.children.length) { ds.push(d); return; } for (const y of x.children) { if (y.len == null) { ok = false; return; } g(y, d + y.len); } })(t, 0);
   if (!ok || ds.length < 3) return false;
-  const mx = Math.max(...ds), tol = Math.max(1e-9, mx * 1e-6), n = ds.filter(d => mx - d <= tol).length;
+  const mx = maxOf(ds), tol = Math.max(1e-9, mx * 1e-6), n = ds.filter(d => mx - d <= tol).length;
   if (mx > 0 && n >= Math.max(3, ds.length * 0.1)) return true;
   if (t.children.length !== 2) return false;
   let sa = false, hb = false;
@@ -3028,7 +3039,7 @@ const NUM_RE = /^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/;
 function encodeTreeBin(t, dg) {
   const nodes = []; walkAll(t, x => nodes.push(x));
   const n = nodes.length, f64 = dg > 7, inner = nodes.filter(x => x.children.length), leafN = n - inner.length;
-  const maxK = Math.max(...inner.map(x => x.children.length), 0), maxT = Math.max(...nodes.filter(x => !x.children.length).map(x => +x.name), 0);
+  const maxK = maxOf(inner.map(x => x.children.length), 0), maxT = maxOf(nodes.filter(x => !x.children.length).map(x => +x.name), 0);
   const kids = maxK < 256 ? new Uint8Array(n) : new Uint16Array(n), L = f64 ? new Float64Array(n) : new Float32Array(n);
   const tips = maxT < 65536 ? new Uint16Array(leafN) : new Uint32Array(leafN);
   const labs = inner.map(x => x.name || ''), anyLab = labs.some(Boolean), allNum = labs.every(v => !v || NUM_RE.test(v));
@@ -3443,7 +3454,7 @@ function ageDensity0(ages, factor) {
   const n = ages.length; if (n < 2) return null;
   const m = ages.reduce((a, b) => a + b, 0) / n, sd = Math.sqrt(ages.reduce((a, b) => a + (b - m) ** 2, 0) / (n - 1));
   if (!(sd > 0)) return null;
-  const bw = 1.06 * sd * Math.pow(n, -0.2) * Math.max(0.05, factor), lo = Math.min(...ages) - 3 * bw, hi = Math.max(...ages) + 3 * bw, G = 64, pts = [];
+  const bw = 1.06 * sd * Math.pow(n, -0.2) * Math.max(0.05, factor), lo = minOf(ages) - 3 * bw, hi = maxOf(ages) + 3 * bw, G = 64, pts = [];
   let mx = 0;
   // with many trees, the ages are first counted in 512 thin bins: the curve is the same and costs a fixed amount
   let src = ages.map(a => [a, 1]);
@@ -3800,7 +3811,7 @@ function clearAttachments() {
 // After a new tree is opened with files still attached: keep them for it, or remove them.
 function confirmAttachments() {
   const A = attachSummary(); if (!A.kinds.length) return;
-  const found = k => { const h = k.hits.filter(v => v != null); if (!h.length) return 'not tied to the tip names'; const lo = Math.min(...h), hi = Math.max(...h); return `${lo === hi ? lo : `${lo} to ${hi}`} of the ${A.n} tips found`; };
+  const found = k => { const h = k.hits.filter(v => v != null); if (!h.length) return 'not tied to the tip names'; const lo = minOf(h), hi = maxOf(h); return `${lo === hi ? lo : `${lo} to ${hi}`} of the ${A.n} tips found`; };
   askConfirm({ title: 'Keep the attached files?', ok: 'Keep them', okClass: 'primary', cancel: 'Remove them', focusOk: true,
     html: `You opened a new tree, and the files attached to the previous one are still loaded. They are matched to this tree by its tip names:<br><br>${A.kinds.map(k => `<b>${k.label} (${k.count})</b>: ${found(k)}`).join('<br>')}<br><br>Keep them to use them with this tree, or remove them all to start clean.` })
     .then(ok => { if (!ok) { clearAttachments(); toast('Attachments removed'); } });
@@ -4194,9 +4205,9 @@ function renderOnce() {
     }
   }
   const tipLabelEnd = n => (S.align ? maxD * sx : n._ex) + (S.showTips ? LOFF + (n._lw || 0) : 0);
-  let labelsEnd = Math.max(0, ...tips.map(tipLabelEnd));
+  let labelsEnd = maxOf(tips.map(tipLabelEnd), 0);
   const tipLabelR = n => (S.align ? S.radius : rOf(n._dEnd)) + (S.showTips ? S.labelOffset + (n._lw || 0) : 0);
-  let outerR = Math.max(0, ...tips.map(tipLabelR));
+  let outerR = maxOf(tips.map(tipLabelR), 0);
   // Grafted fossils: small subtrees that bud from a branch without changing the tree
   const gNodes = [], gDraw = [];
   if (useLen && L !== 'unrooted') {
@@ -4280,8 +4291,8 @@ function renderOnce() {
     const val = nodeValues(S, S.brcTable, S.brcCol, S.brcLog);
     if (!val.size) return null;
     const f = v => S.brcLog ? Math.log10(v) : v, vs = [...val.values()];
-    const lo = S.brcMin != null && S.brcMin !== '' && (!S.brcLog || S.brcMin > 0) ? +S.brcMin : Math.min(...vs);
-    const hi = S.brcMax != null && S.brcMax !== '' && (!S.brcLog || S.brcMax > 0) ? +S.brcMax : Math.max(...vs);
+    const lo = S.brcMin != null && S.brcMin !== '' && (!S.brcLog || S.brcMin > 0) ? +S.brcMin : minOf(vs);
+    const hi = S.brcMax != null && S.brcMax !== '' && (!S.brcLog || S.brcMax > 0) ? +S.brcMax : maxOf(vs);
     const a = f(lo), b = f(hi), stops = brcStops(S);
     const ramp = q => { q = clamp(q, 0, 1) * (stops.length - 1); const i = Math.min(stops.length - 2, Math.floor(q)), u = q - i, c0 = hexRGB(stops[i]), c1 = hexRGB(stops[i + 1]); return rgbHex(c0.map((c, k) => c + (c1[k] - c) * u)); };
     const colorOf = n => { const v = val.get(n); return v == null ? null : ramp(b > a ? (f(v) - a) / (b - a) : 0.5); };
@@ -4292,7 +4303,7 @@ function renderOnce() {
   // values written on the tree can take their colour from a parameter of their own (By data), independent of the branches
   const valColorer = (src, col, pal, rev) => {
     const val = src && col ? nodeValues(S, src, col) : null; if (!val || !val.size) return () => null;
-    const vs = [...val.values()], lo = Math.min(...vs), hi = Math.max(...vs), st = palStops(pal || 'viridis', ['#2C7BB6', '#FFFFBF', '#D7191C'], rev, 0);
+    const vs = [...val.values()], lo = minOf(vs), hi = maxOf(vs), st = palStops(pal || 'viridis', ['#2C7BB6', '#FFFFBF', '#D7191C'], rev, 0);
     return n => { const v = val.get(n); return v == null ? null : rampOf(st, hi > lo ? (v - lo) / (hi - lo) : 0.5); };
   };
   const lenVC = S.lengthColorBy === 'data' ? valColorer(S.lengthVSrc, S.lengthVCol, S.lengthVPal, S.lengthVRev) : null;
@@ -4301,7 +4312,7 @@ function renderOnce() {
   // branch width from data: thin for low values, thick for high ones
   const bwd = (() => {
     const val = nodeValues(S, S.bwdSrc, S.bwdCol, S.bwdLog); if (!val.size) return null;
-    const f = v => S.bwdLog ? Math.log10(v) : v, vs = [...val.values()], lo = Math.min(...vs), hi = Math.max(...vs), a = f(lo), b = f(hi);
+    const f = v => S.bwdLog ? Math.log10(v) : v, vs = [...val.values()], lo = minOf(vs), hi = maxOf(vs), a = f(lo), b = f(hi);
     const wOf = v => S.bwdMin + (S.bwdMax - S.bwdMin) * (b > a ? clamp((f(v) - a) / (b - a), 0, 1) : 0.5);
     return { widthOf: n => { const v = val.get(n); return v == null ? null : wOf(v); }, lo, hi, wOf, col: S.bwdCol };
   })();
@@ -4400,7 +4411,7 @@ function renderOnce() {
       if (kidsV && kidsV.length > 1) {
         // the vertical line joins the children; a hybrid child is reached by its own curve, from the middle of the node
         const ys = kidsV.filter(k => !hybOf(k)).map(k => k._py); if (ys.length < kidsV.length) ys.push(n._py);
-        const y0 = Math.min(...ys), y1 = Math.max(...ys); if (y1 - y0 > 1e-6) d += `M${f2(n._px)},${f2(y0)}V${f2(y1)}`;
+        const y0 = minOf(ys), y1 = maxOf(ys); if (y1 - y0 > 1e-6) d += `M${f2(n._px)},${f2(y0)}V${f2(y1)}`;
       }
     } else if (L === 'slanted' || L === 'unrooted') {
       if (p) d = `M${f2(p._px)},${f2(p._py)}L${f2(n._px)},${f2(n._py)}`;
@@ -4595,7 +4606,7 @@ function renderOnce() {
 
   const internals = vis.filter(n => n.children.length && !n._tri);
   const sups = internals.map(supOf).filter(v => v != null);
-  const supMax = sups.length ? Math.max(...sups) : 100;
+  const supMax = sups.length ? maxOf(sups) : 100;
   const pct = v => supMax <= 1 ? v * 100 : v;
   const cats = S.supportCats || [];
   for (const n of internals) {
@@ -4659,12 +4670,12 @@ function renderOnce() {
       for (const ti of dtPickIdx(S, used.length)) {
         const t = treeOfRec(used[ti]), H = nodeHeights(t); if (!H) continue;
         const yOf = new Map();
-        (function g(x) { if (!x.children.length) { const y = rowY.get(normTip(x.name || '')); if (y != null) yOf.set(x, y); return y; } const ys = x.children.map(g).filter(v => v != null); if (!ys.length) return null; const y = (Math.min(...ys) + Math.max(...ys)) / 2; yOf.set(x, y); return y; })(t);
+        (function g(x) { if (!x.children.length) { const y = rowY.get(normTip(x.name || '')); if (y != null) yOf.set(x, y); return y; } const ys = x.children.map(g).filter(v => v != null); if (!ys.length) return null; const y = (minOf(ys) + maxOf(ys)) / 2; yOf.set(x, y); return y; })(t);
         let d = '';
         walkAll(t, x => {
           const y = yOf.get(x); if (y == null) return; const X = (maxD - H.get(x)) * sx;
           if (x.parent && yOf.has(x.parent)) d += seg((maxD - H.get(x.parent)) * sx, elbow ? yOf.get(x.parent) : y, X, y);
-          const ys = x.children.map(c => yOf.get(c)).filter(v => v != null); if (!elbow && ys.length > 1) d += `M${f2(X)},${f2(Math.min(...ys))}V${f2(Math.max(...ys))}`;
+          const ys = x.children.map(c => yOf.get(c)).filter(v => v != null); if (!elbow && ys.length > 1) d += `M${f2(X)},${f2(minOf(ys))}V${f2(maxOf(ys))}`;
         });
         if (d) paths.push(d);
       }
@@ -4772,7 +4783,7 @@ function renderOnce() {
       const v = parseFloat(nodeLabelText(n, S)); if (Number.isFinite(v)) pts.push([n, v]);
     }
     if (pts.length) {
-      const vs = pts.map(q => q[1]), lo = Math.min(...vs), hi = Math.max(...vs), q = v => hi > lo ? (v - lo) / (hi - lo) : 0.5;
+      const vs = pts.map(q => q[1]), lo = minOf(vs), hi = maxOf(vs), q = v => hi > lo ? (v - lo) / (hi - lo) : 0.5;
       const ramp = v => { const a = hexRGB(S.nlabLow), b = hexRGB(S.nlabHigh), t = q(v); return rgbHex(a.map((c, i) => c + (b[i] - c) * t)); };
       const rOf = v => S.nlabSizeBy ? S.nlabSizeMin + (S.nlabSizeMax - S.nlabSizeMin) * q(v) : S.nlabDot;
       for (const [n, v] of pts) {
@@ -4850,8 +4861,8 @@ function renderOnce() {
       const kids = n.children.filter(k => vOn.has(k)); if (kids.length < 2) continue;
       const c = nodeCol(n); if (!c) continue;
       const w = widthOf(n) + 0.4;
-      if (L === 'rect') { const ys = kids.map(k => k._py); ancBrL.push(`<path d="M${f2(n._px)},${f2(Math.min(...ys))}V${f2(Math.max(...ys))}" stroke="${c}" stroke-width="${f2(w)}" stroke-linecap="square"/>`); }
-      else { const as = kids.map(k => k._a); ancBrL.push(`<path d="${arcPath(rOf(n._d), Math.min(...as), Math.max(...as))}" stroke="${c}" stroke-width="${f2(w)}" stroke-linecap="square"/>`); }
+      if (L === 'rect') { const ys = kids.map(k => k._py); ancBrL.push(`<path d="M${f2(n._px)},${f2(minOf(ys))}V${f2(maxOf(ys))}" stroke="${c}" stroke-width="${f2(w)}" stroke-linecap="square"/>`); }
+      else { const as = kids.map(k => k._a); ancBrL.push(`<path d="${arcPath(rOf(n._d), minOf(as), maxOf(as))}" stroke="${c}" stroke-width="${f2(w)}" stroke-linecap="square"/>`); }
     }
   }
 
@@ -4862,7 +4873,7 @@ function renderOnce() {
   if (nbSrc && useLen && (L === 'rect' || circ)) {
     const key = nbSrc.startsWith('meta:') ? nbSrc.slice(5) : null;
     const field = { kde: 'ages', kdeLen: 'lens', kdeSup: 'sups' }[nbSrc], kde = !!field && !!treeSet && (field !== 'ages' || treeSet.hasLen);
-    const supMax = field === 'sups' ? Math.max(1, ...[...treeSet.clades.values()].flatMap(o => o.sups || [])) <= 1 ? 1 : 100 : 1;
+    const supMax = field === 'sups' ? maxOf([...treeSet.clades.values()].flatMap(o => o.sups || []), 1) <= 1 ? 1 : 100 : 1;
     // where a value falls on the tree, as a depth from the root: an age counts back from the youngest tip,
     // a branch length runs from the parent node, a support runs on a short scale that ends at the node
     let curN = null;
@@ -4885,7 +4896,7 @@ function renderOnce() {
       let d = null;
       if (key) {
         const v = n.meta && n.meta[key]; if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite)) continue;
-        const lo = Math.min(...v), hi = Math.max(...v);
+        const lo = minOf(v), hi = maxOf(v);
         if (circ) { const r0 = posR(hi), r1 = posR(lo), rm = realR((r0 + r1) / 2), da = H / 2 / Math.max(1, rm) * 180 / Math.PI; d = sector(Math.min(r0, r1), Math.max(r0, r1), n._a - da, n._a + da); }
         else { const x0 = posR(hi), x1 = posR(lo); d = `M${f2(x0)},${f2(n._py - H / 2)}H${f2(x1)}V${f2(n._py + H / 2)}H${f2(x0)}Z`; }
       } else if (kde) {
@@ -4942,7 +4953,7 @@ function renderOnce() {
   let dotLeg = null;
   const dotData = (() => {
     if (!dv || !dv.size) return null;
-    const vs = [...dv.values()], lo = Math.min(...vs), hi = Math.max(...vs), q = v => hi > lo ? (v - lo) / (hi - lo) : 0.5;
+    const vs = [...dv.values()], lo = minOf(vs), hi = maxOf(vs), q = v => hi > lo ? (v - lo) / (hi - lo) : 0.5;
     const ramp = v => rampOf(dotStops(S), q(v));
     dotLeg = { lo, hi, col: S.dotDataCol };
     return { has: n => dv.has(n), fill: n => S.dotDataColor ? ramp(dv.get(n)) : null, r: n => S.dotDataSize ? S.dotSizeMin + (S.dotSizeMax - S.dotSizeMin) * q(dv.get(n)) : null, rOf: v => S.dotSizeMin + (S.dotSizeMax - S.dotSizeMin) * q(v) };
@@ -4980,7 +4991,7 @@ function renderOnce() {
   // the alignment, on rectangular trees: right after the names, or (alnBars 'before') after the clade names, further down
   let alnEnd = -Infinity, alnBlock = -Infinity;   // alnBlock: the end of an alignment the clade names must clear
   const alnRows = () => [...tips, ...gNodes.filter(x => !x.children.length)].filter(n => !n._tri && alnData && alnData.seqs.has(normTip(n.name || ''))).map(n => ({ y: n._py, seq: alnData.seqs.get(normTip(n.name || '')) }));
-  const alnDraw = x0 => { const rs = alnRows(); if (!rs.length) return; const top = Math.min(...rs.map(r => r.y)) - sp / 2, bottom = Math.max(...rs.map(r => r.y)) + sp / 2; const a = alnSvg(S, rs, x0, Math.max(1, sp * (S.alnCell || 100) / 100), top, bottom); anL.push(`<g>${a.svg}</g>`); alnEnd = a.end; };
+  const alnDraw = x0 => { const rs = alnRows(); if (!rs.length) return; const top = minOf(rs.map(r => r.y)) - sp / 2, bottom = maxOf(rs.map(r => r.y)) + sp / 2; const a = alnSvg(S, rs, x0, Math.max(1, sp * (S.alnCell || 100) / 100), top, bottom); anL.push(`<g>${a.svg}</g>`); alnEnd = a.end; };
   const sideHid = k => !!(S.sideHidden && S.sideHidden[k]);   // a layer hidden with its eye: kept, but not drawn
   const alnHere = !!alnData && L === 'rect' && !circ && !sideHid('aln');
   // Layers: on rectangular trees each side plot starts where the ones before it in the order end. A width is the real
@@ -4992,8 +5003,8 @@ function renderOnce() {
   { const hp = layered && !sideHid('heat') ? heatPlot(S) : null; if (hp) { sideOn.heat = true; sideW.heat = hp.cols.length * S.heatCellW + Math.max(0, hp.cols.length - 1) * S.heatColGap; } }
   { const lab = layered && !sideHid('clade') ? vis.filter(n => n.cladeLabel) : []; if (lab.length) {   // clade names: their widest bar and name, times how deep they nest
     const lv = n => { let m = 0, x = n.parent; while (x) { if (x.cladeLabel) m++; x = x.parent; } return m; };
-    const item = Math.max(...lab.map(n => (stv(n, 'barW') ?? S.barWidth) + Math.max(0, stv(n, 'barTO') ?? S.barTextGap) + measure(n.cladeLabel, stv(n, 'barFs') ?? S.barFontSize, fam, stv(n, 'barI') ?? S.barItalic, stv(n, 'barB') ?? S.barBold))) + 14;
-    sideOn.clade = true; sideW.clade = (Math.max(...lab.map(lv)) + 1) * item + Math.max(0, S.barGap) + 6; } }
+    const item = maxOf(lab.map(n => (stv(n, 'barW') ?? S.barWidth) + Math.max(0, stv(n, 'barTO') ?? S.barTextGap) + measure(n.cladeLabel, stv(n, 'barFs') ?? S.barFontSize, fam, stv(n, 'barI') ?? S.barItalic, stv(n, 'barB') ?? S.barBold))) + 14;
+    sideOn.clade = true; sideW.clade = (maxOf(lab.map(lv)) + 1) * item + Math.max(0, S.barGap) + 6; } }
   const cPlot = L !== 'unrooted' && !sideHid('cat') ? catPlot(S) : null;
   // column centers from the start of the categories: each column may be pushed right, or left until it touches its neighbor
   const catPos = { cs: [], w: 0, sz: 0 };
@@ -5028,7 +5039,7 @@ function renderOnce() {
     if (prop && nC > 1) for (const r of recs) { const t = r.vals.reduce((a, v) => a + pos(v), 0); r.vals = r.vals.map(v => v == null ? null : t > 0 ? pos(v) / t : 0); }
     else if (prop) { const t = recs.reduce((a, r) => a + pos(r.vals[0]), 0); for (const r of recs) r.vals = r.vals.map(v => v == null ? null : t > 0 ? pos(v) / t : 0); }
     const tot = r => r.vals.reduce((a, v) => a + pos(v), 0);
-    const auto = prop && nC > 1 ? 1 : Math.max(0, ...recs.map(tot));
+    const auto = prop && nC > 1 ? 1 : maxOf(recs.map(tot), 0);
     const vmax = S.dataMax > 0 ? (pct ? S.dataMax / 100 : S.dataMax) : auto;
     const W = Math.max(1, S.dataWidth), kx = vmax > 0 ? W / vmax : 0, th = clamp(S.dataThick, 1, 100) / 100, vfs = S.dataValSize;
     const fmtV = v => pct ? +(v * 100).toFixed(v * 100 >= 10 ? 1 : 2) + '%' : prop ? String(+v.toFixed(v >= 0.1 ? 3 : 4)) : fmtNum(v);
@@ -5071,7 +5082,7 @@ function renderOnce() {
     // Scale under the bars (rectangular views)
     if (S.dataAxis && !circ && recs.length && vmax > 0) {
       const col = S.dataAxisColor, lw = S.dataAxisW, tk = S.dataAxisTick, afs = S.dataAxisFs;
-      const y = Math.max(...recs.map(r => r.n._py)) + sp / 2 + S.dataAxisGap, stp = niceNum(vmax / 4);
+      const y = maxOf(recs.map(r => r.n._py)) + sp / 2 + S.dataAxisGap, stp = niceNum(vmax / 4);
       const ticks = [];
       for (let v = 0, i = 0; v <= vmax * (1 + 1e-9) && i < 60; v = +(stp * (++i)).toPrecision(12)) ticks.push(v);
       drawnEnd = Math.max(drawnEnd, xMax);
@@ -5123,7 +5134,7 @@ function renderOnce() {
         ? `<circle transform="${tr}" r="${f2(half - inset)}" ${paint}${border}/>`
         : `<rect transform="${tr}" x="${f2(-half + inset)}" y="${f2(-half + inset)}" width="${f2(sz - 2 * inset)}" height="${f2(sz - 2 * inset)}" ${paint}${border}/>`;
     };
-    const ys = rows.map(r => r.n._py), yTop = rows.length ? Math.min(...ys) : 0, yBot = rows.length ? Math.max(...ys) : 0;
+    const ys = rows.map(r => r.n._py), yTop = rows.length ? minOf(ys) : 0, yBot = rows.length ? maxOf(ys) : 0;
     cPlot.cols.forEach((c, i) => {
       const cx = start + cs[i];
       for (const r of rows) catL.push(shape(c, r.n, r.v[i], cx));
@@ -5159,7 +5170,7 @@ function renderOnce() {
       const start = layered ? layerAt('heat') : Math.max(labelsEnd, isFinite(dataEnd) ? dataEnd : -Infinity) + S.heatGap, cw = S.heatCellW, cg = S.heatColGap, ch = sp * clamp(S.heatH, 0.05, 1);
       const stops = S.heatMidOn ? [S.heatLow, S.heatMid, S.heatHigh] : [S.heatLow, S.heatHigh];
       const ramp = q => { q = clamp(q, 0, 1) * (stops.length - 1); const i = Math.min(stops.length - 2, Math.floor(q)), u = q - i, c0 = hexRGB(stops[i]), c1 = hexRGB(stops[i + 1]); return rgbHex(c0.map((c, k) => c + (c1[k] - c) * u)); };
-      const rng = cols.map((c, j) => { const v = rows.map(r => r[1][j]).filter(v => v != null); return v.length ? [Math.min(...v), Math.max(...v)] : [0, 1]; });
+      const rng = cols.map((c, j) => { const v = rows.map(r => r[1][j]).filter(v => v != null); return v.length ? [minOf(v), maxOf(v)] : [0, 1]; });
       const all = rng.reduce((a, r) => [Math.min(a[0], r[0]), Math.max(a[1], r[1])], [Infinity, -Infinity]);
       const cells = [];
       for (const [n, vals] of rows) vals.forEach((v, j) => {
@@ -5172,7 +5183,7 @@ function renderOnce() {
       const endX = start + cols.length * (cw + cg) - cg;
       drawnEnd = Math.max(drawnEnd, endX); dataEnd = Math.max(dataEnd, endX);
       if (S.heatTitles) {
-        const top = Math.min(...rows.map(r => r[0]._py)) - ch / 2 - 4, ang = clamp(S.heatTitleAngle, 0, 90), tfs = S.heatTitleSize;
+        const top = minOf(rows.map(r => r[0]._py)) - ch / 2 - 4, ang = clamp(S.heatTitleAngle, 0, 90), tfs = S.heatTitleSize;
         let reach = 0;
         cols.forEach((c, j) => {
           const x = start + j * (cw + cg) + cw / 2, tw = measure(c, tfs, fam, false, false);
@@ -5199,7 +5210,7 @@ function renderOnce() {
     });
     const opts = new Map(labeled.map(n => [n, bOpt(n)]));
     for (const n of labeled) { const o = opts.get(n); o.tw = measure(n.cladeLabel, o.fs, fam, o.it, o.bold); o.tc = stv(n, 'barTC') || o.bc; }
-    const step = Math.max(...labeled.map(n => { const o = opts.get(n); return o.w + Math.max(0, o.tgap) + o.tw; })) + 14;
+    const step = maxOf(labeled.map(n => { const o = opts.get(n); return o.w + Math.max(0, o.tgap) + o.tw; })) + 14;
     if (layered && dPlot && isFinite(barsReach)) sideW.bar = Math.max(sideW.bar || 0, barsReach - layerAt('bar'));
     const cladeFloor = layered && layerAt('clade') > sideBase + 1e-6 ? layerAt('clade') : -Infinity;   // the layers before the clade names
     const edge = layered ? Math.max(labelsEnd, layerAt('clade')) + 6 : Math.max(circ ? outerR : labelsEnd, dataEnd, alnBlock) + 6;   // outer edge of clade highlights, or of the data bars
@@ -5242,7 +5253,7 @@ function renderOnce() {
     for (const n of labeled) barLo.set(n.id, outside ? -4 : aligned ? Math.ceil(ownEnd(n) + 4 - edge - (lvl.get(n) || 0) * step) : 2);
     if (outside) for (const n of labeled) cladeOut = Math.max(cladeOut, barExtent(n));
     const glob = labeled.filter(n => stv(n, 'barOff') == null);
-    if (glob.length) barGapLo = Math.max(...glob.map(n => barLo.get(n.id)));
+    if (glob.length) barGapLo = maxOf(glob.map(n => barLo.get(n.id)));
     const flipSave = radFlip; if (outside) radFlip = null;
     for (const n of labeled) {
       const o = opts.get(n), k = lvl.get(n) || 0;
@@ -5312,7 +5323,7 @@ function renderOnce() {
     for (const n of tips) { const [x, y] = polar((S.align ? S.radius : rOf(n._dEnd)) + (S.showTips ? S.labelOffset + (n._lw || 0) : 0), n._a); addPt(x, y); }
     for (const x of gNodes) if (!x.children.length) { const [px, py] = polar(x._r + (S.showTips ? S.labelOffset + (x._lw || 0) : 0), x._a); addPt(px, py); }
     // highlights, clade bars and geologic rings reach the outer ring
-    lastReach = { reach: Math.max(outerR, dataEnd), n: N, catRing: cPlot ? catLastRing : null, catSz: catPos.sz, tipR: Math.max(...tips.map(n => S.align ? S.radius : rOf(n._dEnd))), fs: S.fontSize, curvedNeed };
+    lastReach = { reach: Math.max(outerR, dataEnd), n: N, catRing: cPlot ? catLastRing : null, catSz: catPos.sz, tipR: maxOf(tips.map(n => S.align ? S.radius : rOf(n._dEnd))), fs: S.fontSize, curvedNeed };
     const ring = radFlip != null ? 0.0001 : vis.some(n => n.bg) || labeled.length || dPlot || cPlot ? Math.max(outerR, dataEnd, cladeReach) + 6 + (labeled.length ? 40 : 0) : (S.axisOn && useLen && S.geoBg !== 'none') ? S.radius : 0;
     if (ring) for (let k = 0; k <= 72; k++) { const [x, y] = polar(ring, base + span * k / 72); addPt(x, y); }
     if (cladeOut > 0) for (let k = 0; k <= 72; k++) { const [x, y] = polar0(cladeOut + 6, base + span * k / 72); addPt(x, y); }
@@ -5451,7 +5462,7 @@ function renderOnce() {
       for (const a of majors) { const r = Rr(a); if (realR(r) > 0.5) bgL.push(`<path d="${arcPath(r, a0, Math.min(a1, a0 + 359.99))}" fill="none"${ringSty} opacity=".8"/>`); }
       const slotA = span / N;
       const la = span >= 359 ? base + Math.round((((270 - base) % 360) + 360) % 360 / slotA) * slotA : base + span + (360 - span) / 2;
-      const youngest = majors.length ? Math.min(...majors) : null;
+      const youngest = majors.length ? minOf(majors) : null;
       if (S.axisCircLabels) for (const a of majors) {
         const [x, y] = polar(Rr(a), la);
         const txt = fmtA(a) + (S.axisUnitShow && S.axisUnitText && a === youngest ? ' ' + S.axisUnitText : '');
@@ -5528,7 +5539,7 @@ function renderOnce() {
     // a custom angle: legends and the title go around the turned box of the tree
     const A = treeTurn(S) * Math.PI / 180, ca = Math.cos(A), sa = Math.sin(A), B0 = Math.max(maxY, scaleBottom, scaleNatBottom ?? -Infinity, dAxis ? dAxis.bottom : -Infinity);
     const pts = [[boxL, minY], [boxR, minY], [boxL, B0], [boxR, B0]].map(([x, y]) => [x * ca - y * sa, x * sa + y * ca]);
-    boxL = Math.min(...pts.map(q => q[0])); boxR = Math.max(...pts.map(q => q[0])); minY = Math.min(...pts.map(q => q[1])); maxY = Math.max(...pts.map(q => q[1]));
+    boxL = minOf(pts.map(q => q[0])); boxR = maxOf(pts.map(q => q[0])); minY = minOf(pts.map(q => q[1])); maxY = maxOf(pts.map(q => q[1]));
     scaleBottom = maxY; scaleNatBottom = null; scaleTopY = null; dAxis = null;
   }
   const blocks = [];
@@ -5578,7 +5589,7 @@ function renderOnce() {
       out.push(`<text x="0" y="${f2(y)}" dominant-baseline="hanging" font-size="${f2(lfs * 0.9)}"${ff}>${esc(lo)}</text><text x="${f2(W)}" y="${f2(y)}" dominant-baseline="hanging" text-anchor="end" font-size="${f2(lfs * 0.9)}"${ff}>${esc(hi)}</text>`);
       y += lfs; w = Math.max(w, W);
     } else {
-      const symW = Math.max(...b.entries.map(e => e.sym.t === 'circle' ? 2 * e.sym.r * sc : e.sym.t === 'line' ? 22 * sc : 10 * sc), 1);
+      const symW = maxOf(b.entries.map(e => e.sym.t === 'circle' ? 2 * e.sym.r * sc : e.sym.t === 'line' ? 22 * sc : 10 * sc), 1);
       b.entries.forEach((e, i) => {
         const symH = e.sym.t === 'circle' ? 2 * e.sym.r * sc : e.sym.t === 'line' ? e.sym.w : 8 * sc, rowH = Math.max(lfs * 1.25, symH), cy = y + rowH / 2, sx0 = symW / 2;
         if (e.sym.t === 'line') out.push(`<line x1="0" y1="${f2(cy)}" x2="${f2(symW)}" y2="${f2(cy)}" stroke="${e.sym.c}" stroke-width="${f2(e.sym.w)}" stroke-linecap="butt"/>`);
@@ -5597,7 +5608,7 @@ function renderOnce() {
   const isFreeL = k => !!(S.legendPos && S.legendPos[k] && S.legendPos[k].free);
   const stack = drawn.filter(d => !isFreeL(d.b.key));
   if (stack.length) {
-    const gw = Math.max(...stack.map(d => d.w)), gh = stack.reduce((a, d) => a + d.h, 0) + S.legendBlockGap * (stack.length - 1);
+    const gw = maxOf(stack.map(d => d.w)), gh = stack.reduce((a, d) => a + d.h, 0) + S.legendBlockGap * (stack.length - 1);
     const px = placeX(S.legendH, gw, S.legendDx); dxRange.legendDx = [px.lo, px.hi];
     // legends sit below the tree and its locked scale bar, but moving the bar never pushes them
     const below = Math.max(maxY, scaleNatBottom ?? -Infinity, dAxis ? dAxis.bottom : -Infinity);
@@ -5654,7 +5665,7 @@ function renderOnce() {
       freeBoxes['mini:' + sec.id] = { x: mx, y: my, w: W, h: H, rel: { dx: mx - boxL, dy: my - g.y0 } };
     }
     const lefts = pageGeo.filter(g => g.mini).map(g => g.mini.x), rights = pageGeo.filter(g => g.mini).map(g => g.mini.x + g.mini.w);
-    const ax0 = Math.min(boxL, ...lefts) - 8, ax1 = Math.max(boxR, ...rights) + 8;
+    const ax0 = minOf(lefts, boxL) - 8, ax1 = maxOf(rights, boxR) + 8;
     pageBounds = { ax0, ax1, x0: ax0 - (S.pageExtL || 0), x1: Math.max(ax0 - (S.pageExtL || 0) + 20, ax1 + (S.pageExtR || 0)), treeBottom: maxYTree };
   }
   if (S.title) {
@@ -6493,7 +6504,7 @@ function openEdit(cx, cy, keep) {
       })()}
       <div class="grp"><span>Bar color</span>${sw('barC', 'bar', g('bar', 'barC'))}</div>
       <div class="grp"><span>Text color</span>${sw('barTC', 'bar', g('bar', 'barTC'))}</div>
-      ${slider('barOff', 'bar', 'Bar distance from labels', S.barGap, Math.max(...T.bar.map(n => barLo.get(n.id) ?? -400)), 200)}
+      ${slider('barOff', 'bar', 'Bar distance from labels', S.barGap, maxOf(T.bar.map(n => barLo.get(n.id) ?? -400)), 200)}
       ${slider('barTO', 'bar', 'Text distance from bar', S.barTextGap, 0, 60)}
       <div class="kv"><span>Bar width</span>${num('barW', 'bar', S.barWidth, 'px')}</div>
       <div class="kv"><span>Text size</span>${num('barFs', 'bar', S.barFontSize, 'px')}</div>
@@ -7624,7 +7635,7 @@ function tgMatch(t2) {   // the same tips in both, or the tanglegram makes no se
   const onlyA = [...a].filter(x => !b.has(x)), onlyB = [...b].filter(x => !a.has(x)); return { ok: !onlyA.length && !onlyB.length, onlyA, onlyB };
 }
 function tgRight() { const L = tree ? leaves(tree).filter(l => !l._hidden && l._py != null) : []; if (!L.length) return null;
-  return { x: Math.max(...L.map(l => settings.showTips && l._lw ? l._lx + l._lw : l._px)), y0: Math.min(...L.map(l => l._py)), y1: Math.max(...L.map(l => l._py)), L }; }
+  return { x: maxOf(L.map(l => settings.showTips && l._lw ? l._lx + l._lw : l._px)), y0: minOf(L.map(l => l._py)), y1: maxOf(L.map(l => l._py)), L }; }
 function tgWhy(S = settings) {   // why it cannot be drawn now, if it cannot
   if (!tree) return 'Open a tree first.';
   if (S.layout !== 'rect' || (S.rectOrient && S.rectOrient !== 'horizontal')) return 'A tanglegram needs a rectangular tree, not turned (Layout).';
@@ -7644,10 +7655,10 @@ function tangleSvgNow() {
   L2.forEach((l, i) => { l._ty = R.y0 + i * step; });
   (function gy(x) { if (x.children.length) { x.children.forEach(gy); x._ty = (x.children[0]._ty + x.children[x.children.length - 1]._ty) / 2; } })(t2);
   const useLen = S2.useLengths && hasLengths(t2); (function gd(x, d) { x._td = d; x.children.forEach(c => gd(c, d + (useLen ? (c.len || 0) : 1))); })(t2, 0);
-  if (!useLen) (function lv(x) { if (!x.children.length) return 0; const h = Math.max(...x.children.map(lv)) + 1; x._th = h; return h; })(t2);
-  const maxD = Math.max(...L2.map(l => l._td)) || 1, W1 = Math.max(...R.L.map(l => l._px)) - tree._px, W2 = S.tgWidth > 0 ? S.tgWidth : Math.max(40, W1);
+  if (!useLen) (function lv(x) { if (!x.children.length) return 0; const h = maxOf(x.children.map(lv)) + 1; x._th = h; return h; })(t2);
+  const maxD = maxOf(L2.map(l => l._td)) || 1, W1 = maxOf(R.L.map(l => l._px)) - tree._px, W2 = S.tgWidth > 0 ? S.tgWidth : Math.max(40, W1);
   const fs = S2.fontSize, fam = S2.fontFamily, it = !!S2.italic, off = S2.labelOffset ?? 5, show = S.tgLabels !== false;
-  const lw = show ? Math.max(0, ...L2.map(l => measure(disp(nm(l)), fs, fam, it, false))) : 0;
+  const lw = show ? maxOf(L2.map(l => measure(disp(nm(l)), fs, fam, it, false)), 0) : 0;
   const xT = R.x + S.tgGap + lw + (show ? off : 0);   // where its youngest tips are
   const X = x => xT + W2 * (useLen ? (maxD - x._td) / maxD : (x.children.length ? x._th / Math.max(1, t2._th) : 0));
   const al = !!S2.align, LX = l => (al ? xT : X(l)) - off;   // where each name ends: in one column when its tab aligns them
@@ -7655,8 +7666,8 @@ function tangleSvgNow() {
   (function cc(x, c) { const col = (x.st && x.st.bc) || x.color || c; inh.set(x, col); x.children.forEach(k => cc(k, col)); })(t2, S2.lineColor);
   const tipsOf = x => x.children.length ? x.children.flatMap(tipsOf) : [x];
   // highlights of the second tree, from its clades to its names
-  walkAll(t2, x => { if (!x.bg || !x.children.length) return; const tp = tipsOf(x), a = Math.min(...tp.map(t => t._ty)) - step / 2, b = Math.max(...tp.map(t => t._ty)) + step / 2;
-    const opv = (x.st && x.st.bgOp != null ? x.st.bgOp : S2.cladeOpacity), op = opv > 1 ? opv / 100 : opv, x0 = Math.min(...tp.map(t => show ? LX(t) - lw : X(t))) - 4;
+  walkAll(t2, x => { if (!x.bg || !x.children.length) return; const tp = tipsOf(x), a = minOf(tp.map(t => t._ty)) - step / 2, b = maxOf(tp.map(t => t._ty)) + step / 2;
+    const opv = (x.st && x.st.bgOp != null ? x.st.bgOp : S2.cladeOpacity), op = opv > 1 ? opv / 100 : opv, x0 = minOf(tp.map(t => show ? LX(t) - lw : X(t))) - 4;
     bgs.push(`<rect x="${f2(x0)}" y="${f2(a)}" width="${f2(X(x) - x0)}" height="${f2(b - a)}" fill="${x.bg}" fill-opacity="${f2(op)}"/>`);
     hl2.push({ tips: new Set(tp.map(t => normTip(t.name))), x0, y0: a, y1: b, c: x.bg, a: op }); });
   // its branches, as a rectangular tree turned to face this one
@@ -8373,8 +8384,8 @@ svg.addEventListener('pointerdown', e => {
     const r = svg.getBoundingClientRect(), y = (ev.clientY - r.top - view.ty) / view.k;
     const b = Math.round((y + pageSp / 2) / pageSp);     // boundary between rows
     let s0 = sec.s0, s1 = sec.s1;
-    if (edge === 'top') { const lim = nb ? nb.s0 + 1 : Math.max(0, ...others.filter(p => p.s1 < sec.s0).map(p => p.s1 + 1)); s0 = clamp(b, lim, s1); }
-    else { const lim = nb ? nb.s1 - 1 : Math.min(pageRows.N - 1, ...others.filter(p => p.s0 > sec.s1).map(p => p.s0 - 1)); s1 = clamp(b - 1, s0, lim); }
+    if (edge === 'top') { const lim = nb ? nb.s0 + 1 : maxOf(others.filter(p => p.s1 < sec.s0).map(p => p.s1 + 1), 0); s0 = clamp(b, lim, s1); }
+    else { const lim = nb ? nb.s1 - 1 : minOf(others.filter(p => p.s0 > sec.s1).map(p => p.s0 - 1), pageRows.N - 1); s1 = clamp(b - 1, s0, lim); }
     if (s0 === sec.s0 && s1 === sec.s1) return;
     if (!moved) { moved = true; if (tree) pushUndo(true); }
     sec.s0 = s0; sec.s1 = s1; sec.from = pageRows.owners[s0]; sec.to = pageRows.owners[s1];
@@ -9644,12 +9655,12 @@ function kdeScale(mode) {
   if (mode === 'branches' && S.brcTable && S.brcCol) {
     const val = nodeValues(S, S.brcTable, S.brcCol, S.brcLog); if (!val.size) return null;
     const vs = [...val.values()], f = v => S.brcLog ? Math.log10(v) : v;
-    const lo = S.brcMin != null && S.brcMin !== '' ? +S.brcMin : Math.min(...vs), hi = S.brcMax != null && S.brcMax !== '' ? +S.brcMax : Math.max(...vs);
+    const lo = S.brcMin != null && S.brcMin !== '' ? +S.brcMin : minOf(vs), hi = S.brcMax != null && S.brcMax !== '' ? +S.brcMax : maxOf(vs);
     return { stops: brcStops(S), a: f(lo), b: f(hi), f };
   }
   if (mode === 'dots' && S.dotDataSrc && S.dotDataCol) {
     const val = nodeValues(S, S.dotDataSrc, S.dotDataCol); if (!val.size) return null;
-    const vs = [...val.values()]; return { stops: dotStops(S), a: Math.min(...vs), b: Math.max(...vs), f: v => v };
+    const vs = [...val.values()]; return { stops: dotStops(S), a: minOf(vs), b: maxOf(vs), f: v => v };
   }
   return null;
 }
@@ -9973,7 +9984,7 @@ const treeHasAges = () => !!tree && ((treeSet && treeSet.hasLen && !treeSet.unro
 // Ages measured from the youngest tip become absolute ages by adding it.
 function tipAgeOffset() {
   const hs = leaves(tree).map(l => l.meta && typeof l.meta.height === 'number' ? l.meta.height : null).filter(v => v != null);
-  return hs.length >= leaves(tree).length / 2 ? Math.max(0, Math.min(...hs)) : Math.max(0, +settings.axisOffset || 0);   // else the age given to the youngest tip in Time axis
+  return hs.length >= leaves(tree).length / 2 ? Math.max(0, minOf(hs)) : Math.max(0, +settings.axisOffset || 0);   // else the age given to the youngest tip in Time axis
 }
 // ---- tree statistics: right-click an empty part of the canvas
 const fmtS = v => v == null || !isFinite(v) ? '—' : Math.abs(v) >= 1000 || Number.isInteger(v) ? String(Math.round(v * 1000) / 1000) : String(+v.toPrecision(4));
@@ -9988,7 +9999,7 @@ function treeStats() {
   add('Structure', 'Bifurcating nodes', deg.filter(d => d === 2).length);
   const poly = deg.filter(d => d > 2);
   add('Structure', 'Polytomies', poly.length);
-  if (poly.length) add('Structure', 'Largest polytomy (branches)', Math.max(...poly));
+  if (poly.length) add('Structure', 'Largest polytomy (branches)', maxOf(poly));
   if (deg.some(d => d === 1)) add('Structure', 'Nodes with a single child', deg.filter(d => d === 1).length);
   // rooted: the [&U] or [&R] of the file tells an unrooted tree from a rooted one with a basal polytomy
   const unr = (treeSet && treeSet.unrooted) || tree._unrooted;
@@ -10001,13 +10012,13 @@ function treeStats() {
   if (hasLen) {
     const lens = E.map(x => x.len || 0), sum = lens.reduce((a, b) => a + b, 0);
     const dist = new Map(); (function g(x, d) { dist.set(x, d); x.children.forEach(c => g(c, d + (c.len || 0))); })(tree, 0);
-    const H = Math.max(...L.map(l => dist.get(l)));
+    const H = maxOf(L.map(l => dist.get(l)));
     add('Branch lengths', 'Tree length (sum of all branches)', fmtS(sum));
     add('Branch lengths', 'Root height (root to the farthest tip)', fmtS(H));
     add('Branch lengths', 'Mean (SD)', `${fmtS(sum / lens.length)} (${fmtS(sd(lens))})`);
     add('Branch lengths', 'Median', fmtS(med(lens)));
-    add('Branch lengths', 'Shortest', fmtS(Math.min(...lens)));
-    add('Branch lengths', 'Longest', fmtS(Math.max(...lens)));
+    add('Branch lengths', 'Shortest', fmtS(minOf(lens)));
+    add('Branch lengths', 'Longest', fmtS(maxOf(lens)));
     const zero = lens.filter(v => v === 0).length; if (zero) add('Branch lengths', 'Zero-length branches', zero);
     // time: only for trees with ages (dated, with fossils found, or with ages in their annotations)
     const ageMeta = I.some(x => x.meta && Object.keys(x.meta).some(k => /^(height|age)(_|$)/i.test(k)));
@@ -10020,8 +10031,8 @@ function treeStats() {
       add('Time', 'Extant tips', extant);
       if (fos.length) {
         add('Time', 'Fossil tips', fos.length);
-        add('Time', 'Oldest fossil', fmtS(Math.max(...ages)));
-        add('Time', 'Youngest fossil', fmtS(Math.min(...ages)));
+        add('Time', 'Oldest fossil', fmtS(maxOf(ages)));
+        add('Time', 'Youngest fossil', fmtS(minOf(ages)));
       }
       if (sa) add('Time', 'Sampled ancestors', sa);
       if (extant === n && !fos.length && n > 2 && deg.every(d => d === 2)) {   // gamma (Pybus & Harvey 2000): bifurcating, every tip at the present
@@ -10048,12 +10059,12 @@ function treeStats() {
   // support values
   const sup = I.filter(x => x.parent && isSupport(x.name)).map(x => parseFloat(String(x.name).split('/')[0])).filter(Number.isFinite);
   if (sup.length) {
-    const prob = Math.max(...sup) <= 1, thr = prob ? 0.95 : 70, hi = sup.filter(v => v >= thr).length;
+    const prob = maxOf(sup) <= 1, thr = prob ? 0.95 : 70, hi = sup.filter(v => v >= thr).length;
     add('Support values', 'Nodes with a value', sup.length);
     add('Support values', 'Mean (SD)', `${fmtS(sup.reduce((a, b) => a + b, 0) / sup.length)} (${fmtS(sd(sup))})`);
     add('Support values', 'Median', fmtS(med(sup)));
-    add('Support values', 'Lowest', fmtS(Math.min(...sup)));
-    add('Support values', 'Highest', fmtS(Math.max(...sup)));
+    add('Support values', 'Lowest', fmtS(minOf(sup)));
+    add('Support values', 'Highest', fmtS(maxOf(sup)));
     add('Support values', `Nodes at ${prob ? '0.95' : '70'} or more`, `${hi} (${Math.round(100 * hi / sup.length)}%)`);
   }
   // the tree set it comes from
@@ -10122,7 +10133,7 @@ function lttSvg(k, m) {
   if (!tree) return msg('No tree');
   if (!treeHasAges()) return msg('Lineages through time need a tree with ages');
   const dist = new Map(); (function g(x, d) { dist.set(x, d); x.children.forEach(c => g(c, d + (c.len || 0))); })(tree, 0);
-  const Ht = Math.max(...leaves(tree).map(l => dist.get(l))); if (!(Ht > 0)) return msg('The tree needs branch lengths');
+  const Ht = maxOf(leaves(tree).map(l => dist.get(l))); if (!(Ht > 0)) return msg('The tree needs branch lengths');
   const age = x => Ht - dist.get(x), tol = Ht * 1e-6;
   // each line: the times its lineages begin and end
   const curves = [];
@@ -10131,7 +10142,7 @@ function lttSvg(k, m) {
     const keep = x => ln.fossils || leaves(x).some(l => age(l) <= tol);   // without fossils, only the lineages with a tip at the present
     const ev = []; (function g(x) { for (const c of x.children) { if (!keep(c)) continue; const a0 = age(x), a1 = age(c); if (a0 - a1 > tol) ev.push([a0, a1]); g(c); } })(R);
     if (!ev.length) continue;
-    const start = Math.max(...ev.map(e => e[0])), cum = k.count !== 'standing';
+    const start = maxOf(ev.map(e => e[0])), cum = k.count !== 'standing';
     // cumulative: every lineage that has appeared by that time; standing: the lineages alive at that time
     const at = t => cum ? 1 + ev.filter(e => e[0] > t && e[0] < start - tol).length + (ev.filter(e => Math.abs(e[0] - start) <= tol).length > 1 ? ev.filter(e => Math.abs(e[0] - start) <= tol).length - 1 : 0) : ev.filter(e => e[0] >= t && e[1] < t).length;
     let ts;
@@ -10143,9 +10154,9 @@ function lttSvg(k, m) {
     curves.push({ ln, steps, label: ln.label || ((ln.src === 'all' ? 'All lineages' : ln.src) + (ln.fossils ? '' : ' (no fossils)')) });
   }
   if (!curves.length) return msg(k.lines.some(l => !l.fossils) ? 'No lineage reaches the present: include the fossils' : 'Nothing to plot: name a clade or add a line');
-  const T0 = Ht, Nmax = Math.max(...curves.flatMap(c => c.steps.map(s => s[2])));
+  const T0 = Ht, Nmax = maxOf(curves.flatMap(c => c.steps.map(s => s[2])));
   const ytv = k.logY ? [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000].filter(v => v <= Math.max(2, Nmax)) : (() => { const s2 = niceNum(Nmax / 4) || 1, o = []; for (let v = 0; v <= Nmax + 1e-9; v += s2) o.push(Math.round(v)); return o; })();
-  const numW = Math.max(...ytv.map(v => String(v).length)) * k.axisFs * 0.62;   // the widest number of the lineages axis
+  const numW = maxOf(ytv.map(v => String(v).length)) * k.axisFs * 0.62;   // the widest number of the lineages axis
   const tg = k.tickGap ?? 4, tt = k.titleGap ?? 6, padL = 10 + (k.yTitle ? k.axisFs * 1.2 + tt : 0) + numW + tg + 4, padR = 12, padT = 10, padB = 8 + tg + tt + k.axisFs * 2.2;
   const X = a => padL + (1 - a / T0) * (W - padL - padR);
   const Y = nn => { const top = padT, bot = H - padB; if (k.logY) { const lm = Math.log10(Math.max(2, Nmax)); return bot - (Math.log10(Math.max(1, nn)) / lm) * (bot - top); } return bot - (nn / Nmax) * (bot - top); };
@@ -10153,8 +10164,8 @@ function lttSvg(k, m) {
   if (k.showTree) {   // the tree, faint, on the same time axis
     const tips = leaves(tree), row = new Map(tips.map((t, i) => [t, i])), yOf = new Map();
     const ty = i => padT + (i + 0.5) / tips.length * (H - padB - padT);
-    (function g(x) { if (!x.children.length) { yOf.set(x, ty(row.get(x))); return yOf.get(x); } const ys = x.children.map(g); yOf.set(x, (Math.min(...ys) + Math.max(...ys)) / 2); return yOf.get(x); })(tree);
-    let d = ''; walkAll(tree, x => { if (x.parent) d += `M${f2(X(age(x.parent)))},${f2(yOf.get(x))}H${f2(X(age(x)))}`; if (x.children.length) d += `M${f2(X(age(x)))},${f2(Math.min(...x.children.map(c => yOf.get(c))))}V${f2(Math.max(...x.children.map(c => yOf.get(c))))}`; });
+    (function g(x) { if (!x.children.length) { yOf.set(x, ty(row.get(x))); return yOf.get(x); } const ys = x.children.map(g); yOf.set(x, (minOf(ys) + maxOf(ys)) / 2); return yOf.get(x); })(tree);
+    let d = ''; walkAll(tree, x => { if (x.parent) d += `M${f2(X(age(x.parent)))},${f2(yOf.get(x))}H${f2(X(age(x)))}`; if (x.children.length) d += `M${f2(X(age(x)))},${f2(minOf(x.children.map(c => yOf.get(c))))}V${f2(maxOf(x.children.map(c => yOf.get(c))))}`; });
     body += `<path d="${d}" fill="none" stroke="${k.treeColor || '#888888'}" stroke-width="${k.treeW ?? 0.8}" opacity="${clamp(k.treeOp, 0, 100) / 100}"/>`;
   }
   for (const c of curves) {
@@ -10308,7 +10319,7 @@ function alnFromText(text, name) {
   }
   flush();
   if (!seqs.size) return toast('No sequences found: the file should be FASTA, with lines starting with >');
-  const len = Math.max(...[...seqs.values()].map(s => s.length));
+  const len = maxOf([...seqs.values()].map(s => s.length));
   const sample = [...seqs.values()].join('').slice(0, 20000).replace(/[-?.N]/g, '');
   const type = sample.length && (sample.match(/[ACGTU]/g) || []).length / sample.length > 0.9 ? 'dna' : 'aa';
   let nm = name || 'alignment'; while (alnSets.some(a => a.name === nm)) nm = nm.replace(/( \(\d+\))?$/, m => ` (${(+(m.match(/\d+/) || [1])[0]) + 1})`);
@@ -10593,7 +10604,7 @@ function geoSvg(m) {
     const pal = (typeof PALETTES !== 'undefined' && (PALETTES[settings.paletteName] || PALETTES.default)) || ['#2F5D8C', '#C8553D', '#4C9A6A', '#D9A21B'];
     const named = tree ? [...nodeById.values()].filter(n => n.cladeLabel) : [];
     const up = (name, f) => { let n = nodes.get(normTip(name)); while (n) { const r = f(n); if (r) return r; n = n.parent; } return null; };
-    const range = val => { const nums = rows.map(p => +val(p)).filter(isFinite), lo = Math.min(...nums), hi = Math.max(...nums); return v => hi > lo ? (v - lo) / (hi - lo) : 0.5; };
+    const range = val => { const nums = rows.map(p => +val(p)).filter(isFinite), lo = minOf(nums), hi = maxOf(nums); return v => hi > lo ? (v - lo) / (hi - lo) : 0.5; };
     // colour of a record
     const cv = geoValues(S, 'gmColorVar'); let colOf = () => S.gmColor;
     if (S.gmColorBy === 'clade') colOf = p => { const c = up(p.name, n => n.cladeLabel && n); return c ? pal[named.indexOf(c) % pal.length] : '#A0A6AD'; };   // grey outside the named clades
@@ -10601,7 +10612,7 @@ function geoSvg(m) {
     else if (S.gmColorBy === 'cat' && cv) { const cats = [...new Set(rows.map(p => String(cv(p) ?? '')).filter(Boolean))]; colOf = p => { const v = String(cv(p) ?? ''); return v ? pal[cats.indexOf(v) % pal.length] : '#A0A6AD'; }; }
     else if (S.gmColorBy === 'cont' && cv) { const q = range(cv), st = palStops(S.gmPal || 'viridis', ['#2C7BB6', '#D7191C'], S.gmRev, 0); colOf = p => { const v = +cv(p); return isFinite(v) ? rampOf(st, q(v)) : '#A0A6AD'; }; }
     // size of a point: one size (growing with its records when grouped), by its records, or by a value
-    const nmax = Math.max(1, ...groups.map(gr => gr.recs.length)), byCount = gr => Math.sqrt((gr.recs.length - 1) / Math.max(1, nmax - 1));
+    const nmax = maxOf(groups.map(gr => gr.recs.length), 1), byCount = gr => Math.sqrt((gr.recs.length - 1) / Math.max(1, nmax - 1));
     let sizeOf = () => S.gmSize;
     if (S.gmSizeBy === 'density' || (S.gmSizeBy === 'fixed' && S.gmCluster > 0)) { const lo = S.gmSizeBy === 'fixed' ? S.gmSize : S.gmSizeMin; sizeOf = gr => lo + (S.gmSizeMax - lo) * byCount(gr); }
     else if (S.gmSizeBy === 'cont') { const sv = geoValues(S, 'gmSizeVar'); if (sv) { const q = range(sv); sizeOf = gr => { const vs = gr.recs.map(p => +sv(p)).filter(isFinite); return vs.length ? S.gmSizeMin + (S.gmSizeMax - S.gmSizeMin) * q(vs.reduce((a, b) => a + b, 0) / vs.length) : S.gmSize; }; } }
@@ -10696,7 +10707,7 @@ function gmLegend(S) {
   if (S.gmColorBy === 'clade' && tree) { const named = [...nodeById.values()].filter(n => n.cladeLabel); return named.length ? { key: 'geo', title, entries: named.map((n, i) => ({ text: n.cladeLabel, sym: sym(pal[i % pal.length]) })) } : null; }
   const cv = geoValues(S, 'gmColorVar'); if (!cv) return null;
   if (S.gmColorBy === 'cat') { const cats = [...new Set(rows.map(p => String(cv(p) ?? '')).filter(Boolean))]; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], entries: cats.map((c, i) => ({ text: c, sym: sym(pal[i % pal.length]) })) }; }
-  if (S.gmColorBy === 'cont') { const nums = rows.map(p => +cv(p)).filter(isFinite); if (!nums.length) return null; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], gradient: { stops: palStops(S.gmPal || 'viridis', ['#2C7BB6', '#D7191C'], S.gmRev, 0), lo: Math.min(...nums), hi: Math.max(...nums) } }; }
+  if (S.gmColorBy === 'cont') { const nums = rows.map(p => +cv(p)).filter(isFinite); if (!nums.length) return null; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], gradient: { stops: palStops(S.gmPal || 'viridis', ['#2C7BB6', '#D7191C'], S.gmRev, 0), lo: minOf(nums), hi: maxOf(nums) } }; }
   return null;
 }
 // Natural Earth, from its GeoJSON files on GitHub (they allow being read from any page). Needs internet once:
@@ -10823,7 +10834,7 @@ function geoAddImage(id, name, extra) {
   const sid = 's' + (++imgUid) + 'g'; imgStore.set(sid, '');
   const w = 420, cx = (svg.clientWidth / 2 - view.tx) / view.k, cy = (svg.clientHeight / 2 - view.ty) / view.k;
   if (tree) pushUndo();
-  const n = Math.max(0, ...figImages.filter(x => x.geo).map(x => +(String(x.geo.title || '').match(/^Map (\d+)$/) || [0, 0])[1])) + 1;
+  const n = maxOf(figImages.filter(x => x.geo).map(x => +(String(x.geo.title || '').match(/^Map (\d+)$/) || [0, 0])[1]), 0) + 1;
   const cfg = Object.fromEntries(geoKeys().map(k => [k, JSON.parse(JSON.stringify(DEFAULTS[k]))])); Object.assign(cfg, extra || {});
   const m = { id: ++imgUid, sid, name: 'Map: ' + name, x: cx - w / 2, y: cy - w / 3, w, h: w * 0.6, nw: 600, nh: 360, op: 1, rot: 0, layer: 'back', geo: { id, title: 'Map ' + n, line: '#6E6E6E', lw: 0.6, fill: '#ECE8DD', fillOp: 100, frame: false, frameColor: '#888888', area: 'all', pad: 10, cfg } };   // at the back: lines to its points stay in view
   settings.gmMap = String(m.id);
