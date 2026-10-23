@@ -2061,6 +2061,7 @@ const SECTIONS_RAW = [
     { k: 'lightMode', type: 'check', label: 'Lighten heavy elements while working' },
     { type: 'hint', text: s => 'Additional visual elements stay where they are and can be moved, but are shown as light placeholders. This only takes their drawing off the screen to keep the app quick: they are still there, and exports draw them in full with their current options. Untick it to see and edit them again.' },
     { type: 'custom', build: copyPartsBox },
+    { type: 'custom', build: resetStylesBox },
   ]}
 ];
 // Side plot options appear only once a table with matching names is chosen
@@ -3773,14 +3774,7 @@ function exportPanel() {
     $('dpiSide').value = dpiNow();
     syncDpi();
     $('dpiSide').addEventListener('change', e => setDpi(e.target.value));
-    $('resetSet').onclick = () => {
-      if (tree) {
-        pushUndo(true);
-        walkAll(tree, n => { n.st = null; n.color = null; n.bg = null; n.labelColor = null; n.bold = false; });
-      }
-      settings = freshSettings({ dataTables: settings.dataTables, dataActive: settings.dataActive, dataCols: settings.dataCols, dataColors: settings.dataColors, catTable: settings.catTable, catCols: settings.catCols, catStyle: Object.fromEntries(Object.entries(settings.catStyle || {}).filter(([, v]) => v.name).map(([k, v]) => [k, { name: v.name }])) }); buildSide(); sel.clear(); closePop(); render(); fit(); persist();
-      toast('All styles reset. Press Ctrl+Z to undo.');
-    };
+    $('resetSet').onclick = resetStyles;
   });
   return w;
 }
@@ -6491,6 +6485,20 @@ const COPY_GROUPS = [['bcolor', 'Branch color', ['bc', 'color']], ['bwidth', 'Br
   ['cbars', 'Clade name bars', BAR_KEYS], ['data', 'Data plots', DATA_KEYS]];
 const copyAllowed = k => { const cp = settings.copyParts || {}, g = COPY_GROUPS.find(x => x[2].includes(k)); return !g || cp[g[0]] !== false; };
 let copyPartsOpen = false;   // Copy style folds by itself, so what follows it stays outside
+// Back to the default look (see defaultSettings and clearLook), from Page settings or Export. Undone with Ctrl+Z.
+function resetStyles() {
+  if (tree) { pushUndo(true); clearLook(tree); }
+  settings = defaultSettings(settings); buildSide(); sel.clear(); closePop(); render(); fit(); persist();
+  toast('All styles reset. Press Ctrl+Z to undo.');
+}
+// The Reset styles button at the end of Page settings.
+function resetStylesBox() {
+  const w = document.createElement('div');
+  w.innerHTML = `<div class="btns"><button type="button" class="btn danger" id="resetSetPage">Reset styles</button></div>
+    <p class="hint">Every option and element back to the default look. The tree itself (names, branch lengths, collapsed clades, clade names, fossils) and the attached files are kept. Ctrl+Z undoes it.</p>`;
+  w.querySelector('#resetSetPage').onclick = resetStyles;
+  return w;
+}
 function copyPartsBox() {
   const w = document.createElement('div'); w.className = 'copywrap';
   w.innerHTML = `<div class="subhead fold${copyPartsOpen ? ' open' : ''}" role="button" tabindex="0" aria-expanded="${copyPartsOpen}">Copy style</div>`;
@@ -6814,7 +6822,7 @@ function openEdit(cx, cy, keep) {
       if (netBlocked) actHint = (`<span class="hint">This branch is on or below a hybrid node: in a network the root cannot go there, since both parents of the hybrid node must stay above it.</span>`);
       if (dated) actHint = (`<span class="hint">Rerooting is not available on dated (ultrametric) trees: moving the root changes the ages of the nodes, so the tree has to be dated again with the new root.</span>`);
     }
-    if (single && single.children.length && !single.parent) acts.push(`<button class="btn small" data-a="copytree" title="Open the whole tree in a new tab, with the same look, to style or plot it otherwise">Copy tree to a new tab</button>`);
+    if (single && single.children.length && !single.parent) acts.push(`<button class="btn small" data-a="copytree" title="Open the whole tree in a new tab, with the same look or the default one, to style or plot it otherwise">Copy tree to a new tab</button>`);
     if (single && single.children.length && single.parent) acts.push(`<button class="btn small" data-a="extract" title="Open this clade in a new tab. The full tree stays in its own tab.">Extract clade</button>`);
     if (single && S.layout === 'rect' && !isGraft(single)) acts.push(`<button class="btn small" data-a="mkpage" title="Export these rows as a page of their own">Make a page</button>`);
     if (single && single.parent) acts.push(`<button class="btn small danger" data-a="prune">${single.children.length ? 'Delete clade' : 'Delete tip'}</button>`);
@@ -6935,7 +6943,12 @@ function openEdit(cx, cy, keep) {
     else if (a === 'barremove') { mutate(() => T.bar.forEach(x => { x.cladeLabel = null; BAR_KEYS.forEach(k => setSt(x, k, null)); }), 'Clade name removed'); sel.clear(); closePop(); render(); }
     else if (a === 'reroot') { if (isUltrametric(tree)) { toast('Dated trees cannot be rerooted'); return; }
       if (netBlocksRoot(n)) { toast('In a network the root cannot go on or below a hybrid node: its two parents must stay above it.'); return; } mutate(() => { tree = reroot(tree, n); }, 'Tree rerooted', true); sel.clear(); closePop(); render(); }
-    else if (a === 'copytree') { closePop(); copyTreeToTab(); }
+    else if (a === 'copytree') {
+      closePop();
+      askConfirm({ title: 'Copy the tree to a new tab', ok: 'Same look', okClass: 'primary', cancel: 'Default look', focusOk: true, dismiss: true,
+        html: 'Keep the look of this tree in the copy, or start from the default look?<br><br>With the default look, the copy keeps the tree itself (names, branch lengths, collapsed clades, clade names, fossils marked by hand) and the attached files.' })
+        .then(ok => { if (ok === null) return; copyTreeToTab(!ok); });
+    }
     else if (a === 'extract') { const sub = deserialize(serialize(n)); sub.len = null; sub.parent = null; openInTab(sub, n.cladeLabel || (n.name && !isSupport(n.name) ? disp(nm(n)) : `Clade (${leafCount(n)} tips)`), true); toast('The clade opens in a new tab. The full tree stays in its own tab.'); if (false) sel.clear(); closePop(); render(); }
     else if (a === 'prune') { mutate(() => { tree = prune(tree, n); }, n.children.length ? 'Clade deleted' : 'Tip deleted'); sel.clear(); closePop(); render(); }
     else if (a === 'copy') { navigator.clipboard?.writeText(toNewick(n)).then(() => toast('Newick copied'), () => toast('Copying is blocked in this browser')); }
@@ -8077,12 +8090,27 @@ svg.addEventListener('contextmenu', e => {
   const t = e.target.closest && e.target.closest('[data-tgl]'); if (!t) return;
   e.preventDefault(); e.stopImmediatePropagation(); const g = tgGeom[+t.dataset.tgl]; if (g) openTgLine(g.k, g.name, e.clientX, e.clientY);
 }, true);
-// Copy the whole tree to a new tab: the same tree and look, to style or plot it otherwise.
-function copyTreeToTab() {
+/* The default look: every option of the panel back to its default, and no style of its own on any element (colors,
+   widths, label places, highlights, values shown or hidden one by one). The tree itself stays: names, branch lengths,
+   rooting and order, collapsed clades and their names, clade names, fossils marked by hand. Attached files and the
+   reading properties stay too, as when another tree is opened. */
+function defaultSettings(S) {
+  return freshSettings({ dataTables: S.dataTables, dataActive: S.dataActive, dataCols: S.dataCols, dataColors: S.dataColors, catTable: S.catTable, catCols: S.catCols,
+    catStyle: Object.fromEntries(Object.entries(S.catStyle || {}).filter(([, v]) => v.name).map(([k, v]) => [k, { name: v.name }])),
+    pieData: S.pieData, pieColors: S.pieColors, readDigits: S.readDigits, readBinary: S.readBinary });
+}
+function clearLook(root) {
+  const keepSt = n => { const tl = n.st && n.st.tl; n.st = tl ? { tl } : null; };   // the name of a collapsed clade is a name, not a style
+  walkAll(root, n => { keepSt(n); n.color = null; n.bg = null; n.labelColor = null; n.bold = false; if (n.grafts) n.grafts.forEach(G => walkAll(G, x => { keepSt(x); x.color = null; x.bg = null; x.labelColor = null; x.bold = false; })); });
+}
+// Copy the whole tree to a new tab, to style or plot it otherwise: with the same look, or (fresh) with the default look,
+// which keeps the tree, its attached files and its maps, and leaves out the images placed on the figure.
+function copyTreeToTab(fresh) {
   ensureTabs(); const d0 = captureTab(); tabs[tabIdx].doc = d0;
   const d = { ...d0, settings: { ...JSON.parse(JSON.stringify(d0.settings)), tgOn: false, tgTab: 0, tgLines: {} }, undo: [], redo: [], images: d0.images.map(m => ({ ...m })), view: { ...d0.view } };   // no tanglegram of its own
+  if (fresh) { const t = deserialize(d0.tree); clearLook(t); d.tree = serialize(t); d.settings = defaultSettings(d0.settings); d.images = d0.images.filter(m => m.geo).map(m => ({ ...m })); }
   tabs.push({ id: ++tabUid, name: `${tabs[tabIdx].name} (copy)`, doc: null }); tabIdx = tabs.length - 1; tabs[tabIdx - 0].doc = null;
-  applyTab(d); toast('The tree is copied to a new tab');
+  applyTab(d); toast(fresh ? 'The tree is copied to a new tab, with the default look' : 'The tree is copied to a new tab');
 }
 const imgWraps = new Map();   // the group of each image
 // The box in Page settings: ticked when every heavy element is lightened, empty when none, a dash (partly) when only some.
