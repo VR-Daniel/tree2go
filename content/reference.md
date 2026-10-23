@@ -679,9 +679,10 @@ The side plots are layers next to the tips. The first in the list is the nearest
 | `Distance from the previous element` | Space between the bars and the layer before it in `Layers`. Changing it moves the bars and every layer after it together, as one block, and making it smaller brings them back the same way. | 0 to 200 px | 12 px | A table is chosen for the bars |
 | `Bar thickness` | Share of the row each bar takes. | 10 to 100% | 70% | A table is chosen for the bars |
 | `Bar opacity` |  | 5 to 100% | 100% | A table is chosen for the bars |
-| `Color the bars by named clade` | Each bar takes the color of its clade name bar. | On<br>Off | Off | A table is chosen for the bars |
+| `Color the bars by named clade` | Each bar takes the color of the named clade its tip belongs to: the color given to the name bar of the clade, or else its highlight, or else the color of its branches. | On<br>Off | Off | A table is chosen for the bars |
 | `Show as proportions` | Stacks the columns as parts of a whole. | On<br>Off | Off | A table is chosen for the bars |
 | `Show them as` | Writes the parts as proportions or percentages. | Proportion<br>Percentage | Proportion | A table is chosen for the bars, `Show as proportions` is **On** |
+| `Logarithmic scale (log₁₀)` | Draws the bars on a base-10 logarithmic scale, so each tenfold step takes the same length, for values of very different sizes. The bars start one decade at or below the smallest value, the scale under the bars marks the decades, and the values shown keep the values themselves. Values of zero or below are not drawn. | On<br>Off | Off | A table is chosen for the bars, with one column, `Show as proportions` is **Off** |
 | `Show the values next to the bars` |  | On<br>Off | Off | A table is chosen for the bars, `Show as proportions` is **On** |
 | `Value size` |  | 1 to 100 px | 9 px | A table is chosen for the bars, `Show the values next to the bars` is **On**, `Show as proportions` is **On** |
 | `Upper limit of the bars` | Value at the end of the bar area, empty uses the highest value. | 0 to 10¹² |  | A table is chosen for the bars |
