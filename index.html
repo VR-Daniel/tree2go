@@ -4292,6 +4292,7 @@ function render() {
   let M = R.reach + 12;
   if (R.catRing != null) M = Math.max(M, R.catRing + (R.catSz + 2) / slot);
   M = Math.max(M, R.tipR + Math.min(R.fs * 1.15, 40) / slot);
+  M += Math.max(0, S.innerRadius || 0);   // inside out, the inner radius widens the gap in the middle, moving everything outwards
   radFlip = M;
   renderOnce();
 }
@@ -4390,7 +4391,7 @@ function renderOnce() {
   const span = L === 'circular' ? S.circSpan : S.fanSpan;
   const base = L === 'circular' ? S.rotation : 270 - span / 2 + S.rotation;
   const angOf = y => base + (y + 0.5) / N * span;
-  const rIn = Math.min(S.innerRadius, S.radius - 10);
+  const rIn = circ && S.catInvert ? 0 : Math.min(S.innerRadius, S.radius - 10);   // inside out, the inner radius is the gap in the middle (see render), not part of the tree
   const rOf = d => rIn + d / maxD * (S.radius - rIn);
   const sx = S.width / maxD;
   const stub = S.rootStub;
