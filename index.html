@@ -666,7 +666,7 @@ header .selmode #mrcaBtn[aria-expanded=true]{background:var(--accent); border-co
       <input id="search" type="search" placeholder="Find tips" aria-label="Find tips" title="Type a name, or a pattern with * and ?. Enter selects the matches, Shift+Enter selects their clade.">
       <button class="btn about-btn" id="aboutBtn" title="What tree2go is and how to use it">About</button>
     </div>
-    <input type="file" id="fileIn" hidden>
+    <input type="file" id="fileIn" multiple hidden>
     <input type="file" id="projIn" accept=".json,.gz,application/json,application/gzip" hidden>
   </header>
 
@@ -1419,7 +1419,7 @@ const SECTIONS_RAW = [
     { type: 'hint', text: s => !dtAvailable() ? 'Open a file with several dated trees (a posterior sample) to draw them as a cloud with the tree shown.' : s.layout !== 'rect' ? 'Drawn on rectangular trees.' : 'The trees of the sample, after the burn-in, on the tip order and time axis of the tree shown: dense where they agree, spread where they differ.' },
     { k: 'dtOn', type: 'check', label: 'Show the trees of the sample', enable: s => dtAvailable() && s.layout === 'rect' },
     { k: 'dtMode', type: 'seg', label: 'Trees drawn', opts: [['count', 'A number'], ['percent', 'A percentage']], enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
-    { type: 'hint', text: s => s.dtOn && dtAvailable() ? `${dtCount(s)} of ${treeSet.trees.length - (treeSet.skip || 0)} trees. Drawing more trees can slow the view down considerably, since every tree adds lines for the browser to draw.` : '' },
+    { type: 'hint', text: s => s.dtOn && dtAvailable() ? `${dtCount(s)} of ${usedRecs(treeSet).length} trees. Drawing more trees can slow the view down considerably, since every tree adds lines for the browser to draw.` : '' },
     { k: 'dtN', type: 'number', commit: true, label: 'Number of trees', min: 1, max: 100000, step: 10, show: s => s.dtMode !== 'percent', enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
     { k: 'dtPct', type: 'range', commit: true, label: 'Percentage of the trees', min: 1, max: 100, step: 1, unit: '%', show: s => s.dtMode === 'percent', enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
     { k: 'dtPick', type: 'seg', label: 'Which trees', opts: [['even', 'Evenly spaced'], ['random', 'At random']], enable: s => s.dtOn && dtAvailable() && s.layout === 'rect', sub: true },
@@ -2597,7 +2597,32 @@ function readMcmcLog(text, name) {
   return map.size ? { name, map, col: iPost >= 0 ? 'posterior' : iPr >= 0 ? 'LnL + LnPr' : 'LnL' } : null;
 }
 // Posterior of a sampled tree: written in the trees file (BEAST) or taken from the attached log.
-const treePost = t => t._post ?? (mcmcLog && t._name != null ? mcmcLog.map.get(stateNum(t._name)) : undefined) ?? null;
+// With several runs, each tree is looked up in the log of its own run (mcmcLog.runs: run → log), since every run has the
+// same generation numbers.
+const treePost = t => t._post ?? (mcmcLog && t._name != null ? (mcmcLog.runs ? (t.run ? mcmcLog.runs.get(t.run)?.map.get(stateNum(t._name)) : undefined) : t.run ? undefined : mcmcLog.map.get(stateNum(t._name))) : undefined) ?? null;
+/* The log of one run, for a set read from several runs: matched with its run by the name of the file (analysis.run2.p
+   with analysis.run2.t), or by the run number in it; failing that, the user confirms the first run without a log.
+   Logs are attached one after the other, so two logs without a run in their names are not given the same run. */
+let logQueue = Promise.resolve();
+const attachRunLog = (lg, name) => { logQueue = logQueue.then(() => attachRunLog0(lg, name)).catch(() => { }); };
+function attachRunLog0(lg, name) {
+  const R = setRuns(treeSet); if (!R) return;
+  const stem = n => n.toLowerCase().replace(/\.(t|trees|tre|tree|nex|nexus|p|log|txt)$/i, ''), num = n => { const m = /run[ _.-]?(\d+)/i.exec(n); return m ? +m[1] : null; };
+  let i = R.findIndex(r => stem(r.name) === stem(name));
+  if (i < 0 && num(name) != null) i = R.findIndex(r => num(r.name) === num(name));
+  const done = run => {
+    if (!(mcmcLog && mcmcLog.runs)) mcmcLog = { name: '', col: lg.col, runs: new Map() };
+    mcmcLog.runs.set(run, lg); mcmcLog.col = lg.col; mcmcLog.name = `MCMC logs of ${mcmcLog.runs.size} of ${R.length} runs`;
+    refreshTreeSetBox(); refreshAttach();
+    const mine = treeSet.trees.filter(t => t.run === run), hit = mine.filter(t => treePost(t) != null).length;
+    toast(`${name} → run ${run} (${R[run - 1].name}): ${hit} of ${mine.length} trees matched` + (mcmcLog.runs.size < R.length ? '. Attach the logs of the other runs too.' : '. MAP is ready in the Tree section.'));
+  };
+  if (i >= 0) return done(i + 1);
+  const free = R.findIndex((r, j) => !(mcmcLog && mcmcLog.runs && mcmcLog.runs.has(j + 1)));
+  if (free < 0) { toast(`${name}: every run has its log already. Remove the logs in Attachments to attach others.`); return; }
+  return askConfirm({ title: 'Which run is this log from?', ok: `Run ${free + 1}`, okClass: 'primary', cancel: 'Cancel', focusOk: true,
+    html: `The name of ${esc(name)} does not say which run it belongs to. Match it with run ${free + 1} (${esc(R[free].name)}), the first run without a log?` }).then(ok => { if (ok) done(free + 1); });
+}
 // Reads an attached file: SIMMAP, MCMC log or data table, recognized from its content.
 function addTableFile(file) {
   const r = new FileReader();
@@ -2605,6 +2630,7 @@ function addTableFile(file) {
     if (/^\s*>/.test(String(r.result))) { alnFromText(String(r.result), file.name); return; }   // a FASTA alignment, shown from Side plots
     if (looksSimmap(r.result)) { loadSmapText(String(r.result), file.name); return; }
     const lg = readMcmcLog(r.result, file.name);
+    if (lg && setRuns(treeSet)) { attachRunLog(lg, file.name); return; }   // a set of several runs: the log of one of them
     if (lg) {
       mcmcLog = lg; refreshTreeSetBox(); refreshAttach();
       const hit = treeSet && treeSet.trees ? treeSet.trees.filter(t => treePost(t) != null).length : 0;
@@ -2635,7 +2661,7 @@ function refreshAttach() {
     const sm = smap ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(smap.name)}">${esc(smap.name)}</span><button type="button" class="btn small danger" data-delsmap>Remove</button></div><span class="tmeta">SIMMAP, ${plural(smap.nMaps, 'map', 'maps')}</span></div>` : '';
     // the MCMC log (.log of BEAST2, .p of MrBayes), with what it is good for
     const lgHit = mcmcLog && treeSet && treeSet.trees ? treeSet.trees.filter(t => treePost(t) != null).length : 0;
-    const lg = mcmcLog ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(mcmcLog.name)}">${esc(mcmcLog.name)}</span><button type="button" class="btn small danger" data-dellog>Remove</button></div><span class="tmeta">MCMC log, ${plural(mcmcLog.map.size, 'state', 'states')} (${esc(mcmcLog.col)}). ${treeSet && treeSet.trees ? `${lgHit} of ${treeSet.trees.length} trees matched: choose MAP in Tree → Summary tree.` : 'Open the sampled trees (.t of MrBayes, .trees of BEAST) to build the MAP tree, a consensus tree is not enough.'}</span></div>` : '';
+    const lg = mcmcLog ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(mcmcLog.name)}">${esc(mcmcLog.name)}</span><button type="button" class="btn small danger" data-dellog>Remove</button></div><span class="tmeta">${mcmcLog.runs ? [...mcmcLog.runs].sort((a, b) => a[0] - b[0]).map(([k, l]) => `Run ${k}: ${esc(l.name)}`).join(', ') + '. ' : ''}MCMC log, ${plural(mcmcLog.runs ? [...mcmcLog.runs.values()].reduce((a, l) => a + l.map.size, 0) : mcmcLog.map.size, 'state', 'states')} (${esc(mcmcLog.col)}). ${treeSet && treeSet.trees ? `${lgHit} of ${treeSet.trees.length} trees matched: choose MAP in Tree → Summary tree.` : 'Open the sampled trees (.t of MrBayes, .trees of BEAST) to build the MAP tree, a consensus tree is not enough.'}</span></div>` : '';
     const al = alnSets.map((a, i) => `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(a.name)}">${esc(a.name)}</span><button type="button" class="btn small danger" data-delaln="${i}">Remove</button></div><span class="tmeta">Alignment: ${a.n} sequences of ${a.len} ${a.type === 'dna' ? 'bases' : 'residues'}. Shown from Side plots, Alignment.</span></div>`).join('');
     box.innerHTML = sm + lg + al + (ts.length || mcmcLog ? ts.map(t => `<div class="tabitem" data-id="${esc(t.id)}"><div class="thead"><span class="tname" title="${esc(t.name)}">${esc(t.name)}</span><button type="button" class="btn small danger" data-del>Remove</button></div><span class="tmeta">${esc(matchInfo(t, false))}</span><label class="tidcol"><span>Names in</span><select data-idcol>${t.header.map((h, i) => `<option value="${i}"${i === (t.idCol || 0) ? ' selected' : ''}>${esc(h)}</option>`).join('')}</select></label></div>`).join('') : sm ? '' : '<p class="hint">No tables yet.</p>');
     const ds = box.querySelector('[data-delsmap]'); if (ds) ds.onclick = () => { smap = null; persistSmap(); buildSide(); render(); toast('SIMMAP removed'); };
@@ -2882,7 +2908,7 @@ function splitTopLevel(s, sep) {   // split at sep outside quotes, [comments] an
 // The trees of the sample, after the burn-in (and as resampled when read), as a NEXUS file.
 async function exportTreeSet(kind = 'nexus') {
   if (!treeSet || !treeSet.trees || treeSet.trees.length < 2) return toast('Open a file with several trees first');
-  const used = treeSet.trees.slice(treeSet.skip || 0), fname = await exportName(kind === 'newick' ? '.nwk' : '.trees', `${used.length} trees of the sample${kind === 'newick' ? ' as Newick' : ''}`); if (!fname) return;
+  const used = usedRecs(treeSet), fname = await exportName(kind === 'newick' ? '.nwk' : '.trees', `${used.length} trees of the sample${kind === 'newick' ? ' as Newick' : ''}`); if (!fname) return;
   if (kind === 'newick') return saveFile(fname, used.map(r => r.nwk.replace(/;?\s*$/, ';')).join('\n') + '\n');   // one tree per line
   const R = treeSet.resample, note = `[${used.length} trees from tree2go${R ? `, resampled from ${R.total} trees after a burn-in of ${R.burnin}%` : ''}${treeSet.burnin ? `, burn-in of ${treeSet.burnin}% applied in tree2go` : ''}${treeSet.clockScaled ? ', branch lengths divided by the clock rate of each tree' : ''}]`;
   saveFile(fname, `#NEXUS\n${note}\nbegin trees;\n${used.map((r, i) => `  tree ${r._name || 'tree_' + (i + 1)} = ${r._unrooted ? '[&U]' : '[&R]'} ${r.nwk.replace(/;?\s*$/, ';')}`).join('\n')}\nend;\n`);
@@ -3150,18 +3176,29 @@ function compactTrees(all) {
     if (settings.readBinary !== false && !treeHasNetwork(t)) bin = encodeTreeBin(t, dg);
     else { nwkDigits = dg; try { cnwk = toNewick(t, true); } finally { nwkDigits = 10; } }
     lv.forEach((l, q) => { l.name = orig[q]; });
-    const rec = { cnwk, bin, names, _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i), mv: Object.keys(mv).length ? Object.fromEntries(Object.entries(mv).map(([a, b]) => [a, b.slice(0, i)])) : null };
+    const rec = { cnwk, bin, names, _name: t._name, _post: t._post, _unrooted: t._unrooted, run: t._run || 0, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i), mv: Object.keys(mv).length ? Object.fromEntries(Object.entries(mv).map(([a, b]) => [a, b.slice(0, i)])) : null };
     Object.defineProperty(rec, 'nwk', { get() { return toNewick(treeOfRec(this), true); } });   // the full Newick, rebuilt only when asked (export, project)
     recs.push(rec);
   }
   const sample = all.slice(0, 50), dated = hasLen && !unrooted && sample.filter(isTimeTree).length > sample.length / 4;
-  return { recs, keyList, tipsOf, unrooted, ref, hasLen, tot, dated };
+  // trees read from several files (the runs of MrBayes): where each run starts and ends, [start, end, run]
+  let runSeg = null;
+  if (recs.some(r => r.run)) { runSeg = []; recs.forEach((r, i) => { const L = runSeg[runSeg.length - 1]; if (L && L[2] === r.run) L[1] = i + 1; else runSeg.push([i, i + 1, r.run]); }); if (runSeg.length < 2) runSeg = null; }
+  return { recs, keyList, tipsOf, unrooted, ref, hasLen, tot, dated, runSeg };
 }
 // Counts every clade (and collects its ages) over the trees after the burn-in, from the compact records.
-function aggregateTrees(C, name, burnin = 0) {
-  const all = C.recs, skip = Math.min(all.length - 1, Math.floor(all.length * clamp(burnin, 0, 99) / 100)), clades = new Map();
-  for (let t = skip; t < all.length; t++) {
-    const r = all[t];
+// With several runs, the burn-in leaves out the first trees of each run, and runSel (run numbers, or null for all)
+// keeps only the trees of those runs. The trees used are listed in used.
+function aggregateTrees(C, name, burnin = 0, runSel = null) {
+  const all = C.recs, clades = new Map(), used = [], segs = C.runSeg || [[0, all.length, 0]];
+  let skip = 0;
+  for (const [a, b, run] of segs) {
+    if (runSel && !runSel.includes(run)) continue;
+    const sk = Math.min(b - a - 1, Math.floor((b - a) * clamp(burnin, 0, 99) / 100)); if (segs.length === 1) skip = sk;
+    for (let t = a + sk; t < b; t++) used.push(all[t]);
+  }
+  if (!used.length) throw new Error('No tree is left in the runs chosen.');
+  for (const r of used) {
     for (let i = 0; i < r.keys.length; i++) {
       const k = C.keyList[r.keys[i]]; let o = clades.get(k); if (!o) { o = { n: 0, ages: [], lens: [], sups: [] }; clades.set(k, o); }
       o.n++; if (C.hasLen) o.ages.push(+r.ages[i].toPrecision(6));
@@ -3170,7 +3207,44 @@ function aggregateTrees(C, name, burnin = 0) {
       if (r.mv) for (const kk in r.mv) { const v = r.mv[kk][i]; if (Number.isFinite(v)) { const m = o.meta || (o.meta = {}); (m[kk] || (m[kk] = [])).push(+v.toPrecision(6)); } }
     }
   }
-  return { name, count: all.length - skip, total: all.length, burnin, skip, hasLen: C.hasLen, dated: C.dated, clades, trees: all, tips: C.tipsOf, unrooted: C.unrooted, ref: C.ref, tot: C.tot, C };
+  return { name, count: used.length, total: all.length, burnin, skip, used, runSel: runSel && runSel.length ? runSel : null, hasLen: C.hasLen, dated: C.dated, clades, trees: all, tips: C.tipsOf, unrooted: C.unrooted, ref: C.ref, tot: C.tot, C };
+}
+// The trees of the set left after the burn-in (and in the runs chosen).
+const usedRecs = T => T.used || T.trees.slice(T.skip || 0);
+// The runs of a set read from several files, or null: [{ name, total, from, kept }], in the order of their numbers.
+const setRuns = T => T && T.C && T.C.runSeg && T.C.runInfo && T.C.runInfo.length > 1 ? T.C.runInfo : null;
+// "1,2,4" or "1-3": the run numbers written, checked against the k runs; null means every run.
+function parseRunSel(txt, k) {
+  const t = String(txt || '').trim().toLowerCase(); if (!t || t === 'all') return null;
+  const out = new Set();
+  for (const part of t.split(/[,;\s]+/).filter(Boolean)) {
+    const m = /^(\d+)(?:-(\d+))?$/.exec(part); if (!m) throw new Error(`"${part}" is not a run number. Write them as 1,2,4 or 1-3.`);
+    const a = +m[1], b = m[2] ? +m[2] : a; if (a < 1 || b > k || a > b) throw new Error(`There are ${k} runs: use numbers from 1 to ${k}.`);
+    for (let i = a; i <= b; i++) out.add(i);
+  }
+  return out.size === k ? null : [...out].sort((x, y) => x - y);
+}
+const runSelText = sel => sel ? sel.join(',') : 'all';
+/* Average standard deviation of split frequencies (ASDSF) between the runs chosen, as MrBayes reports it: for every split
+   found in at least 10% of the trees of some run, the standard deviation (n − 1) of its frequency in each run, averaged.
+   Tips and the whole tree are left out; so are the splits of a single tip from the rest in unrooted trees. */
+function asdsfOf(T) {
+  const segs = T && T.C && T.C.runSeg; if (!segs || !T.used) return null;
+  const runs = T.runSel || segs.map(s => s[2]); if (runs.length < 2) return null;
+  const nTips = T.tot ? T.tot[2] : 0, freq = new Map(), sizes = new Map();
+  for (const run of runs) sizes.set(run, 0);
+  const counts = new Map(runs.map(r => [r, new Map()]));
+  for (const r of T.used) { const c = counts.get(r.run); if (!c) continue; sizes.set(r.run, sizes.get(r.run) + 1); for (let i = 0; i < r.keys.length; i++) { const j = r.keys[i]; c.set(j, (c.get(j) || 0) + 1); } }
+  for (const [run, c] of counts) for (const [j, n] of c) { let f = freq.get(j); if (!f) { f = new Map(); freq.set(j, f); } f.set(run, n / sizes.get(run)); }
+  let sum = 0, nSplits = 0;
+  for (const [j, f] of freq) {
+    const tips = T.tips.get(T.C.keyList[j]), m = tips ? tips.length : 0;
+    if (m < 2 || m >= nTips || (T.unrooted && m >= nTips - 1)) continue;
+    const vs = runs.map(r => f.get(r) || 0); if (maxOf(vs) < 0.1) continue;
+    const mean = vs.reduce((a, b) => a + b, 0) / vs.length, sd = Math.sqrt(vs.reduce((a, b) => a + (b - mean) ** 2, 0) / (vs.length - 1));
+    sum += sd; nSplits++;
+  }
+  return nSplits ? { value: sum / nSplits, nSplits, runs } : null;
 }
 // Reads a list of trees and summarizes them (compactTrees, then aggregateTrees).
 const summarizeTrees = (all, name, burnin = 0) => aggregateTrees(compactTrees(all), name, burnin);
@@ -3194,14 +3268,15 @@ function persistTreeSetNow() {
 }
 // A tree set rebuilt from every one of its trees (as a project or the browser keeps them) and its state: burn-in, summary, resample.
 function setFromAll(all, S0 = {}) {
-  const trees = all.recs.map(([nwk, nm, post, un]) => { const t = parseNewick(nwk); if (nm) t._name = nm; if (post != null) t._post = post; if (un) t._unrooted = true; return t; });
-  const T = summarizeTrees(trees, all.name || 'Trees', S0.burnin || 0);   // the burn-in, as a percentage
+  const trees = all.recs.map(([nwk, nm, post, un, run]) => { const t = parseNewick(nwk); if (nm) t._name = nm; if (post != null) t._post = post; if (un) t._unrooted = true; if (run) t._run = run; return t; });
+  const C = compactTrees(trees); if (C.runSeg && Array.isArray(all.runs)) C.runInfo = all.runs;   // the runs it was read from
+  let T; try { T = aggregateTrees(C, all.name || 'Trees', S0.burnin || 0, S0.runSel || null); } catch (e) { T = aggregateTrees(C, all.name || 'Trees', S0.burnin || 0); }   // the burn-in, as a percentage
   Object.assign(T, { burnin: S0.burnin || T.burnin, mode: S0.mode || 'majority', pct: S0.pct ?? 50, shown: S0.shown || 1, resample: S0.resample || null, clockScaled: !!S0.clockScaled });
   return T;
 }
 // Every tree of the set and its state, as a project keeps them.
-const allTreesOf = T => T && T.trees && T.trees.length > 1 ? { name: T.name, recs: T.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0]) } : null;
-const setState = T => ({ skip: T.skip || 0, burnin: T.burnin || 0, mode: T.mode, pct: T.pct, shown: T.shown, resample: T.resample || null, clockScaled: !!T.clockScaled });
+const allTreesOf = T => T && T.trees && T.trees.length > 1 ? { name: T.name, recs: T.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0, r.run || 0]), runs: setRuns(T) } : null;
+const setState = T => ({ skip: T.skip || 0, burnin: T.burnin || 0, runSel: T.runSel || null, mode: T.mode, pct: T.pct, shown: T.shown, resample: T.resample || null, clockScaled: !!T.clockScaled });
 /* Every tree of a set, kept between sessions in IndexedDB. The summary of the set stays in localStorage, where it is read
    at once; localStorage holds only a few MB, so the trees themselves (for the MCC tree, another burn-in or one tree of the
    set) go to IndexedDB, compressed, as a project keeps them, and come back a moment after the app opens. One set only:
@@ -3308,7 +3383,7 @@ function annotateSummary(R) {
 }
 // A tree of the sample chosen by a score, with node ages from all the trees (MCC) or its own (MAP)
 function sampleSummary(kind, heights) {
-  const T = treeSet, used = T.trees.slice(T.skip || 0), C = T.C;
+  const T = treeSet, used = usedRecs(T), C = T.C;
   const logF = C.keyList.map(k => { const o = T.clades.get(k); return /_1$/.test(k) ? 0 : Math.log(o ? o.n / T.count : 1e-9); });   // tips add nothing
   let best = -Infinity, pick = null;
   for (const r of used) {
@@ -3344,6 +3419,13 @@ function treeSetBox() {
   setTimeout(refreshTreeSetBox);
   return d;
 }
+// The note of a set resampled when it was read: from one file, or from several runs.
+function resampleNote(r) {
+  const how = r.mode === 'random' ? `at random, seed ${r.seed}` : 'evenly spaced', n = v => v.toLocaleString('en');
+  if (r.runs) return (r.kept >= r.from ? `These ${n(r.kept)} trees are all the trees left after a burn-in of ${r.burnin}% in each of the ${r.runs} runs (${n(r.total)} trees in all).`
+    : `These ${n(r.kept)} trees were resampled (${how}), the same number from each of the ${r.runs} runs, from the ${n(r.from)} left after a burn-in of ${r.burnin}% in each (${n(r.total)} trees in all).`) + ' A burn-in here would drop some of the trees kept.';
+  return `These ${n(r.kept)} trees were resampled (${how}) from the ${n(r.from)} left after a burn-in of ${r.burnin}% of ${n(r.total)} trees. A burn-in here would drop some of the trees kept.`;
+}
 // Updates the tree set box (or the note of a clade tab, whose values come from its parent).
 function refreshTreeSetBox() {
   const d = $('treeSetBox'); if (!d) return;
@@ -3352,10 +3434,14 @@ function refreshTreeSetBox() {
   d.hidden = false;
   const raw = !!treeSet.trees;
   d.innerHTML = `<div class="subhead">Several trees</div>
-    <p class="hint">${esc(treeSet.name)}: ${plural(treeSet.total ?? treeSet.count, 'tree', 'trees')}${treeSet.unrooted ? ', unrooted (clades are read as splits, and node ages need a clock)' : treeSet.hasLen ? ', with branch lengths' : ''}${treeSet.burnin ? `, ${treeSet.count} used after the burn-in` : ''}.${raw ? '' : ' Open the file again to pick another tree, change the burn-in or build a consensus.'}</p>
-    ${treeSet.resample ? `<p class="rsnote">These ${treeSet.resample.kept.toLocaleString('en')} trees were resampled (${treeSet.resample.mode === 'random' ? `at random, seed ${treeSet.resample.seed}` : 'evenly spaced'}) from the ${treeSet.resample.from.toLocaleString('en')} left after a burn-in of ${treeSet.resample.burnin}% of ${treeSet.resample.total.toLocaleString('en')} trees. A burn-in here would drop some of the trees kept.</p>${treeSet.burnin ? `<p class="rsnote">A second burn-in of ${treeSet.burnin}% was applied here: ${treeSet.count.toLocaleString('en')} of these ${treeSet.resample.kept.toLocaleString('en')} trees are used.</p>` : ''}` : ''}
+    <p class="hint">${esc(treeSet.name)}: ${plural(treeSet.total ?? treeSet.count, 'tree', 'trees')}${treeSet.unrooted ? ', unrooted (clades are read as splits, and node ages need a clock)' : treeSet.hasLen ? ', with branch lengths' : ''}${treeSet.count < (treeSet.total ?? treeSet.count) ? `, ${treeSet.count.toLocaleString('en')} used${treeSet.runSel ? ` (runs ${runSelText(treeSet.runSel)})` : ' after the burn-in'}` : ''}.${raw ? '' : ' Open the file again to pick another tree, change the burn-in or build a consensus.'}</p>
+    ${treeSet.resample ? `<p class="rsnote">${resampleNote(treeSet.resample)}</p>${treeSet.burnin ? `<p class="rsnote">A second burn-in of ${treeSet.burnin}% was applied here${setRuns(treeSet) ? ' to each run' : ''}: ${treeSet.count.toLocaleString('en')} of these ${treeSet.resample.kept.toLocaleString('en')} trees are used${treeSet.runSel ? `, from runs ${runSelText(treeSet.runSel)}` : ''}.</p>` : ''}` : ''}
     <div class="row${raw ? '' : ' off'}"><label for="tsBurn">Burn-in</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsBurn" type="number" min="0" max="99" step="1" value="${treeSet.burnin || 0}"${raw ? '' : ' disabled'}><span class="u">%</span></span><button class="btn small" id="tsBurnApply"${raw ? '' : ' disabled'}>Apply</button></span></div>
-    <p class="hint">The first trees of the file, left out of every summary: summary trees, support values and age densities.</p>
+    <p class="hint">The first trees ${setRuns(treeSet) ? 'of each run' : 'of the file'}, left out of every summary: summary trees, support values and age densities.</p>
+    ${raw && setRuns(treeSet) ? (() => { const R = setRuns(treeSet), A = asdsfOf(treeSet); return `
+    <div class="row"><label for="tsRuns">Runs used</label><span class="inline"><span class="numwrap" style="width:110px"><input class="num" id="tsRuns" type="text" value="${runSelText(treeSet.runSel)}" aria-label="Runs used" style="text-align:left" title="${esc(R.map((r, i) => `${i + 1}: ${r.name}`).join('\n'))}"><span class="u"></span></span><button class="btn small" id="tsRunsApply">Apply</button></span></div>
+    <p class="hint">${R.length} runs, numbered in the order of their file names${R.every(r => r.kept === R[0].kept) ? ` (${R[0].kept.toLocaleString('en')} trees each)` : ''}. Separate them with commas or give a range: 1,2,4 or 1-3.</p>
+    <p class="hint">${A ? `ASDSF of runs ${A.runs.join(', ')}: <b>${A.value < 0.0001 ? A.value.toExponential(1) : A.value.toFixed(4)}</b>, from ${plural(A.nSplits, 'split', 'splits')} found in at least 10% of the trees of some run. MrBayes takes values below 0.01 as a sign that the runs converged.` : 'Choose at least two runs to compare them with the ASDSF.'}</p>`; })() : ''}
     <div class="row${raw ? '' : ' off'}"><label for="tsIdx">Show tree number</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsIdx" type="number" min="1" max="${treeSet.total ?? treeSet.count}" step="1" value="${treeSet.shown || 1}"${raw ? '' : ' disabled'}><span class="u"></span></span><button class="btn small" id="tsShow"${raw ? '' : ' disabled'}>Show</button></span></div>
     <div class="row${raw ? '' : ' off'}"><label for="tsKind">Summary tree</label><select id="tsKind"${raw ? '' : ' disabled'}>${[['majority', 'Majority rule'], ['strict', 'Strict consensus'], ['allcompat', 'Maximum compatible'], ['mcc', 'Maximum clade credibility (MCC)'], ['map', 'Maximum a posteriori (MAP)']].map(([v, l]) => `<option value="${v}"${(treeSet.mode || 'majority') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
     <p class="hint">${({ majority: 'Keeps the clades found in more than the chosen share of the trees.', strict: 'Keeps only the clades found in every tree.', allcompat: 'The majority-rule tree plus the less frequent clades that do not conflict with it (allcompat in MrBayes).', mcc: 'Maximum clade credibility: the sampled tree whose clades are, together, the most frequent, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.', map: treeSet.trees && treeSet.trees.some(t => treePost(t) != null) ? `Maximum a posteriori: the sampled tree with the highest posterior probability${mcmcLog ? ` (from ${mcmcLog.name})` : ''}.` : 'Maximum a posteriori: needs the posterior of each tree. BEAST writes it in the trees file, for BEAST2 or MrBayes attach the .log or .p file in Attachments.' })[treeSet.mode || 'majority']}</p>
@@ -3371,11 +3457,25 @@ function refreshTreeSetBox() {
     const e = { target: burnIn };
     // what the set already was (how it was resampled when read, its options) is kept with the new burn-in
     const b = clamp(Math.round(+e.target.value || 0), 0, 99), keep = { shown: treeSet.shown, mode: treeSet.mode, pct: treeSet.pct, heights: treeSet.heights, built: treeSet.built, resample: treeSet.resample, clockScaled: treeSet.clockScaled };
-    treeSet = Object.assign(aggregateTrees(treeSet.C, treeSet.name, b), keep);
+    treeSet = Object.assign(aggregateTrees(treeSet.C, treeSet.name, b, treeSet.runSel), keep);
     persistTreeSet(); render(); refreshTreeSetBox();
     if (treeSet.shown == null && treeSet.built && treeSet.trees) { $('tsBuild').click(); toast(`Burn-in ${b}%: ${plural(treeSet.count, 'tree', 'trees')} used, summary tree rebuilt`); }
     else toast(`Burn-in ${b}%: ${plural(treeSet.count, 'tree', 'trees')} used`);
   });
+  // the runs used: the summary trees, supports and ASDSF use only their trees
+  const runsIn = d.querySelector('#tsRuns');
+  if (runsIn) {
+    runsIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); d.querySelector('#tsRunsApply').click(); } });
+    d.querySelector('#tsRunsApply').addEventListener('click', () => {
+      let sel; try { sel = parseRunSel(runsIn.value, setRuns(treeSet).length); } catch (e) { toast(e.message); return; }
+      const keep = { shown: treeSet.shown, mode: treeSet.mode, pct: treeSet.pct, heights: treeSet.heights, built: treeSet.built, resample: treeSet.resample, clockScaled: treeSet.clockScaled };
+      try { treeSet = Object.assign(aggregateTrees(treeSet.C, treeSet.name, treeSet.burnin || 0, sel), keep); } catch (e) { toast(e.message); return; }
+      persistTreeSet(); render(); refreshTreeSetBox();
+      const what = sel ? `Runs ${runSelText(sel)}` : 'Every run';
+      if (treeSet.shown == null && treeSet.built && treeSet.trees) { $('tsBuild').click(); toast(`${what}: ${plural(treeSet.count, 'tree', 'trees')} used, summary tree rebuilt`); }
+      else toast(`${what}: ${plural(treeSet.count, 'tree', 'trees')} used`);
+    });
+  }
   idx.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); d.querySelector('#tsShow').click(); } });
   d.querySelector('#tsKind').onchange = e => { treeSet.mode = e.target.value; refreshTreeSetBox(); };
   const hs = d.querySelector('#tsHeights'); if (hs) hs.onchange = e => { treeSet.heights = e.target.value; };
@@ -3384,6 +3484,10 @@ function refreshTreeSetBox() {
     const m = treeSet.mode || 'majority', pct = m === 'strict' ? 100 : clamp(treeSet.pct ?? 50, 50, 100);
     try {
       treeSet.shown = null; treeSet.built = true;
+      if (m === 'map' && setRuns(treeSet)) {   // several runs: the log of every run used
+        const need = treeSet.runSel || setRuns(treeSet).map((r, i) => i + 1), miss = need.filter(k => !(mcmcLog && mcmcLog.runs && mcmcLog.runs.has(k)));
+        if (miss.length) { toast(`Attach the .p file of run${miss.length > 1 ? 's' : ''} ${miss.join(', ')} in Attachments, or leave ${miss.length > 1 ? 'them' : 'it'} out in Runs used, to build the MAP tree.`); return; }
+      }
       if (m === 'map' && !treeSet.trees.some(t => treePost(t) != null)) { toast('Attach the .log of BEAST2 or the .p file of MrBayes in Attachments to build the MAP tree.'); return; }
       if (m === 'mcc' || m === 'map') showFromSet(sampleSummary(m, treeSet.heights || 'median'), m === 'mcc' ? 'Maximum clade credibility tree' : 'Maximum a posteriori tree');
       else if (m === 'allcompat') showFromSet(consensusTree(50, true), 'Maximum compatible tree');
@@ -3403,26 +3507,33 @@ function resetForNewTree() {
 // A file with very many trees: before reading them, offer a burn-in and a resample, so only the trees kept are read.
 function countTreeLines(txt) { const nex = /begin\s+trees\s*;/i.test(txt), re = nex ? /^[ \t]*u?tree\s/gim : /^[ \t]*(\[[^\]\n]*\][ \t]*)*\(/gm; let n = 0; while (re.exec(txt)) n++; return { n, nex }; }
 // The window of the burn-in and resample, for a file of C.n trees: gives null (closed), false (load them all) or the choices.
+// With C.runs ([{ name, n }], the files of several runs), the burn-in is applied to each run, the same number of trees is
+// kept from each, and "Combine all after the burn-in" replaces "Load them all".
 function resampleDialog(C) {
-  const p = askConfirm({ title: `${C.n.toLocaleString('en')} trees`, ok: 'Load the trees kept', okClass: 'primary', cancel: 'Load them all', focusOk: true, dismiss: true,
-    html: `${C.mb ? `This file is large (${Math.round(C.mb).toLocaleString('en')} MB)` : 'This file has many trees'}, and reading them all takes a while. A burn-in and a resample read only the trees kept.
+  const R = C.runs && C.runs.length > 1 ? C.runs : null, leftOf = b => R ? R.map(r => r.n - Math.floor(r.n * b / 100)) : [C.n - Math.floor(C.n * b / 100)];
+  const p = askConfirm({ title: R ? `${R.length} runs, ${C.n.toLocaleString('en')} trees` : `${C.n.toLocaleString('en')} trees`, ok: 'Load the trees kept', okClass: 'primary', cancel: R ? 'Combine all after the burn-in' : 'Load them all', focusOk: true, dismiss: true,
+    html: `${R ? `The burn-in is applied to each run, and the same number of trees is kept from each.`
+      : `${C.mb ? `This file is large (${Math.round(C.mb).toLocaleString('en')} MB)` : 'This file has many trees'}, and reading them all takes a while. A burn-in and a resample read only the trees kept.`}
       <div class="rsform"><span>Burn-in</span><div class="ctl"><span class="numwrap"><input class="num boxed" type="number" id="rsBurn" min="0" max="99" step="1" value="25"><span class="unit">%</span></span></div>
-      <span>Keep</span><div class="ctl"><select id="rsKind"><option value="n">A number of trees</option><option value="pct">A percentage</option></select><input class="num boxed" type="number" id="rsN" min="1" step="1" value="${Math.min(10000, Math.round(C.n * 0.75))}"></div>
+      <span>Keep</span><div class="ctl"><select id="rsKind"><option value="n">A number of trees</option><option value="pct">A percentage</option></select><input class="num boxed" type="number" id="rsN" min="1" step="1" value="${Math.min(10000, R ? R.length * minOf(leftOf(25)) : Math.round(C.n * 0.75))}"></div>
       <span>Which trees</span><div class="ctl"><select id="rsMode"><option value="even">Evenly spaced</option><option value="random">At random</option></select><span id="rsSeedW" hidden>Seed <input class="num boxed" type="number" id="rsSeed" min="0" step="1" value="123"></span></div></div><p class="hint rsmsg" id="rsMsg"></p>` });
   setTimeout(() => {
     const m = $('rsMode'), w = $('rsSeedW'); if (m && w) m.onchange = () => { w.hidden = m.value !== 'random'; };
     // how many trees are left after the burn-in, and whether the number asked can be kept
     const check = () => {
-      const b = clamp(+$('rsBurn').value || 0, 0, 99), left = C.n - Math.floor(C.n * b / 100), kind = $('rsKind').value, v = +$('rsN').value || 0, msg = $('rsMsg');
-      const bad = kind === 'pct' ? !(v >= 1 && v <= 100) : !(v >= 1 && v <= left);
+      const b = clamp(+$('rsBurn').value || 0, 0, 99), lefts = leftOf(b), left = lefts.reduce((x, y) => x + y, 0), kind = $('rsKind').value, v = +$('rsN').value || 0, msg = $('rsMsg');
+      const cap = R ? R.length * minOf(lefts) : left;   // the same number from each run: the shortest run sets the limit
+      const bad = kind === 'pct' ? !(v >= 1 && v <= 100) : !(v >= 1 && v <= cap);
       $('cOk').disabled = bad; msg.classList.toggle('warn', bad);
-      msg.textContent = bad ? (kind === 'pct' ? 'Keep between 1 and 100% of the trees left.' : `Only ${left.toLocaleString('en')} trees are left after a burn-in of ${b}%: keep fewer, or lower the burn-in.`)
+      msg.textContent = bad ? (kind === 'pct' ? 'Keep between 1 and 100% of the trees left.' : R ? `The same number is kept from each run, so at most ${cap.toLocaleString('en')} trees (${minOf(lefts).toLocaleString('en')} from each of the ${R.length} runs) after a burn-in of ${b}%: keep fewer, or lower the burn-in.` : `Only ${left.toLocaleString('en')} trees are left after a burn-in of ${b}%: keep fewer, or lower the burn-in.`)
         : `${left.toLocaleString('en')} trees are left after the burn-in. A sample of 10,000 trees is more than enough for summary trees.`;
     };
     ['rsBurn', 'rsKind', 'rsN'].forEach(id => { const el = $(id); if (el) { el.addEventListener('input', check); el.addEventListener('change', check); } });
     check();
   });
-  return p.then(ok => ok === null ? null : !ok ? false : { b: clamp(+$('rsBurn').value || 0, 0, 99), kind: $('rsKind').value, val: +$('rsN').value || 0, mode: $('rsMode').value, seed: +$('rsSeed').value || 0 });
+  const vals = () => ({ b: clamp(+$('rsBurn').value || 0, 0, 99), kind: $('rsKind').value, val: +$('rsN').value || 0, mode: $('rsMode').value, seed: +$('rsSeed').value || 0 });
+  // several runs: "Combine all after the burn-in" keeps every tree left, with the burn-in chosen
+  return p.then(ok => ok === null ? null : !ok ? (R ? { ...vals(), kind: 'pct', val: 100, all: true } : false) : vals());
 }
 // The trees kept: list holds the trees in order (their lines, or their positions in the file); o, the choices of the window.
 function pickTrees(list, o) {
@@ -3443,6 +3554,56 @@ function loadTreesText(txt, name) {
     const r = pickTrees(idx, o), keepAll = new Set(idx), out = lines.filter((l, i) => !keepAll.has(i) || r.pick.has(i)).join('\n');
     loadTreesTextNow(out, name); noteResample(o, idx.length, r);
   });
+}
+/* Several files of trees opened together, such as the .t files of the runs of MrBayes (run1, run2…): read as one set.
+   They must hold the same tips. The window always opens: the burn-in is applied to each run, the same number of trees
+   is kept from each, and the trees kept are combined. Each tree remembers its run, for the runs used by the summary trees
+   and the ASDSF, and for matching it with the MCMC log of its run. */
+async function readRuns(files) {
+  files = [...files].sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }));
+  if (files.some(f => f.size > BIG_TREES)) return toast(`${files.find(f => f.size > BIG_TREES).name} is too large to combine with other runs. Open the runs one at a time, or thin them first.`);
+  const had = !!tree; let texts;
+  try { texts = await Promise.all(files.map(f => f.text())); } catch (e) { return toast('These files could not be read'); }
+  const runs = [], treeRe = nex => nex ? /^[ \t]*u?tree\s/i : /^[ \t]*(\[[^\]]*\][ \t]*)*\(/;
+  for (let i = 0; i < files.length; i++) {
+    const txt = texts[i].replace(/^\uFEFF/, ''), name = files[i].name;
+    if (/^\s*\{/.test(txt)) return toast(`${name} is a project, not a file of trees. Open several files only to combine the runs of one analysis.`);
+    const C = countTreeLines(txt); if (C.n < 1) return toast(`No trees were found in ${name}.`);
+    const lines = txt.split('\n'), re = treeRe(C.nex), idx = []; lines.forEach((l, j) => { if (re.test(l)) idx.push(j); });
+    // the tips of its first tree: the head of the file (taxa, translate) and that tree alone
+    let tips;
+    try { const first = parseTreeFile(lines.slice(0, idx[0] + 1).join('\n') + (C.nex ? '\nend;' : '')).trees[0]; tips = leaves(first).map(l => l.name).sort(); }
+    catch (e) { return toast(`${name}: ${e.message}`); }
+    runs.push({ name, n: C.n, txt, lines, idx, tips });
+  }
+  const ref = runs[0].tips.join('\u0001'), odd = runs.find(r => r.tips.join('\u0001') !== ref);
+  if (odd) return toast(`${odd.name} does not have the same tips as ${runs[0].name}: only the runs of one analysis can be combined.`);
+  const total = runs.reduce((a, r) => a + r.n, 0);
+  const o = await resampleDialog({ n: total, runs: runs.map(r => ({ name: r.name, n: r.n })) });
+  if (!o) return;   // closed: nothing is loaded
+  toast('Reading the trees of the runs…'); await new Promise(r => setTimeout(r, 60));
+  const k = runs.length, all = [], info = [];
+  try {
+    // the same number of trees from each run (the shortest run sets it), or the same share of each
+    const lefts = runs.map(r => r.n - Math.floor(r.n * o.b / 100)), share = o.kind === 'pct' ? null : Math.min(Math.floor(o.val / k), minOf(lefts));
+    runs.forEach((r, i) => {
+      const want = share == null ? Math.max(1, Math.round(lefts[i] * clamp(o.val, 0, 100) / 100)) : Math.max(1, share + (i < o.val - share * k && share < minOf(lefts) ? 1 : 0));
+      const pk = pickTrees(r.idx, { b: o.b, kind: 'n', val: want, mode: o.mode, seed: (o.seed || 0) + i }), keepAll = new Set(r.idx);
+      const out = r.lines.filter((l, j) => !keepAll.has(j) || pk.pick.has(j)).join('\n'), P = parseTreeFile(out);
+      for (const t of P.trees) { t._run = i + 1; all.push(t); }
+      info.push({ name: r.name, total: r.n, from: pk.from, kept: P.trees.length });
+    });
+  } catch (e) { return toast(e.message); }
+  // the name of the analysis: the files without .run1.t, .t, .trees…
+  const stems = new Set(files.map(f => f.name.replace(/(\.run\d+)?\.(t|trees|tre|tree|nex|nexus|nwk|newick|txt)$/i, '')));
+  const name = (stems.size === 1 ? [...stems][0] : files[0].name) + ` (${k} runs)`;
+  loadTreeList(all, name, '');
+  if (!treeSet) return;
+  treeSet.C.runInfo = info;
+  treeSet.resample = { total, burnin: o.b, from: info.reduce((a, r) => a + r.from, 0), kept: all.length, mode: o.mode, seed: o.mode === 'random' ? o.seed : null, runs: k };
+  persistTreeSet(); refreshTreeSetBox();
+  toast(`${all.length.toLocaleString('en')} trees of ${k} runs combined, ${info.map(r => r.kept.toLocaleString('en')).join(' + ')} after a burn-in of ${o.b}% in each`);
+  if (had && tree) confirmAttachments();
 }
 /* A tree file too large to read whole (more than BIG_TREES bytes): browsers cannot hold it as one text. It is read in
    pieces, twice: once to count its trees, and once to keep only the trees chosen in the window. Memory then depends
@@ -3485,15 +3646,17 @@ async function readBigTrees(file) {
     toast(e instanceof RangeError ? 'Too many trees for this browser to hold at once: read fewer of them (burn-in and resample).' : 'This file could not be read: ' + (e.message || e));
   }
 }
-function loadTreesTextNow(txt, name) {
-  const P = parseTreeFile(txt);
+function loadTreesTextNow(txt, name) { loadTreeList(parseTreeFile(txt).trees, name, txt); }
+// Shows a list of trees: one tree, or a set of them. txt is the text they came from, if any.
+function loadTreeList(trees, name, txt = '') {
+  const P = { trees };
   resetForNewTree();
   // MrBayes clock trees carry their branch lengths in substitutions per site: divided by each tree's clock rate, they are in time
   const clocked = P.trees.length > 1 && P.trees.filter(t => t._clockrate > 0).length > P.trees.length / 2;
   if (clocked) for (const t of P.trees) if (t._clockrate > 0) walkAll(t, x => { if (x.len != null) x.len /= t._clockrate; });
   if (P.trees.length > 1) {
     treeSet = summarizeTrees(P.trees, name || 'Trees', 0); treeSet.clockScaled = clocked; treeSet.shown = 1; treeSet.mode = 'majority'; treeSet.pct = 50;
-    srcText = txt.length < 2e6 ? txt : ''; $('nwkIn').value = srcText ? txt : toNewick(P.trees[0]) + ';';
+    srcText = txt && txt.length < 2e6 ? txt : ''; $('nwkIn').value = srcText ? txt : toNewick(P.trees[0]) + ';';
     if (settings.supportSource === 'tree') settings.supportSource = 'boot';
     setTree(cloneTree(P.trees[0])); persistTreeSet(); buildSide();
     toast(`${plural(P.trees.length, 'tree', 'trees')} read, showing tree 1`);
@@ -3649,8 +3812,7 @@ async function runBench(auto) {   // auto: opened with ?bench=auto, the test run
   if (!T || !ST || !ST2) { if (auto) window.__benchResult = { error: 'The test files could not be downloaded' }; return benchWindow('Test performance', 'The test files could not be downloaded. The test needs an internet connection.', 'Close'); }
   // the user's work, kept whole (the trees of a set too), and nothing written in the browser until it is back
   const had = !!tree, snap = had ? projectObject() : null;
-  if (snap && treeSet && treeSet.trees && treeSet.trees.length > 1) snap.treesAll = { name: treeSet.name, recs: treeSet.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0]),
-    state: { skip: treeSet.skip || 0, burnin: treeSet.burnin || 0, mode: treeSet.mode, pct: treeSet.pct, shown: treeSet.shown, resample: treeSet.resample || null, clockScaled: !!treeSet.clockScaled } };
+  if (snap && treeSet && treeSet.trees && treeSet.trees.length > 1) snap.treesAll = { ...allTreesOf(treeSet), state: setState(treeSet) };
   const keep = snap ? JSON.parse(JSON.stringify(snap)) : null;
   benchOn = true; const R = {};
   const time = async (key, label, fn) => { step(`${label}…`); await benchNext(); const a = performance.now(); await fn(); R[key] = performance.now() - a; };
@@ -3713,7 +3875,7 @@ function projectObject() {
     format: 'tree2go-project', version: 1, saved: new Date().toISOString(),
     newick: toNewick(tree), tree: serialize(tree), settings, source: srcText, images: imageRecords(), smap: smapRecord(), trees: treeSetRecord(), ro: treeSetRO,
     alignments: alnSets.map(a => ({ name: a.name, len: a.len, type: a.type, seqs: [...a.seqs] })),
-    mcmc: mcmcLog ? { name: mcmcLog.name, col: mcmcLog.col, map: [...mcmcLog.map] } : null,
+    mcmc: mcmcLog ? { name: mcmcLog.name, col: mcmcLog.col, map: mcmcLog.map ? [...mcmcLog.map] : null, runs: mcmcLog.runs ? [...mcmcLog.runs].map(([k, l]) => [k, l.name, l.col, [...l.map]]) : null } : null,
     geo: [...geoStore],
     tabs: (() => { const r = tabsRecord(); if (r) for (const t of r.tabs) if (t.doc) t.doc.images = (t.doc.images || []).map(m => ({ ...m, src: imgStore.get(m.sid) })); return r; })()
   };
@@ -3733,8 +3895,7 @@ async function saveProject() {
   const full = JSON.stringify(proj, null, 1), bare = JSON.stringify(lite, null, 1), size = t => { const b = new Blob([t]).size; return b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; };
   const A = attachSummary(), imgs = figImages.length;
   // every tree of the set, so a burn-in, a consensus or one tree of it can be changed without the file
-  const allTrees = treeSet && treeSet.trees && treeSet.trees.length > 1 ? { name: treeSet.name, recs: treeSet.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0]),
-    state: { skip: treeSet.skip || 0, burnin: treeSet.burnin || 0, mode: treeSet.mode, pct: treeSet.pct, shown: treeSet.shown, resample: treeSet.resample || null, clockScaled: !!treeSet.clockScaled } } : null;
+  const allTrees = treeSet && treeSet.trees && treeSet.trees.length > 1 ? { ...allTreesOf(treeSet), state: setState(treeSet) } : null;
   const treesText = allTrees ? JSON.stringify(allTrees) : '';
   const ok = await askConfirm({ title: 'Save project', ok: 'Save project', okClass: 'primary', focusOk: true,
     html: `${!A.list.length && !imgs ? '<div hidden>' : ''}<label class="savechoice"><input type="radio" name="saveAtt" value="1" checked> <span><b>With the attached files</b> (${size(full)})<br>Anyone who opens it sees the same figure. It holds: ${[attachKinds(A), imgs ? `Images (${imgs})` : ''].filter(Boolean).join(', ')}.</span></label>
@@ -3765,6 +3926,7 @@ function openProject(o) {
   if (settings.layout === 'slanted') settings.layout = 'rect';
   if (Array.isArray(o.geo)) { geoStore = new Map(o.geo); geoCache = null; geoSave(); }   // the maps of the project
   if (o.mcmc && o.mcmc.map) mcmcLog = { name: o.mcmc.name, col: o.mcmc.col, map: new Map(o.mcmc.map) };   // the MCMC log of the project
+  else if (o.mcmc && Array.isArray(o.mcmc.runs)) mcmcLog = { name: o.mcmc.name, col: o.mcmc.col, runs: new Map(o.mcmc.runs.map(([k, n, c, m]) => [k, { name: n, col: c, map: new Map(m) }])) };   // one log per run
   if (Array.isArray(o.alignments)) { alnSets = o.alignments.map(a => ({ seqs: new Map(a.seqs), len: a.len, n: a.seqs.length, type: a.type, name: a.name })); alnSync(); alnSave(); }   // the alignments of the project
   srcText = o.source || o.newick || '';
   loadImageRecords(o.images); persistImages();
@@ -4724,9 +4886,9 @@ function renderOnce() {
   if (S.dtOn && dtAvailable() && L === 'rect' && maxD > 0) {
     const rowY = new Map(); for (const n of vis) if (!n.children.length) rowY.set(normTip(n.name || ''), n._py);
     let sig = 0, i0 = 0; for (const [k, y] of rowY) sig += (++i0) * y + k.length;
-    const key = [treeSet.name, treeSet.skip, S.dtMode, S.dtN, S.dtPct, S.dtPick, S.dtSeed, S.branchAngle, S.branchRound, f2(sx), f2(maxD), f2(sig)].join(':');
+    const key = [treeSet.name, treeSet.skip, runSelText(treeSet.runSel), usedRecs(treeSet).length, S.dtMode, S.dtN, S.dtPct, S.dtPick, S.dtSeed, S.branchAngle, S.branchRound, f2(sx), f2(maxD), f2(sig)].join(':');
     if (!dtCache || dtCache.key !== key) {
-      const used = treeSet.trees.slice(treeSet.skip || 0), paths = [];
+      const used = usedRecs(treeSet), paths = [];
       // a branch as the tree draws its own: square corners, or leaving the parent at an angle with an optional rounded bend
       const seg = (ax, ay, cx, cy) => {
         if (!elbow || Math.abs(cy - ay) < 1e-6) return `M${f2(ax)},${f2(cy)}H${f2(cx)}`;
@@ -7328,7 +7490,7 @@ document.querySelectorAll('.selmode button[data-m]').forEach(b => {
     toast(selMode === 'clade' ? (sel.size ? 'Selection extended to whole clades' : 'Clicks now select whole clades') : 'Clicks now select single elements');
   };
 });
-$('fileIn').onchange = e => { const f = e.target.files[0]; if (f) readFile(f); e.target.value = ''; };
+$('fileIn').onchange = e => { const fs = [...e.target.files]; if (fs.length > 1) readRuns(fs); else if (fs[0]) readFile(fs[0]); e.target.value = ''; };
 $('undoBtn').onclick = undo; $('redoBtn').onclick = redo;
 $('zIn').onclick = () => zoomAt(svg.clientWidth / 2, svg.clientHeight / 2, 1.3);
 $('zOut').onclick = () => zoomAt(svg.clientWidth / 2, svg.clientHeight / 2, 1 / 1.3);
@@ -7418,7 +7580,7 @@ const main = $('main'); let dragN = 0;
 main.addEventListener('dragenter', e => { e.preventDefault(); dragN++; $('drop').classList.add('on'); });
 main.addEventListener('dragover', e => e.preventDefault());
 main.addEventListener('dragleave', () => { if (--dragN <= 0) { dragN = 0; $('drop').classList.remove('on'); } });
-main.addEventListener('drop', e => { e.preventDefault(); dragN = 0; $('drop').classList.remove('on'); const f = e.dataTransfer.files[0]; if (f && /\.(csv|tsv)$/i.test(f.name)) addTableFile(f); else if (f) readFile(f); else { const t = e.dataTransfer.getData('text'); if (t) loadText(t); } });
+main.addEventListener('drop', e => { e.preventDefault(); dragN = 0; $('drop').classList.remove('on'); const f = e.dataTransfer.files[0]; if (e.dataTransfer.files.length > 1 && ![...e.dataTransfer.files].some(x => /\.(csv|tsv)$/i.test(x.name))) readRuns([...e.dataTransfer.files]); else if (f && /\.(csv|tsv)$/i.test(f.name)) addTableFile(f); else if (f) readFile(f); else { const t = e.dataTransfer.getData('text'); if (t) loadText(t); } });
 
 document.addEventListener('keydown', e => {
   const inField = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
@@ -10402,7 +10564,7 @@ function pieSvg(x, y, r, parts, border) {
 // ---- DensiTree: the trees of a dated sample, faint, on the tip order and the time axis of the tree shown
 let dtCache = null;
 const pieHits = [];
-const dtCount = S => { const n = treeSet ? treeSet.trees.length - (treeSet.skip || 0) : 0; return Math.max(1, Math.min(n, S.dtMode === 'percent' ? Math.round(n * clamp(S.dtPct, 1, 100) / 100) : Math.round(S.dtN || 1))); };
+const dtCount = S => { const n = treeSet ? usedRecs(treeSet).length : 0; return Math.max(1, Math.min(n, S.dtMode === 'percent' ? Math.round(n * clamp(S.dtPct, 1, 100) / 100) : Math.round(S.dtN || 1))); };
 function dtPickIdx(S, n) {
   const N = dtCount(S);
   if (S.dtPick !== 'random') return [...Array(N)].map((_, i) => Math.floor(i * n / N));
@@ -10411,7 +10573,7 @@ function dtPickIdx(S, n) {
   const idx = [...Array(n).keys()]; for (let i = 0; i < N; i++) { const j = i + Math.floor(rnd() * (n - i)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
   return idx.slice(0, N).sort((x, y) => x - y);
 }
-const dtAvailable = () => !!(treeSet && treeSet.hasLen && !treeSet.unrooted && treeSet.trees && treeSet.trees.length - (treeSet.skip || 0) > 1);
+const dtAvailable = () => !!(treeSet && treeSet.hasLen && !treeSet.unrooted && treeSet.trees && usedRecs(treeSet).length > 1);
 // Consecutive paths that look the same are written as one path: on large trees the browser gets far fewer elements
 // to read, lay out and paint, and the exported SVG is smaller. Paths with ids, classes or data are left as they are.
 function mergeRuns(list) {
