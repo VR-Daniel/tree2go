@@ -498,6 +498,7 @@ details.needtree > :not(summary){opacity:.45; pointer-events:none; user-select:n
 .copyparts{display:flex; flex-direction:column; gap:6px; margin-top:10px} .copywrap > .subhead{margin-top:2px} .copyparts[hidden]{display:none} .copyparts .btns{margin-top:4px}
 .savefile{display:block}   /* the margins of its choices meet, as above */ .savetrees{margin-top:10px; padding-top:10px; border-top:1px solid var(--line)}
 .thinview #content path, .thinview #content line, .thinview #content polyline{vector-effect:non-scaling-stroke}   /* on screen only: exports draw the true widths */
+.layer.lglayer{grid-template-columns:minmax(0,1fr) auto; cursor:default; padding-left:10px}   /* a legend: its name and its eye */
 .benchrun{padding:14px 0; color:var(--ink)} .bench p{margin:0 0 10px}
 .benchgrid{display:grid; grid-template-columns:1fr auto auto; gap:6px 18px; margin:6px 0 12px; font-size:13px} .benchgrid b{font-weight:600; border-bottom:1px solid var(--line); padding-bottom:4px} .benchgrid span:nth-child(3n+2), .benchgrid span:nth-child(3n){text-align:right; font-variant-numeric:tabular-nums}
 .rsmsg{margin:14px 0 16px; line-height:1.45}
@@ -1289,10 +1290,11 @@ const DEFAULTS = {
   axisLineW: 1, axisTickLen: 5, axisLabelSize: 10, axisLabelGap: 3, axisColor: '#333333', axisTitleSize: 11, axisGap: 8, axisUnitShow: false, axisUnitText: 'Ma', axisGrid: false, axisGridColor: '#9a9a9a', axisGridStyle: 'dashed', axisGridW: 0.6, axisGridDash: 3, axisGridGap: 3, geoBgToAxis: false,
   geoOn: false, geoEra: false, geoPeriod: true, geoEpoch: true, geoAge: false, geoRowH: 14, geoFontSize: 8, geoNames: true, geoBorder: '#333333', geoBorderW: 0.5,
   geoBg: 'none', geoBgLevel: 'period', geoBgOpacity: 0.25,
+  geoCustom: '', geoCustomDraw: 'band', geoCustomColor: '#8C8C8C', geoCustomLineColor: '#555555', geoCustomLineW: 1, geoCustomLineStyle: 'dashed',
   scaleBar: true, scaleMode: 'auto', scaleLen: 0.1, scaleUnit: '', scaleDecimals: -1, scaleH: 'left', scaleV: 'bottom', scaleDx: 0, scaleDy: 0,
   scaleLineW: 1.2, scaleTick: 4, scaleFs: 10, scaleTextGap: 4, scaleColor: '#333333', scaleFree: false, scaleX: null, scaleY: null,
   legendV: 'bottom', legendH: 'left', legendDx: 0, legendDy: 0, legendFs: 10, legendTitleSize: 10, legendTitleBold: true, legendSym: 1,
-  legendGap: 8, legendRowGap: 4, legendBlockGap: 14, legendColor: '#333333', legendPos: {}, legendText: {}, legendStyle: {},
+  legendShow: true, legendHide: {}, legendGap: 8, legendRowGap: 4, legendBlockGap: 14, legendColor: '#333333', legendPos: {}, legendText: {}, legendStyle: {},
   pages: [], pageColor: '#27408B', pageMiniOn: true, pageMiniW: 60, pageMiniH: 120, pageMiniGap: 24, pageMiniBase: '#BDBDBD', pageMiniHi: '#C8553D', pageMiniMark: 'both', pageMiniLW: 0.8, pageAxis: true, exportSplit: true, pageExtL: 0, pageExtR: 0, pageExtras: false,
   bg: '#ffffff', exportDpi: 300, exportSizeMode: 'natural', exportUnit: 'px', exportWidthVal: 0, title: '', titleSize: 18, titleH: 'left', titleV: 'top', titleDx: 0, titleDy: 0, titleColor: '#1f1f1f', titleBold: true, titleItalic: false,
   dataTables: [], dataActive: null, dataCols: [], dataColors: {}, dataWidth: 150, dataGap: 12, dataThick: 70, dataProp: false, dataValues: false, dataValSize: 9, dataAxis: true, dataLegend: true,
@@ -1763,11 +1765,18 @@ const SECTIONS_RAW = [
     { k: 'geoFontSize', type: 'number', label: 'Name size', min: 1, max: 60, step: 0.5, unit: 'px', enable: s => s.axisOn && s.geoOn && s.geoNames, sub: true },
     { k: 'geoBorderW', type: 'number', label: 'Box border width', min: 0, max: 10, step: 0.25, unit: 'px', enable: s => s.axisOn && s.geoOn, sub: true },
     { k: 'geoBorder', type: 'color', label: 'Box border color', enable: s => s.axisOn && s.geoOn && s.geoBorderW > 0, sub: true },
-    { k: 'geoBg', type: 'seg', label: 'Tree background', opts: [['none', 'None'], ['colors', 'Colors'], ['stripes', 'Stripes']], enable: s => s.axisOn, sub: true },
-    { type: 'hint', text: () => 'Colors uses the official colors of the intervals, while Stripes alternates light gray bands.' },
-    { k: 'geoBgLevel', type: 'seg', label: 'Background intervals', opts: [...GEO_LEVELS, ['ticks', 'Ticks']], enable: s => s.axisOn && s.geoBg !== 'none', sub: true },
-    { type: 'hint', text: s => s.geoBgLevel === 'ticks' && s.geoBg !== 'none' ? 'Ticks shades the spaces between the ticks of the axis, for example your own ages.' : '' },
-    { k: 'geoBgOpacity', type: 'range', label: 'Background opacity', min: 0.05, max: 1, step: 0.05, hmin: 0, hmax: 1, enable: s => s.axisOn && s.geoBg !== 'none', sub: true },
+    { k: 'geoBg', type: 'seg', label: 'Tree background', opts: [['none', 'None'], ['colors', 'Colors'], ['stripes', 'Stripes'], ['custom', 'Custom']], enable: s => s.axisOn, sub: true },
+    { type: 'hint', text: () => 'Colors uses the official colors of the intervals, Stripes alternates light gray bands, and Custom marks intervals of your own.' },
+    { k: 'geoBgLevel', type: 'seg', label: 'Background intervals', opts: [...GEO_LEVELS, ['ticks', 'Ticks']], enable: s => s.axisOn && (s.geoBg === 'colors' || s.geoBg === 'stripes'), show: s => s.geoBg !== 'custom', sub: true },
+    { type: 'hint', text: s => s.geoBgLevel === 'ticks' && (s.geoBg === 'colors' || s.geoBg === 'stripes') ? 'Ticks shades the spaces between the ticks of the axis, for example your own ages.' : '' },
+    { k: 'geoCustom', type: 'text', label: 'Intervals', enable: s => s.axisOn && s.geoBg === 'custom', show: s => s.geoBg === 'custom', sub: true },
+    { type: 'hint', text: s => s.geoBg === 'custom' ? 'Write each interval as two ages joined by a dash, and separate the intervals with commas, for example 66-56, 201.4-145. To give one its own color, add it after a colon: 66-56:#F2A65A.' : '' },
+    { k: 'geoCustomDraw', type: 'seg', label: 'Draw as', opts: [['band', 'Band'], ['lines', 'Lines'], ['both', 'Both']], enable: s => s.axisOn && s.geoBg === 'custom', show: s => s.geoBg === 'custom', sub: true },
+    { k: 'geoCustomColor', type: 'color', label: 'Band color', enable: s => s.axisOn && s.geoBg === 'custom' && s.geoCustomDraw !== 'lines', show: s => s.geoBg === 'custom', sub: true },
+    { k: 'geoBgOpacity', type: 'range', label: 'Background opacity', min: 0.05, max: 1, step: 0.05, hmin: 0, hmax: 1, enable: s => s.axisOn && s.geoBg !== 'none' && !(s.geoBg === 'custom' && s.geoCustomDraw === 'lines'), sub: true },
+    { k: 'geoCustomLineColor', type: 'color', label: 'Line color', enable: s => s.axisOn && s.geoBg === 'custom' && s.geoCustomDraw !== 'band', show: s => s.geoBg === 'custom', sub: true },
+    { k: 'geoCustomLineW', type: 'number', label: 'Line width', min: 0.05, max: 20, step: 0.1, unit: 'px', enable: s => s.axisOn && s.geoBg === 'custom' && s.geoCustomDraw !== 'band', show: s => s.geoBg === 'custom', sub: true },
+    { k: 'geoCustomLineStyle', type: 'seg', label: 'Line style', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], enable: s => s.axisOn && s.geoBg === 'custom' && s.geoCustomDraw !== 'band', show: s => s.geoBg === 'custom', sub: true },
     { k: 'geoBgToAxis', type: 'check', label: 'Extend the background and guide lines down to the axis', show: s => isRectish(s), enable: s => s.axisOn && (s.geoBg !== 'none' || s.axisGrid), sub: true },
     { type: 'head', label: 'Second axis' },
     { k: 'ax2On', type: 'check', label: 'Show a second axis', enable: s => s.axisOn && s.layout === 'rect' },
@@ -1906,6 +1915,9 @@ const SECTIONS_RAW = [
   ]},
   { title: 'Legends', items: [
     { type: 'hint', text: () => 'Hover a legend or the scale bar on the canvas and click its lock to drag it by hand. Right-click a legend to rewrite its title and entries.' },
+    { k: 'legendShow', type: 'check', label: 'Show legends' },
+    { type: 'custom', build: legendListBox },
+    { type: 'hint', text: () => legendList.some(l => legendHidden(l.key)) ? 'Hidden legends keep their place and look, and are left out of exports. Click the eye of one to show it again.' : '' },
     { type: 'head', label: 'Place' },
     { k: 'legendV', type: 'seg', label: 'Vertical position', opts: [['top', 'Top'], ['bottom', 'Bottom']] },
     { k: 'legendH', type: 'seg', label: 'Horizontal position', opts: [['left', 'Left'], ['center', 'Center'], ['right', 'Right']] },
@@ -2411,6 +2423,7 @@ function renderSoon() { if (!rRaf) rRaf = requestAnimationFrame(() => { rRaf = 0
 // Reacts to a panel change: redraws, refits when needed, saves and refreshes the panel.
 function changed(it) {
   if (it && it.k === 'screenLines') setTimeout(applyView);
+  if (it && it.k === 'legendShow') { settings.legendHide = settings.legendShow ? {} : Object.fromEntries(legendList.map(l => [l.key, true])); settings.legendShow = true; setTimeout(syncLegendBox); }   // the box only sets them all
   if (it && it.k === 'lightMode') { figImages.forEach(m => { delete m.lightOv; }); setTimeout(syncLightBox); }   // Page settings sets it for all, over any one by one
   if (it && it.k === 'ax2On' && settings.ax2On) { const main = settings.geoOn ? settings.geoPos : settings.axisPos; settings.ax2Pos = main === 'top' ? 'bottom' : 'top'; const r = allItems().find(x => x.k === 'ax2Pos'); if (r) syncControl(r); }   // the other side
   if (it && /^gm(Table|Lon|Lat)$/.test(it.k)) setTimeout(geoCheck, 50);   // points and map: do they match?
@@ -2889,6 +2902,13 @@ function parseTreeFile(txt) {
 function parseMeta(c) {
   const o = {};
   if (/^&&?NHX/i.test(c)) { for (const p of c.replace(/^&&?NHX:?/i, '').split(':')) { const k = p.indexOf('='); if (k > 0) o[p.slice(0, k)] = metaVal(p.slice(k + 1)); } return o; }
+  // MrBayes writes per-branch values of its sampled trees as [&B name value] (and [&E name value]), with spaces
+  // instead of key=value, for example [&B TK02Brlens 1.02e-01] or [&B IgrBrlens{2} 0.31]; several pairs may follow
+  if (/^&[A-Z]\s/.test(c) && !/=/.test(c)) {
+    const tok = c.slice(2).trim().split(/[\s,]+/).filter(Boolean);
+    for (let q = 0; q + 1 < tok.length; q += 2) { const v = Number(tok[q + 1]); o[tok[q]] = Number.isFinite(v) ? v : tok[q + 1]; }
+    return o;
+  }
   /* Reads key=value pairs one at a time. Keys may hold braces with commas inside, as MrBayes writes them
      (brlens{1,2,3,4}_mean), so a comma only ends a pair outside braces and quotes. Some programs rewrite those keys
      badly (brlens{1=true,2=true,4}_mean, or 4}_median cut from the one before); they are repaired when the name can
@@ -3087,6 +3107,7 @@ function compactTrees(all) {
   for (const t of all) {
     const keys = treeCladeKeys(t, ref, tot), H = nodeHeights(t); if (!H) hasLen = false;
     const ks = new Int32Array(keys.size), ag = H ? new Float32Array(keys.size) : null, ln = new Float32Array(keys.size).fill(NaN), sp = new Float32Array(keys.size).fill(NaN); let i = 0, allTips = null;
+    const mv = {};   // numeric annotations of the nodes ([&rate=…] and the like), one array per key
     const seen = new Map();   // in an unrooted tree drawn with two root branches, both give the same split: count it once, with both lengths
     for (const [x, k] of keys) {
       if (seen.has(k)) { const q = seen.get(k); if (x.len != null) ln[q] = (Number.isFinite(ln[q]) ? ln[q] : 0) + x.len; continue; }
@@ -3101,6 +3122,7 @@ function compactTrees(all) {
       ks[i] = j; if (ag) ag[i] = H.get(x);
       if (x.parent && x.len != null) ln[i] = x.len;
       if (x.children.length && x.parent) { const v = treeSup(x); if (v != null) sp[i] = v; }
+      if (x.meta) for (const mk2 in x.meta) { const v = x.meta[mk2]; if (typeof v === 'number' && Number.isFinite(v)) (mv[mk2] || (mv[mk2] = new Float32Array(keys.size).fill(NaN)))[i] = v; }
       i++;
     }
     const lv = leaves(t), orig = lv.map(l => l.name), dg = clamp(Math.round(settings.readDigits || 6), 1, 10);
@@ -3109,7 +3131,7 @@ function compactTrees(all) {
     if (settings.readBinary !== false && !treeHasNetwork(t)) bin = encodeTreeBin(t, dg);
     else { nwkDigits = dg; try { cnwk = toNewick(t, true); } finally { nwkDigits = 10; } }
     lv.forEach((l, q) => { l.name = orig[q]; });
-    const rec = { cnwk, bin, names, _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i) };
+    const rec = { cnwk, bin, names, _name: t._name, _post: t._post, _unrooted: t._unrooted, keys: ks.slice(0, i), ages: ag ? ag.slice(0, i) : null, lens: ln.slice(0, i), sups: sp.slice(0, i), mv: Object.keys(mv).length ? Object.fromEntries(Object.entries(mv).map(([a, b]) => [a, b.slice(0, i)])) : null };
     Object.defineProperty(rec, 'nwk', { get() { return toNewick(treeOfRec(this), true); } });   // the full Newick, rebuilt only when asked (export, project)
     recs.push(rec);
   }
@@ -3126,6 +3148,7 @@ function aggregateTrees(C, name, burnin = 0) {
       o.n++; if (C.hasLen) o.ages.push(+r.ages[i].toPrecision(6));
       if (r.lens && Number.isFinite(r.lens[i])) o.lens.push(+r.lens[i].toPrecision(6));
       if (r.sups && Number.isFinite(r.sups[i])) o.sups.push(+r.sups[i].toPrecision(6));
+      if (r.mv) for (const kk in r.mv) { const v = r.mv[kk][i]; if (Number.isFinite(v)) { const m = o.meta || (o.meta = {}); (m[kk] || (m[kk] = [])).push(+v.toPrecision(6)); } }
     }
   }
   return { name, count: all.length - skip, total: all.length, burnin, skip, hasLen: C.hasLen, dated: C.dated, clades, trees: all, tips: C.tipsOf, unrooted: C.unrooted, ref: C.ref, tot: C.tot, C };
@@ -3242,6 +3265,26 @@ function consensusTree(pct, compat) {
   if (T.hasLen && !T.unrooted && T.dated !== false) walkAll(R, x => { if (x.parent) x.len = Math.max(0, (x.parent._age ?? 0) - (x._age ?? 0)); });
   else if (T.hasLen) { const keysR = treeCladeKeys(R, T.unrooted ? T.ref : null, T.tot); for (const [x, k] of keysR) if (x.parent) { const o = T.clades.get(k); x.len = o && o.lens && o.lens.length ? mean(o.lens) : 0; } }
   walkAll(R, x => { delete x._age; delete x._saKeep; });
+  return annotateSummary(R);
+}
+function annotateSummary(R) {
+  const T = treeSet; if (!T || !R) return R;
+  const r6 = v => +(+v).toPrecision(6), mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const put = (m, name, a) => {
+    if (!a || !a.length) return;
+    const h = hpdOf(a, 0.95); let lo = Infinity, hi = -Infinity; for (const v of a) { if (v < lo) lo = v; if (v > hi) hi = v; }
+    m[name] = r6(mean(a)); m[name + '_median'] = r6(h.med); m[name + '_95%_HPD'] = [r6(h.lo), r6(h.hi)]; m[name + '_range'] = [r6(lo), r6(hi)];
+  };
+  const keys = treeCladeKeys(R, T.unrooted ? T.ref : null, T.tot);
+  for (const [x, k] of keys) {
+    const o = T.clades.get(k); if (!o) continue;
+    const m = {};
+    if (x.children.length) m.posterior = +(o.n / T.count).toPrecision(4);
+    if (T.hasLen && !T.unrooted && T.dated !== false) put(m, 'height', o.ages);
+    if (x.parent) put(m, 'length', o.lens);
+    if (o.meta) for (const kk in o.meta) put(m, kk, o.meta[kk]);
+    x.meta = m;   // the values of one sampled tree would mislead: a summary shows the whole sample
+  }
   return R;
 }
 // A tree of the sample chosen by a score, with node ages from all the trees (MCC) or its own (MAP)
@@ -3268,7 +3311,7 @@ function sampleSummary(kind, heights) {
   }
   // clade frequency as the support of each node
   for (const [x, k] of treeCladeKeys(R, T.unrooted ? T.ref : null)) if (x.children.length && x.parent) { const o = T.clades.get(k); if (o && !(x.name && !isSupport(x.name))) x.name = String(Math.round(100 * o.n / T.count)); }
-  return R;
+  return annotateSummary(R);
 }
 // Shows a tree built from the tree set (a single sample or a summary tree).
 function showFromSet(t, msg) {
@@ -5374,6 +5417,14 @@ function renderOnce() {
       ? (() => { const pts = [...new Set([off, ...majors, rootAge])].sort((a, b) => a - b); const out = []; for (let i = 0; i < pts.length - 1; i++) out.push(['', pts[i + 1], pts[i], BGPAL[i % BGPAL.length]]); return out; })()
       : GEO[S.geoBgLevel] || GEO.period;
     const clipI = (o, y) => [Math.min(o, rootAge), Math.max(y, off)];
+    // custom intervals: "66-56, 201.4-145:#F2A65A", in the units of the axis; each [older, younger, color]
+    const custI = S.geoBg !== 'custom' ? [] : String(S.geoCustom || '').split(/[,;\n]+/).map(part => {
+      const m = /^\s*(-?[\d.]+(?:e[-+]?\d+)?)\s*(?:-|–|—|to)\s*(-?[\d.]+(?:e[-+]?\d+)?)\s*(?::\s*(#[0-9a-f]{3,8}|[a-z]+))?\s*$/i.exec(part); if (!m) return null;
+      const a = +m[1], b = +m[2]; if (!isFinite(a) || !isFinite(b) || a === b) return null;
+      return [Math.max(a, b), Math.min(a, b), m[3] || S.geoCustomColor];
+    }).filter(v => v && v[0] > off && v[1] < rootAge);
+    const custLine = ` stroke="${S.geoCustomLineColor}" stroke-width="${S.geoCustomLineW}"${dashFor(S.geoCustomLineStyle, S.geoCustomLineW, S.axisGridDash, S.axisGridGap)}`;
+    const custBand = S.geoCustomDraw !== 'lines', custEdge = S.geoCustomDraw !== 'band';
     if (L === 'rect') {
       const X = a => dOf(a) * sx;
       const top = minY, bottom = maxY;
@@ -5381,8 +5432,14 @@ function renderOnce() {
       const usedB = (axShown && axisSide > 0) || (S.geoOn && geoSide > 0), usedT = (axShown && axisSide < 0) || (S.geoOn && geoSide < 0);
       const bgBottom = S.geoBgToAxis && usedB ? bottom + S.axisGap : bottom, bgTop = S.geoBgToAxis && usedT ? top - S.axisGap : top;   // the bands reach the axis, below or above
       const gridSty = ` stroke="${S.axisGridColor}" stroke-width="${S.axisGridW}"${dashFor(S.axisGridStyle, S.axisGridW, S.axisGridDash, S.axisGridGap)}`;
+      // custom intervals: bands, and lines at their limits (inside the tree's span)
+      for (const [o, y, c] of custI) {
+        const [a0, a1] = clipI(o, y), x0 = X(a0), x1 = X(a1);
+        if (custBand) bgL.unshift(`<rect x="${f2(Math.min(x0, x1))}" y="${f2(bgTop)}" width="${f2(Math.abs(x1 - x0))}" height="${f2(bgBottom - bgTop)}" fill="${c}" opacity="${S.geoBgOpacity}"/>`);
+        if (custEdge) for (const a of [o, y]) if (a > off && a < rootAge) bgL.push(`<line x1="${f2(X(a))}" y1="${f2(bgTop)}" x2="${f2(X(a))}" y2="${f2(bgBottom)}"${custLine}/>`);
+      }
       // background by interval
-      if (S.geoBg !== 'none') {
+      if (S.geoBg === 'colors' || S.geoBg === 'stripes') {
         let k = 0;
         for (const [, o, y, c] of bgLevel) {
           if (o <= off || y >= rootAge) continue;
@@ -5445,11 +5502,17 @@ function renderOnce() {
       // Circular and fan: rings for ticks, background bands by interval
       const Rr = a => rOf(dOf(a));
       const a0 = base, a1 = base + span;
-      if (S.geoBg !== 'none' || S.geoOn) {
-        const style = S.geoBg === 'none' ? 'colors' : S.geoBg;
-        const lvl = S.geoBg === 'none' ? (['age', 'epoch', 'period', 'era'].find(l => S['geo' + l.charAt(0).toUpperCase() + l.slice(1)]) || 'period') : S.geoBgLevel;
+      for (const [o, y, c] of custI) {   // custom intervals: sectors, and arcs at their limits
+        const [aa, ab] = clipI(o, y), r0 = Rr(aa), r1 = Rr(ab);
+        if (custBand) bgL.unshift(`<path d="${sector(Math.min(r0, r1), Math.max(r0, r1), a0, a1)}" fill="${c}" opacity="${f2(S.geoBgOpacity)}"/>`);
+        if (custEdge) for (const a of [o, y]) if (a > off && a < rootAge) { const r = Rr(a); if (realR(r) > 0.5) bgL.push(`<path d="${arcPath(r, a0, Math.min(a1, a0 + 359.99))}" fill="none"${custLine}/>`); }
+      }
+      const gBg = S.geoBg === 'custom' ? 'none' : S.geoBg;   // with custom intervals, the geologic rings are drawn as without a background
+      if (gBg !== 'none' || S.geoOn) {
+        const style = gBg === 'none' ? 'colors' : gBg;
+        const lvl = gBg === 'none' ? (['age', 'epoch', 'period', 'era'].find(l => S['geo' + l.charAt(0).toUpperCase() + l.slice(1)]) || 'period') : S.geoBgLevel;
         let k = 0;
-        for (const [, o, y, c] of (S.geoBg !== 'none' ? bgLevel : GEO[lvl] || GEO.period)) {
+        for (const [, o, y, c] of (gBg !== 'none' ? bgLevel : GEO[lvl] || GEO.period)) {
           if (o <= off || y >= rootAge) continue;
           const [aa, ab] = clipI(o, y); const r0 = Rr(aa), r1 = Rr(ab);
           const fill = style === 'colors' ? c : '#000', op = style === 'colors' ? S.geoBgOpacity : (k % 2 === 0 ? S.geoBgOpacity * 0.35 : 0);
@@ -5604,7 +5667,9 @@ function renderOnce() {
     }
     return { svg: out.join(''), w, h: Math.max(y, 1) };
   };
-  const drawn = blocks.map(b => ({ b, ...drawBlock(b) }));
+  legendList = blocks.map(b => ({ key: b.key, name: (LEGEND_NAMES[b.key] || 'Legend') + (b.title ? ` (${lgText(b.key, 'title', b.title)})` : '') }));   // listed in the panel, shown or hidden
+  const drawn = blocks.filter(b => !legendHidden(b.key)).map(b => ({ b, ...drawBlock(b) }));
+  setTimeout(syncLegendBox);
   const isFreeL = k => !!(S.legendPos && S.legendPos[k] && S.legendPos[k].free);
   const stack = drawn.filter(d => !isFreeL(d.b.key));
   if (stack.length) {
@@ -8682,11 +8747,35 @@ function wireLock(reopen) {
     setFree(key, !isFreeKey(key)); render(); persist(); syncPanelKeys(['scaleFree']); reopen();
   });
 }
+const LEGEND_NAMES = { support: 'Support legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', geo: 'Map legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
+/* Legends hidden by the user (settings.legendHide, by key): not drawn nor exported, but they keep their place and look.
+   The legends of the figure, with their names, are listed in the Legends section, where each can be shown again. */
+let legendList = [];   // [{ key, name }] of the legends the figure has now, shown or hidden
+const legendHidden = k => !!(settings.legendHide || {})[k];
+function setLegendHidden(k, on) { settings.legendHide = { ...(settings.legendHide || {}) }; if (on) settings.legendHide[k] = true; else delete settings.legendHide[k]; }
+// The box of the Legends section: ticked when every legend is shown, empty when none, a dash when only some.
+function syncLegendBox() {
+  const inp = document.querySelector('#side .row[data-k="legendShow"] input'); if (inp) {
+    const n = legendList.filter(l => !legendHidden(l.key)).length;
+    inp.indeterminate = n > 0 && n < legendList.length; inp.checked = legendList.length > 0 && n === legendList.length; inp.disabled = !legendList.length;
+  }
+  const box = document.getElementById('legendListBox'); if (!box) return;
+  const sig = legendList.map(l => l.key + (legendHidden(l.key) ? '0' : '1') + l.name).join('|'); if (box.dataset.sig === sig) return; box.dataset.sig = sig;
+  // the same rows as the layers of the side plots: a name and an eye
+  const eye = shut => shut ? '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg>'
+    : '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></svg>';
+  box.innerHTML = legendList.length
+    ? `<div class="layerlist">${legendList.map(l => { const h = legendHidden(l.key); return `<div class="layer lglayer${h ? ' off' : ''}" data-lg="${esc(l.key)}"><span class="lname" title="${esc(l.name)}">${esc(l.name)}</span><button type="button" class="btn small icon eye${h ? ' shut' : ''}" data-lgeye title="${h ? 'Show' : 'Hide'} ${esc(l.name)}" aria-pressed="${!h}">${eye(h)}</button></div>`; }).join('')}</div>`
+    : '<p class="hint">The figure has no legends yet.</p>';
+  box.querySelectorAll('[data-lgeye]').forEach(b => b.onclick = () => { const k = b.closest('.layer').dataset.lg; pushUndo(true); setLegendHidden(k, !legendHidden(k)); persist(); render(); });
+  refreshVisibility();   // the note on hidden legends follows the list
+}
+function legendListBox() { const d = document.createElement('div'); d.id = 'legendListBox'; d.className = 'treetools sidelayers'; setTimeout(syncLegendBox); return d; }   // framed as the layers of the side plots
 // Right-click menu of a legend: texts, look and alignment.
 function openLegendMenu(key, cx, cy, keep) {
   const auto = legendAuto[key]; if (!auto) return;
   const T0 = settings.legendText || {}, keepScroll = keep ? pop.scrollTop : 0;
-  const names = { support: 'Support legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', geo: 'Map legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
+  const names = LEGEND_NAMES;
   const field = (i, ph, lab) => `<div class="grp"><span>${lab}</span><input type="text" class="lgtext" data-li="${i}" value="${esc(T0[key + ':' + i] ?? '')}" placeholder="${esc(ph || '(none)')}"></div>`;
   pop.innerHTML = `
     <button class="close" aria-label="Close">×</button>
@@ -8696,7 +8785,8 @@ function openLegendMenu(key, cx, cy, keep) {
       ${auto.gradient ? field('lo', auto.lo, 'Lowest value') + field('hi', auto.hi, 'Highest value') : auto.entries.map((t, i) => field(i, t, 'Entry ' + (i + 1))).join('')}
       <div class="btns"><button class="btn small" data-lreset>Use the automatic texts</button></div></div>
     <div class="part"><b>Look of this legend</b>${ctlRows(LEGEND_SPEC, k => { const own = ((settings.legendStyle || {})[key] || {})[k]; return { v: own ?? settings[k], own: own != null }; })}</div>
-    ${alignSection('this legend')}`;
+    ${alignSection('this legend')}
+    <div class="part"><div class="btns"><button class="btn small" id="lgHide">Hide this legend</button></div></div>`;
   pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
   pop.querySelector('.close').onclick = () => closePop();
   pop.querySelectorAll('.lgtext').forEach(inp => {
@@ -8717,6 +8807,7 @@ function openLegendMenu(key, cx, cy, keep) {
     render(); persist(); openLegendMenu(key, 0, 0, true);
   };
   pop.querySelectorAll('[data-al]').forEach(b => b.onclick = () => { alignFree('legend:' + key, b.dataset.al); openLegendMenu(key, 0, 0, true); });
+  const hb = pop.querySelector('#lgHide'); if (hb) hb.onclick = () => { pushUndo(true); setLegendHidden(key, true); closePop(); persist(); render(); toast('Legend hidden. Show it again from the Legends section.'); };
   wireCtl(LEGEND_SPEC, (k, v) => {
     settings.legendStyle = settings.legendStyle || {}; const st = settings.legendStyle[key] = settings.legendStyle[key] || {};
     if ((st[k] ?? null) === v) return;
@@ -9090,7 +9181,7 @@ function selectMatches() {
 
 /* ================= Style templates: the look of a figure, without its tree or data ================= */
 const STYLE_SKIP = new Set(['renderOpt', 'screenLines', 'tgTab', 'tgLines', 'lightMode', 'copyParts', 'gmMap', 'neRes', 'neLayers', 'gpAge', 'gpModel', 'gmTable', 'gmLon', 'gmLat', 'gmColorVar', 'gmSizeVar', 'gmPts', 'alnPick', 'pieData', 'arrows', 'dataTables', 'dataActive', 'dataCols', 'dataColors', 'catTable', 'catCols', 'catStyle', 'brcTable', 'brcCol', 'bwdSrc', 'bwdCol', 'heatTable', 'heatCols', 'labelSrcTable', 'labelSrcCol',
-  'pages', 'legendPos', 'legendText', 'scaleX', 'scaleY', 'scaleFree', 'title', 'projectName', 'exportName', 'exportSizeMode', 'exportWidthVal', 'axisCustom', 'nbarSrc', 'nlabSrc', 'supportSource']);
+  'pages', 'legendPos', 'legendText', 'legendHide', 'scaleX', 'scaleY', 'scaleFree', 'title', 'projectName', 'exportName', 'exportSizeMode', 'exportWidthVal', 'axisCustom', 'nbarSrc', 'nlabSrc', 'supportSource']);
 // Saves a style template: every setting except the tree and its data.
 // The menus Import and Save of the header.
 for (const [b, mn] of [['impMenuBtn', 'impMenu'], ['saveMenuBtn', 'saveMenu']]) {
