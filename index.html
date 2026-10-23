@@ -4679,7 +4679,9 @@ function renderOnce() {
           border = strokeAttr(cat.stroke, cat.strokeStyle, cat.strokeWidth, r, cat.strokeCount);
         } else {
           const sz = stv(n, 'ss') ?? S.supportSize;
-          r = S.supportScaleDots ? sz * 0.25 + sz * 0.35 * (v / supMax) : sz * 0.5; fill = stv(n, 'sc') || S.supportColor;
+          r = S.supportScaleDots ? sz * 0.25 + sz * 0.35 * (v / supMax) : sz * 0.5;
+          // the same color rule as the support written as numbers: one color, the color of the branch, or by data
+          fill = stv(n, 'sc') || (S.supportColorBy === 'branch' ? strokeOf(n) : supVC ? supVC(n) || S.supportColor : S.supportColor);
         }
         supL.push(`<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(r)}" fill="${fill}"${border}/>`);
         valGeo.set(skey(n.id, 'support'), { cx: n._px, cy: n._py, r });
