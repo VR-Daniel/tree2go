@@ -1011,7 +1011,7 @@ The window shown when a project is saved.
 
 ## Page settings
 
-The `Page settings` menu of the header holds the plot title, the background, the palette, the color blind preview and the lightening of heavy elements, then `Copy style`, the only part that folds.
+The `Page settings` menu of the header holds the plot title, the background, the palette, the color blind preview and the lightening of heavy elements, then `Copy style`, the only part that folds, and `Reset styles`.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -1039,6 +1039,10 @@ What `Paste style` applies, by groups of properties. It copies the look of each 
 |:---|:---|:---|:---|:---|
 | `Groups of properties` | Branch color, branch width, line style of the branches, node dots (size, shape, color, border), highlights, font and size of the tip labels, color of the tip labels, values on branches and nodes, node bars, clade name bars and data plots. `All` and `None` tick or untick them all. | On<br>Off | On | Always |
 
+### › Reset styles
+
+`Reset styles`, at the end of `Page settings`, returns every option of the panel to its default and removes the look given to single elements, as the button of the same name in **Export** does. The tree itself is kept (names, branch lengths, rooting and order, collapsed clades and their names, clade names, fossils marked by hand), and so are the attached files and the reading properties. `Ctrl+Z` undoes it.
+
 ## Export
 
 In the **Export** menu of the header.
@@ -1057,7 +1061,7 @@ Save the figure, the tree or a style template.
 | `Save the trees (Newick)` and `Save the trees (NEXUS)` | The trees of the sample after the burn-in (and as resampled when read), one tree per line in Newick, or as NEXUS with a note on where they come from. Also in `Export`, Trees of the sample. |  |  | A file with several trees is open |
 | `Save style…` | Saves the look of the figure, without its tree or data. |  |  |  |
 | `Apply a style…` | Gives a saved look to the current tree. |  |  |  |
-| `Reset visual settings` | Back to the default look (names, lengths, collapsed clades, clade names, fossils and tables are kept). |  |  |  |
+| `Reset styles` | Back to the default look: every option of the panel to its default, and no style of its own on any element. The tree itself is kept (names, branch lengths, rooting and order, collapsed clades and their names, clade names, fossils marked by hand), and so are the attached files and the reading properties. `Ctrl+Z` undoes it. |  |  |  |
 
 </details>
 
@@ -1074,7 +1078,7 @@ Save the figure, the tree or a style template.
 |---|---|
 | Empty part of the canvas | Tree statistics: tips and nodes, polytomies, rooting, reticulations, branch lengths, ages, fossils and sampled ancestors, tree shape (cherries¹, Colless² and Sackin³ indices, γ⁴), support values and the tree set it comes from |
 | Branch | Color, width, line style, branch length label, grafting a fossil, reroot here, extract clade, make a page, copy Newick, delete |
-| Clade | Clade color, highlight background (opacity, start at root, stem or crown, end, gradient, corners), collapse, make a polytomy of the whole clade (and undo it), copy the whole tree to a new tab (on the root, where Extract clade does not apply), rotate its children (the order of the children of this node), rotate the clade (turned over on its own axis, the order reversed at every node inside it), ladderize, height and fill when collapsed, clade name bar |
+| Clade | Clade color, highlight background (opacity, start at root, stem or crown, end, gradient, corners), collapse, make a polytomy of the whole clade (and undo it), copy the whole tree to a new tab, choosing in a window whether it keeps the same look or starts from the default look (on the root, where Extract clade does not apply; the copy with the default look keeps what `Reset styles` keeps, and the maps, but not the images placed on the figure), rotate its children (the order of the children of this node), rotate the clade (turned over on its own axis, the order reversed at every node inside it), ladderize, height and fill when collapsed, clade name bar |
 | Tip label | Font size, color, style, weight, open nomenclature qualifiers (cf., aff., sp.), extinct tip |
 | Node | Dot size, shape, fill, color and border, support label, other node labels, node bars, make a polytomy of its children (and undo it) |
 | Grafted fossil | Ages, split the lineage, add fossils to a split, delete |
