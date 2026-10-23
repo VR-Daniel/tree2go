@@ -109,7 +109,7 @@ The shape of the tree and its overall size.
 | `Width` | Horizontal size of the tree, without labels. | 80 to 4000 px | 700 px | **Rectangular** layout |
 | `Height` | Vertical distance between neighboring tips. | 3 to 80 px | 18 px | **Rectangular** layout |
 | `Radius` |  | 40 to 3000 px | 320 px | **Circular**, **Fan** or **Unrooted** layout |
-| `Inner radius (center gap)` | Empty circle left at the center. | 0 to 1500 px | 0 px | `Shape` is **Circular** or **Fan** |
+| `Inner radius (center gap)` | Empty circle left at the center. With the tree turned inside out, it widens the empty circle in the middle, moving everything outwards, for example to place an image there. | 0 to 1500 px | 0 px | `Shape` is **Circular** or **Fan** |
 | `Total angle` | How much of the circle the tree fills. | 20 to 360° | 360° | `Shape` is **Circular** |
 | `Fan opening` | Angle covered by a fan tree. | 20 to 359° | 180° | `Shape` is **Fan** |
 | `Rotation` | Turns the whole circular, fan or unrooted tree. | −180 to 180° | 0° | **Circular**, **Fan** or **Unrooted** layout |
