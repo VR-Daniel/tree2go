@@ -3087,11 +3087,31 @@ function isTimeTree(t) {
   const beast = /^STATE_\d+$/i.test(t._name || '');   // a tree of the posterior sample of BEAST: always a time tree
   return mx > 0 && (sa || hb || beast);
 }
+/* Trees dated by their tips, with few tips (or one, as a dummy) at the present: a single tree cannot tell, but a sample can.
+   With a clock, each tip keeps (nearly) the same age in every tree, fixed or sampled within its fossil range; without one,
+   the distance of a tip from the youngest changes from tree to tree with the branch lengths. In the trees seen, the
+   spread of the age of a tip across trees, against the height of the tree, was 0–2% with a clock and about 30% without. */
+function tipAgesStable(sample) {
+  if (sample.length < 5) return false;
+  const H = new Map(), tops = [];
+  for (const t of sample) {
+    const ds = new Map(); let mx = 0, ok = true;
+    const st = [[t, 0]];
+    while (st.length) { const [x, d] = st.pop(); if (!x.children.length) { ds.set(x.name, d); if (d > mx) mx = d; continue; } for (const y of x.children) { if (y.len == null) { ok = false; break; } st.push([y, d + y.len]); } }
+    if (!ok || !(mx > 0)) return false;
+    tops.push(mx);
+    for (const [k, d] of ds) { let a = H.get(k); if (!a) H.set(k, a = []); a.push(mx - d); }
+  }
+  const hm = tops.sort((a, b) => a - b)[tops.length >> 1];
+  const spreads = [...H.values()].filter(a => a.length === sample.length).map(a => (maxOf(a) - minOf(a)) / hm).sort((a, b) => a - b);
+  return spreads.length >= 3 && spreads[spreads.length >> 1] < 0.05;
+}
 // sampled ancestors apply only to a tree drawn in time; otherwise their options stay on screen, greyed out
 const saAvail = s => !!tree && s.useLengths && treeInTime(tree);
 function treeInTime(t) {
   if (!t) return false;
   if (treeSet && treeSet.dated === false) return false;   // the set was read as trees of substitutions (or unrooted)
+  if (treeSet && treeSet.dated === true && t === tree) { let ok = true; walkAll(t, x => { if (x !== t && x.len == null) ok = false; }); if (ok) return true; }   // a tree of a set in time, or its summary
   return isTimeTree(t);
 }
 // Compact binary copy of a tree of a set, in preorder, with the smallest arrays that fit:
@@ -3180,7 +3200,7 @@ function compactTrees(all) {
     Object.defineProperty(rec, 'nwk', { get() { return toNewick(treeOfRec(this), true); } });   // the full Newick, rebuilt only when asked (export, project)
     recs.push(rec);
   }
-  const sample = all.slice(0, 50), dated = hasLen && !unrooted && sample.filter(isTimeTree).length > sample.length / 4;
+  const sample = all.slice(0, 50), dated = hasLen && !unrooted && (sample.filter(isTimeTree).length > sample.length / 4 || tipAgesStable(sample));
   // trees read from several files (the runs of MrBayes): where each run starts and ends, [start, end, run]
   let runSeg = null;
   if (recs.some(r => r.run)) { runSeg = []; recs.forEach((r, i) => { const L = runSeg[runSeg.length - 1]; if (L && L[2] === r.run) L[1] = i + 1; else runSeg.push([i, i + 1, r.run]); }); if (runSeg.length < 2) runSeg = null; }
@@ -3271,12 +3291,13 @@ function setFromAll(all, S0 = {}) {
   const trees = all.recs.map(([nwk, nm, post, un, run]) => { const t = parseNewick(nwk); if (nm) t._name = nm; if (post != null) t._post = post; if (un) t._unrooted = true; if (run) t._run = run; return t; });
   const C = compactTrees(trees); if (C.runSeg && Array.isArray(all.runs)) C.runInfo = all.runs;   // the runs it was read from
   let T; try { T = aggregateTrees(C, all.name || 'Trees', S0.burnin || 0, S0.runSel || null); } catch (e) { T = aggregateTrees(C, all.name || 'Trees', S0.burnin || 0); }   // the burn-in, as a percentage
+  if (S0.dated != null) { T.dated = T.C.dated = !!S0.dated; T.datedUser = true; }   // set by the user
   Object.assign(T, { burnin: S0.burnin || T.burnin, mode: S0.mode || 'majority', pct: S0.pct ?? 50, shown: S0.shown || 1, resample: S0.resample || null, clockScaled: !!S0.clockScaled });
   return T;
 }
 // Every tree of the set and its state, as a project keeps them.
 const allTreesOf = T => T && T.trees && T.trees.length > 1 ? { name: T.name, recs: T.trees.map(r => [r.nwk, r._name || null, r._post ?? null, r._unrooted ? 1 : 0, r.run || 0]), runs: setRuns(T) } : null;
-const setState = T => ({ skip: T.skip || 0, burnin: T.burnin || 0, runSel: T.runSel || null, mode: T.mode, pct: T.pct, shown: T.shown, resample: T.resample || null, clockScaled: !!T.clockScaled });
+const setState = T => ({ skip: T.skip || 0, burnin: T.burnin || 0, runSel: T.runSel || null, dated: T.datedUser ? !!T.dated : null, mode: T.mode, pct: T.pct, shown: T.shown, resample: T.resample || null, clockScaled: !!T.clockScaled });
 /* Every tree of a set, kept between sessions in IndexedDB. The summary of the set stays in localStorage, where it is read
    at once; localStorage holds only a few MB, so the trees themselves (for the MCC tree, another burn-in or one tree of the
    set) go to IndexedDB, compressed, as a project keeps them, and come back a moment after the app opens. One set only:
@@ -3442,6 +3463,8 @@ function refreshTreeSetBox() {
     <div class="row"><label for="tsRuns">Runs used</label><span class="inline"><span class="numwrap" style="width:110px"><input class="num" id="tsRuns" type="text" value="${runSelText(treeSet.runSel)}" aria-label="Runs used" style="text-align:left" title="${esc(R.map((r, i) => `${i + 1}: ${r.name}`).join('\n'))}"><span class="u"></span></span><button class="btn small" id="tsRunsApply">Apply</button></span></div>
     <p class="hint">${R.length} runs, numbered in the order of their file names${R.every(r => r.kept === R[0].kept) ? ` (${R[0].kept.toLocaleString('en')} trees each)` : ''}. Separate them with commas or give a range: 1,2,4 or 1-3.</p>
     <p class="hint">${A ? `ASDSF of runs ${A.runs.join(', ')}: <b>${A.value < 0.0001 ? A.value.toExponential(1) : A.value.toFixed(4)}</b>, from ${plural(A.nSplits, 'split', 'splits')} found in at least 10% of the trees of some run. MrBayes takes values below 0.01 as a sign that the runs converged.` : 'Choose at least two runs to compare them with the ASDSF.'}</p>`; })() : ''}
+    ${raw && treeSet.hasLen && !treeSet.unrooted ? `<div class="row check"><input type="checkbox" id="tsDated"${treeSet.dated !== false ? ' checked' : ''}><label for="tsDated">Trees in time</label></div>
+    <p class="hint">Recognized automatically from the files. If tree2go gets it wrong, set it here: in dated trees, leaving it off misplaces everything that depends on node ages.</p>` : ''}
     <div class="row${raw ? '' : ' off'}"><label for="tsIdx">Show tree number</label><span class="inline"><span class="numwrap" style="width:84px"><input class="num" id="tsIdx" type="number" min="1" max="${treeSet.total ?? treeSet.count}" step="1" value="${treeSet.shown || 1}"${raw ? '' : ' disabled'}><span class="u"></span></span><button class="btn small" id="tsShow"${raw ? '' : ' disabled'}>Show</button></span></div>
     <div class="row${raw ? '' : ' off'}"><label for="tsKind">Summary tree</label><select id="tsKind"${raw ? '' : ' disabled'}>${[['majority', 'Majority rule'], ['strict', 'Strict consensus'], ['allcompat', 'Maximum compatible'], ['mcc', 'Maximum clade credibility (MCC)'], ['map', 'Maximum a posteriori (MAP)']].map(([v, l]) => `<option value="${v}"${(treeSet.mode || 'majority') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
     <p class="hint">${({ majority: 'Keeps the clades found in more than the chosen share of the trees.', strict: 'Keeps only the clades found in every tree.', allcompat: 'The majority-rule tree plus the less frequent clades that do not conflict with it (allcompat in MrBayes).', mcc: 'Maximum clade credibility: the sampled tree whose clades are, together, the most frequent, as in TreeAnnotator. Each node gets the median or mean age of its clade in all the trees.', map: treeSet.trees && treeSet.trees.some(t => treePost(t) != null) ? `Maximum a posteriori: the sampled tree with the highest posterior probability${mcmcLog ? ` (from ${mcmcLog.name})` : ''}.` : 'Maximum a posteriori: needs the posterior of each tree. BEAST writes it in the trees file, for BEAST2 or MrBayes attach the .log or .p file in Attachments.' })[treeSet.mode || 'majority']}</p>
@@ -3456,11 +3479,18 @@ function refreshTreeSetBox() {
   d.querySelector('#tsBurnApply').addEventListener('click', () => {
     const e = { target: burnIn };
     // what the set already was (how it was resampled when read, its options) is kept with the new burn-in
-    const b = clamp(Math.round(+e.target.value || 0), 0, 99), keep = { shown: treeSet.shown, mode: treeSet.mode, pct: treeSet.pct, heights: treeSet.heights, built: treeSet.built, resample: treeSet.resample, clockScaled: treeSet.clockScaled };
+    const b = clamp(Math.round(+e.target.value || 0), 0, 99), keep = { shown: treeSet.shown, mode: treeSet.mode, pct: treeSet.pct, heights: treeSet.heights, built: treeSet.built, resample: treeSet.resample, clockScaled: treeSet.clockScaled, datedUser: treeSet.datedUser };
     treeSet = Object.assign(aggregateTrees(treeSet.C, treeSet.name, b, treeSet.runSel), keep);
     persistTreeSet(); render(); refreshTreeSetBox();
     if (treeSet.shown == null && treeSet.built && treeSet.trees) { $('tsBuild').click(); toast(`Burn-in ${b}%: ${plural(treeSet.count, 'tree', 'trees')} used, summary tree rebuilt`); }
     else toast(`Burn-in ${b}%: ${plural(treeSet.count, 'tree', 'trees')} used`);
+  });
+  const datedIn = d.querySelector('#tsDated');
+  if (datedIn) datedIn.addEventListener('change', () => {
+    treeSet.dated = treeSet.C.dated = datedIn.checked; treeSet.datedUser = true;
+    persistTreeSet(); buildSide(); render(); refreshTreeSetBox();
+    if (treeSet.shown == null && treeSet.built && treeSet.trees) { $('tsBuild').click(); toast(`Trees ${datedIn.checked ? 'in time' : 'not in time'}: summary tree rebuilt`); }
+    else toast(datedIn.checked ? 'The trees are read in time' : 'The trees are read as branch lengths, not in time');
   });
   // the runs used: the summary trees, supports and ASDSF use only their trees
   const runsIn = d.querySelector('#tsRuns');
@@ -3468,7 +3498,7 @@ function refreshTreeSetBox() {
     runsIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); d.querySelector('#tsRunsApply').click(); } });
     d.querySelector('#tsRunsApply').addEventListener('click', () => {
       let sel; try { sel = parseRunSel(runsIn.value, setRuns(treeSet).length); } catch (e) { toast(e.message); return; }
-      const keep = { shown: treeSet.shown, mode: treeSet.mode, pct: treeSet.pct, heights: treeSet.heights, built: treeSet.built, resample: treeSet.resample, clockScaled: treeSet.clockScaled };
+      const keep = { shown: treeSet.shown, mode: treeSet.mode, pct: treeSet.pct, heights: treeSet.heights, built: treeSet.built, resample: treeSet.resample, clockScaled: treeSet.clockScaled, datedUser: treeSet.datedUser };
       try { treeSet = Object.assign(aggregateTrees(treeSet.C, treeSet.name, treeSet.burnin || 0, sel), keep); } catch (e) { toast(e.message); return; }
       persistTreeSet(); render(); refreshTreeSetBox();
       const what = sel ? `Runs ${runSelText(sel)}` : 'Every run';
