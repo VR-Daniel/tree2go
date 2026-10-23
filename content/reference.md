@@ -413,7 +413,7 @@ Extinct tips and grafted fossils. Mark a tip as extinct, or add a fossil lineage
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
 | `Tips that end before the present are extinct`¹ | In dated trees, marks tips that do not reach the present as fossils. | On<br>Off | On |  |
-| `Tolerance (% of the tree height)` | Tips this close to the present still count as living. | 0 to 5% | 0.5% | `Tips that end before the present are extinct` is **On** |
+| `Tolerance (% of the tree height)` | Tips this close to the present still count as living. At 0, only tips at the present count as living. For very recent fossils, type a smaller value in the box (0.001%, for example). | 0 to 5% (smaller values can be typed) | 0.5% | `Tips that end before the present are extinct` is **On** |
 | `Add † after the names of extinct tips and fossils` |  | On<br>Off | On |  |
 | `Branches of extinct tips`² | Line style of extinct lineages. | Same<br>Dashed<br>Dotted | Dashed |  |
 
