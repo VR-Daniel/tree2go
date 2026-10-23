@@ -938,6 +938,10 @@ function toNewick(root, original) {   // original: renamed tips written with the
 // so a tree beyond that many tips failed to open.
 function maxOf(a, ...rest) { if (!Array.isArray(a) && !ArrayBuffer.isView(a)) a = [...a]; let m = Math.max(...rest); for (let i = 0; i < a.length; i++) { const v = +a[i]; if (v !== v) return NaN; if (v > m) m = v; } return m; }
 function minOf(a, ...rest) { if (!Array.isArray(a) && !ArrayBuffer.isView(a)) a = [...a]; let m = Math.min(...rest); for (let i = 0; i < a.length; i++) { const v = +a[i]; if (v !== v) return NaN; if (v < m) m = v; } return m; }
+// How far before the present (in tree units) a tip must end to count as extinct: the tolerance chosen, as a percentage
+// of the tree height. At 0 it keeps a margin of a ten-millionth of the height, far below any real age (46 years in a
+// tree of 465 Ma), so that the rounding of branch lengths does not make living tips look extinct.
+function fossilTolOf(H, pct) { return H * Math.max(+(pct ?? 0.5) || 0, 1e-5) / 100; }
 // Visits a node and all its descendants, parents before children.
 function walkAll(n, f) { const st = [n]; while (st.length) { const x = st.pop(); f(x); for (let k = x.children.length - 1; k >= 0; k--) st.push(x.children[k]); } }
 // The tips below a node, in drawing order.
@@ -1639,8 +1643,8 @@ const SECTIONS_RAW = [
   { title: 'Fossils', items: [
     { type: 'hint', text: () => 'Mark a tip as extinct, or add a fossil lineage to a branch, from the right-click menu.' },
     { k: 'fossilAuto', type: 'check', label: 'Tips that end before the present are extinct' },
-    { type: 'hint', text: s => s.fossilAuto ? 'For dated trees. When the youngest tip is above 0, as in a fossil-only tree, every tip is extinct. Right-click a tip to change it by hand.' : '' },
-    { k: 'fossilAutoTol', type: 'range', label: 'Tolerance (% of the tree height)', min: 0, max: 5, step: 0.1, hmax: 50, unit: '%', enable: s => s.fossilAuto, sub: true },
+    { type: 'hint', text: s => s.fossilAuto ? 'For dated trees. When the youngest tip is above 0, as in a fossil-only tree, every tip is extinct. Right-click a tip to change it by hand. For very recent fossils, such as those of the last ice age, type a smaller tolerance in the box (0.001%, for example).' : '' },
+    { k: 'fossilAutoTol', type: 'range', label: 'Tolerance (% of the tree height)', min: 0, max: 5, step: 0.01, hmax: 50, unit: '%', enable: s => s.fossilAuto, sub: true },
     { k: 'fossilDagger', type: 'check', label: 'Add † after the names of extinct tips and fossils' },
     { k: 'extinctBranch', type: 'seg', label: 'Branches of extinct tips', opts: [['same', 'Same'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] },
     { type: 'hint', text: () => 'Grafted fossil lineages are always drawn dashed, using the dash length and gap from Branches.' },
@@ -4205,7 +4209,7 @@ function renderOnce() {
   // In a dated tree where most tips reach the present, the tips that end earlier are fossils
   autoExt = new Set();
   if (S.fossilAuto && lay.useLen && maxD > 0) {
-    const tipsAll = vis.filter(n => !n.children.length), tol = maxD * (S.fossilAutoTol / 100);
+    const tipsAll = vis.filter(n => !n.children.length), tol = fossilTolOf(maxD, S.fossilAutoTol);
     const atPresent = tipsAll.filter(n => maxD - n._d <= tol).length;
     if (S.axisOn && S.axisOffset > 0) { for (const n of tipsAll) if (!n.noEx) autoExt.add(n.id); }   // the youngest tip is older than the present: all are fossils
     else if (tipsAll.length > 2 && atPresent >= tipsAll.length / 2) for (const n of tipsAll) if (maxD - n._d > tol && !n.noEx) autoExt.add(n.id);
@@ -10116,7 +10120,7 @@ function treeStats() {
     const dated = ageMeta || treeHasAges();
     if (dated) {
       // fossils as the app marks them (by hand, or found from the tips that end before the present)
-      const off = tipAgeOffset(), tolF = H * (settings.fossilAutoTol || 0.5) / 100, isFos = l => !!l.ex || autoExt.has(l.id) || (off > 0 && !l._sa) || (H - dist.get(l) > tolF && !l.noEx), sa = L.filter(l => l._sa).length;
+      const off = tipAgeOffset(), tolF = fossilTolOf(H, settings.fossilAutoTol), isFos = l => !!l.ex || autoExt.has(l.id) || (off > 0 && !l._sa) || (H - dist.get(l) > tolF && !l.noEx), sa = L.filter(l => l._sa).length;
       const fos = L.filter(l => isFos(l) && !l._sa), extant = L.filter(l => !isFos(l) && !l._sa).length, ages = fos.map(l => H - dist.get(l) + off);
       add('Time', 'Age of the root', fmtS(H + off));
       add('Time', 'Extant tips', extant);
