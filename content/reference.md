@@ -1011,7 +1011,7 @@ The window shown when a project is saved.
 
 ## Page settings
 
-The `Page settings` menu of the header holds the plot title, the background, the palette, the color blind preview and the lightening of heavy elements, then `Copy style`, the only part that folds, and `Reset styles`.
+The `Page settings` menu of the header holds the plot title, the background, the palette, the color blind preview and the lightening of heavy elements, then `Reset styles`, and `Copy style`, the only part that folds.
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Appears&nbsp;when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 |:---|:---|:---|:---|:---|
@@ -1031,6 +1031,10 @@ The `Page settings` menu of the header holds the plot title, the background, the
 
 ¹ Lightened elements stay where they are and can be moved, but not resized. Each shows a gray snapshot of how it last looked, framed by a gray dashed line. They are still there, and exports draw them in full with their current options. One element can also be lightened, or shown again, from its `Right-click` menu (`Lighten this one`, `Show this one`). The box shows a tick when all are lightened, a dash when only some are, and is empty when none are. A click on a dash lightens them all, and a click on a tick shows them all again.
 
+### › Reset styles
+
+`Reset styles`, in `Page settings`, returns every option of the panel to its default and removes the look given to single elements, as the button of the same name in **Export** does. The tree itself is kept (names, branch lengths, rooting and order, collapsed clades and their names, clade names, fossils marked by hand), and so are the attached files and the reading properties. `Ctrl+Z` undoes it.
+
 ### › Copy style
 
 What `Paste style` applies, by groups of properties. It copies the look of each kind of element (colors, widths, sizes, places), never their values or data. Unticked groups stay as they are on the elements a style is pasted on, so only the color of the branches can be pasted, for example, or the branches and the nodes but not the labels.
@@ -1039,9 +1043,6 @@ What `Paste style` applies, by groups of properties. It copies the look of each 
 |:---|:---|:---|:---|:---|
 | `Groups of properties` | Branch color, branch width, line style of the branches, node dots (size, shape, color, border), highlights, font and size of the tip labels, color of the tip labels, values on branches and nodes, node bars, clade name bars and data plots. `All` and `None` tick or untick them all. | On<br>Off | On | Always |
 
-### › Reset styles
-
-`Reset styles`, at the end of `Page settings`, returns every option of the panel to its default and removes the look given to single elements, as the button of the same name in **Export** does. The tree itself is kept (names, branch lengths, rooting and order, collapsed clades and their names, clade names, fossils marked by hand), and so are the attached files and the reading properties. `Ctrl+Z` undoes it.
 
 ## Export
 

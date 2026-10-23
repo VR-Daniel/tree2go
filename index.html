@@ -2060,8 +2060,8 @@ const SECTIONS_RAW = [
     { type: 'hint', text: s => s.screenLines === 'true' ? 'Lines keep their true width on screen, however far out the view: thin lines look faint or vanish, as they will in a small print of the figure.' : 'Zoomed far out, lines that would vanish are drawn one pixel wide, on screen only. Exports keep the true widths.' },
     { k: 'lightMode', type: 'check', label: 'Lighten heavy elements while working' },
     { type: 'hint', text: s => 'Additional visual elements stay where they are and can be moved, but are shown as light placeholders. This only takes their drawing off the screen to keep the app quick: they are still there, and exports draw them in full with their current options. Untick it to see and edit them again.' },
-    { type: 'custom', build: copyPartsBox },
     { type: 'custom', build: resetStylesBox },
+    { type: 'custom', build: copyPartsBox },
   ]}
 ];
 // Side plot options appear only once a table with matching names is chosen
@@ -6494,7 +6494,7 @@ function resetStyles() {
 // The Reset styles button at the end of Page settings.
 function resetStylesBox() {
   const w = document.createElement('div');
-  w.innerHTML = `<div class="btns"><button type="button" class="btn danger" id="resetSetPage">Reset styles</button></div>
+  w.innerHTML = `<div class="btns"><button type="button" class="btn small danger" id="resetSetPage">Reset styles</button></div>
     <p class="hint">Every option and element back to the default look. The tree itself (names, branch lengths, collapsed clades, clade names, fossils) and the attached files are kept. Ctrl+Z undoes it.</p>`;
   w.querySelector('#resetSetPage').onclick = resetStyles;
   return w;
