@@ -73,6 +73,8 @@ Before reading a file with more than 10,000 trees, or any tree file larger than 
 
 With unrooted trees (no clock), the branch lengths of the majority-rule, strict and maximum compatible trees are the mean length of each branch over the trees that contain it, as in MrBayes.  
 
+Every summary tree is annotated as TreeAnnotator does, using the trees that contain each clade. Each node gets its `posterior`, and the mean, median, 95% HPD and range of its height (in time trees), of its branch length and of every numeric annotation of the sampled trees. These annotations can come from BEAST, written as `[&rate=…]`, or from MrBayes, written as `[&B name value]`, such as the branch lengths of its relaxed-clock models. For an annotation such as `rate`, the summary tree gets `rate` (the mean), `rate_median`, `rate_95%_HPD` and `rate_range`. They can then be shown as node values, used to color branches or drawn as node bars.  
+
 ### › Reading properties
 
 For files with several trees: how tree2go keeps its copy of each tree (used to show another tree, pick the MCC or MAP tree, draw the tree cloud and export the set). They take effect with the next file opened. Supports, ages and summary trees are computed from the file at full precision.
@@ -565,12 +567,18 @@ Boundaries follow the GSA Geologic Time Scale v. 6.0.
 | `Name size` |  | 1 to 60 px | 8 px | `Show time axis (dated trees)` is **On**, `Show geologic boxes with official colors` is **On**, `Show names that fit` is **On** |
 | `Box border width` |  | 0 to 10 px | 0.5 px | `Show time axis (dated trees)` is **On**, `Show geologic boxes with official colors` is **On** |
 | `Box border color` |  | Color | <img src="img/colors/333333.svg" alt="#333333" align="absmiddle"> #333333 | `Show time axis (dated trees)` is **On**, `Show geologic boxes with official colors` is **On**, `Box border width` is **On** |
-| `Tree background`¹ | Shades the area behind the tree by geologic interval. | None<br>Colors<br>Stripes | None | `Show time axis (dated trees)` is **On** |
-| `Background intervals` | Intervals used to shade the background. | Era<br>Period<br>Epoch<br>Age<br>Ticks | Period | `Show time axis (dated trees)` is **On**, `Tree background` is not **None** |
+| `Tree background`¹ | Shades the area behind the tree by geologic interval, or marks intervals of your own. | None<br>Colors<br>Stripes<br>Custom | None | `Show time axis (dated trees)` is **On** |
+| `Background intervals` | Intervals used to shade the background. | Era<br>Period<br>Epoch<br>Age<br>Ticks | Period | `Show time axis (dated trees)` is **On**, `Tree background` is **Colors** or **Stripes** |
+| `Intervals` | Intervals of your own, each written as two ages joined by a dash and separated by commas, for example `66-56, 201.4-145`. To give one its own color, add it after a colon: `66-56:#F2A65A`. The ticks and ages of the axis stay as they are set, so a period can be marked while the axis shows another scale. | Text |  | `Show time axis (dated trees)` is **On**, `Tree background` is **Custom** |
+| `Draw as` | A band of color over each interval, lines at its two limits, or both. | Band<br>Lines<br>Both | Band | `Show time axis (dated trees)` is **On**, `Tree background` is **Custom** |
+| `Band color` | The color of the intervals without one of their own. | Color | <img src="img/colors/8C8C8C.svg" alt="#8C8C8C" align="absmiddle"> #8C8C8C | `Show time axis (dated trees)` is **On**, `Tree background` is **Custom**, `Draw as` is not **Lines** |
 | `Background opacity` |  | 0.05 to 1 | 0.25 | `Show time axis (dated trees)` is **On**, `Tree background` is not **None** |
+| `Line color` | The lines at the limits of the custom intervals. | Color | <img src="img/colors/555555.svg" alt="#555555" align="absmiddle"> #555555 | `Show time axis (dated trees)` is **On**, `Tree background` is **Custom**, `Draw as` is not **Band** |
+| `Line width` |  | 0.05 to 20 px | 1 px | `Show time axis (dated trees)` is **On**, `Tree background` is **Custom**, `Draw as` is not **Band** |
+| `Line style` |  | Solid<br>Dashed<br>Dotted | Dashed | `Show time axis (dated trees)` is **On**, `Tree background` is **Custom**, `Draw as` is not **Band** |
 | `Extend the background and guide lines down to the axis` | The shading and guides reach the axis instead of stopping at the tree. | On<br>Off | Off | **Rectangular** layout, `Show time axis (dated trees)` is **On**, `Tree background` is not **None**, `Guide lines at each label` is **On** |
 
-¹ **Colors** uses the official colors of the intervals, while **Stripes** alternates light gray bands.  
+¹ **Colors** uses the official colors of the intervals, **Stripes** alternates light gray bands, and **Custom** marks intervals of your own. **Custom** and the background intervals are not shown together.  
 
 ### › Second axis
 
@@ -760,6 +768,11 @@ A sequence alignment (FASTA) next to the tips, matched by name. The cells are sq
 ## Legends
 
 Placement and look of every legend or scale bar. Hover an element on the canvas and click its lock to move it by hand. `Right-click` it to rewrite its texts.
+
+| Option | Description | Values | Default | Appears when |
+|:---|:---|:---|:---|:---|
+| `Show legends` | Shows or hides every legend of the figure. It shows a tick when all are shown, a dash when only some are, and is empty when none are. A click on a dash shows them all. | On<br>Off | On |  |
+| List of legends | Every legend the figure has, as the layers of the side plots, each with an eye to show or hide it. A legend hidden from its `Right-click` menu (`Hide this legend`) comes back from here. Hidden legends keep their place and look, and are left out of exports. | On<br>Off | On | The figure has legends |
 
 ### › Place
 
@@ -1046,7 +1059,7 @@ Save the figure, the tree or a style template.
 | Node | Dot size, shape, fill, color and border, support label, other node labels, node bars, make a polytomy of its children (and undo it) |
 | Grafted fossil | Ages, split the lineage, add fossils to a split, delete |
 | Clade name bar | Name, color, sizes, on circular trees, the name along the arc |
-| Legend | Title and entry texts, look of that legend, alignment with a selection |
+| Legend | Title and entry texts, look of that legend, alignment with a selection, hide it |
 | Scale bar | Length, unit, sizes, color, alignment |
 | Page box | Rows of the page, look of its tree map, alignment |
 | Image | Position, size, opacity, rotation, mirror, layer, alignment |
