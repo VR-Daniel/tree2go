@@ -2574,7 +2574,13 @@ function matchInfo(t, withCol = true) {
   return `${k} of ${plural(names.length, 'tip', 'tips')}` + (ki ? ` and ${ki} of ${plural(inner.length, 'internal node', 'internal nodes')}` : '') + ' matched' + (withCol ? `, names in "${t.header[t.idCol || 0]}"` : '');
 }
 // Updates the match counts shown in the Attachments list.
-function updateMatchCounts() { document.querySelectorAll('#tabList .tabitem').forEach(it => { const t = (settings.dataTables || []).find(x => x.id === it.dataset.id); const m = it.querySelector('.tmeta'); if (t && m) m.textContent = matchInfo(t, false); }); }
+// How many tips of the tree have a sequence in an alignment.
+function alnMatchInfo(a) { if (!tree) return 'no tree open'; const L = leaves(tree), k = L.filter(l => a.seqs.has(normTip(l.name || ''))).length; return `${k} of ${plural(L.length, 'tip', 'tips')} matched`; }
+// How many internal nodes of the tree are found in the SIMMAP maps (the same count as in Ancestral reconstructions).
+function smapMatchInfo() { const f = smapFound(); return f ? `${f.found} of ${plural(f.tot, 'internal node', 'internal nodes')} found` : 'no tree open'; }
+function updateMatchCounts() {
+  { const m = document.querySelector('#tabList .tabitem[data-smap] .smapmatch'); if (m && smap) m.textContent = smapMatchInfo(); }
+  document.querySelectorAll('#tabList .tabitem[data-aln]').forEach(it => { const a = alnSets[+it.dataset.aln], m = it.querySelector('.alnmatch'); if (a && m) m.textContent = alnMatchInfo(a); }); document.querySelectorAll('#tabList .tabitem').forEach(it => { const t = (settings.dataTables || []).find(x => x.id === it.dataset.id); const m = it.querySelector('.tmeta'); if (t && m) m.textContent = matchInfo(t, false); }); }
 // Redraws and saves after a change in the attached data.
 function dataChanged(msg) { refreshAttach(); refreshVisibility(); render(); persist(); if (msg) toast(msg); }
 // MCMC log of BEAST2 (.log) or MrBayes (.p): the posterior of every state, matched to the trees by their number
@@ -2659,11 +2665,11 @@ function refreshAttach() {
   const S = settings, ts = S.dataTables || [];
   const box = $('tabList');
   if (box) {
-    const sm = smap ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(smap.name)}">${esc(smap.name)}</span><button type="button" class="btn small danger" data-delsmap>Remove</button></div><span class="tmeta">SIMMAP, ${plural(smap.nMaps, 'map', 'maps')}</span></div>` : '';
+    const sm = smap ? `<div class="tabitem" data-smap><div class="thead"><span class="tname" title="${esc(smap.name)}">${esc(smap.name)}</span><button type="button" class="btn small danger" data-delsmap>Remove</button></div><span class="tmeta">SIMMAP, ${plural(smap.nMaps, 'map', 'maps')}, <span class="smapmatch">${smapMatchInfo()}</span></span></div>` : '';
     // the MCMC log (.log of BEAST2, .p of MrBayes), with what it is good for
     const lgHit = mcmcLog && treeSet && treeSet.trees ? treeSet.trees.filter(t => treePost(t) != null).length : 0;
     const lg = mcmcLog ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(mcmcLog.name)}">${esc(mcmcLog.name)}</span><button type="button" class="btn small danger" data-dellog>Remove</button></div><span class="tmeta">${mcmcLog.runs ? [...mcmcLog.runs].sort((a, b) => a[0] - b[0]).map(([k, l]) => `Run ${k}: ${esc(l.name)}`).join(', ') + '. ' : ''}MCMC log, ${plural(mcmcLog.runs ? [...mcmcLog.runs.values()].reduce((a, l) => a + l.map.size, 0) : mcmcLog.map.size, 'state', 'states')} (${esc(mcmcLog.col)}). ${treeSet && treeSet.trees ? `${lgHit} of ${treeSet.trees.length} trees matched: choose MAP in Tree → Summary tree.` : 'Open the sampled trees (.t of MrBayes, .trees of BEAST) to build the MAP tree, a consensus tree is not enough.'}</span></div>` : '';
-    const al = alnSets.map((a, i) => `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(a.name)}">${esc(a.name)}</span><button type="button" class="btn small danger" data-delaln="${i}">Remove</button></div><span class="tmeta">Alignment: ${a.n} sequences of ${a.len} ${a.type === 'dna' ? 'bases' : 'residues'}. Shown from Side plots, Alignment.</span></div>`).join('');
+    const al = alnSets.map((a, i) => `<div class="tabitem" data-aln="${i}"><div class="thead"><span class="tname" title="${esc(a.name)}">${esc(a.name)}</span><button type="button" class="btn small danger" data-delaln="${i}">Remove</button></div><span class="tmeta">Alignment: ${a.n} sequences of ${a.len} ${a.type === 'dna' ? 'bases' : 'residues'}, <span class="alnmatch">${alnMatchInfo(a)}</span>. Shown from Side plots, Alignment.</span></div>`).join('');
     box.innerHTML = sm + lg + al + (ts.length || mcmcLog ? ts.map(t => `<div class="tabitem" data-id="${esc(t.id)}"><div class="thead"><span class="tname" title="${esc(t.name)}">${esc(t.name)}</span><button type="button" class="btn small danger" data-del>Remove</button></div><span class="tmeta">${esc(matchInfo(t, false))}</span><label class="tidcol"><span>Names in</span><select data-idcol>${t.header.map((h, i) => `<option value="${i}"${i === (t.idCol || 0) ? ' selected' : ''}>${esc(h)}</option>`).join('')}</select></label></div>`).join('') : sm ? '' : '<p class="hint">No tables yet.</p>');
     const ds = box.querySelector('[data-delsmap]'); if (ds) ds.onclick = () => { smap = null; dropSmapLook(); persistSmap(); buildSide(); render(); persist(); toast('SIMMAP removed'); };
     const dl = box.querySelector('[data-dellog]'); if (dl) dl.onclick = () => { mcmcLog = null; refreshAttach(); refreshTreeSetBox(); toast('MCMC log removed'); };
