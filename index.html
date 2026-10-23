@@ -353,7 +353,7 @@ main{position:relative; overflow:hidden; background:var(--bg); flex:1 1 auto; mi
 .tab input.tabin{width:150px; height:22px !important; min-height:0; margin:0; padding:0 7px; font-size:12.5px; line-height:20px; border:1px solid var(--accent); border-radius:5px; box-sizing:border-box; background:var(--panel)}
 body.hastabs #stage{border-top-left-radius:0}
 body.hastabs #stage, body.hastabs .drop{top:42px}
-body.hastabs .status{top:50px}
+body.hastabs .status{top:10px}
 #stage{position:absolute; inset:12px 12px 12px 30px; border-radius:6px; overflow:hidden; box-shadow:0 0 0 1px var(--line); touch-action:none; cursor:grab}
 #stage.panning{cursor:grabbing}
 #svg{width:100%; height:100%; display:block; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none}
@@ -375,7 +375,7 @@ body.hastabs .status{top:50px}
 .status.right{left:auto; right:22px; background:#FFE8C7; color:#6B4300}
 .status .sub{color:#7d848e; margin-top:1px}
 /* Status line and search count over the canvas. */
-.status{position:absolute; left:40px; top:20px; font-size:12px; color:#4f5660; background:rgba(255,255,255,.88); padding:3px 8px; border-radius:6px; pointer-events:none; max-width:calc(100% - 60px)}
+.status{position:absolute; left:14px; top:10px; font-size:12px; color:#4f5660; background:rgba(255,255,255,.88); padding:3px 8px; border-radius:6px; pointer-events:none; max-width:calc(100% - 60px)}
 .empty{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:24px; color:#4f5660; pointer-events:none}
 .empty h2{font-family:var(--display); font-weight:400; font-size:38px; margin:0; color:#1e2228}
 .empty p{margin:0; max-width:46ch}
@@ -2665,7 +2665,7 @@ function refreshAttach() {
     const lg = mcmcLog ? `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(mcmcLog.name)}">${esc(mcmcLog.name)}</span><button type="button" class="btn small danger" data-dellog>Remove</button></div><span class="tmeta">${mcmcLog.runs ? [...mcmcLog.runs].sort((a, b) => a[0] - b[0]).map(([k, l]) => `Run ${k}: ${esc(l.name)}`).join(', ') + '. ' : ''}MCMC log, ${plural(mcmcLog.runs ? [...mcmcLog.runs.values()].reduce((a, l) => a + l.map.size, 0) : mcmcLog.map.size, 'state', 'states')} (${esc(mcmcLog.col)}). ${treeSet && treeSet.trees ? `${lgHit} of ${treeSet.trees.length} trees matched: choose MAP in Tree → Summary tree.` : 'Open the sampled trees (.t of MrBayes, .trees of BEAST) to build the MAP tree, a consensus tree is not enough.'}</span></div>` : '';
     const al = alnSets.map((a, i) => `<div class="tabitem"><div class="thead"><span class="tname" title="${esc(a.name)}">${esc(a.name)}</span><button type="button" class="btn small danger" data-delaln="${i}">Remove</button></div><span class="tmeta">Alignment: ${a.n} sequences of ${a.len} ${a.type === 'dna' ? 'bases' : 'residues'}. Shown from Side plots, Alignment.</span></div>`).join('');
     box.innerHTML = sm + lg + al + (ts.length || mcmcLog ? ts.map(t => `<div class="tabitem" data-id="${esc(t.id)}"><div class="thead"><span class="tname" title="${esc(t.name)}">${esc(t.name)}</span><button type="button" class="btn small danger" data-del>Remove</button></div><span class="tmeta">${esc(matchInfo(t, false))}</span><label class="tidcol"><span>Names in</span><select data-idcol>${t.header.map((h, i) => `<option value="${i}"${i === (t.idCol || 0) ? ' selected' : ''}>${esc(h)}</option>`).join('')}</select></label></div>`).join('') : sm ? '' : '<p class="hint">No tables yet.</p>');
-    const ds = box.querySelector('[data-delsmap]'); if (ds) ds.onclick = () => { smap = null; persistSmap(); buildSide(); render(); toast('SIMMAP removed'); };
+    const ds = box.querySelector('[data-delsmap]'); if (ds) ds.onclick = () => { smap = null; dropSmapLook(); persistSmap(); buildSide(); render(); persist(); toast('SIMMAP removed'); };
     const dl = box.querySelector('[data-dellog]'); if (dl) dl.onclick = () => { mcmcLog = null; refreshAttach(); refreshTreeSetBox(); toast('MCMC log removed'); };
     box.querySelectorAll('[data-delaln]').forEach(b => b.onclick = () => { alnSets.splice(+b.dataset.delaln, 1); alnSync(); if (!alnSets.length) { try { localStorage.removeItem(ALN_KEY); } catch (e) { } settings.alnPick = ''; } else alnSave(); buildSide(); render(); persist(); refreshAttach(); toast('Alignment removed'); });
     box.querySelectorAll('.tabitem[data-id] [data-idcol]').forEach(sl => sl.onchange = () => {
@@ -2855,6 +2855,9 @@ function loadSmapText(text, name) {
     smap = r;
     if (!tree) { const first = String(text).split(/;\s*/).find(l => l.trim().startsWith('(')); loadText(smapToNewick(first.trim()) + ';'); }
     const S = settings;
+    // the pies are drawn in the place of the node and tip dots, which are turned on for them: what they were is kept,
+    // to give it back when the SIMMAP is removed (only the first time, so a second SIMMAP does not keep the pies' dots)
+    if (!S.ancPrevDots) S.ancPrevDots = { nodeDotOn: S.nodeDotOn, tipDotOn: S.tipDotOn, nodeDot: S.nodeDot, tipDot: S.tipDot };
     S.ancOn = true; S.ancColors = { ...(S.ancColors || {}) };
     applyAncWhere(); enforceSupportLocks();
     { let any = false; walkAll(tree, x => { if (x.children.length && isSupport(x.name)) any = true; }); if (!any) S.supportSource = 'attach'; }
@@ -2869,6 +2872,12 @@ function loadSmapText(text, name) {
 }
 // "Show on" turns the matching dots on in Nodes; the pies use the dots' size, border and opacity
 function applyAncWhere() { const w = settings.ancWhere; settings.tipDotOn = w !== 'internal'; settings.nodeDotOn = w !== 'tips'; for (const k of ['tipDotOn', 'nodeDotOn']) { const it = allItems().find(x => x.k === k); if (it) syncControl(it); } }
+// After the SIMMAP is removed: the node and tip dots as they were before it, and its pies and branch colors off.
+function dropSmapLook() {
+  const S = settings, p = S.ancPrevDots;
+  if (p) { for (const k of ['nodeDotOn', 'tipDotOn', 'nodeDot', 'tipDot']) if (p[k] !== undefined) S[k] = p[k]; delete S.ancPrevDots; }
+  S.ancOn = false; S.ancBranch = 'none';
+}
 // Color of an ancestral state.
 function ancColor(s, i) { return (settings.ancColors || {})[smap.states[i]] || PALETTE[i % PALETTE.length]; }
 // Builds the state list of the Ancestral reconstructions section.
@@ -4052,7 +4061,7 @@ function attachSummary() {
 const attachKinds = A => A.kinds.map(k => `${k.label} (${k.count})`).join(', ');
 function clearAttachments() {
   settings.dataTables = []; settings.pieData = null; settings.pieOn = false;
-  smap = null; persistSmap(); alnSets = []; alnSync(); try { localStorage.removeItem(ALN_KEY); } catch (e) { }
+  smap = null; dropSmapLook(); persistSmap(); alnSets = []; alnSync(); try { localStorage.removeItem(ALN_KEY); } catch (e) { }
   settings.alnPick = ''; mcmcLog = null;
   buildSide(); render(); persist(); refreshAttach(); refreshTreeSetBox();
 }
@@ -4834,7 +4843,7 @@ function renderOnce() {
   const anc = (() => {
     if (!smap) return null;
     const keys = ancKeys, nS = smap.states.length, B = smap.B;
-    const cl = n => smap.clades.get(keys.get(n));
+    const cl = n => { const c = smap.clades.get(keys.get(n)); return c && c.n > 0 && c.node.some(v => v > 0) ? c : null; };   // no data (the root, which has no branch): no pie
     const coll = S.ancCollapse ? S.ancCollapsePct / 100 : 0;
     // slices after grouping the small ones: [{ color, p, i }], i = state index or -1 for the group
     const slices = probs => {
@@ -5191,6 +5200,9 @@ function renderOnce() {
     const fill = fillOn ? (stv(n, 'dc') || defFill) : 'none';
     const border = strokeAttr(stv(n, 'dbc') || S.dotBorderColor, stv(n, 'dbs') ?? S.dotBorderStyle, stv(n, 'dbw') ?? S.dotBorderWidth, r, stv(n, 'dbn') ?? S.dotBorderCount);
     const op = S.dotOpacity < 100 ? ` opacity="${f2(S.dotOpacity / 100)}"` : '';
+    // while the pies are shown, a node the maps say nothing about (the root, which has no branch) gets no dot either,
+    // unless it was given one of its own: the dots were turned on for the pies
+    if (anc && S.ancOn && !anc.cl(n) && n.children.length && stv(n, 'dot') == null && S.ancPrevDots && !S.ancPrevDots.nodeDotOn) return '';
     if (pieAt(n)) {   // pie of state probabilities, with the dot's size, border and opacity
       const sl = anc.slices(anc.cl(n).node), [cx, cy] = piePt(n, S.ancPos); let a = -90, body = '';   // on the node, or mid-branch
       pieHits.push(`<circle class="hitpt" cx="${f2(cx)}" cy="${f2(cy)}" r="${f2(Math.max(r, 4))}" data-id="${n.id}" data-kind="node" data-pie="anc"/>`);
