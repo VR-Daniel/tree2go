@@ -262,7 +262,9 @@ html:has(body.refpage), body.refpage{height:auto; overflow:auto}   /* on its own
 .tutpage .helpBody figure.vfig .vrow > img{height:auto; width:auto; max-height:var(--vh, 360px); max-width:100%; min-width:0; flex:0 1 auto; margin:0}
 .tutpage .helpBody figure.vfig.pair > figcaption{max-width:92%}
 .tutpage .helpBody figure.vfig .vrow > figure > img{height:auto; width:auto; max-height:var(--vh, 360px); max-width:100%}
-.tutpage .helpBody figure.vfig img.vpanel{filter:drop-shadow(0 0 1px rgba(0,0,0,.35))}
+/* every figure on a soft shadow, as a frame that fades out (the outline of .vpanel gives way to it) */
+.tutpage .helpBody figure.vfig img{border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.12), 0 6px 16px rgba(0,0,0,.08)}
+.tutpage .helpBody figure.vfig img.vpanel{filter:none}
 @media (max-width:640px){ .tutpage .helpBody figure.vfig .vrow{flex-direction:column; align-items:center} }
 .tutpage .helpBody blockquote{margin:10px 0 18px; padding:10px 14px; border-left:3px solid #4a67c9; background:rgba(127,127,127,.12); border-radius:0 8px 8px 0; color:inherit; font-size:15px}
 .tutpage .helpBody blockquote p{margin:0}
