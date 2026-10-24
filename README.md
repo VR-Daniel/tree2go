@@ -15,7 +15,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/VR-Daniel/tree2go)](https://github.com/VR-Daniel/tree2go/commits)
 [![Stars](https://img.shields.io/github/stars/VR-Daniel/tree2go?style=social)](https://github.com/VR-Daniel/tree2go/stargazers)
 
-[**Open tree2go**](https://vr-daniel.github.io/tree2go/) · [Reference guide](https://vr-daniel.github.io/tree2go/#reference) · [Tutorial](https://github.com/VR-Daniel/tree2go/blob/main/content/vignettes/en/01-basic-editing.md) · [How to cite](#how-to-cite)
+[**Open tree2go**](https://vr-daniel.github.io/tree2go/) · [Reference guide](https://vr-daniel.github.io/tree2go/#reference) · [Tutorial](https://vr-daniel.github.io/tree2go/#tutorial/en/01-basic-editing) · [How to cite](#how-to-cite)
 
 </div>
 
@@ -54,9 +54,9 @@ Then click `Open tree` in the **Tree** section of the left panel, or drop a tree
 
 - **[Options reference guide](https://vr-daniel.github.io/tree2go/#reference):** every option of tree2go, grouped as in the app, with what it does, its values and when it appears.
 - **Tutorial on the basic options:** a step-by-step walk from opening a set of trees to exporting the final figure, available in three languages:
-  - 🇬🇧 [English](https://github.com/VR-Daniel/tree2go/blob/main/content/vignettes/en/01-basic-editing.md)
-  - 🇪🇸 [Español](https://github.com/VR-Daniel/tree2go/blob/main/content/vignettes/es/01-basic-editing.md)
-  - 🇧🇷 [Português](https://github.com/VR-Daniel/tree2go/blob/main/content/vignettes/pt/01-basic-editing.md)
+  - 🇬🇧 [English](https://vr-daniel.github.io/tree2go/#tutorial/en/01-basic-editing)
+  - 🇪🇸 [Español](https://vr-daniel.github.io/tree2go/#tutorial/es/01-basic-editing)
+  - 🇧🇷 [Português](https://vr-daniel.github.io/tree2go/#tutorial/pt/01-basic-editing)
 
 ## How to cite
 

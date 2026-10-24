@@ -244,6 +244,32 @@ html:has(body.refpage), body.refpage{height:auto; overflow:auto}   /* on its own
 .refpage #helpModal .box > *{overflow:visible; max-height:none; flex:none}
 .refpage .helpBody{padding-right:4px !important}   /* the room kept for the scroll bar of the window: on its own page the browser has its own */
 .refpage #helpTab{display:none}
+/* A tutorial on its own page (…#tutorial/en/01-basic-editing): the page of the reference, narrower for reading,
+   with a choice of language, and the figures and notes of the vignettes */
+.tutpage #helpModal .box{max-width:min(940px, 96vw)}
+.tutpage #helpPdf{display:none}
+.tutlang{display:flex; gap:4px; align-items:center}
+.tutlang a{padding:4px 9px; border:1px solid var(--line); border-radius:6px; font-size:12.5px; font-weight:600; color:var(--muted); text-decoration:none}
+.tutlang a:hover{color:var(--ink); border-color:var(--accent)}
+.tutlang a.on{background:var(--accent); border-color:var(--accent); color:#fff}
+.tutpage .helpBody{font-size:15px; line-height:1.65}
+.tutpage .helpBody h2{margin-top:30px}
+.tutpage .helpBody figure.vfig{margin:14px 0 20px; padding:0; border:0; background:none}
+.tutpage .helpBody figure.vfig > img{display:block; margin:0 auto; max-width:100%; max-height:var(--vh-one, 460px); width:auto; height:auto}
+.tutpage .helpBody figure.vfig figcaption{margin:8px auto 0; font-size:14px; line-height:1.45; text-align:center; opacity:.8}
+.tutpage .helpBody figure.vfig > figcaption{max-width:720px}
+.tutpage .helpBody figure.vfig .vrow{display:flex; gap:18px; justify-content:center; align-items:flex-start}
+.tutpage .helpBody figure.vfig .vrow > figure{margin:0; flex:0 1 auto; min-width:0; display:flex; flex-direction:column; align-items:center}
+.tutpage .helpBody figure.vfig .vrow > figure > figcaption{contain:inline-size; width:100%}
+.tutpage .helpBody figure.vfig .vrow > img{height:auto; width:auto; max-height:var(--vh, 360px); max-width:100%; min-width:0; flex:0 1 auto; margin:0}
+.tutpage .helpBody figure.vfig.pair > figcaption{max-width:92%}
+.tutpage .helpBody figure.vfig .vrow > figure > img{height:auto; width:auto; max-height:var(--vh, 360px); max-width:100%}
+.tutpage .helpBody figure.vfig img.vpanel{filter:drop-shadow(0 0 1px rgba(0,0,0,.35))}
+@media (max-width:640px){ .tutpage .helpBody figure.vfig .vrow{flex-direction:column; align-items:center} }
+.tutpage .helpBody blockquote{margin:10px 0 18px; padding:10px 14px; border-left:3px solid #4a67c9; background:rgba(127,127,127,.12); border-radius:0 8px 8px 0; color:inherit; font-size:15px}
+.tutpage .helpBody blockquote p{margin:0}
+.tutpage .helpBody blockquote p + p{margin-top:8px}
+@media print{ .tutpage .helpBody figure.vfig, .tutpage .helpBody blockquote{break-inside:avoid} }
 .helpsearch .btn.helppdf{width:auto; padding:0 12px; font-size:13px; display:inline-flex; align-items:center; text-decoration:none; white-space:nowrap; color:inherit}
 .helpBody mark.find{background:#ffe8b0; color:inherit; border-radius:2px; padding:0}
 .helpBody mark.find.on{background:var(--mustard); box-shadow:0 0 0 1px var(--mustard)}
@@ -9821,6 +9847,52 @@ if (location.hash === '#reference') {
   document.body.classList.add('refpage'); document.title = 'tree2go reference';
   helpM.hidden = false; setTimeout(() => { loadHelp(); $('helpFind').focus(); });
 }
+/* ================= Tutorials on their own page =================
+   …#tutorial/<language>/<name> shows content/vignettes/<language>/<name>.md as a page, with the look of the reference.
+   Images are read next to the file (../../img/…), as GitHub reads them. A language without its translation yet
+   offers the English one. */
+const TUT_RE = /^#tutorial\/([a-z]{2})\/([\w.-]+)$/i;
+const TUT_LANGS = [['en', 'EN', 'English'], ['es', 'ES', 'Español'], ['pt', 'PT', 'Português']];
+const TUT_RAW = 'https://raw.githubusercontent.com/vr-daniel/tree2go/main/content/vignettes/';
+const tutorialOfHash = () => { const m = TUT_RE.exec(location.hash); return m ? { lang: m[1].toLowerCase(), name: m[2] } : null; };
+async function loadTutorial() {
+  const t = tutorialOfHash(); if (!t) return;
+  const box = $('helpBody'), page = location.href.split('#')[0];
+  // the choice of language, beside the title
+  let nav = document.querySelector('.tutlang');
+  if (!nav) { nav = document.createElement('nav'); nav.className = 'tutlang'; nav.setAttribute('aria-label', 'Language'); $('helpTitle').after(nav); }
+  nav.innerHTML = TUT_LANGS.map(([k, ab, nm]) => `<a href="${page}#tutorial/${k}/${esc(t.name)}" title="${nm}" lang="${k}"${k === t.lang ? ' class="on" aria-current="true"' : ''}>${ab}</a>`).join('');
+  document.documentElement.lang = t.lang;
+  $('helpFind').placeholder = 'Search the tutorial'; $('helpFind').setAttribute('aria-label', 'Search the tutorial');
+  const key = `tree2go-tutorial-${t.lang}-${t.name}`;
+  let cached = null; try { cached = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { }
+  box.innerHTML = cached && cached.html ? cached.html : '<p class="hint">Loading…</p>';
+  if (cached && cached.html) helpTitleFromBody();
+  const file = `${t.lang}/${t.name}.md`, web = /^https?:/.test(location.protocol);
+  const got = await fetchFirst(web ? [`content/vignettes/${file}`, TUT_RAW + file] : [TUT_RAW + file, `content/vignettes/${file}`]);
+  if (tutorialOfHash() && (tutorialOfHash().lang !== t.lang || tutorialOfHash().name !== t.name)) return;   // another one was asked for meanwhile
+  if (got) {
+    const html = cleanAbout(mdToHtml(got.text, got.base));
+    box.innerHTML = html; helpTitleFromBody();
+    try { localStorage.setItem(key, JSON.stringify({ html, saved: new Date().toISOString() })); } catch (e) { }
+  } else if (!(cached && cached.html)) {
+    const en = t.lang !== 'en' ? ` <a href="${page}#tutorial/en/${esc(t.name)}">Read it in English</a>.` : '';
+    box.innerHTML = `<p class="hint">This tutorial is not available ${t.lang !== 'en' ? 'in this language yet' : 'right now: check your internet connection and open it again'}.${en}</p>`;
+    $('helpTitle').textContent = 'Tutorial';
+  }
+  document.title = `${$('helpTitle').textContent} · tree2go`;
+  if ($('helpFind').value.trim()) helpSearch($('helpFind').value);
+  window.scrollTo(0, 0);
+}
+if (TUT_RE.test(location.hash)) {
+  document.body.classList.add('refpage', 'tutpage');
+  helpM.hidden = false; setTimeout(loadTutorial);
+}
+// moving between languages (or to the reference) on the same page
+window.addEventListener('hashchange', () => {
+  if (!document.body.classList.contains('tutpage')) return;
+  if (TUT_RE.test(location.hash)) loadTutorial(); else location.reload();
+});
 // The first # title of the file becomes the title of the window (and leaves the text, so it is not shown twice).
 function helpTitleFromBody() {
   const box = $('helpBody'), h = box.firstElementChild;
