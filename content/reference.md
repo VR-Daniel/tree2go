@@ -41,7 +41,7 @@ In the panel, sections and their subsections (marked ›) fold, and the open one
 - [Right-click menus](#right-click-menus)
 - [On the canvas](#on-the-canvas)
 
----
+
 
 <details open class="refgroup">
 <summary><strong style="font-size:1.5em">Left panel</strong></summary>
