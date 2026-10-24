@@ -1281,7 +1281,7 @@ const DEFAULTS = {
   showLengths: false, lengthDecimals: 3, lengthSize: 8, lengthColor: '#666666', lengthAlign: 'center', lengthMargin: 0, lengthDy: 2,
   supportMode: 'none', supportScaleDots: false, supportThreshold: 0, supportSize: 9, supportColor: '#6a6a6a', supportAlign: 'left', supportMargin: 3, supAlignV: 2, supportDy: 2,
   triSlots: 2, triFill: true, triCount: true, cladeOpacity: 0.55, hlStart: 'node', hlEnd: 'tree', hoverInfo: false, hlGradient: 'none', hlRadius: 0,
-  barAlign: true, barShowName: true, barTextMode: 'radial', barTextAlign: 'center', labelOrient: 'readable', barWidth: 3, barGap: 6, barTextGap: 6, barFontSize: 13, barBold: true, barItalic: true,
+  barAlign: true, barShowName: true, barTextMode: 'radial', barTextAlign: 'center', labelOrient: 'readable', barWidth: 3, barColorBy: 'branch', barColor: '#1F1F1F', barGap: 6, barTextGap: 6, barFontSize: 13, barBold: true, barItalic: true,
   dotFill: true, dotBorderStyle: 'none', dotBorderColor: '#1f1f1f', dotBorderWidth: 1, dotBorderCount: 12,
   supportScheme: 'threshold', supportLegend: true, projectName: '',
   supportLowIn: true,
@@ -1298,12 +1298,12 @@ const DEFAULTS = {
   scaleBar: true, scaleMode: 'auto', scaleLen: 0.1, scaleUnit: '', scaleDecimals: -1, scaleH: 'left', scaleV: 'bottom', scaleDx: 0, scaleDy: 0,
   scaleLineW: 1.2, scaleTick: 4, scaleFs: 10, scaleTextGap: 4, scaleColor: '#333333', scaleFree: false, scaleX: null, scaleY: null,
   legendV: 'bottom', legendH: 'left', legendDx: 0, legendDy: 0, legendFs: 10, legendTitleSize: 10, legendTitleBold: true, legendSym: 1,
-  legendShow: true, legendHide: {}, legendGap: 8, legendRowGap: 4, legendBlockGap: 14, legendColor: '#333333', legendPos: {}, legendText: {}, legendStyle: {},
+  legendShow: true, legendHide: {}, legendDec: 'auto', legendGap: 8, legendRowGap: 4, legendBlockGap: 14, legendColor: '#333333', legendPos: {}, legendText: {}, legendStyle: {},
   pages: [], pageColor: '#27408B', pageMiniOn: true, pageMiniW: 60, pageMiniH: 120, pageMiniGap: 24, pageMiniBase: '#BDBDBD', pageMiniHi: '#C8553D', pageMiniMark: 'both', pageMiniLW: 0.8, pageAxis: true, exportSplit: true, pageExtL: 0, pageExtR: 0, pageExtras: false,
   bg: '#ffffff', exportDpi: 300, exportSizeMode: 'natural', exportUnit: 'px', exportWidthVal: 0, title: '', titleSize: 18, titleH: 'left', titleV: 'top', titleDx: 0, titleDy: 0, titleColor: '#1f1f1f', titleBold: true, titleItalic: false,
   dataTables: [], dataActive: null, dataCols: [], dataColors: {}, dataWidth: 150, dataGap: 12, dataThick: 70, dataProp: false, dataValues: false, dataValSize: 9, dataAxis: true, dataLegend: true,
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataLog: false, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
-  catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
+  catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catLegend: true, catCircFit: true, catCircW: null, catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
   ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, lengthVLow: '#2C7BB6', lengthVMidOn: true, lengthVMid: '#FFFFBF', lengthVHigh: '#D7191C', lengthVLegend: true, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, supportVLow: '#2C7BB6', supportVMidOn: true, supportVMid: '#FFFFBF', supportVHigh: '#D7191C', supportVLegend: true, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, ancLabelVLow: '#2C7BB6', ancLabelVMidOn: true, ancLabelVMid: '#FFFFBF', ancLabelVHigh: '#D7191C', ancLabelVLegend: true, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', gmProj: 'equalearth', gmTable: '', gmLon: '', gmLat: '', gmShape: 'circle', gmSizeBy: 'fixed', gmSize: 3.5, gmSizeMin: 2.5, gmSizeMax: 12, gmColorBy: 'single', gmColor: '#C8553D', gmColorVar: '', gmSizeVar: '', gmPts: {}, gmPal: 'viridis', gmRev: false, gmOp: 85, gmBorder: '#ffffff', gmBorderW: 0.6, gmCluster: 0, gmCount: true, gmMixColor: '#9AA0A6', gmLines: false, gmLineFrom: 'tip', gmLineColor: '#8A8F98', gmLineW: 0.6, gmLineOp: 70, gmLineStyle: 'solid', gmLegend: true, gmLegendTitle: '', gmLineColorBy: 'single', gmLife: 'all', gmPaleo: false, gmAge: 50, gmModel: 'PALEOMAP', gmMap: '', neRes: '110m', neLayers: ['land'], gpAge: 50, gpModel: 'PALEOMAP', axisShow: true, axisPos: 'bottom', geoPos: 'bottom', ax2On: false, ax2Pos: 'top', ax2Interval: 0, ax2Minor: 0, ax2Decimals: -1, ax2Title: '', ax2Gap: 8, geoTitle: true, copyParts: {}, lightMode: false, tgOn: false, tgTab: 0, tgFrom: 'label', tgColorBy: 'single', tgColor: '#8A8F98', tgMismatch: 'blend', tgGrey: '#C8CCD2', tgW: 0.8, tgOp: 80, tgStyle: 'solid', tgCurve: 0, tgGap: 140, tgWidth: 0, tgLabels: true, tgLines: {}, tgBridge: true, screenLines: 'visible', renderOpt: true, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
@@ -1646,6 +1646,9 @@ const SECTIONS_RAW = [
     { k: 'barTextMode', type: 'seg', label: 'Names on circular and fan trees', opts: [['radial', 'Radial'], ['curved', 'Curved along the arc']], enable: s => s.barShowName && isCirc(s) },
     { k: 'barTextAlign', type: 'seg', label: 'Position along the arc', opts: [['start', 'Start'], ['center', 'Center'], ['end', 'End']], enable: s => s.barShowName && isCirc(s) && s.barTextMode === 'curved' },
     { k: 'barWidth', type: 'range', label: 'Clade bar width', min: 1, max: 12, step: 0.5, hmin: 0.1, hmax: 100, unit: 'px' },
+    { k: 'barColorBy', type: 'seg', label: 'Bar color', opts: [['single', 'One color'], ['branch', 'As the branches'], ['highlight', 'As the highlight']] },
+    { k: 'barColor', type: 'color', label: 'Color of the bars and names', show: s => s.barColorBy !== 'branch', sub: true },
+    { type: 'hint', text: s => s.barColorBy === 'highlight' ? 'The names take the color above, so that they read well over a light highlight, and so do the bars of clades without a highlight.' : s.barColorBy === 'single' ? 'Whatever the color of the branches.' : '' },
     { k: 'barAlign', type: 'check', label: 'Line up the clade bars in one column' },
     { type: 'hint', text: () => 'When off, each bar sits right after the labels of its own clade.' },
     { k: 'barGap', type: 'range', label: 'Clade bar distance from the previous element', min: -200, max: 200, step: 1, hmin: -5000, hmax: 5000, unit: 'px' },
@@ -1862,6 +1865,10 @@ const SECTIONS_RAW = [
     { type: 'head', label: 'Categories' },
     { type: 'custom', build: pickerBox('catCols') },
     { k: 'catShape', type: 'seg', label: 'Shape', opts: [['square', 'Squares'], ['circle', 'Circles']], enable: s => hasCat(s) },
+    { k: 'catCircFit', type: 'check', label: 'Squares follow the circle', show: s => isCirc(s), enable: s => hasCat(s) && s.catShape !== 'circle', sub: true },
+    { type: 'hint', text: s => isCirc(s) && s.catShape !== 'circle' ? 'Draws the squares as wedges, so the cells of each tip form one band that widens away from the center.' : '' },
+    { k: 'catCircW', type: 'number', label: 'Width of the bands', min: 1, max: 100, step: 1, unit: '%', blank: 'Auto', show: s => isCirc(s), enable: s => hasCat(s) && s.catShape !== 'circle' && s.catCircFit !== false, sub: true },
+    { type: 'hint', text: s => isCirc(s) && s.catShape !== 'circle' && s.catCircFit !== false ? 'The share of the space of each tip the band takes. At 100% the bands touch, and each column becomes a ring. Empty: as wide as the squares.' : '' },
     { k: 'catSize', type: 'range', label: 'Size', min: 4, max: 40, step: 0.5, hmin: 1, hmax: 500, unit: 'px', enable: s => hasCat(s) },
     { k: 'catGap', type: 'range', label: 'Space between columns', min: 0, max: 40, step: 0.5, hmin: 0, hmax: 1000, unit: 'px', enable: s => hasCat(s) },
     { k: 'catDist', type: 'range', label: 'Distance from the previous element', min: 0, max: 200, step: 1, hmin: -5000, hmax: 2000, unit: 'px', enable: s => hasCat(s) },
@@ -1872,6 +1879,7 @@ const SECTIONS_RAW = [
     { k: 'catBorderWidth', type: 'number', label: 'Border width', min: 0.05, max: 50, step: 0.5, unit: 'px', enable: s => hasCat(s) && s.catBorderStyle !== 'none', sub: true },
     { k: 'catBorderCount', type: 'range', label: 'Number of dashes or dots', min: 1, max: 60, step: 1, hmax: 500, enable: s => hasCat(s) && (s.catBorderStyle === 'dashed' || s.catBorderStyle === 'dotted'), sub: true },
     { type: 'hint', text: s => 'The tree goes to the outside and its labels, bars and categories fill the middle, with the clade name bars around the outside.' + (isCirc(s) ? '' : ' It takes effect when the layout is circular or fan.') },
+    { k: 'catLegend', type: 'check', label: 'Show a legend', enable: s => hasCat(s) },
     { k: 'catTitles', type: 'check', label: 'Show the column titles', enable: s => hasCat(s) && isRectish(s) },
     { k: 'catTitleAngle', type: 'seg', label: 'Title angle', opts: [['45', '45°'], ['90', 'Vertical']], enable: s => hasCat(s) && isRectish(s) && s.catTitles && !isVertical(s), sub: true },   // on a vertical tree the titles are always straight
     { k: 'catTitleFont', type: 'select', label: 'Title typeface', opts: [['', 'Same as the labels'], ...FONTS], enable: s => hasCat(s) && isRectish(s) && s.catTitles, sub: true },
@@ -2156,6 +2164,11 @@ const OVERRIDES = {
   barWidth: ['st:barW'], barGap: ['st:barOff'], barTextGap: ['st:barTO'], barFontSize: ['st:barFs'], barBold: ['st:barB'], barItalic: ['st:barI'],
   barShowName: ['st:barNH'], barTextMode: ['st:barTM'], barTextAlign: ['st:barTA']
 };
+/* The color of a named clade, the same wherever the app colors by clade (bars, map points, their legends): the color
+   given to its name bar, else its highlight, else the color of its branches, else one from the palette by its place
+   among the named clades, in the order of the tree. */
+function namedClades() { const out = []; if (tree) walkAll(tree, n => { if (n.cladeLabel && n.children.length) out.push(n); }); return out; }
+function cladeColorOf(G, named) { return stv(G, 'barC') || G.bg || G.color || PALETTE[Math.max(0, (named || namedClades()).indexOf(G)) % PALETTE.length]; }
 // Every node of the tree and of its grafted fossils.
 function allElements() { const out = []; if (tree) walkAll(tree, n => { out.push(n); if (n.grafts) n.grafts.forEach(G => walkAll(G, x => out.push(x))); }); return out; }
 // True when a node has its own value for a setting (set from the right-click menu).
@@ -5304,12 +5317,12 @@ function renderOnce() {
     const dataL = [], nC = dPlot.cols.length, prop = dPlot.prop, pct = prop && S.dataPropFmt === 'percent';
     // Named clades group the bars: the nearest named clade above each tip
     const byClade = !!S.dataByClade && nC === 1;
-    const named = vis.filter(n => n.cladeLabel && n.children.length);
+    const named = namedClades();
     const grpOf = new Map();
     if (byClade) (function g(x, cur) { const c = x.cladeLabel && x.children.length ? x : cur; if (!x.children.length || x._tri) grpOf.set(x, c); else x.children.forEach(y => g(y, c)); if (x.grafts) for (const G of x.grafts) walkAll(G, y => { if (!y.children.length) grpOf.set(y, c); }); })(tree, null);
     // the color of the clade: one given to its bars, else the one given to its name bar, else its highlight (the block
     // the bars sit next to), else its branch color, else one from the palette
-    const grpColor = G => stv(G, 'dtc') || stv(G, 'barC') || G.bg || G.color || PALETTE[named.indexOf(G) % PALETTE.length];
+    const grpColor = G => stv(G, 'dtc') || cladeColorOf(G, named);
     const recs = [];
     for (const n of [...tips.filter(n => !n._tri), ...gNodes.filter(x => !x.children.length)]) { const vals = dPlot.rowOf(n.name); if (vals && vals.some(v => v != null)) recs.push({ n, vals, G: grpOf.get(n) || null }); }
     const pos = v => v != null && v > 0 ? v : 0;
@@ -5415,11 +5428,21 @@ function renderOnce() {
       const tr = rot ? `translate(${f2(px)},${f2(py)}) rotate(${f2(rot)})` : `translate(${f2(px)},${f2(py)})`;
       cellGeo.set(catCellKey(c.name, n.name), { tr, h: half });
       hitL.push(`<rect class="hitlabel" transform="${tr}" x="${f2(-half)}" y="${f2(-half)}" width="${f2(sz)}" height="${f2(sz)}" data-catcol="${esc(c.name)}" data-cattip="${n.id}"/>`);
+      // on circular and fan trees, a square becomes a ring sector. Every column of a tip takes the same angle, that of a
+      // square on the ring nearest the center, so the cells of a tip make one band that widens away from the center
+      // (towards it when the tree is inside out, which realR and sector() handle)
+      if (circ && S.catShape !== 'circle' && S.catCircFit !== false) {
+        const rr = Math.max(realR(cx), half + 0.5), deg = x => x * 180 / Math.PI;
+        const slot = span / N / 2, w = +S.catCircW;
+        const da = Math.max(0, (w > 0 ? slot * Math.min(w, 100) / 100 : Math.min(deg(half / catRin), slot * 0.98)) - deg(inset / rr));   // the width chosen, or a square on the innermost ring
+        return `<path d="${sector(cx - half + inset, cx + half - inset, n._a - da, n._a + da)}" ${paint}${border}/>`;
+      }
       return S.catShape === 'circle'
         ? `<circle transform="${tr}" r="${f2(half - inset)}" ${paint}${border}/>`
         : `<rect transform="${tr}" x="${f2(-half + inset)}" y="${f2(-half + inset)}" width="${f2(sz - 2 * inset)}" height="${f2(sz - 2 * inset)}" ${paint}${border}/>`;
     };
     const ys = rows.map(r => r.n._py), yTop = rows.length ? minOf(ys) : 0, yBot = rows.length ? maxOf(ys) : 0;
+    const catRin = Math.max(half + 0.5, minOf(cs.map(x => realR(start + x))));   // the ring nearest the center, for the angle of the cells
     cPlot.cols.forEach((c, i) => {
       const cx = start + cs[i];
       for (const r of rows) catL.push(shape(c, r.n, r.v[i], cx));
@@ -5491,10 +5514,11 @@ function renderOnce() {
     const bOpt = n => ({
       w: stv(n, 'barW') ?? S.barWidth, gap: stv(n, 'barOff') ?? S.barGap, tgap: stv(n, 'barTO') ?? S.barTextGap,
       fs: stv(n, 'barFs') ?? S.barFontSize, bold: stv(n, 'barB') ?? S.barBold, it: stv(n, 'barI') ?? S.barItalic,
-      bc: stv(n, 'barC') || n._ec || S.lineColor
+      bc: stv(n, 'barC') || (S.barColorBy === 'highlight' && n.bg) || (S.barColorBy === 'branch' ? n._ec || S.lineColor : S.barColor || '#1F1F1F'),
+      lc: stv(n, 'barC') || (S.barColorBy === 'branch' ? n._ec || S.lineColor : S.barColor || '#1F1F1F')   // the names: the bar color given by hand, else the branches or the one color
     });
     const opts = new Map(labeled.map(n => [n, bOpt(n)]));
-    for (const n of labeled) { const o = opts.get(n); o.tw = measure(n.cladeLabel, o.fs, fam, o.it, o.bold); o.tc = stv(n, 'barTC') || o.bc; }
+    for (const n of labeled) { const o = opts.get(n); o.tw = measure(n.cladeLabel, o.fs, fam, o.it, o.bold); o.tc = stv(n, 'barTC') || o.lc; }
     const step = maxOf(labeled.map(n => { const o = opts.get(n); return o.w + Math.max(0, o.tgap) + o.tw; })) + 14;
     if (layered && dPlot && isFinite(barsReach)) sideW.bar = Math.max(sideW.bar || 0, barsReach - layerAt('bar'));
     const cladeFloor = layered && layerAt('clade') > sideBase + 1e-6 ? layerAt('clade') : -Infinity;   // the layers before the clade names
@@ -5877,10 +5901,18 @@ function renderOnce() {
     if (anc.usedOther) ent.push({ text: `Other (below ${S.ancCollapsePct}%)`, sym: { t: 'circle', r: 5, fill: S.ancOtherColor } });
     blocks.push({ key: 'anc', title: '', entries: ent });
   }
+  // categories: one entry per column, in its color and shape, and one for the absent shapes
+  if (cPlot && S.catLegend !== false) {
+    const symOf = (fill, stroke) => S.catShape === 'circle' ? { t: 'circle', r: 5, fill, stroke } : { t: 'rect', fill, stroke };
+    const absent = S.catAbsentStyle === 'outline' ? symOf('none', ` stroke="${S.catAbsent}" stroke-width="1.2"`) : symOf(S.catAbsent);
+    blocks.push({ key: 'cat', title: '', entries: [...cPlot.cols.map(c => ({ text: c.label, sym: symOf(c.color) })), { text: 'Absent', sym: absent }] });
+  }
   if (dLegend && S.dataLegend) blocks.push({ key: 'data', title: '', entries: dLegend.map(([name, c]) => ({ text: name, sym: { t: 'rect', fill: c } })) });
   legendAuto = {};
   const drawBlock = b => {
     const own = (S.legendStyle || {})[b.key] || {}, Lv = k => own[k] ?? S[k];
+    const decV = own.legendDec, decFix = decV != null && decV !== 'auto' && decV !== '' && isFinite(+decV) ? +decV : null;   // decimals chosen for this legend
+    const numTxt = t => decFix != null && isNumText(t) ? (+t).toFixed(decFix) : t;
     const lfs = Lv('legendFs'), tfs = Lv('legendTitleSize'), sc = Lv('legendSym'), gap = Lv('legendGap'), rg = Lv('legendRowGap'), col = Lv('legendColor'), tbold = Lv('legendTitleBold');
     const out = [], ff = ` font-family="${esc(fam)}" fill="${col}"`;
     let y = 0, w = 0;
@@ -5890,7 +5922,7 @@ function renderOnce() {
     if (b.gradient) {
       const g = b.gradient, W = 140 * sc, H = 10 * sc, id = 'lgGrad_' + b.key;
       const stops = g.stops.map((c, i) => `<stop offset="${f2(i / (g.stops.length - 1))}" stop-color="${c}"/>`).join('');
-      const fmt = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(4));
+      const fmt = v => decFix != null ? (+v).toFixed(decFix) : (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(4));
       out.push(`<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs><rect x="0" y="${f2(y)}" width="${f2(W)}" height="${f2(H)}" fill="url(#${id})" stroke="#999" stroke-width="0.5"/>`);
       y += H + 3;
       const autoLo = g.labels ? g.labels[0] : fmt(g.lo), autoHi = g.labels ? g.labels[1] : fmt(g.hi), lo = lgText(b.key, 'lo', autoLo), hi = lgText(b.key, 'hi', autoHi);
@@ -5903,8 +5935,8 @@ function renderOnce() {
         const symH = e.sym.t === 'circle' ? 2 * e.sym.r * sc : e.sym.t === 'line' ? e.sym.w : 8 * sc, rowH = Math.max(lfs * 1.25, symH), cy = y + rowH / 2, sx0 = symW / 2;
         if (e.sym.t === 'line') out.push(`<line x1="0" y1="${f2(cy)}" x2="${f2(symW)}" y2="${f2(cy)}" stroke="${e.sym.c}" stroke-width="${f2(e.sym.w)}" stroke-linecap="butt"/>`);
         else if (e.sym.t === 'circle') out.push(`<circle cx="${f2(sx0)}" cy="${f2(cy)}" r="${f2(e.sym.r * sc)}" fill="${e.sym.fill}"${e.sym.stroke || ''}/>`);
-        else out.push(`<rect x="${f2(sx0 - 5 * sc)}" y="${f2(cy - 4 * sc)}" width="${f2(10 * sc)}" height="${f2(8 * sc)}" rx="${f2(2 * sc)}" fill="${e.sym.fill}"/>`);
-        const txt = lgText(b.key, i, e.text);
+        else out.push(`<rect x="${f2(sx0 - 5 * sc)}" y="${f2(cy - 4 * sc)}" width="${f2(10 * sc)}" height="${f2(8 * sc)}" rx="${f2(2 * sc)}" fill="${e.sym.fill}"${e.sym.stroke || ''}/>`);
+        const txt = lgText(b.key, i, numTxt(e.text));
         out.push(`<text x="${f2(symW + gap)}" y="${f2(cy)}" dominant-baseline="central" font-size="${f2(lfs)}"${ff}>${esc(txt)}</text>`);
         w = Math.max(w, symW + gap + measure(txt, lfs, fam, false, false));
         y += rowH + rg;
@@ -8998,6 +9030,9 @@ const LEGEND_SPEC = [
   { k: 'legendRowGap', label: 'Space between rows', unit: 'px' },
   { k: 'legendColor', label: 'Text color', type: 'color' }
 ];
+// Decimals of the numbers of one legend (gradient ends, sizes): only offered when it shows numbers.
+const LEGEND_DEC_SPEC = { k: 'legendDec', label: 'Decimals', type: 'sel', opts: [['auto', 'Auto'], ...[0, 1, 2, 3, 4, 5, 6].map(d => [d, String(d)])] };
+const isNumText = t => /^\s*-?\d+(\.\d+)?(e[-+]?\d+)?\s*$/i.test(String(t ?? ''));
 const MINI_SPEC = [
   { k: 'pageMiniW', label: 'Width', unit: 'px' },
   { k: 'pageMiniH', label: 'Height', unit: 'px' },
@@ -9027,7 +9062,7 @@ function wireLock(reopen) {
     setFree(key, !isFreeKey(key)); render(); persist(); syncPanelKeys(['scaleFree']); reopen();
   });
 }
-const LEGEND_NAMES = { support: 'Support legend', supvc: 'Support color legend', lenvc: 'Branch value color legend', nlabvc: 'Node label color legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', geo: 'Map legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
+const LEGEND_NAMES = { support: 'Support legend', cat: 'Categories legend', supvc: 'Support color legend', lenvc: 'Branch value color legend', nlabvc: 'Node label color legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', geo: 'Map legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
 /* Legends hidden by the user (settings.legendHide, by key): not drawn nor exported, but they keep their place and look.
    The legends of the figure, with their names, are listed in the Legends section, where each can be shown again. */
 let legendList = [];   // [{ key, name }] of the legends the figure has now, shown or hidden
@@ -9064,7 +9099,7 @@ function openLegendMenu(key, cx, cy, keep) {
       ${field('title', auto.title, 'Title')}
       ${auto.gradient ? field('lo', auto.lo, 'Lowest value') + field('hi', auto.hi, 'Highest value') : auto.entries.map((t, i) => field(i, t, 'Entry ' + (i + 1))).join('')}
       <div class="btns"><button class="btn small" data-lreset>Use the automatic texts</button></div></div>
-    <div class="part"><b>Look of this legend</b>${ctlRows(LEGEND_SPEC, k => { const own = ((settings.legendStyle || {})[key] || {})[k]; return { v: own ?? settings[k], own: own != null }; })}</div>
+    <div class="part"><b>Look of this legend</b>${ctlRows(legendSpecOf(key), k => { const own = ((settings.legendStyle || {})[key] || {})[k]; return { v: own ?? settings[k], own: own != null }; })}</div>
     ${alignSection('this legend')}
     <div class="part"><div class="btns"><button class="btn small" id="lgHide">Hide this legend</button></div></div>`;
   pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
@@ -9088,7 +9123,7 @@ function openLegendMenu(key, cx, cy, keep) {
   };
   pop.querySelectorAll('[data-al]').forEach(b => b.onclick = () => { alignFree('legend:' + key, b.dataset.al); openLegendMenu(key, 0, 0, true); });
   const hb = pop.querySelector('#lgHide'); if (hb) hb.onclick = () => { pushUndo(true); setLegendHidden(key, true); closePop(); persist(); render(); toast('Legend hidden. Show it again from the Legends section.'); };
-  wireCtl(LEGEND_SPEC, (k, v) => {
+  wireCtl(legendSpecOf(key), (k, v) => {
     settings.legendStyle = settings.legendStyle || {}; const st = settings.legendStyle[key] = settings.legendStyle[key] || {};
     if ((st[k] ?? null) === v) return;
     if (tree) pushUndo(true);
@@ -9096,6 +9131,7 @@ function openLegendMenu(key, cx, cy, keep) {
     render(); persist(); openLegendMenu(key, 0, 0, true);
   });
 }
+function legendSpecOf(key) { const la = (legendAuto || {})[key]; return la && (la.gradient || (la.entries || []).some(isNumText)) ? [...LEGEND_SPEC, LEGEND_DEC_SPEC] : LEGEND_SPEC; }
 // Right-click menu of the scale bar.
 function openScaleMenu(cx, cy, keep) {
   const S = settings, keepScroll = keep ? pop.scrollTop : 0;
@@ -10770,7 +10806,7 @@ function sideLayersBox() {
     d.innerHTML = `<p class="hint">${rect ? 'Layers from the tips outwards. Drag them or use the arrows to change their order on the tree, and the eye to show or hide one.' : 'Layers from the tips outwards. On circular and fan trees the clade name bars always go around the outside, whatever their place in the list. The eye shows or hides each one.'}</p>
       <div class="layerlist">${o.map((k, i) => `<div class="layer${note(k) || hid[k] ? ' off' : ''}" ${rect || k !== 'clade' ? 'draggable="true"' : ''} data-layer="${k}"><span class="grip" aria-hidden="true"${rect || k !== 'clade' ? '' : ' style="visibility:hidden"'}>⋮⋮</span><span class="lname">${SIDE_NAMES[k]}</span><span class="lnote">${note(k)}</span><button type="button" class="btn small icon eye${hid[k] ? ' shut' : ''}" data-leye title="${hid[k] ? 'Show' : 'Hide'} ${SIDE_NAMES[k]}" aria-pressed="${!hid[k]}">${hid[k] ? '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg>' : '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></svg>'}</button><button type="button" class="btn small icon" data-lmove="-1" ${i && (rect || k !== 'clade') ? '' : 'disabled'} aria-label="Move ${SIDE_NAMES[k]} closer to the tree">↑</button><button type="button" class="btn small icon" data-lmove="1" ${i < o.length - 1 && (rect || k !== 'clade') ? '' : 'disabled'} aria-label="Move ${SIDE_NAMES[k]} away from the tree">↓</button></div>`).join('')}<div class="dropline" hidden></div></div>`;
     const set = list => { pushUndo(true); settings.sideOrder = list; render(); persist(); fill(); };
-    d.querySelectorAll('[data-leye]').forEach(b => b.onclick = () => { const k = b.closest('.layer').dataset.layer; pushUndo(true); settings.sideHidden = { ...(settings.sideHidden || {}), [k]: !(settings.sideHidden || {})[k] }; render(); persist(); fill(); });
+    d.querySelectorAll('[data-leye]').forEach(b => b.onclick = () => { const k = b.closest('.layer').dataset.layer; pushUndo(true); settings.sideHidden = { ...(settings.sideHidden || {}), [k]: !(settings.sideHidden || {})[k] }; render(); persist(); fill(); applySubs(); });
     d.querySelectorAll('[data-lmove]').forEach(b => b.onclick = () => { const k = b.closest('.layer').dataset.layer, list = sideOrderOf(settings), i = list.indexOf(k), j = i + +b.dataset.lmove; if (j < 0 || j >= list.length) return; [list[i], list[j]] = [list[j], list[i]]; set(list); });
     // dragging: one line between two layers (or above the first, below the last) shows where it will go
     const listEl = d.querySelector('.layerlist'), line = d.querySelector('.dropline'), rows = [...d.querySelectorAll('.layer')];
@@ -10973,12 +11009,12 @@ function geoSvg(m) {
     for (const gr of groups) { const [px, py] = Pp(gr.x, gr.y); gr.X = X(px); gr.Y = Y(py); }
     const nodes = new Map(tree ? leaves(tree).map(l => [normTip(l.name || ''), l]) : []);
     const pal = (typeof PALETTES !== 'undefined' && (PALETTES[settings.paletteName] || PALETTES.default)) || ['#2F5D8C', '#C8553D', '#4C9A6A', '#D9A21B'];
-    const named = tree ? [...nodeById.values()].filter(n => n.cladeLabel) : [];
+    const named = namedClades();
     const up = (name, f) => { let n = nodes.get(normTip(name)); while (n) { const r = f(n); if (r) return r; n = n.parent; } return null; };
     const range = val => { const nums = rows.map(p => +val(p)).filter(isFinite), lo = minOf(nums), hi = maxOf(nums); return v => hi > lo ? (v - lo) / (hi - lo) : 0.5; };
     // colour of a record
     const cv = geoValues(S, 'gmColorVar'); let colOf = () => S.gmColor;
-    if (S.gmColorBy === 'clade') colOf = p => { const c = up(p.name, n => n.cladeLabel && n); return c ? pal[named.indexOf(c) % pal.length] : '#A0A6AD'; };   // grey outside the named clades
+    if (S.gmColorBy === 'clade') colOf = p => { const c = up(p.name, n => n.cladeLabel && n); return c ? cladeColorOf(c, named) : '#A0A6AD'; };   // grey outside the named clades
     else if (S.gmColorBy === 'highlight') colOf = p => up(p.name, n => n.bg) || '#A0A6AD';
     else if (S.gmColorBy === 'cat' && cv) { const cats = [...new Set(rows.map(p => String(cv(p) ?? '')).filter(Boolean))]; colOf = p => { const v = String(cv(p) ?? ''); return v ? pal[cats.indexOf(v) % pal.length] : '#A0A6AD'; }; }
     else if (S.gmColorBy === 'cont' && cv) { const q = range(cv), st = palStops(S.gmPal || 'viridis', ['#2C7BB6', '#D7191C'], S.gmRev, 0); colOf = p => { const v = +cv(p); return isFinite(v) ? rampOf(st, q(v)) : '#A0A6AD'; }; }
@@ -11075,7 +11111,7 @@ function gmLegend(S) {
   const rows = geoRows(S); if (!rows.length) return null;
   const pal = (typeof PALETTES !== 'undefined' && (PALETTES[S.paletteName] || PALETTES.default)) || ['#2F5D8C', '#C8553D', '#4C9A6A', '#D9A21B'];
   const sym = fill => ({ t: 'circle', r: 5, fill }), title = S.gmLegendTitle || '';
-  if (S.gmColorBy === 'clade' && tree) { const named = [...nodeById.values()].filter(n => n.cladeLabel); return named.length ? { key: 'geo', title, entries: named.map((n, i) => ({ text: n.cladeLabel, sym: sym(pal[i % pal.length]) })) } : null; }
+  if (S.gmColorBy === 'clade' && tree) { const named = namedClades(); return named.length ? { key: 'geo', title, entries: named.map(n => ({ text: n.cladeLabel, sym: sym(cladeColorOf(n, named)) })) } : null; }
   const cv = geoValues(S, 'gmColorVar'); if (!cv) return null;
   if (S.gmColorBy === 'cat') { const cats = [...new Set(rows.map(p => String(cv(p) ?? '')).filter(Boolean))]; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], entries: cats.map((c, i) => ({ text: c, sym: sym(pal[i % pal.length]) })) }; }
   if (S.gmColorBy === 'cont') { const nums = rows.map(p => +cv(p)).filter(isFinite); if (!nums.length) return null; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], gradient: { stops: palStops(S.gmPal || 'viridis', ['#2C7BB6', '#D7191C'], S.gmRev, 0), lo: minOf(nums), hi: maxOf(nums) } }; }

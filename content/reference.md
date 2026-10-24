@@ -416,6 +416,8 @@ Add a highlight from the `Right-click` menu of a branch or a clade (these option
 | `Names on circular and fan trees` | Names pointing outward, or written along the arc. | Radial<br>Curved along the arc | Radial | **Circular** or **Fan** layout, `Show the names next to the bars` is **On** |
 | `Position along the arc` | Where a curved name sits along its bar. | Start<br>Center<br>End | Center | **Circular** or **Fan** layout, `Show the names next to the bars` is **On**, `Names on circular and fan trees` is **Curved along the arc** |
 | `Clade bar width` |  | 1 to 12 px | 3 px |  |
+| `Bar color` | The color of the name bars: one color for all, whatever the color of the branches; that of the branches of each clade; or that of its highlight. With the highlight, the names and the bars of clades without a highlight take the one color, so that the names read well over a light highlight. A color given to a bar from its `Right-click` menu comes first. | One color<br>As the branches<br>As the highlight | As the branches |  |
+| `Color of the bars and names` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | `Bar color` is **One color** or **As the highlight** |
 | `Line up the clade bars in one column`¹ | Puts every bar at the same distance. | On<br>Off | On |  |
 | `Clade bar distance from the previous element` | Space between the clade name bars and the layer before it in `Layers`. Changing it moves the clade name bars and every layer after it together, as one block, and making it smaller brings them back the same way. | −200 to 200 px | 6 px |  |
 | `Clade name distance from bar` |  | 0 to 60 px | 6 px |  |
@@ -716,7 +718,10 @@ The side plots are layers next to the tips. The first in the list is the nearest
 | `Border color` |  | Color | <img src="img/colors/1F1F1F.svg" alt="#1F1F1F" align="absmiddle"> #1F1F1F | A table is chosen for the categories, `Shape border` is not **None** |
 | `Border width` |  | 0.05 to 50 px | 1 px | A table is chosen for the categories, `Shape border` is not **None** |
 | `Number of dashes or dots` |  | 1 to 60 | 12 | A table is chosen for the categories, `Shape border` is **Dashed** or **Dotted** |
+| `Squares follow the circle` | On circular and fan trees, draws each square as a ring sector. All the columns of a tip take the same angle, that of a square on the ring nearest the center, so the cells of a tip make one band that widens away from the center, or towards it when the tree is turned inside out. | On<br>Off | On | A table is chosen for the categories, `Shape` is **Squares**, **Circular** or **Fan** layout |
+| `Width of the bands` | The share of the space of each tip that its band takes. At 100%, the bands of neighboring tips touch, and each column becomes a ring. Empty, the bands are as wide as a square on the ring nearest the center. | 1 to 100% | Auto | A table is chosen for the categories, `Shape` is **Squares**, `Squares follow the circle` is **On**, **Circular** or **Fan** layout |
 | `Turn circular and fan trees inside out` | Puts the tree outside and the categories inside the circle. | On<br>Off | Off | A table is chosen for the categories, **Circular** or **Fan** layout |
+| `Show a legend` | One entry per column, in its color and shape, and one for the absent shapes. | On<br>Off | On | A table is chosen for the categories |
 | `Show the column titles` |  | On<br>Off | On | A table is chosen for the categories, **Rectangular** layout |
 | `Title angle` |  | 45°<br>Vertical | 45° | A table is chosen for the categories, **Rectangular** layout, `Show the column titles` is **On**, `Orientation` is not **Vertical** |
 | `Title typeface` |  | Same as the labels |  | A table is chosen for the categories, **Rectangular** layout, `Show the column titles` is **On** |
@@ -902,7 +907,7 @@ One row per record, with the species in the first column, as attached in Attachm
 | `Value for the size` | A column of the records, a tip annotation of the tree, or a column of another table (by species). | None<br>The columns and annotations found | None | `Table` is chosen, `Size` is **By a value** |
 | `Smallest` |  | 0.5 to 40 px | 2.5 px | `Table` is chosen, `Size` is not **One size** |
 | `Largest` |  | 0.5 to 60 px | 12 px | `Table` is chosen, `Size` is not **One size**, or with grouping |
-| `Color` | One color, the color of the named clade of the species, the color of the highlight of its clade, a color per category, or a gradient along a value. Species outside any named or highlighted clade, or without a value, are gray. | One color<br>By named clade<br>As the highlight of its clade<br>By a category<br>By a value (gradient) | One color | `Table` is chosen |
+| `Color` | One color, the color of the named clade of the species (the same as the bars colored by clade: the color given to its name bar, its highlight, the color of its branches, or one from the palette), the color of the highlight of its clade, a color per category, or a gradient along a value. Species outside any named or highlighted clade, or without a value, are gray. | One color<br>By named clade<br>As the highlight of its clade<br>By a category<br>By a value (gradient) | One color | `Table` is chosen |
 | `Point color` |  | Color | <img src="img/colors/C8553D.svg" alt="#C8553D" align="absmiddle"> #C8553D | `Table` is chosen, `Color` is **One color** |
 | `Value for the color` | Works like the value for the size but is independent of it, so the color and the size can follow different values. | None<br>The columns and annotations found | None | `Table` is chosen, `Color` is **By a category** or **By a value** |
 | `Palette` |  | The palettes of the app | Viridis | `Table` is chosen, `Color` is **By a value** |
@@ -1085,7 +1090,7 @@ Save the figure, the tree or a style template.
 | Node | Dot size, shape, fill, color and border, support label, other node labels, node bars, make a polytomy of its children (and undo it) |
 | Grafted fossil | Ages, split the lineage, add fossils to a split, delete |
 | Clade name bar | Name, color, sizes, on circular trees, the name along the arc |
-| Legend | Title and entry texts, look of that legend, alignment with a selection, hide it |
+| Legend | Title and entry texts, look of that legend (with the number of decimals of its numbers, when it shows any), alignment with a selection, hide it |
 | Scale bar | Length, unit, sizes, color, alignment |
 | Page box | Rows of the page, look of its tree map, alignment |
 | Image | Position, size, opacity, rotation, mirror, layer, alignment |
