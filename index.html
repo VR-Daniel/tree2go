@@ -1745,6 +1745,8 @@ const SECTIONS_RAW = [
     { k: 'axisOffset', type: 'number', label: 'Age of the youngest tip', min: -1e6, max: 1e6, step: 1, enable: s => s.axisOn, sub: true },
     { type: 'hint', text: () => 'Change it when the youngest tip is not from the present, as in a fossil-only tree. All tips then count as extinct.' },
     { k: 'axisUnit', type: 'number', label: 'Time units per branch length unit', min: 1e-9, max: 1e9, step: 1, enable: s => s.axisOn, sub: true },
+    { k: 'axisOldest', type: 'number', label: 'Oldest age of the axis', min: 0, max: 1e9, step: 1, blank: 'Auto', enable: s => s.axisOn && s.layout === 'rect', sub: true },
+    { type: 'hint', text: s => s.axisOn && s.layout === 'rect' ? 'Empty, the axis starts at the root. An older age stretches the axis and the geologic scale past the root, for example to cover the age density of the root.' : '' },
     { type: 'hint', text: () => 'Multiplies the branch lengths to get ages. Leave it at 1 when the lengths are already in the units of the axis.' },
     { k: 'axisTitle', type: 'text', label: 'Axis title', enable: s => s.axisOn, sub: true },
     { k: 'axisUnitShow', type: 'check', label: 'Show units next to the youngest value', enable: s => s.axisOn, sub: true },
@@ -2040,6 +2042,8 @@ const SECTIONS_RAW = [
     { k: 'tgW', type: 'number', label: 'Width', min: 0, max: 20, step: 0.1, unit: 'px', enable: s => s.tgOn, sub: true },
     { k: 'tgOp', type: 'number', label: 'Opacity', min: 0, max: 100, step: 5, unit: '%', enable: s => s.tgOn, sub: true },
     { k: 'tgStyle', type: 'seg', label: 'Style', opts: [['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], enable: s => s.tgOn, sub: true },
+    { k: 'tgDashLen', type: 'number', label: 'Dash length', min: 0.1, max: 200, step: 0.5, unit: 'px', blank: 'Auto', enable: s => s.tgOn && s.tgStyle === 'dashed', sub: true },
+    { k: 'tgDashGap', type: 'number', label: 'Gap between dashes or dots', min: 0.1, max: 200, step: 0.5, unit: 'px', blank: 'Auto', enable: s => s.tgOn && s.tgStyle !== 'solid', sub: true },
     { k: 'tgCurve', type: 'number', label: 'Curvature (0 for straight)', min: 0, max: 100, step: 5, unit: '%', enable: s => s.tgOn, sub: true },
     { type: 'hint', text: s => s.tgOn ? 'Right-click a line to give it a color, width or style of its own.' : '' },
     { type: 'head', label: 'Placement' },
@@ -4014,6 +4018,39 @@ function reindex() { nodeById = new Map(); if (tree) walkAll(tree, n => { nodeBy
 // Loads a tree, a NEXUS file or a set of trees from text.
 // Annotations broken by another program: MrBayes partition keys rewritten as flags ({1=true,2=true}) or cut at
 // their commas (,4}_mean=). Other programs stop on them; tree2go can rebuild the keys, so it asks first.
+/* Annotations [&…] whose braces do not pair, such as a closing brace lost by hand: the value runs on and swallows the
+   keys after it (height_95%_HPD={0.1,0.3,rate=0.9 loses rate). A missing closing brace can be put back before the next
+   key (",name="), where the program that wrote the file had it, or at the end of the annotation; a missing opening
+   brace cannot be placed for sure, and is only reported. */
+function findUnbalancedBraces(txt) {
+  const re = /\[&[^\]]*\]/g; let m, count = 0, first = -1, fixable = true;
+  while ((m = re.exec(txt))) {
+    const c = m[0]; if (c.indexOf('{') < 0 && c.indexOf('}') < 0) continue;
+    let d = 0, bad = false; for (let i = 0; i < c.length; i++) { const ch = c[i]; if (ch === '{') d++; else if (ch === '}') { d--; if (d < 0) { bad = true; break; } } }
+    if (!bad && d === 0) continue;
+    if (first < 0) first = m.index; count++;
+    if (bad) fixable = false;   // a closing brace with no opening one: where it should open cannot be told
+  }
+  if (!count) return null;
+  const line = txt.slice(0, first).split('\n').length, col = first - txt.lastIndexOf('\n', first - 1);
+  return { count, line, col, fixable, ctx: txt.slice(first, Math.min(txt.length, first + 70)).replace(/\s+/g, ' ') };
+}
+function repairBraces(txt) {
+  return txt.replace(/\[&[^\]]*\]/g, c => {
+    if (c.indexOf('{') < 0) return c;
+    let d = 0; for (const ch of c) { if (ch === '{') d++; else if (ch === '}') d--; }
+    if (d <= 0) return c;   // balanced, or a missing opening brace: left as it is
+    let out = '', depth = 0;
+    for (let i = 0; i < c.length; i++) {
+      const ch = c[i];
+      if (ch === '{') depth++; else if (ch === '}') depth--;
+      else if (depth > 0 && ch === ',' && /^,[A-Za-z_][\w%.+-]*=/.test(c.slice(i, i + 80))) { out += '}'.repeat(depth); depth = 0; }   // a key: the open value ended before it
+      else if (depth > 0 && ch === ']' && i === c.length - 1) { out += '}'.repeat(depth); depth = 0; }   // the end of the annotation
+      out += ch;
+    }
+    return out;
+  });
+}
 function findDamagedAnnotations(txt) {
   const re = /\{\d+=true,|[,\[]\d+\}_[\w%.+-]+=/g; let m, count = 0, first = -1;
   while ((m = re.exec(txt)) && count < 100000) { if (first < 0) first = m.index; count++; }
@@ -4024,6 +4061,14 @@ function findDamagedAnnotations(txt) {
 function loadText(txt, opts) {
   const err = $('parseErr');
   txt = (txt || '').trim();
+  const ub = !(opts && opts.repairOk) && !txt.startsWith('{') && !findDamagedAnnotations(txt) && findUnbalancedBraces(txt);
+  if (ub) {
+    askConfirm({ title: 'Annotations with unpaired braces', ok: ub.fixable ? 'Load with the repair' : 'Load anyway', okClass: 'primary', focusOk: true,
+      html: `Line ${ub.line}, character ${ub.col}:<br><code class="dmgctx">${esc(ub.ctx)}…</code><br><br>${ub.count === 1 ? 'An annotation of this file has' : `${ub.count} annotations of this file have`} braces { } that do not pair, so ${ub.count === 1 ? 'its' : 'their'} values run on and take the keys after them.<br><br>`
+        + (ub.fixable ? 'tree2go can repair it: each missing closing brace is put back before the next key, where it was.' : 'tree2go cannot tell for sure where the missing brace was, so the file is loaded as it is: check the values of these annotations, or fix the file and open it again.') })
+      .then(ok => { if (ok) loadText(ub.fixable ? repairBraces(txt) : txt, { repairOk: true }); });
+    return;
+  }
   const dmg = !(opts && opts.repairOk) && !txt.startsWith('{') && findDamagedAnnotations(txt);
   if (dmg) {
     askConfirm({ title: 'Damaged annotations in the file', ok: 'Load with the repair', okClass: 'primary', focusOk: true,
@@ -5646,7 +5691,9 @@ function renderOnce() {
   if (axisOk) {
     axisDrawn = true;
     const unit = S.axisUnit > 0 ? S.axisUnit : 1, off = S.axisOffset || 0;
-    const rootAge = off + maxD * unit, spanA = rootAge - off;
+    // the oldest age of the axis: the root, or an older one chosen (rectangular trees), so the axis and the geologic scale
+    // reach what is drawn beyond the root, such as the age densities of the root
+    const treeRootAge = off + maxD * unit, rootAge = L === 'rect' && +S.axisOldest > treeRootAge ? +S.axisOldest : treeRootAge, spanA = rootAge - off;
     const dOf = a => maxD - (a - off) / unit;
     const inRange = a => a >= off - 1e-9 && a <= rootAge + 1e-9;
     let majors = [], step = null;
@@ -8006,7 +8053,9 @@ function tgWhy(S = settings) {   // why it cannot be drawn now, if it cannot
   const R = tgRight(); if (R) { const m = figImages.find(m => m.x + m.w > R.x && m.y < R.y1 + 20 && m.y + m.h > R.y0 - 20); if (m) return `${m.geo ? 'A map' : m.kde ? 'A density plot' : m.ltt ? 'An LTT plot' : m.txt ? 'A text' : 'An image'} is right of the tree: move it below or above it.`; }
   return '';
 }
-const tgDash = (st, w) => st === 'dashed' ? ` stroke-dasharray="${f2(w * 4)} ${f2(w * 3)}"` : st === 'dotted' ? ` stroke-dasharray="0.1 ${f2(w * 2.6)}" stroke-linecap="round"` : '';
+// dashes and dots of the lines: the lengths chosen, or by default in proportion to the width
+const tgDash = (st, w) => { const S = settings, dl = +S.tgDashLen > 0 ? +S.tgDashLen : w * 4, gp = +S.tgDashGap > 0 ? +S.tgDashGap : st === 'dotted' ? w * 2.6 : w * 3;
+  return st === 'dashed' ? ` stroke-dasharray="${f2(dl)} ${f2(gp)}"` : st === 'dotted' ? ` stroke-dasharray="0.1 ${f2(gp)}" stroke-linecap="round"` : ''; };
 function tangleSvg() { try { return tangleSvgNow(); } catch (e) { console.warn('tanglegram', e); tgGeom = []; return ''; } }   // never stops the drawing of the tree
 function tangleSvgNow() {
   tgGeom = []; const S = settings; if (!S.tgOn || tgWhy(S)) return '';
@@ -8058,9 +8107,11 @@ function tangleSvgNow() {
   const bridges = [], bdefs = [];
   if (S.tgBridge !== false) hlBoxes.forEach((A, i) => {
     const B = hl2.find(h => h.tips.size === A.tips.size && [...A.tips].every(t => h.tips.has(t))); if (!B || B.x0 <= A.x1) return;
-    const same = A.c.toLowerCase() === B.c.toLowerCase() && Math.abs(A.a - B.a) < 0.01, pts = `${f2(A.x1)},${f2(A.y0)} ${f2(B.x0)},${f2(B.y0)} ${f2(B.x0)},${f2(B.y1)} ${f2(A.x1)},${f2(A.y1)}`;
-    if (same) bridges.push(`<polygon points="${pts}" fill="${A.c}" fill-opacity="${f2(A.a)}"/>`);
-    else { bdefs.push(`<linearGradient id="tgb${i}" gradientUnits="userSpaceOnUse" x1="${f2(A.x1)}" y1="0" x2="${f2(B.x0)}" y2="0"><stop offset="0" stop-color="${A.c}" stop-opacity="${f2(A.a)}"/><stop offset="1" stop-color="${B.c}" stop-opacity="${f2(B.a)}"/></linearGradient>`); bridges.push(`<polygon points="${pts}" fill="url(#tgb${i})"/>`); }
+    const same = A.c.toLowerCase() === B.c.toLowerCase() && Math.abs(A.a - B.a) < 0.01, mx = (A.x1 + B.x0) / 2;
+    // its top and bottom edges leave one highlight and reach the other level with them, as smooth curves (no corners)
+    const pts = `M${f2(A.x1)},${f2(A.y0)}C${f2(mx)},${f2(A.y0)} ${f2(mx)},${f2(B.y0)} ${f2(B.x0)},${f2(B.y0)}L${f2(B.x0)},${f2(B.y1)}C${f2(mx)},${f2(B.y1)} ${f2(mx)},${f2(A.y1)} ${f2(A.x1)},${f2(A.y1)}Z`;
+    if (same) bridges.push(`<path d="${pts}" fill="${A.c}" fill-opacity="${f2(A.a)}"/>`);
+    else { bdefs.push(`<linearGradient id="tgb${i}" gradientUnits="userSpaceOnUse" x1="${f2(A.x1)}" y1="0" x2="${f2(B.x0)}" y2="0"><stop offset="0" stop-color="${A.c}" stop-opacity="${f2(A.a)}"/><stop offset="1" stop-color="${B.c}" stop-opacity="${f2(B.a)}"/></linearGradient>`); bridges.push(`<path d="${pts}" fill="url(#tgb${i})"/>`); }
   });
   // the lines: from the end of each name here to the start of the same name there
   const by2 = new Map(L2.map(l => [normTip(l.name), l])), hl = x => { for (let y = x; y; y = y.parent) if (y.bg) return y.bg; return null; };
