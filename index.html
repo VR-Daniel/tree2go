@@ -2003,6 +2003,8 @@ const SECTIONS_RAW = [
     { k: 'gmSizeVar', type: 'select', label: 'Value for the size', opts: s => geoVarOpts(s), show: s => s.gmSizeBy === 'cont', enable: s => !!s.gmTable, sub: true },
     { k: 'gmSizeMin', type: 'number', label: 'Smallest', min: 0.5, max: 40, step: 0.5, unit: 'px', show: s => s.gmSizeBy !== 'fixed', enable: s => !!s.gmTable, sub: true },
     { k: 'gmSizeMax', type: 'number', label: 'Largest', min: 0.5, max: 60, step: 0.5, unit: 'px', show: s => s.gmSizeBy !== 'fixed' || s.gmCluster > 0, enable: s => !!s.gmTable, sub: true },
+    { k: 'gmLegend', type: 'check', label: 'Show a legend', enable: s => !!s.gmTable, sub: true },
+    { type: 'hint', text: s => s.gmTable ? 'The colors of the points, when they follow clades, highlights, categories or a value, and their sizes, when they follow the records or a value.' : '' },
     { k: 'gmColorBy', type: 'select', label: 'Color', opts: [['single', 'One color'], ['clade', 'By named clade'], ['highlight', 'As the highlight of its clade'], ['cat', 'By a category'], ['cont', 'By a value (gradient)']], enable: s => !!s.gmTable, sub: true },
     { k: 'gmColor', type: 'color', label: 'Point color', show: s => s.gmColorBy === 'single', enable: s => !!s.gmTable, sub: true },
     { k: 'gmColorVar', type: 'select', label: 'Value for the color', opts: s => geoVarOpts(s), show: s => s.gmColorBy === 'cat' || s.gmColorBy === 'cont', enable: s => !!s.gmTable, sub: true },
@@ -5949,6 +5951,7 @@ function renderOnce() {
     blocks.push({ key: 'anc', title: '', entries: ent });
   }
   // categories: one entry per column, in its color and shape, and one for the absent shapes
+  { const gl = gmLegend(S), gs = gmSizeLegend(S); if (gl) blocks.push(gl); if (gs) blocks.push(gs); }   // maps: colors and sizes of the points
   if (cPlot && S.catLegend !== false) {
     const symOf = (fill, stroke) => S.catShape === 'circle' ? { t: 'circle', r: 5, fill, stroke } : { t: 'rect', fill, stroke };
     const absent = S.catAbsentStyle === 'outline' ? symOf('none', ` stroke="${S.catAbsent}" stroke-width="1.2"`) : symOf(S.catAbsent);
@@ -8593,19 +8596,20 @@ function openImage(cx, cy, keep) {
     const C = geoCfg(m); if (h3) h3.textContent = geoTitle(m); if (meta) meta.textContent = g ? `${g.name}: ${g.parts.length} shapes, ${g.deg ? 'in degrees, ' + (GEO_PROJ.find(p => p[0] === C.gmProj) || GEO_PROJ[0])[1] : 'in a planar system, drawn as it is'}.` : 'Map not found.';
     const spec = [{ k: 'line', label: 'Line color', type: 'color' }, { k: 'lw', label: 'Line width', type: 'num', unit: 'px' }, { k: 'fill', label: 'Fill', type: 'color' }, { k: 'fillOp', label: 'Fill opacity', type: 'num', unit: '%' },
       { k: 'area', label: 'Area', type: 'sel', opts: [['all', 'The whole map'], ['points', 'Around the points'], ['custom', 'Custom']] }, { k: 'pad', label: 'Margin around the points', type: 'num', unit: '%' }, { k: 'scale', label: 'Scale 1:', type: 'num' },
-      { k: 'frame', label: 'Frame', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] }, { k: 'frameColor', label: 'Frame color', type: 'color' }];
-    const tkSpec = [{ k: 'tkStep', label: 'Every (0 for automatic)', type: 'num', unit: g && g.deg ? '°' : '' }, ...(g && g.deg ? [{ k: 'tkFmt', label: 'Format', type: 'sel', opts: [['dec', 'Decimal degrees (N, S, E, W)'], ['sign', 'Decimal degrees (+ and −)'], ['dms', 'Degrees, minutes, seconds']] }] : []),
+      { k: 'frame', label: 'Frame', type: 'sel', opts: [[true, 'Show'], [false, 'Hide']] }, { k: 'frameColor', label: 'Frame color', type: 'color' }, { k: 'frameW', label: 'Frame width', type: 'num', unit: 'px' },
+      { k: 'bgOn', label: 'Background', type: 'sel', opts: [[true, 'Show'], [false, 'Transparent']] }, { k: 'bg', label: 'Background color', type: 'color' }];
+    const tkSpec = [{ k: 'tkStepX', label: g && g.deg ? 'Longitudes every (0 for automatic)' : 'X every (0 for automatic)', type: 'num', unit: g && g.deg ? '°' : '' }, { k: 'tkStepY', label: g && g.deg ? 'Latitudes every (0 for automatic)' : 'Y every (0 for automatic)', type: 'num', unit: g && g.deg ? '°' : '' }, ...(g && g.deg ? [{ k: 'tkFmt', label: 'Format', type: 'sel', opts: [['dec', 'Degrees (N, S, E, W)'], ['sign', 'Degrees (+ and −)'], ['dm', 'Degrees and minutes (DM)'], ['dms', 'Degrees, minutes and seconds (DMS)']] }] : []),
       { k: 'tkDec', label: 'Decimals', type: 'num' }, { k: 'tkLen', label: 'Tick length', type: 'num', unit: 'px' }, { k: 'tkW', label: 'Tick width', type: 'num', unit: 'px' },
       { k: 'tkGap', label: 'Space to the numbers', type: 'num', unit: 'px' }, { k: 'tkFs', label: 'Text size', type: 'num', unit: 'px' }, { k: 'tkColor', label: 'Color', type: 'color' }];
-    const tkDef = { tkStep: 0, tkFmt: 'dec', tkDec: 0, tkLen: 4, tkW: 0.8, tkGap: 2, tkFs: 9, tkColor: '#333333' };
-    pop.querySelector('.part').insertAdjacentHTML('beforebegin', `<div class="part"><b>Map</b><div class="kv"><span>Name</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" id="geoTitleIn" value="${esc(geoTitle(m))}" aria-label="Name of the map"></div>${ctlRows(spec, key => ({ v: key === 'scale' ? Math.round(geoScaleOf(m)) : m.geo[key], own: false }))}<p class="hint">${m.geo.area === 'custom' ? 'With the map selected, Ctrl + drag moves its view and Ctrl + scroll zooms in and out. The scale is the one of the figure at its size (96 px per inch), true at the center of the map. ' : ''}Its points, projection and lines are set in Geography, with this map chosen in Map.</p></div><div class="part"><b>Coordinates</b><div class="kv"><span>Edges</span><span class="tkedges">${[['b', 'Bottom'], ['l', 'Left'], ['t', 'Top'], ['r', 'Right']].map(([e, l]) => `<label class="opt"><input type="checkbox" data-tke="${e}" ${(m.geo.tk || '').includes(e) ? 'checked' : ''}> ${l}</label>`).join('')}</span></div>${(m.geo.tk || '') ? ctlRows(tkSpec, key => ({ v: m.geo[key] ?? tkDef[key], own: false })) : ''}</div>`);
+    const tkDef = { tkStepX: m.geo.tkStep || 0, tkStepY: m.geo.tkStep || 0, tkFmt: 'dec', tkDec: 0, tkLen: 4, tkW: 0.8, tkGap: 2, tkFs: 9, tkColor: '#333333' };
+    pop.querySelector('.part').insertAdjacentHTML('beforebegin', `<div class="part"><b>Map</b><div class="kv"><span>Name</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" id="geoTitleIn" value="${esc(geoTitle(m))}" aria-label="Name of the map"></div>${ctlRows(spec, key => ({ v: key === 'scale' ? Math.round(geoScaleOf(m)) : key === 'bgOn' ? m.geo.bgOn !== false : key === 'bg' ? m.geo.bg || '#FFFFFF' : key === 'frameW' ? m.geo.frameW ?? 1 : m.geo[key], own: false }))}<p class="hint">${m.geo.area === 'custom' ? 'With the map selected, Ctrl + drag moves its view and Ctrl + scroll zooms in and out. The scale is the one of the figure at its size (96 px per inch), true at the center of the map. ' : ''}Its points, projection and lines are set in Geography, with this map chosen in Map.</p></div><div class="part"><b>Coordinates</b><div class="kv"><span>Edges</span><span class="tkedges">${[['b', 'Bottom'], ['l', 'Left'], ['t', 'Top'], ['r', 'Right']].map(([e, l]) => `<label class="opt"><input type="checkbox" data-tke="${e}" ${(m.geo.tk || '').includes(e) ? 'checked' : ''}> ${l}</label>`).join('')}</span></div>${(m.geo.tk || '') ? ctlRows(tkSpec, key => ({ v: m.geo[key] ?? tkDef[key], own: false })) : ''}</div>`);
     { const ps = [...pop.querySelectorAll('.part > b')].find(b => b.textContent === 'Position and size');
       if (ps) { ps.insertAdjacentHTML('afterend', `<div class="kv"><span>Proportions</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><select class="psel" data-free aria-label="Proportions"><option value="0"${m.free ? '' : ' selected'}>Locked</option><option value="1"${m.free ? ' selected' : ''}>Free</option></select></div>${m.free ? '<p class="hint">The map shows more or less of its area to fill the frame, never stretched.</p>' : ''}`);
         ps.parentNode.querySelector('[data-free]').onchange = e => { pushUndo(); m.free = e.target.value === '1'; imgChanged(); openImage(cx, cy, true); }; } }
     pop.querySelectorAll('[data-tke]').forEach(i => i.onchange = () => { pushUndo(); m.geo.tk = [...pop.querySelectorAll('[data-tke]:checked')].map(x => x.dataset.tke).join(''); imgChanged(); openImage(cx, cy, true); });
     { const ti = pop.querySelector('#geoTitleIn'); ti.addEventListener('change', () => { m.geo.title = ti.value.trim() || m.geo.title; if (h3) h3.textContent = m.geo.title; persist(); buildSide(); }); }
     if (m.geo.tk) wireCtl(tkSpec, (key, v) => { pushUndo(); if (key !== 'tkFmt' && key !== 'tkColor') v = Math.max(0, +v || 0); m.geo[key] = v; geoSoon(); });
-    wireCtl(spec, (key, v) => { pushUndo(); if (key === 'scale') { geoSetScale(m, v); openImage(cx, cy, true); return; } if (key === 'area' && v === 'custom' && !m.geo.view && m._geoBox) m.geo.view = [...m._geoBox]; if (key === 'fillOp') v = clamp(v, 0, 100); if (key === 'lw' || key === 'pad') v = Math.max(0, v); m.geo[key] = v; if (key === 'area') { imgChanged(); openImage(cx, cy, true); } else geoSoon(); });   // the menu is built again only when its hint changes
+    wireCtl(spec, (key, v) => { pushUndo(); if (key === 'scale') { geoSetScale(m, v); openImage(cx, cy, true); return; } if (key === 'area' && v === 'custom' && !m.geo.view && m._geoBox) m.geo.view = [...m._geoBox]; if (key === 'fillOp') v = clamp(v, 0, 100); if (key === 'lw' || key === 'pad') v = Math.max(0, v); if (key === 'frameW') v = clamp(+v || 1, 0.1, 50); m.geo[key] = v; if (key === 'area') { imgChanged(); openImage(cx, cy, true); } else geoSoon(); });   // the menu is built again only when its hint changes
   }
   if (m.txt || m.kde) {   // items the app draws: a title that says what they are
     const h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta');
@@ -9128,7 +9132,7 @@ function wireLock(reopen) {
     setFree(key, !isFreeKey(key)); render(); persist(); syncPanelKeys(['scaleFree']); reopen();
   });
 }
-const LEGEND_NAMES = { support: 'Support legend', cat: 'Categories legend', supvc: 'Support color legend', lenvc: 'Branch value color legend', nlabvc: 'Node label color legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', geo: 'Map legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
+const LEGEND_NAMES = { support: 'Support legend', cat: 'Categories legend', geosize: 'Map sizes legend', supvc: 'Support color legend', lenvc: 'Branch value color legend', nlabvc: 'Node label color legend', brc: 'Branch color legend', bwd: 'Branch width legend', heat: 'Heatmap legend', dotc: 'Dot color legend', geo: 'Map legend', dots: 'Dot size legend', pie: 'Pie legend', nlabc: 'Node value color legend', nlabs: 'Node value size legend', anc: 'Ancestral states legend', data: 'Data legend' };
 /* Legends hidden by the user (settings.legendHide, by key): not drawn nor exported, but they keep their place and look.
    The legends of the figure, with their names, are listed in the Legends section, where each can be shown again. */
 let legendList = [];   // [{ key, name }] of the legends the figure has now, shown or hidden
@@ -11032,7 +11036,7 @@ function geoSvg(m) {
   let H = Math.max(60, Math.round((W - 2 * pad) * (y1 - y0) / Math.max(1e-9, x1 - x0) + 2 * pad));
   if (k.area === 'custom' && k.view) [x0, y0, x1, y1] = k.view;   // a view of its own
   // coordinates on the edges chosen: margins outside the frame for their ticks and numbers
-  const tk = k.tk || '', tkLen = k.tkLen ?? 4, tkGap = k.tkGap ?? 2, tkFs = k.tkFs ?? 9, tkCh = (k.tkFmt === 'dms' ? 10 : 6) + Math.max(0, k.tkDec ?? 0);
+  const tk = k.tk || '', tkLen = k.tkLen ?? 4, tkGap = k.tkGap ?? 2, tkFs = k.tkFs ?? 9, tkCh = (k.tkFmt === 'dms' ? 10 : k.tkFmt === 'dm' ? 8 : 6) + Math.max(0, k.tkDec ?? 0);
   const mT = tk.includes('t') ? tkLen + tkGap + tkFs + 3 : 0, mB = tk.includes('b') ? tkLen + tkGap + tkFs + 3 : 0, mLR = tkLen + tkGap + tkFs * 0.58 * tkCh + 3;
   const mL = tk.includes('l') ? mLR : 0, mR = tk.includes('r') ? mLR : 0;
   if (m.free && m.w > 0 && m.h > 0) {   // proportions unlocked: the frame takes the shape set, and the map shows more of its area to fill it, never stretched
@@ -11050,7 +11054,7 @@ function geoSvg(m) {
   if (geoCache.boxKey !== boxKey) { geoCache.paths = new Map(); geoCache.boxKey = boxKey; }   // outlines kept while the projection and the view stay
   const pathOfC = (tag, rs, closed) => { let v = geoCache.paths.get(tag); if (v == null) { v = pathOf(rs, closed); geoCache.paths.set(tag, v); } return v; };
   let d = g.kind === 'point' || geoCache.layers ? '' : pathOfC('main', geoCache.parts, g.kind === 'poly');
-  let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${f2(Wt)}" height="${f2(Ht)}" viewBox="0 0 ${f2(Wt)} ${f2(Ht)}"><g transform="translate(${f2(mL)},${f2(mT)})"><defs><clipPath id="gclip${m.id}"><rect width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#gclip${m.id})">`;
+  let out = `<svg xmlns="http://www.w3.org/2000/svg" width="${f2(Wt)}" height="${f2(Ht)}" viewBox="0 0 ${f2(Wt)} ${f2(Ht)}"><g transform="translate(${f2(mL)},${f2(mT)})"><defs><clipPath id="gclip${m.id}"><rect width="${W}" height="${H}"/></clipPath></defs>${k.bgOn !== false ? `<rect width="${W}" height="${H}" fill="${k.bg || '#FFFFFF'}"/>` : ''}<g clip-path="url(#gclip${m.id})">`;   // the background inside the frame, under everything
   if (geoCache.layers) for (const L of ['land', 'countries', 'lakes', 'coast', 'rivers']) {   // Natural Earth: each layer with its own look
     const l = geoCache.layers.find(x => x.role === L); if (!l) continue; const dd = pathOfC(L, l.parts, l.kind === 'poly');
     if (L === 'land' || L === 'countries') out += `<path d="${dd}" fill="${k.fill}" fill-opacity="${k.fillOp / 100}" fill-rule="evenodd" stroke="${k.line}" stroke-width="${f2(L === 'countries' ? k.lw * 0.7 : k.lw)}" stroke-linejoin="round"/>`;
@@ -11101,7 +11105,8 @@ function geoSvg(m) {
     }
   }
   out += '</g>';
-  if (k.frame || tk) out += `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" fill="none" stroke="${k.frameColor}" stroke-width="1"/>`;   // the frame over everything (always with coordinates)
+  { const fw = Math.max(0.1, +(k.frameW ?? 1) || 1), h = fw / 2;   // the frame inside the map's edge, whatever its width
+    if (k.frame || tk) out += `<rect x="${f2(h)}" y="${f2(h)}" width="${f2(W - fw)}" height="${f2(H - fw)}" fill="none" stroke="${k.frameColor}" stroke-width="${f2(fw)}"/>`; }   // the frame over everything (always with coordinates)
   if (tk) out += geoTicksSvg(k, g, S, { x0, y0, x1, y1, sc, pad, W, H, X, Y, tkLen, tkGap, tkFs });
   return out + '</g></svg>';
 }
@@ -11172,15 +11177,53 @@ function geoLinesSvg() {
   return res;
 }
 // The legend of the points: their categories, named clades, or the gradient of their value.
+// The legends of the maps: the colors of the points (clades, highlights, categories or a gradient), and their sizes.
 function gmLegend(S) {
-  if (!S.gmLegend || !figImages.some(m => m.geo)) return null;
+  if (S.gmLegend === false || !figImages.some(m => m.geo)) return null;
   const rows = geoRows(S); if (!rows.length) return null;
   const pal = (typeof PALETTES !== 'undefined' && (PALETTES[S.paletteName] || PALETTES.default)) || ['#2F5D8C', '#C8553D', '#4C9A6A', '#D9A21B'];
   const sym = fill => ({ t: 'circle', r: 5, fill }), title = S.gmLegendTitle || '';
-  if (S.gmColorBy === 'clade' && tree) { const named = namedClades(); return named.length ? { key: 'geo', title, entries: named.map(n => ({ text: n.cladeLabel, sym: sym(cladeColorOf(n, named)) })) } : null; }
+  // grouped points with records of several colors take the mixing color: an entry for it when any is drawn
+  const mixed = S.gmCluster > 0 && figImages.some(m => m.geo && (m._geoPts || []).some(p => p.col === S.gmMixColor));
+  const several = S.gmColorBy === 'cat' ? 'Several categories' : 'Several clades';
+  const near = (c1, c2) => { const h = c => [1, 3, 5].map(i => parseInt(String(c).slice(i, i + 2), 16)); try { const [a, b] = [h(c1), h(c2)]; return a.every((v, i) => Math.abs(v - b[i]) < 24); } catch (e) { return false; } };
+  const tail = (entries, covered) => {
+    let other = false;
+    if (covered && tree) { const L = new Set(leaves(tree).map(l => normTip(l.name))); other = rows.some(p => L.has(normTip(p.name)) && !covered.has(normTip(p.name))); }
+    if (other && mixed && near('#A0A6AD', S.gmMixColor)) entries.push({ text: `Other species, or ${several.toLowerCase()}`, sym: sym('#A0A6AD') });   // one grey for both
+    else { if (other) entries.push({ text: 'Other species', sym: sym('#A0A6AD') }); if (mixed) entries.push({ text: several, sym: sym(S.gmMixColor) }); }
+    return entries;
+  };
+  const tipsIn = nodes => new Set(nodes.flatMap(n => leaves(n).map(l => normTip(l.name))));
+  if (S.gmColorBy === 'clade' && tree) { const named = namedClades(); return named.length ? { key: 'geo', title, entries: tail(named.map(n => ({ text: n.cladeLabel, sym: sym(cladeColorOf(n, named)) })), tipsIn(named)) } : null; }
+  if (S.gmColorBy === 'highlight' && tree) {
+    const hs = []; walkAll(tree, n => { if (n.bg && n.children.length) hs.push(n); });
+    if (!hs.length) return null;
+    const label = n => n.cladeLabel || (() => { const L = leaves(n); return L.length > 1 ? `${disp(nm(L[0]))} and ${L.length - 1} more` : disp(nm(L[0])); })();
+    return { key: 'geo', title, entries: tail(hs.map(n => ({ text: label(n), sym: sym(n.bg) })), tipsIn(hs)) };
+  }
   const cv = geoValues(S, 'gmColorVar'); if (!cv) return null;
-  if (S.gmColorBy === 'cat') { const cats = [...new Set(rows.map(p => String(cv(p) ?? '')).filter(Boolean))]; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], entries: cats.map((c, i) => ({ text: c, sym: sym(pal[i % pal.length]) })) }; }
+  if (S.gmColorBy === 'cat') { const cats = [...new Set(rows.map(p => String(cv(p) ?? '')).filter(Boolean))]; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], entries: tail(cats.map((c, i) => ({ text: c, sym: sym(pal[i % pal.length]) }))) }; }
   if (S.gmColorBy === 'cont') { const nums = rows.map(p => +cv(p)).filter(isFinite); if (!nums.length) return null; return { key: 'geo', title: title || String(S.gmColorVar).split('\u001f')[1], gradient: { stops: palStops(S.gmPal || 'viridis', ['#2C7BB6', '#D7191C'], S.gmRev, 0), lo: minOf(nums), hi: maxOf(nums) } }; }
+  return null;
+}
+// The sizes of the points, when they follow the number of records or a value: the smallest, middle and largest.
+function gmSizeLegend(S) {
+  if (S.gmLegend === false || !figImages.some(m => m.geo) || !S.gmTable) return null;
+  const grey = '#9a9a9a';
+  if (S.gmSizeBy === 'density' || (S.gmSizeBy === 'fixed' && S.gmCluster > 0)) {
+    const ns = figImages.filter(m => m.geo).flatMap(m => (m._geoPts || []).map(p => p.n)); if (!ns.length) return null;
+    const nmax = maxOf(ns, 1); if (nmax < 2) return null;
+    const lo = S.gmSizeBy === 'fixed' ? S.gmSize : S.gmSizeMin, rOf = n => lo + (S.gmSizeMax - lo) * Math.sqrt((n - 1) / Math.max(1, nmax - 1));
+    const vals = [...new Set([1, Math.round((1 + nmax) / 2), nmax])];
+    return { key: 'geosize', title: 'Records', entries: vals.map(n => ({ text: String(n), sym: { t: 'circle', r: rOf(n), fill: grey } })) };
+  }
+  if (S.gmSizeBy === 'cont') {
+    const sv = geoValues(S, 'gmSizeVar'); if (!sv) return null;
+    const nums = geoRows(S).map(p => +sv(p)).filter(isFinite); if (!nums.length) return null;
+    const a = minOf(nums), b = maxOf(nums), rOf = v => S.gmSizeMin + (S.gmSizeMax - S.gmSizeMin) * (b > a ? (v - a) / (b - a) : 0.5);
+    return { key: 'geosize', title: String(S.gmSizeVar).split('\u001f')[1] || '', entries: [...new Set([a, (a + b) / 2, b])].map(v => ({ text: fmtNum(v), sym: { t: 'circle', r: rOf(v), fill: grey } })) };
+  }
   return null;
 }
 // Natural Earth, from its GeoJSON files on GitHub (they allow being read from any page). Needs internet once:
@@ -11233,7 +11276,18 @@ function geoTicksSvg(k, g, S, F) {
   const { x0, y1, sc, pad, W, H, X, Y, tkLen, tkGap, tkFs } = F, tk = k.tk || '', col = k.tkColor || '#333333', lw = k.tkW ?? 0.8, dec = Math.max(0, k.tkDec ?? 0);
   const eL = x0 - pad / sc, eR = x0 + (W - pad) / sc, eT = y1 + pad / sc, eB = y1 - (H - pad) / sc;   // the frame, in projected units
   const P = g.deg ? geoProjector(S.gmProj) : (x, y) => [x, y], fam = 'Helvetica, Arial, sans-serif';
-  const dms = (v, pos, neg) => { const h = v > 1e-9 ? pos : v < -1e-9 ? neg : '', a = Math.abs(v); if (k.tkFmt === 'sign') return `${v < -1e-9 ? '−' : ''}${a.toFixed(dec)}°`; if (k.tkFmt !== 'dms') return `${a.toFixed(dec)}°${h}`; let d = Math.floor(a), mi = Math.floor((a - d) * 60), se = Math.round(((a - d) * 60 - mi) * 60); if (se === 60) { se = 0; mi++; } if (mi === 60) { mi = 0; d++; } return `${d}°${String(mi).padStart(2, '0')}′${String(se).padStart(2, '0')}″${h}`; };   // decimal degrees with the decimals asked, 50.00°N   // 50°00′00″N
+  // the formats: degrees (with the decimals asked: 0 gives D), signed degrees, degrees and minutes (DM), or degrees,
+  // minutes and seconds (DMS), always written in full. Longitudes past ±180° are written as the meridian they are.
+  const dms = (v0, pos, neg) => {
+    let v = v0; if (pos === 'E') { v = ((v + 180) % 360 + 360) % 360 - 180; if (Math.abs(Math.abs(v) - 180) < 1e-9) v = Math.sign(v0 || 1) * 180; }
+    const at180 = pos === 'E' && Math.abs(Math.abs(v) - 180) < 1e-9, h = at180 ? '' : v > 1e-9 ? pos : v < -1e-9 ? neg : '', a = Math.abs(v);
+    if (k.tkFmt === 'sign') return `${v < -1e-9 && !at180 ? '−' : ''}${a.toFixed(dec)}°`;
+    if (k.tkFmt !== 'dms' && k.tkFmt !== 'dm') return `${a.toFixed(dec)}°${h}`;
+    let d = Math.floor(a), mi = Math.floor((a - d) * 60 + 1e-9), se = Math.round(((a - d) * 60 - mi) * 60);
+    if (k.tkFmt === 'dm') { mi = Math.round((a - d) * 60); if (mi === 60) { mi = 0; d++; } return `${d}°${String(mi).padStart(2, '0')}′${h}`; }
+    if (se === 60) { se = 0; mi++; } if (mi === 60) { mi = 0; d++; }
+    return `${d}°${String(mi).padStart(2, '0')}′${String(se).padStart(2, '0')}″${h}`;
+  };
   const fmtX = v => g.deg ? dms(v, 'E', 'W') : (+v.toFixed(dec)).toLocaleString('en'), fmtY = v => g.deg ? dms(v, 'N', 'S') : (+v.toFixed(dec)).toLocaleString('en');
   const bis = (f, lo, hi, target) => { let a = lo, b = hi, fa = f(a) - target, fb = f(b) - target; if (fa * fb > 0) return Math.abs(fa) < Math.abs(fb) ? lo : hi; for (let i = 0; i < 50; i++) { const m = (a + b) / 2, fm = f(m) - target; if (fa * fm <= 0) { b = m; fb = fm; } else { a = m; fa = fm; } } return (a + b) / 2; };   // past the end of the world: where it ends
   const out = [], tick = (x1t, y1t, x2t, y2t) => out.push(`<path d="M${f2(x1t)},${f2(y1t)}L${f2(x2t)},${f2(y2t)}" stroke="${col}" stroke-width="${f2(lw)}"/>`);
@@ -11243,10 +11297,14 @@ function geoTicksSvg(k, g, S, F) {
   if (g.deg) {
     const lonAt = (yy, xx) => { const la = bis(l => P(0, l)[1], -89.99, 89.99, yy); return la; };
     const lonSpan = Math.max(1, Math.min(360, ((eR - eL) / Math.max(1e-9, P(1, 0)[0] - P(0, 0)[0])))), latSpan = Math.max(1, Math.min(180, (eT - eB) / Math.max(1e-9, P(0, 1)[1] - P(0, 0)[1])));
-    const sx = k.tkStep > 0 ? k.tkStep : niceNum(lonSpan / 5), sy = k.tkStep > 0 ? k.tkStep : niceNum(latSpan / 4);
-    for (let v = Math.ceil(-180 / sx - 1e-9) * sx; v <= 180 + 1e-9; v += sx) xs.push(+v.toFixed(6)); for (let v = Math.ceil(-90 / sy - 1e-9) * sy; v <= 90 + 1e-9; v += sy) ys.push(+v.toFixed(6));   // multiples of the interval: 0°, 50°E, 50°W…
+    const stX = k.tkStepX ?? k.tkStep, stY = k.tkStepY ?? k.tkStep;   // one interval per axis (a map saved with one interval uses it for both)
+    const sx = stX > 0 ? stX : niceNum(lonSpan / 5), sy = stY > 0 ? stY : niceNum(latSpan / 4);
+    // longitudes past ±180° too, for a view across the antimeridian (only those inside the frame are drawn)
+    for (let v = Math.ceil(-540 / sx - 1e-9) * sx; v <= 540 + 1e-9; v += sx) xs.push(+v.toFixed(6));
+    for (let v = Math.ceil(-90 / sy - 1e-9) * sy; v <= 90 + 1e-9; v += sy) ys.push(+v.toFixed(6));   // multiples of the interval: 0°, 50°E, 50°W…
   } else {
-    const sx = k.tkStep > 0 ? k.tkStep : niceNum((eR - eL) / 5), sy = k.tkStep > 0 ? k.tkStep : niceNum((eT - eB) / 4);
+    const stX = k.tkStepX ?? k.tkStep, stY = k.tkStepY ?? k.tkStep;
+    const sx = stX > 0 ? stX : niceNum((eR - eL) / 5), sy = stY > 0 ? stY : niceNum((eT - eB) / 4);
     for (let v = Math.ceil(eL / sx) * sx; v <= eR; v += sx) xs.push(v); for (let v = Math.ceil(eB / sy) * sy; v <= eT; v += sy) ys.push(v);
   }
   for (const side of ['b', 't']) if (tk.includes(side)) {   // meridians crossing the bottom or the top of the frame
@@ -11254,7 +11312,7 @@ function geoTicksSvg(k, g, S, F) {
     for (const v of xs) {
       let px;
       if (g.deg) { const la = bis(l => P(v, l)[1], -89.99, 89.99, ey); if (la == null) continue; px = P(v, la)[0]; } else px = v;
-      if (px < eL - 1e-9 || px > eR + 1e-9) continue; const x = X(px), w = fmtX(v).length * tkFs * 0.58;
+      if (px < eL - 1e-9 || px > eR + 1e-9) continue; const x = X(px), w = measure(fmtX(v), tkFs, fam, false, false);   // the real width of the text, so labels that fit are not left out
       if (x - w / 2 < last + 4) continue; last = x + w / 2;   // where meridians crowd (as at the top of Mollweide), only those with room
       tick(x, sy, x, sy + dir * tkLen); text(x, sy + dir * (tkLen + tkGap), fmtX(v), 'middle', dir > 0 ? 'hanging' : 'alphabetic');
     }
@@ -11263,7 +11321,7 @@ function geoTicksSvg(k, g, S, F) {
     const ex = side === 'l' ? eL : eR, sx = side === 'l' ? 0 : W, dir = side === 'l' ? -1 : 1; let last = Infinity;
     for (const v of ys) {
       let py;
-      if (g.deg) { const lo = bis(l => P(l, v)[0], -180, 180, ex); if (lo == null) continue; py = P(lo, v)[1]; } else py = v;
+      if (g.deg) { const lo = bis(l => P(l, v)[0], -540, 540, ex); if (lo == null) continue; py = P(lo, v)[1]; } else py = v;
       if (py < eB - 1e-9 || py > eT + 1e-9) continue; const y = Y(py);
       if (y > last - tkFs - 2) continue; last = y;   // parallels too close together: only those with room
       tick(sx, y, sx + dir * tkLen, y); text(sx + dir * (tkLen + tkGap), y, fmtY(v), dir > 0 ? 'start' : 'end', 'central');
