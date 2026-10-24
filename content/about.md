@@ -8,7 +8,7 @@ As someone who spends a lot of time making figures look good, I’ve often run i
 
 tree2go runs directly in your browser, with or without an internet connection. It can be run directly from my [GitHub repository](https://github.com/VR-Daniel/tree2go) or downloaded as a single HTML file that opens like any regular webpage. It is fully self-contained, meaning it does not rely on any external resources to work. It is free, open, and unrestricted: there is no registration or subscription, and all of its features are available to everyone.
 
-At just ~922 KB, tree2Go is still less than half the size of DOOM, one of the most iconic video games ever made (~2.2 MB). And if DOOM has been ported to ATMs, calculators, printers, and even pregnancy tests, then pretty much any modern piece of hardware should be able to run tree2Go.
+At just ~980 KB, tree2Go is still less than half the size of DOOM, one of the most iconic video games ever made (~2.2 MB). And if DOOM has been ported to ATMs, calculators, printers, and even pregnancy tests, then pretty much any modern piece of hardware should be able to run tree2Go.
 
 <p class="signature">Daniel</p>
 
