@@ -1,0 +1,9 @@
+Chondrichthyes={Callorhinchus milii, Carcharodon carcharias}
+Actinopterygii={Danio rerio, Lepisosteus oculatus}
+Amphibia={Ambystoma mexicanum, Xenopus tropicalis}
+Lepidosauria={Python bivittatus, Sphenodon punctatus, Varanus komodoensis}
+Dinosauria={Archaeopteryx lithographica, Gallus gallus, Struthio camelus, Tyrannosaurus rex}
+Proboscidea={Loxodonta africana, Mammuthus primigenius}
+Hominidae={Homo sapiens, Pan troglodytes}
+Whippomorpha={Ambulocetus natans, Balaenoptera musculus, Hippopotamus amphibius}
+Felidae={Felis catus, Smilodon fatalis}

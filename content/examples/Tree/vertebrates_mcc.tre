@@ -1,0 +1,42 @@
+#NEXUS
+
+Begin taxa;
+	Dimensions ntax=31;
+	Taxlabels
+		Alligator_mississippiensis
+		Ambulocetus_natans
+		Ambystoma_mexicanum
+		Archaeopteryx_lithographica
+		Balaenoptera_musculus
+		Callorhinchus_milii
+		Carcharodon_carcharias
+		Chelonia_mydas
+		Danio_rerio
+		Dimetrodon_limbatus
+		Felis_catus
+		Gallus_gallus
+		Hippopotamus_amphibius
+		Homo_sapiens
+		Latimeria_chalumnae
+		Lepisosteus_oculatus
+		Loxodonta_africana
+		Mammuthus_primigenius
+		Mus_musculus
+		Ornithorhynchus_anatinus
+		Osphranter_rufus
+		Pan_troglodytes
+		Protopterus_annectens
+		Python_bivittatus
+		Smilodon_fatalis
+		Sphenodon_punctatus
+		Struthio_camelus
+		Tiktaalik_roseae
+		Tyrannosaurus_rex
+		Varanus_komodoensis
+		Xenopus_tropicalis
+		;
+End;
+
+Begin trees;
+	tree TREE1 = [&R] ((Callorhinchus_milii[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.450]:420.1694,Carcharodon_carcharias[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.502]:420.1694)[&height=420.1694,height_95%_HPD={364.7676,479.2351},posterior=1.0000,rate=0.638]:54.6071,((Lepisosteus_oculatus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.299]:309.9220,Danio_rerio[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=1.199]:309.9220)[&height=309.9220,height_95%_HPD={267.8070,352.1730},posterior=1.0000,rate=0.736]:136.7484,(Latimeria_chalumnae[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.250]:427.6859,(Protopterus_annectens[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.502]:413.5912,(Tiktaalik_roseae[&height=375.0000,height_95%_HPD={375.0000,375.0000},rate=2.004]:13.0017,((Xenopus_tropicalis[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=1.299]:294.9111,Ambystoma_mexicanum[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.899]:294.9111)[&height=294.9111,height_95%_HPD={255.7455,336.3867},posterior=1.0000,rate=1.302]:58.5010,((Dimetrodon_limbatus[&height=280.0000,height_95%_HPD={280.0000,280.0000},rate=1.099]:30.2129,(Ornithorhynchus_anatinus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.700]:185.1975,(Osphranter_rufus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=1.200]:160.1142,((Loxodonta_africana[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.800]:6.0025,Mammuthus_primigenius[&height=0.0120,height_95%_HPD={0.0120,0.0120},rate=1.302]:5.9905)[&height=6.0025,height_95%_HPD={5.2197,6.8838},posterior=1.0000,rate=1.011]:95.8601,((Mus_musculus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=1.102]:89.9650,(Homo_sapiens[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=2.396]:6.7026,Pan_troglodytes[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.800]:6.7026)[&height=6.7026,height_95%_HPD={5.7751,7.6302},posterior=1.0000,rate=1.218]:83.2624)[&height=89.9650,height_95%_HPD={77.9677,103.2262},posterior=1.0000,rate=1.087]:7.8914,((Hippopotamus_amphibius[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.900]:56.3473,(Ambulocetus_natans[&height=48.0000,height_95%_HPD={48.0000,48.0000},rate=2.798]:5.0679,Balaenoptera_musculus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=2.604]:53.0679)[&height=53.0679,height_95%_HPD={48.0027,59.5825},posterior=0.8439,rate=2.999]:3.2794)[&height=56.3473,height_95%_HPD={50.1514,63.1244},posterior=1.0000,rate=1.363]:23.7179,(Felis_catus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.799]:19.9903,Smilodon_fatalis[&height=0.0120,height_95%_HPD={0.0120,0.0120},rate=1.696]:19.9783)[&height=19.9903,height_95%_HPD={17.3899,22.8853},posterior=1.0000,rate=1.100]:60.0749)[&height=80.0652,height_95%_HPD={69.8050,91.4356},posterior=1.0000,rate=1.132]:17.7912)[&height=97.8564,height_95%_HPD={87.2659,110.1197},posterior=0.5480,rate=1.063]:4.0062)[&height=101.8626,height_95%_HPD={91.9930,114.0175},posterior=1.0000,rate=1.031]:58.2516)[&height=160.1142,height_95%_HPD={139.4571,183.0530},posterior=1.0000,rate=1.066]:25.0833)[&height=185.1975,height_95%_HPD={163.9577,211.0149,posterior=1.0000,rate=1.603]:125.0154)[&height=310.2129,height_95%_HPD={280.2182,348.9447},posterior=1.0000,rate=1.185]:17.7445,((Sphenodon_punctatus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.301]:244.9669,(Varanus_komodoensis[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.902]:170.0320,Python_bivittatus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=2.597]:170.0320)[&height=170.0320,height_95%_HPD={147.9590,194.8806},posterior=1.0000,rate=1.302]:74.9349)[&height=244.9669,height_95%_HPD={212.7240,278.7617},posterior=1.0000,rate=0.752]:38.9658,(Chelonia_mydas[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.500]:271.7463,(Alligator_mississippiensis[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=0.349]:249.8131,(Tyrannosaurus_rex[&height=67.0000,height_95%_HPD={67.0000,67.0000},rate=1.400]:102.3789,(Archaeopteryx_lithographica[&height=150.0000,height_95%_HPD={150.0000,150.0000},rate=1.893]:10.7699,(Struthio_camelus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=1.400]:99.9571,Gallus_gallus[&height=0.0000,height_95%_HPD={0.0000,0.0000},rate=1.503]:99.9571)[&height=99.9571,height_95%_HPD={86.9429,114.2202},posterior=1.0000,rate=1.805]:60.8128)[&height=160.7699,height_95%_HPD={150.0002,180.4311},posterior=0.8389,rate=1.449]:8.6090)[&height=169.3789,height_95%_HPD={152.2069,188.4064},posterior=1.0000,rate=1.605]:80.4342)[&height=249.8131,height_95%_HPD={218.2483,286.0749},posterior=1.0000,rate=0.842]:21.9332)[&height=271.7463,height_95%_HPD={240.3961,305.6585},posterior=0.7835,rate=0.772]:12.1864)[&height=283.9327,height_95%_HPD={257.6305,316.1669},posterior=1.0000,rate=0.850]:44.0247)[&height=327.9574,height_95%_HPD={295.1260,367.2557},posterior=1.0000,rate=1.003]:25.4547)[&height=353.4121,height_95%_HPD={317.5076,396.5700},posterior=1.0000,rate=2.206]:34.5896)[&height=388.0017,height_95%_HPD={375.0075,431.7030},posterior=1.0000,rate=1.803]:25.5895)[&height=413.5912,height_95%_HPD={377.2313,459.6340},posterior=0.7703,rate=0.968]:14.0947)[&height=427.6859,height_95%_HPD={385.5759,476.7188},posterior=1.0000,rate=0.689]:18.9845)[&height=446.6704,height_95%_HPD={404.9366,496.9809},posterior=1.0000,rate=0.823]:28.1061)[&height=474.7765,height_95%_HPD={430.7517,527.7288},posterior=1.0000];
+End;

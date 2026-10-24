@@ -1,0 +1,32 @@
+species,common_name,status,group,mass_kg,longevity_y,brain_g
+Alligator_mississippiensis,American alligator,Extant,Crocodilians,250,50,15
+Ambulocetus_natans,Ambulocetus,Extinct,Synapsids,200,,
+Ambystoma_mexicanum,Axolotl,Extant,Amphibians,0.1,15,0.1
+Archaeopteryx_lithographica,Archaeopteryx,Extinct,Dinosaurs,0.9,,
+Balaenoptera_musculus,Blue whale,Extant,Synapsids,120000,90,3600
+Callorhinchus_milii,Elephant shark,Extant,Cartilaginous fishes,6,15,2
+Carcharodon_carcharias,Great white shark,Extant,Cartilaginous fishes,1000,70,35
+Chelonia_mydas,Green sea turtle,Extant,Turtles,150,80,8
+Danio_rerio,Zebrafish,Extant,Ray-finned fishes,0.0006,3,0.01
+Dimetrodon_limbatus,Dimetrodon,Extinct,Synapsids,250,,
+Felis_catus,Domestic cat,Extant,Synapsids,4.5,15,30
+Gallus_gallus,Red junglefowl,Extant,Dinosaurs,2.5,10,4
+Hippopotamus_amphibius,Hippopotamus,Extant,Synapsids,1500,50,580
+Homo_sapiens,Human,Extant,Synapsids,62,79,1350
+Latimeria_chalumnae,Coelacanth,Extant,Lobe-finned fishes,80,60,3
+Lepisosteus_oculatus,Spotted gar,Extant,Ray-finned fishes,2,18,0.5
+Loxodonta_africana,African elephant,Extant,Synapsids,5000,65,5000
+Mammuthus_primigenius,Woolly mammoth,Extinct,Synapsids,6000,,
+Mus_musculus,House mouse,Extant,Synapsids,0.02,2,0.4
+Ornithorhynchus_anatinus,Platypus,Extant,Synapsids,1.5,17,9
+Osphranter_rufus,Red kangaroo,Extant,Synapsids,60,20,56
+Pan_troglodytes,Chimpanzee,Extant,Synapsids,45,40,384
+Protopterus_annectens,West African lungfish,Extant,Lobe-finned fishes,4,20,0.5
+Python_bivittatus,Burmese python,Extant,Lepidosaurs,75,25,3
+Smilodon_fatalis,Saber-toothed cat,Extinct,Synapsids,220,,
+Sphenodon_punctatus,Tuatara,Extant,Lepidosaurs,1,100,1
+Struthio_camelus,Common ostrich,Extant,Dinosaurs,110,40,40
+Tiktaalik_roseae,Tiktaalik,Extinct,Lobe-finned fishes,25,,
+Tyrannosaurus_rex,Tyrannosaurus,Extinct,Dinosaurs,8000,,
+Varanus_komodoensis,Komodo dragon,Extant,Lepidosaurs,70,30,10
+Xenopus_tropicalis,Western clawed frog,Extant,Amphibians,0.02,10,0.1
