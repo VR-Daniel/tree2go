@@ -8,7 +8,7 @@ As an example, we use a simulated dataset that includes everything needed to sho
 
 ## 1. The files we need
 
-Phylogenetic trees and networks come from many different programs and methods, and in many flavors. For this tutorial, we prepared a set of ready-to-use files, grouped in folders that follow the sections of the left panel of tree2go. They cover many of the file types and formats you may come across in phylogenetic analyses, so they can also serve as a reference later, when you import your own data. The files can be downloaded from [this link](#), and are as follows:
+Phylogenetic trees and networks come from many different programs and methods, and in many flavors. For this tutorial, we prepared a set of ready-to-use files, grouped in folders that follow the sections of the left panel of tree2go. They cover many of the file types and formats you may come across in phylogenetic analyses, so they can also serve as a reference later, when you import your own data. The files can be downloaded from [this link](https://github.com/VR-Daniel/tree2go/tree/main/content/examples), and are as follows:
 
 ```text
 vertebrates/
@@ -373,7 +373,7 @@ Although it is not part of our vertebrate example, one section is left to explor
 
 As an example, we use `heliconius_network.nwk`, a small network of *Heliconius* butterflies inspired by two well-known cases, with fictitious values: *H. heurippa*, a species of hybrid origin between *H. cydno* and *H. melpomene*, and *H. timareta*, which received genes from *H. melpomene* by introgression. It opens with `Open tree`, like any tree.
 
-tree2go recognizes the reticulations, and the kind of each one, from its label in the file: `#H` for hybridization, `#LGT` for lateral gene transfer and `#R` for recombination, each with its own color in **Phylogenetic networks**. Both events of our example are hybridizations (`#H`). What tells a hybrid species from an introgression is gamma (γ), the share of the genome inherited through each parent, parameter that can be ploted as any ot the previous tree associated labels.
+tree2go recognizes the reticulations, and the kind of each one, from its label in the file: `#H` for hybridization, `#LGT` for lateral gene transfer and `#R` for recombination, each with its own color in **Phylogenetic networks**. Both events of our example are hybridizations (`#H`). What tells a hybrid species from an introgression is gamma (γ), the share of the genome inherited through each parent, a value that can be shown like any other annotation of the tree.
 
 <figure class="vfig pair">
   <div class="vrow">
