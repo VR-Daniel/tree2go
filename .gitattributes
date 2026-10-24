@@ -1,0 +1,9 @@
+# Data for the benchmark and the examples, not source code: left out of the language statistics of GitHub
+content/bench/** linguist-vendored
+*.t       linguist-detectable=false
+*.trees   linguist-detectable=false
+*.tre     linguist-detectable=false
+*.nex     linguist-detectable=false
+*.nexus   linguist-detectable=false
+*.nwk     linguist-detectable=false
+*.fasta   linguist-detectable=false
