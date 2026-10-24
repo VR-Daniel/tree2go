@@ -8028,10 +8028,25 @@ function tangleSvgNow() {
   (function cc(x, c) { const col = (x.st && x.st.bc) || x.color || c; inh.set(x, col); x.children.forEach(k => cc(k, col)); })(t2, S2.lineColor);
   const tipsOf = x => x.children.length ? x.children.flatMap(tipsOf) : [x];
   // highlights of the second tree, from its clades to its names
-  walkAll(t2, x => { if (!x.bg || !x.children.length) return; const tp = tipsOf(x), a = minOf(tp.map(t => t._ty)) - step / 2, b = maxOf(tp.map(t => t._ty)) + step / 2;
-    const opv = (x.st && x.st.bgOp != null ? x.st.bgOp : S2.cladeOpacity), op = opv > 1 ? opv / 100 : opv, x0 = minOf(tp.map(t => show ? LX(t) - lw : X(t))) - 4;
-    bgs.push(`<rect x="${f2(x0)}" y="${f2(a)}" width="${f2(X(x) - x0)}" height="${f2(b - a)}" fill="${x.bg}" fill-opacity="${f2(op)}"/>`);
-    hl2.push({ tips: new Set(tp.map(t => normTip(t.name))), x0, y0: a, y1: b, c: x.bg, a: op }); });
+  // with the options of its own tab, as on any tree: where it starts (root, stem, node, crown), where it ends (the outer
+  // edge of the names, or the names of the clade), gradient, rounded corners and opacity. Mirrored: its root is on the right.
+  const sv = (x, k) => x.st && x.st[k] != null && x.st[k] !== '' ? x.st[k] : null;
+  const nameEdge = t => show ? LX(t) - measure(disp(nm(t)), (t.st && t.st.fs) ?? fs, fam, (t.st && t.st.it) ?? it, (t.st && t.st.fw) ?? t.bold) : X(t);
+  const treeEdge = minOf(L2.map(t => show ? LX(t) - lw : X(t))) - 4, gdefs = [];
+  const split8b = c => /^#[0-9a-f]{8}$/i.test(c) ? [c.slice(0, 7), parseInt(c.slice(7), 16) / 255] : [c, 1];
+  walkAll(t2, x0n => { if (!x0n.bg || !x0n.children.length) return;
+    let x = x0n; const from = sv(x, 'bgS') ?? S2.hlStart, to = sv(x, 'bgE') ?? S2.hlEnd, gr = sv(x, 'bgG') ?? S2.hlGradient, rr = sv(x, 'bgR') ?? S2.hlRadius;
+    if (from === 'crown') { const live = tipsOf(x).filter(l => !l.ex); if (live.length) { const ok = n => live.every(l => tipsOf(n).includes(l)); let c = x; for (;;) { const k = c.children.find(ok); if (!k || !k.children.length) break; c = k; } x = c; } }   // the common ancestor of the living tips
+    const tp = tipsOf(from === 'stem' || from === 'root' ? x0n : x), a = minOf(tp.map(t => t._ty)) - step / 2, b = maxOf(tp.map(t => t._ty)) + step / 2;
+    const opv = sv(x0n, 'bgOp') ?? S2.cladeOpacity, op = opv > 1 ? opv / 100 : opv;
+    const xr = from === 'root' ? X(t2) + 4 : from === 'stem' && x.parent ? X(x.parent) : X(x) + 4;   // the start, on the root side
+    const xl = Math.min(xr - 4, to === 'labels' ? minOf(tp.map(nameEdge)) - 6 : treeEdge);          // the end, on the side of the names
+    const [bc, ba] = split8b(x0n.bg); let fill = x0n.bg;
+    if (gr && gr !== 'none') { const id = 'tg2g' + x0n.id, fade = gr === 'right';   // Fade out: from the start towards the names, as on the main tree
+      gdefs.push(`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${f2(xr)}" y1="0" x2="${f2(xl)}" y2="0"><stop offset="0" stop-color="${bc}" stop-opacity="${f2(fade ? ba : 0)}"/><stop offset="1" stop-color="${bc}" stop-opacity="${f2(fade ? 0 : ba)}"/></linearGradient>`); fill = `url(#${id})`; }
+    bgs.push(`<rect x="${f2(xl)}" y="${f2(a)}" width="${f2(xr - xl)}" height="${f2(b - a)}"${rr > 0 ? ` rx="${rr}"` : ''} fill="${fill}" fill-opacity="${f2(op)}"/>`);
+    hl2.push({ tips: new Set(tipsOf(x0n).map(t => normTip(t.name))), x0: xl, y0: a, y1: b, c: bc, a: (gr === 'right' ? 0 : ba) * op }); });   // its edge facing the main tree, color and opacity there
+  if (gdefs.length) bgs.unshift(`<defs>${gdefs.join('')}</defs>`);
   // its branches, as a rectangular tree turned to face this one
   walkAll(t2, x => { const w = (x.st && x.st.bw) ?? S2.lineWidth, col = inh.get(x);
     if (x.parent) out.push(`<path d="M${f2(X(x))},${f2(x._ty)}H${f2(X(x.parent))}" stroke="${col}" stroke-width="${f2(w)}" fill="none" stroke-linecap="square"/>`);
