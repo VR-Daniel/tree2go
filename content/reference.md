@@ -50,7 +50,7 @@ In the panel, sections and their subsections (marked ›) fold, and the open one
 
 ## Tree
 
-Load or paste a tree (Newick and NEXUS are recognized from their content, whatever the file extension). A file with many trees (for example a BEAST or MrBayes posterior) opens as a tree set. If another program has rewritten a file's annotations in a way that breaks them, tree2go shows where and offers to repair the keys when loading it. It matches the braces and rebuilds the key names. Values that were removed from the file, such as rates, cannot be recovered.
+Load or paste a tree (Newick and NEXUS are recognized from their content, whatever the file extension). A file with many trees (for example a BEAST or MrBayes posterior) opens as a tree set. If another program has rewritten a file's annotations in a way that breaks them, tree2go shows where and offers to repair the keys when loading it. It matches the braces and rebuilds the key names. Values that were removed from the file, such as rates, cannot be recovered. An annotation whose braces { } do not pair, as when one was lost by hand, is shown too: a missing closing brace is put back before the next key, where it was; a missing opening brace cannot be placed for sure, so the file is loaded as it is, for you to check.
 
 Before reading a file with more than 10,000 trees, or any tree file larger than 150 MB, tree2go opens a window where you set a burn-in and how many trees to keep after it (a number or a percentage, evenly spaced or at random with a seed), so only the trees you keep are read. A sample of 10,000 trees is more than enough for summary trees. If you ask for more trees than remain after the burn-in, the window says so and does not load them. You can also read all the trees, and closing the window loads nothing. The Tree set part then shows, in a red box, how the trees were resampled, from how many, and with which burn-in, so that another burn-in is not applied by mistake. MrBayes clock trees carry their branch lengths in substitutions per site, with each tree's clock rate in its header `[&clockrate = …]`, tree2go divides each tree by its own clock rate, so the ages of the summary trees are in time units, as in the MrBayes consensus. Files larger than 150 MB are read in pieces: tree2go counts their trees first, then reads only the trees kept, so a posterior of hundreds of thousands of trees can be opened with a burn-in and a resample. Reading them all at once is limited by the memory of the browser. Every tree of a set is also kept in the browser, compressed, so the set comes back whole when the app is opened again, with its burn-in and summary. Only the last set is kept, and loading a single tree or `Clear session` removes it.
 
@@ -536,6 +536,7 @@ An axis of ages for dated trees, with the geologic time scale, guide lines and s
 |:---|:---|:---|:---|:---|
 | `Age of the youngest tip`¹ | Age where the axis starts. The ages written in labels count from it too, as the axis does. This includes node and branch age annotations (height, age, and their medians, means and intervals), the ages of tree sets and the ages of the tips. Only the numbers shown change, the tree keeps its own heights. | −10⁶ to 10⁶ | 0 | `Show time axis (dated trees)` is **On** |
 | `Time units per branch length unit`² | Factor that turns branch lengths into ages. | 10⁻⁹ to 10⁹ | 1 | `Show time axis (dated trees)` is **On** |
+| `Oldest age of the axis` | Stretches the axis, and the geologic time scale with it, past the root to an older age, for example to cover the age density or HPD bar of the root. Empty, the axis starts at the root. Only older ages than the root apply. | Age, in the units of the axis | Auto | `Show time axis (dated trees)` is **On**, **Rectangular** layout |
 | `Axis title` |  | Text | Ma | `Show time axis (dated trees)` is **On** |
 | `Show units next to the youngest value` | Writes the units after the first number of the axis. | On<br>Off | Off | `Show time axis (dated trees)` is **On** |
 | `Units` |  | Text | Ma | `Show time axis (dated trees)` is **On**, `Show units next to the youngest value` is **On** |
@@ -975,6 +976,8 @@ It needs a rectangular tree that is not turned, with the space to the right of t
 | `Color` | One color, or the color of the highlight (or of the branch) each tip is in, on each side. | One color<br>As the highlights<br>As the branches | One color | `Show a tanglegram` is **On** |
 | `Where the colors differ` | When both sides have a color and they differ, use a gradient from one to the other, or one neutral color. A tip with a color on one side only takes that color, and one with none the line color. | From one to the other<br>One neutral color | From one to the other | `Color` is not **One color** |
 | `Width`, `Opacity` and `Style` |  | px, %<br>Solid, Dashed, Dotted | 0.8 px, 80 %, Solid | `Show a tanglegram` is **On** |
+| `Dash length` | The length of each dash of the lines. Empty, it follows the width of the lines. | 0.1 to 200 px | Auto | `Show a tanglegram` is **On**, `Style` is **Dashed** |
+| `Gap between dashes or dots` | Empty, it follows the width of the lines. | 0.1 to 200 px | Auto | `Show a tanglegram` is **On**, `Style` is **Dashed** or **Dotted** |
 | `Curvature (0 for straight)` | Bends the lines into an S. | 0 to 100 % | 0 | `Show a tanglegram` is **On** |
 
 A click selects a line (it shows in blue), like the branches. `Right-click` a line to give it a color, width or style of its own, and `Back to the look of all` to undo it. The second tree keeps the look of its tab, aligned names with their guides included.
@@ -986,7 +989,7 @@ A click selects a line (it shows in blue), like the branches. `Right-click` a li
 | `Distance between the trees` | The room for the lines. | 10 to 2000 px | 140 px | `Show a tanglegram` is **On** |
 | `Width (0 as this tree)` |  | 0 to 5000 px | 0 | `Show a tanglegram` is **On** |
 | `Names of its tips` | Written facing the lines. | On<br>Off | On | `Show a tanglegram` is **On** |
-| `Join the highlights of the same clade` | A clade highlighted in both trees, with the very same tips, is joined across the gap between them, in its color when both sides share it, or from one color to the other. A highlight that fades toward the lines joins from its faded edge. | On<br>Off | On | `Show a tanglegram` is **On** |
+| `Join the highlights of the same clade` | A clade highlighted in both trees, with the very same tips, is joined across the gap between them by a band with smooth edges, in its color when both sides share it, or from one color to the other. A highlight that fades toward the lines joins from its faded edge. | On<br>Off | On | `Show a tanglegram` is **On** |
 
 </details>
 
