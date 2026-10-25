@@ -248,12 +248,13 @@ html:has(body.refpage), body.refpage{height:auto; overflow:auto}   /* on its own
    with a choice of language, and the figures and notes of the vignettes */
 .tutpage #helpModal .box{max-width:min(1160px, 96vw)}
 .tutpage #helpPdf{display:none}
+.inlineedit{box-sizing:border-box; padding:0 6px; border:1.5px solid var(--accent); border-radius:6px; background:var(--panel); color:var(--ink); font-family:inherit; box-shadow:0 4px 14px rgba(0,0,0,.18); outline:none}
 .tutlang{height:32px; padding:0 10px; font:inherit; font-size:13px; flex:none; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); cursor:pointer}
 .tutlang:focus{outline:none; border-color:var(--accent)}
 .tutpage .helpBody{font-size:15px; line-height:1.65}
 .tutpage .helpBody h2{margin-top:30px}
 .tutpage .helpBody figure.vfig{margin:14px 0 20px; padding:0; border:0; background:none}
-.tutpage .helpBody figure.vfig > img{display:block; margin:0 auto; max-width:100%; max-height:var(--vh-one, 460px); width:auto; height:auto}
+.tutpage .helpBody figure.vfig > img{display:block; margin:0 auto; max-width:75%; max-height:var(--vh-one, 460px); width:auto; height:auto}   /* a figure alone: at most three quarters of the width */
 .tutpage .helpBody figure.vfig figcaption{margin:8px auto 0; font-size:14px; line-height:1.45; text-align:center; opacity:.8}
 .tutpage .helpBody figure.vfig > figcaption{max-width:720px}
 .tutpage .helpBody figure.vfig .vrow{display:flex; gap:18px; justify-content:center; align-items:flex-start}
@@ -271,6 +272,24 @@ html:has(body.refpage), body.refpage{height:auto; overflow:auto}   /* on its own
 .tutpage .helpBody blockquote p + p{margin-top:8px}
 @media print{ .tutpage .helpBody figure.vfig, .tutpage .helpBody blockquote{break-inside:avoid} }
 .helpsearch .btn.helppdf{width:auto; padding:0 12px; font-size:13px; display:inline-flex; align-items:center; text-decoration:none; white-space:nowrap; color:inherit}
+/* notes: as much room under the text as above it (the last paragraph keeps no margin of its own) */
+.helpBody blockquote > :first-child{margin-top:0 !important}
+.helpBody blockquote > :last-child{margin-bottom:0 !important}
+/* the sticky titles of the guide: one pixel higher, with a band of the background above, so no line of text shows
+   through between them and the top of the window when the screen is scaled (125%, 150%) */
+.helpBody summary{top:-1px; box-shadow:0 -4px 0 0 var(--panel)}
+/* the index of a tutorial: fixed on the left, its sections, the one being read marked */
+.tutnav{display:none}
+@media (min-width:1100px){
+  body.tutpage.hasnav #helpModal{padding-left:268px}
+  body.tutpage.hasnav .tutnav{display:block; position:fixed; top:24px; left:16px; width:232px; max-height:calc(100vh - 48px); overflow-y:auto; padding:12px 8px; background:var(--panel); border:1px solid var(--line); border-radius:12px; font-size:13px; line-height:1.35; z-index:5}
+}
+.tutnav .tutnavtitle{font-weight:700; font-size:13px; color:var(--ink); padding:4px 10px 8px; margin-bottom:4px; border-bottom:1px solid var(--line)}
+.tutnav a{display:block; padding:6px 10px; margin:1px 0; border-radius:7px; border-left:3px solid transparent; color:var(--muted); text-decoration:none}
+.tutnav a:hover{background:var(--panel2); color:var(--ink)}
+.tutnav a.on{background:rgba(74,103,201,.12); border-left-color:var(--accent); color:var(--ink); font-weight:600}
+.tutpage .helpBody h2{scroll-margin-top:18px}
+@media print{ .tutnav{display:none !important} body.tutpage.hasnav #helpModal{padding-left:16px} }
 .helpBody mark.find{background:#ffe8b0; color:inherit; border-radius:2px; padding:0}
 .helpBody mark.find.on{background:var(--mustard); box-shadow:0 0 0 1px var(--mustard)}
 .nethit{cursor:context-menu; pointer-events:stroke}
@@ -311,8 +330,8 @@ html:has(body.refpage), body.refpage{height:auto; overflow:auto}   /* on its own
 .helpBody table{border-collapse:collapse; font-size:13px; line-height:1.45}
 .helpBody th,.helpBody td{border:1px solid var(--line); padding:5px 9px; vertical-align:middle; text-align:left}
 .helpBody th{background:var(--panel2); font-weight:600}
-.helpBody code{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; background:var(--panel2); padding:.1em .35em; border-radius:4px}
-.helpBody pre{background:var(--panel2); border-radius:8px; padding:12px 14px; overflow-x:auto; line-height:1.4}
+.helpBody code{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; background:rgba(120,130,145,.15); padding:.1em .35em; border-radius:4px}
+.helpBody pre{background:rgba(120,130,145,.13); border:1px solid var(--line); border-radius:8px; padding:12px 14px; overflow-x:auto; line-height:1.4}   /* a tint that shows on the light theme too */
 .helpBody pre code{display:block; background:none; padding:0; border-radius:0; white-space:pre}   /* one box for the whole block, so trees of folders join line to line */
 .helpBody img[align=absmiddle]{vertical-align:middle}
 .helpBody ul,.helpBody ol{margin:0 0 10px; padding-left:22px}
@@ -984,7 +1003,18 @@ function orderParts(parts) {
   return [...parts.filter(h => !fos.includes(h) && !gr.includes(h)), ...fos, ...gr];
 }
 // True when a label is a support value: a number, or numbers joined by slashes (98/1.00).
-function isSupport(s) { return s !== '' && s != null && /^[0-9]*\.?[0-9]+(e-?\d+)?(\/[0-9]*\.?[0-9]+(e-?\d+)?)*$/i.test(String(s).trim()); }   // 98 or 98/1.00
+/* Supports written as node names: one number (98, 0.95) or several, from several analyses (98/0.95, as consensus trees of
+   maximum likelihood and Bayesian inference write them). The parts may be split by /, | or \, with spaces around, and a
+   part may be - or ? where a clade was not found by that analysis (98/-, -/0.95); at least one part is a number. */
+const SUP_NUM = /^[0-9]*\.?[0-9]+(e-?\d+)?$/i, SUP_NONE = /^(-|\?)$/, SUP_SEP = /\s*[\/|\\]\s*/;
+const supParts = s => String(s ?? '').trim().split(SUP_SEP);
+function isSupport(s) {
+  if (s === '' || s == null) return false;
+  const p = supParts(s);
+  return p.length === 1 ? SUP_NUM.test(p[0]) : p.every(x => SUP_NUM.test(x) || SUP_NONE.test(x)) && p.some(x => SUP_NUM.test(x));
+}
+// The first value of a support written as a name (NaN when the first analysis did not find the clade: -/0.95).
+const supFirst = s => { const f = supParts(s)[0]; return SUP_NUM.test(f) ? parseFloat(f) : NaN; };
 // True when the tree has branch lengths.
 function hasLengths(root) { let h = false; walkAll(root, x => { if (x.parent && x.len != null) h = true; }); return h; }
 // Adds two branch lengths, keeping "no length" when both are missing (used when a node is removed).
@@ -1126,7 +1156,7 @@ function collapseWeak(root, t) {
   let changed = 0;
   (function f(n) {
     for (const c of [...n.children]) f(c);
-    if (n.parent && n.children.length && isSupport(n.name) && parseFloat(n.name) < t) {
+    if (n.parent && n.children.length && isSupport(n.name) && supFirst(n.name) < t) {
       const p = n.parent, idx = p.children.indexOf(n);
       for (const c of n.children) { c.len = sumLen(c.len, n.len); c.parent = p; if (!c.color && n.color) c.color = n.color; }
       p.children.splice(idx, 1, ...n.children); changed++;
@@ -1389,7 +1419,7 @@ let radFlip = null;
 const realR = r => radFlip == null ? r : Math.max(0, radFlip - r);
 const polar = (r, a) => polar0(realR(r), a);
 // A name as shown: underscores become spaces.
-const disp = s => settings.underscores ? String(s).replace(/_/g, ' ') : String(s);
+const disp = s => (settings.underscores ? String(s).replace(/(?<!\\)_/g, ' ') : String(s)).replace(/\\_/g, '_');   // \_ stays an underscore
 // The name shown for a node. A renamed tip keeps its original name underneath, as the key that links it to tables,
 // alignments, plots and maps, and shows its new name (label) everywhere else, Newick exports included.
 const nm = n => n ? (n.label != null && n.label !== '' ? n.label : n.name) : '';
@@ -3794,9 +3824,9 @@ function toolsPanel() {
     $('pcGo').onclick = () => {
       const t = +$('pwT').value; let k = 0;
       mutate(() => {
-        const mx = (() => { let m = 0; walkAll(tree, x => { if (x.children.length && isSupport(x.name)) m = Math.max(m, parseFloat(x.name)); }); return m; })();
+        const mx = (() => { let m = 0; walkAll(tree, x => { if (x.children.length && isSupport(x.name) && Number.isFinite(supFirst(x.name))) m = Math.max(m, supFirst(x.name)); }); return m; })();
         const lim = mx <= 1 && t > 1 ? t / 100 : t;
-        (function f(n) { if (n.parent && n.children.length && isSupport(n.name) && parseFloat(n.name) < lim) { n.collapsed = true; k++; return; } n.children.forEach(f); })(tree);
+        (function f(n) { if (n.parent && n.children.length && isSupport(n.name) && supFirst(n.name) < lim) { n.collapsed = true; k++; return; } n.children.forEach(f); })(tree);
       });
       toast(k ? plural(k, 'clade', 'clades') + ' collapsed' : 'No clade has support below that value');
     };
@@ -4305,15 +4335,41 @@ function nameParts(txt) {
 }
 // True when a name holds a qualifier such as cf. or sp.
 function hasQualifier(txt) { return nameParts(txt).some(p => p.q); }
-// A name as SVG text: italic, with qualifiers upright when asked.
-function nameSvg(txt, italic, keepUp) {
-  if (!italic || !keepUp) return esc(txt);
-  return nameParts(txt).map(p => p.q ? `<tspan font-style="normal">${esc(p.t)}</tspan>` : esc(p.t)).join('');
+/* Marks in the texts people write (tip names, clade names, legends, labels): a part between asterisks, *so*, switches
+   italics (italic in upright text, upright in italic text), and a backslash keeps the next character as it is (\* an
+   asterisk, \_ an underscore that is not turned into a space). An asterisk with no pair is written as it is. */
+const hasMarks = s => /[*\\]/.test(String(s ?? ''));
+function markParts(txt, italic) {
+  const s = String(txt ?? ''), stars = [];
+  for (let i = 0; i < s.length; i++) { if (s[i] === '\\') { i++; continue; } if (s[i] === '*') stars.push(i); }
+  const toggles = new Set(stars.slice(0, stars.length - (stars.length % 2)));   // the last one alone is a plain asterisk
+  const out = []; let it = italic, cur = '';
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === '\\' && i + 1 < s.length) { cur += s[++i]; continue; }
+    if (ch === '*' && toggles.has(i)) { if (cur) out.push({ t: cur, it }); cur = ''; it = !it; continue; }
+    cur += ch;
+  }
+  if (cur) out.push({ t: cur, it });
+  return out;
 }
-// Width of a name, mixing italic and upright parts.
+// The text as it reads, without its marks (for widths of plain texts, searching, titles).
+const plainText = s => hasMarks(s) ? markParts(s, false).map(p => p.t).join('') : String(s ?? '');
+// A text as SVG: its marked parts in the other style, and in italic parts the qualifiers upright when asked (keepUp).
+function nameSvg(txt, italic, keepUp) {
+  if (!hasMarks(txt)) { if (!italic || !keepUp) return esc(txt); return nameParts(txt).map(p => p.q ? `<tspan dominant-baseline="inherit" font-style="normal">${esc(p.t)}</tspan>` : esc(p.t)).join(''); }
+  return markParts(txt, italic).map(seg => {
+    const body = seg.it && keepUp ? nameParts(seg.t).map(p => p.q ? `<tspan dominant-baseline="inherit" font-style="normal">${esc(p.t)}</tspan>` : esc(p.t)).join('') : esc(seg.t);
+    return seg.it === !!italic ? body : `<tspan dominant-baseline="inherit" font-style="${seg.it ? 'italic' : 'normal'}">${body}</tspan>`;   // inherit: Chrome does not pass the baseline of the text on to its tspans
+  }).join('');
+}
+// Width of a text, mixing italic and upright parts.
 function nameWidth(txt, fs, fam, italic, bold, keepUp) {
-  if (!italic || !keepUp || !hasQualifier(txt)) return measure(txt, fs, fam, italic, bold);
-  return nameParts(txt).reduce((w, p) => w + measure(p.t, fs, fam, !p.q, bold), 0);
+  if (!hasMarks(txt)) {
+    if (!italic || !keepUp || !hasQualifier(txt)) return measure(txt, fs, fam, italic, bold);
+    return nameParts(txt).reduce((w, p) => w + measure(p.t, fs, fam, !p.q, bold), 0);
+  }
+  return markParts(txt, italic).reduce((w, seg) => w + (seg.it && keepUp ? nameParts(seg.t).reduce((v, p) => v + measure(p.t, fs, fam, !p.q, bold), 0) : measure(seg.t, fs, fam, seg.it, bold)), 0);
 }
 const DAGGER = '<tspan dy="-0.4em" font-size="0.7em" font-style="normal">†</tspan>';
 // SVG dash pattern for solid, dashed or dotted lines.
@@ -4958,16 +5014,19 @@ function renderOnce() {
   const supSrc = supSource();
   const supOf = supValue;
   const supTxt = n => S.supportDec !== 'auto' && S.supportDec != null && Number.isFinite(supOf(n)) ? supOf(n).toFixed(+S.supportDec)   // the decimals chosen
-    : supSrc !== 'tree' ? String(Math.round(supOf(n))) : isSupport(n.name) ? String(n.name).split('/')[0] : String(+supOf(n).toFixed(2));
+    : supSrc !== 'tree' ? String(Math.round(supOf(n))) : isSupport(n.name) && Number.isFinite(supFirst(n.name)) ? supParts(n.name)[0] : String(+supOf(n).toFixed(2));
   // Other node labels stacked with the support values: 'after' writes them in the same text (a / b), 'below' under the branch
   const stackAfter = S.nlabStack === 'after' && S.supportMode === 'text' && S.nlabShow !== 'circles' && !!nodeLabelSrc(S), stackedNodes = new Set();
 
   const internals = vis.filter(n => n.children.length && !n._tri);
-  const sups = internals.map(supOf).filter(v => v != null);
+  // the values of a node are shown on collapsed clades too: the support of the node where the clade is collapsed, its
+  // symbol and its other node labels (node bars and dots stay off them, where they would cover the triangle)
+  const valueNodes = vis.filter(n => n.children.length);
+  const sups = valueNodes.map(supOf).filter(v => v != null);
   const supMax = sups.length ? maxOf(sups) : 100;
   const pct = v => supMax <= 1 ? v * 100 : v;
   const cats = S.supportCats || [];
-  for (const n of internals) {
+  for (const n of valueNodes) {
     const isS = supOf(n) != null;
     const ov = isS ? stv(n, 'svm') : null, mode = ov ?? S.supportMode;
     if (isS && mode !== 'none' && (n.parent || (L === 'rect' && stub > 0))) {
@@ -5138,7 +5197,7 @@ function renderOnce() {
   if (S.nlabShow === 'circles' && nodeLabelSrc(S)) {
     // circles: color and size from the value of each node (numbers only), placed like the labels
     const pts = [];
-    for (const n of internals) {
+    for (const n of valueNodes) {
       if ((!n.parent && !(L === 'rect' && stub > 0)) || !(stv(n, 'nlv') ?? true)) continue;
       const v = parseFloat(nodeLabelText(n, S)); if (Number.isFinite(v)) pts.push([n, v]);
     }
@@ -5156,7 +5215,7 @@ function renderOnce() {
       nlabLeg = { lo, hi, rOf, title: src.startsWith('meta:') ? src.slice(5) : ({ 'ts:median': 'Age (median)', 'ts:mean': 'Age (mean)', 'ts:freq': 'Clade frequency (%)', part2: 'Second value', names: 'Node value' })[src] || src };
     }
   } else if (nodeLabelSrc(S) || internals.some(n => stv(n, 'nlv'))) {
-    for (const n of internals) {
+    for (const n of valueNodes) {
       if ((!n.parent && !(L === 'rect' && stub > 0)) || !(stv(n, 'nlv') ?? !!nodeLabelSrc(S))) continue;
       if (stackedNodes.has(n.id)) continue;   // already written after the support (a / b)
       const txt = nodeLabelText(n, S); if (txt == null) continue;
@@ -5593,7 +5652,7 @@ function renderOnce() {
       lc: stv(n, 'barC') || (S.barColorBy === 'branch' ? n._ec || S.lineColor : S.barColor || '#1F1F1F')   // the names: the bar color given by hand, else the branches or the one color
     });
     const opts = new Map(labeled.map(n => [n, bOpt(n)]));
-    for (const n of labeled) { const o = opts.get(n); o.tw = measure(n.cladeLabel, o.fs, fam, o.it, o.bold); o.tc = stv(n, 'barTC') || o.lc; }
+    for (const n of labeled) { const o = opts.get(n); o.tw = nameWidth(n.cladeLabel, o.fs, fam, o.it, o.bold, false); o.tc = stv(n, 'barTC') || o.lc; }
     const step = maxOf(labeled.map(n => { const o = opts.get(n); return o.w + Math.max(0, o.tgap) + o.tw; })) + 14;
     if (layered && dPlot && isFinite(barsReach)) sideW.bar = Math.max(sideW.bar || 0, barsReach - layerAt('bar'));
     const cladeFloor = layered && layerAt('clade') > sideBase + 1e-6 ? layerAt('clade') : -Infinity;   // the layers before the clade names
@@ -5688,7 +5747,7 @@ function renderOnce() {
         barGeo.set(n.id, { d, w: o.w, td, th: o.fs * 1.3 });
         valHits.push(barHit + `<path class="hit" d="${td}" stroke-width="${f2(o.fs * 1.3)}" data-id="${n.id}" data-kind="bar"/>`);
       } else {
-        anL.push(`<text transform="${t}" text-anchor="${anchor}" dominant-baseline="central" ${sty}>${esc(n.cladeLabel)}</text>`);
+        anL.push(`<text transform="${t}" text-anchor="${anchor}" dominant-baseline="central" ${sty}>${nameSvg(n.cladeLabel, !!opts.get(n).it, false)}</text>`);
         const rx = anchor === 'end' ? -o.tw - 2 : -2;
         barGeo.set(n.id, { d, w: o.w, t, x: rx, y: -o.fs * 0.65, tw: o.tw + 4, h: o.fs * 1.3 });
         valHits.push(barHit + `<rect class="hitlabel" transform="${t}" x="${f2(rx)}" y="${f2(-o.fs * 0.65)}" width="${f2(o.tw + 4)}" height="${f2(o.fs * 1.3)}" data-id="${n.id}" data-kind="bar"/>`);
@@ -5996,7 +6055,7 @@ function renderOnce() {
     let y = 0, w = 0;
     const title = lgText(b.key, 'title', b.title);
     legendAuto[b.key] = { title: b.title, entries: (b.entries || []).map(e => e.text), gradient: !!b.gradient };
-    if (title) { out.push(`<text x="0" y="0" dominant-baseline="hanging" font-size="${f2(tfs)}"${tbold ? ' font-weight="bold"' : ''}${ff}>${esc(title)}</text>`); w = Math.max(w, measure(title, tfs, fam, false, tbold)); y += tfs * 1.25 + rg; }
+    if (title) { out.push(`<text x="0" y="0" dominant-baseline="hanging" font-size="${f2(tfs)}"${tbold ? ' font-weight="bold"' : ''}${ff}>${nameSvg(title, false, false)}</text>`); w = Math.max(w, nameWidth(title, tfs, fam, false, tbold, false)); y += tfs * 1.25 + rg; }
     if (b.gradient) {
       const g = b.gradient, W = 140 * sc, H = 10 * sc, id = 'lgGrad_' + b.key;
       const stops = g.stops.map((c, i) => `<stop offset="${f2(i / (g.stops.length - 1))}" stop-color="${c}"/>`).join('');
@@ -6015,8 +6074,8 @@ function renderOnce() {
         else if (e.sym.t === 'circle') out.push(`<circle cx="${f2(sx0)}" cy="${f2(cy)}" r="${f2(e.sym.r * sc)}" fill="${e.sym.fill}"${e.sym.stroke || ''}/>`);
         else out.push(`<rect x="${f2(sx0 - 5 * sc)}" y="${f2(cy - 4 * sc)}" width="${f2(10 * sc)}" height="${f2(8 * sc)}" rx="${f2(2 * sc)}" fill="${e.sym.fill}"${e.sym.stroke || ''}/>`);
         const txt = lgText(b.key, i, numTxt(e.text));
-        out.push(`<text x="${f2(symW + gap)}" y="${f2(cy)}" dominant-baseline="central" font-size="${f2(lfs)}"${ff}>${esc(txt)}</text>`);
-        w = Math.max(w, symW + gap + measure(txt, lfs, fam, false, false));
+        out.push(`<text x="${f2(symW + gap)}" y="${f2(cy)}" dominant-baseline="central" font-size="${f2(lfs)}"${ff}>${nameSvg(txt, false, false)}</text>`);
+        w = Math.max(w, symW + gap + nameWidth(txt, lfs, fam, false, false, false));
         y += rowH + rg;
       });
       y -= rg;
@@ -6487,7 +6546,7 @@ const SUP_META = ['posterior', 'prob', 'prob(percent)', 'PP', 'pp', 'support', '
 // Support written in the tree: a numeric label (first number of 98/1.00) or an annotation (posterior, prob,
 // bootstrap...).
 const treeSup = n => {
-  if (isSupport(n.name)) return parseFloat(n.name);
+  if (isSupport(n.name)) { const v = supFirst(n.name); if (Number.isFinite(v)) return v; }   // -/0.95: no support from the first analysis, so none from the name
   if (!n.meta) return null;
   for (const k of SUP_META) { const v = n.meta[k]; const x = typeof v === 'number' ? v : typeof v === 'string' ? parseFloat(v) : NaN; if (Number.isFinite(x)) return k === 'prob(percent)' ? x / 100 : x; }
   return null;
@@ -6507,7 +6566,7 @@ function nodeLabelSrc(S) { const v = S.nlabSrc || ''; return v === 'anc' && !sma
 function nodeLabelText(n, S = settings) {
   const src = nodeLabelSrc(S); if (!src) return null;
   if (src === 'names') return n.name && !isSupport(n.name) ? disp(nm(n)) : null;
-  if (src === 'part2') { const p = isSupport(n.name) ? String(n.name).split('/') : []; return p.length > 1 ? p[1] : null; }
+  if (src === 'part2') { const p = isSupport(n.name) ? supParts(n.name) : []; return p.length > 1 ? p[1] : null; }
   if (src.startsWith('ts:')) {
     const c = treeSet && ancKeys && treeSet.clades.get(ancKeys.get(n)); if (!c) return null;
     const f = x => (+x.toFixed(S.ancLabelDec)).toString(), ag = c.ages || [];
@@ -6529,7 +6588,7 @@ function metaKeys(t) { const ks = new Set(); if (t) walkAll(t, x => { if (x.meta
 // True when a node shows its support under the current threshold or ranges.
 function supportPasses(n) {
   const S = settings, v = supValue(n); if (v == null) return false;
-  let mx = 100; if (!supFromSmap()) { mx = 0; walkAll(tree, x => { if (x.children.length && isSupport(x.name)) mx = Math.max(mx, parseFloat(x.name)); }); }
+  let mx = 100; if (!supFromSmap()) { mx = 0; walkAll(tree, x => { if (x.children.length && isSupport(x.name) && Number.isFinite(supFirst(x.name))) mx = Math.max(mx, supFirst(x.name)); }); }
   const vp = mx <= 1 ? v * 100 : v;
   if (S.supportScheme === 'categories') return !!catFor(vp, S.supportCats || [], S.supportLowIn !== false);
   return vp >= S.supportThreshold;
@@ -9409,6 +9468,43 @@ svg.addEventListener('pointerleave', hideHover);
 svg.addEventListener('pointerdown', hideHover, true);
 svg.addEventListener('wheel', hideHover, { passive: true });
 
+/* ================= Editing a text in place with a double click =================
+   The texts that the right-click menu renames (tip names, the name of a collapsed clade, the name or support of a node,
+   a branch length, a clade name) can also be written right where they are: a double click opens a box over the text,
+   and Enter or clicking elsewhere keeps the change, as the menu would; Esc leaves it as it was. */
+function inlineEditText(el, value, commit) {
+  const r = el.getBoundingClientRect(), box = document.createElement('input');
+  box.type = 'text'; box.value = value; box.className = 'inlineedit';
+  const fs = Math.max(11, Math.min(28, r.height * 0.8));
+  Object.assign(box.style, { position: 'fixed', left: `${Math.round(r.left) - 3}px`, top: `${Math.round(r.top + r.height / 2 - fs * 0.85)}px`, width: `${Math.round(Math.max(r.width + 60, 120))}px`, height: `${Math.round(fs * 1.7)}px`, fontSize: `${Math.round(fs)}px`, zIndex: 60 });
+  document.body.appendChild(box); box.focus(); box.select();
+  let done = false;
+  const finish = keep => { if (done) return; done = true; const v = box.value.trim(); box.remove(); if (keep && v !== String(value)) commit(v); };
+  box.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); finish(true); } else if (e.key === 'Escape') { e.preventDefault(); finish(false); } });
+  box.addEventListener('blur', () => finish(true));
+}
+svg.addEventListener('dblclick', e => {
+  // the first click redraws the tree (it selects), so the element under the pointer now, not the target of the event
+  const at = document.elementFromPoint(e.clientX, e.clientY), h = (at && at.closest && at.closest('[data-id][data-kind]')) || (e.target.closest && e.target.closest('[data-id][data-kind]')); if (!h) return;
+  const n = nodeById.get(+h.dataset.id), kind = h.dataset.kind; if (!n) return;
+  let value, set, msg;
+  if (kind === 'label' && n.collapsed && n.children.length) {   // the name shown: one given to it, else the name of the node, else the number of tips
+    value = stv(n, 'tl') || (n.name && !isSupport(n.name) ? nm(n) : `${leafCount(n)} tips`); set = v => { n.st = n.st || {}; if (v) n.st.tl = v; else delete n.st.tl; if (!Object.keys(n.st).length) n.st = null; }; msg = 'Name of the collapsed clade changed'; }
+  else if (kind === 'label' && !n.children.length) { value = nm(n); set = v => { n.label = v && v !== n.name ? v : null; }; msg = 'Name changed'; }   // a tip keeps its original name for its data
+  else if (kind === 'support' && supSource() !== 'tree') { toast('These supports are counted from the tree set or the SIMMAP, so they cannot be written by hand'); return; }
+  else if (kind === 'label' || kind === 'support') {   // the name of the node: a number there is its support, over the annotations
+    const shown = kind === 'support' && !n.name ? treeSup(n) : null;
+    value = n.name || (shown != null ? String(+shown.toPrecision(6)) : ''); set = v => { n.name = v; }; msg = 'Value changed';
+  }
+  else if (kind === 'length') { value = n.len ?? ''; set = v => { n.len = v === '' ? null : parseFloat(v); }; msg = 'Branch length changed'; }
+  else if (kind === 'bar') { value = n.cladeLabel || ''; set = v => { n.cladeLabel = v || null; }; msg = 'Clade name changed'; }
+  else return;
+  e.preventDefault(); e.stopPropagation(); if (typeof closePop === 'function') closePop();
+  inlineEditText(h, value, v => {
+    if (kind === 'length' && v !== '' && isNaN(parseFloat(v))) { toast('Enter a number, or leave it empty'); return; }
+    mutate(() => set(v), msg);
+  });
+});
 /* ================= Rename tips from a file with two columns: old name, new name ================= */
 function renameFromText(text) {
   const rows = String(text).split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => l.split(/\t|;|,/).map(c => c.trim().replace(/^"|"$/g, '')));
@@ -9899,13 +9995,13 @@ async function loadTutorial() {
   const key = `tree2go-tutorial-${t.lang}-${t.name}`;
   let cached = null; try { cached = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { }
   box.innerHTML = cached && cached.html ? cached.html : '<p class="hint">Loading…</p>';
-  if (cached && cached.html) helpTitleFromBody();
+  if (cached && cached.html) { helpTitleFromBody(); buildTutNav(); }
   const file = `${t.lang}/${t.name}.md`, web = /^https?:/.test(location.protocol);
   const got = await fetchFirst(web ? [`content/vignettes/${file}`, TUT_RAW + file] : [TUT_RAW + file, `content/vignettes/${file}`]);
   if (tutorialOfHash() && (tutorialOfHash().lang !== t.lang || tutorialOfHash().name !== t.name)) return;   // another one was asked for meanwhile
   if (got) {
     const html = cleanAbout(mdToHtml(got.text, got.base));
-    box.innerHTML = html; helpTitleFromBody();
+    box.innerHTML = html; helpTitleFromBody(); buildTutNav();
     try { localStorage.setItem(key, JSON.stringify({ html, saved: new Date().toISOString() })); } catch (e) { }
   } else if (!(cached && cached.html)) {
     const en = t.lang !== 'en' ? ` <a href="${page}#tutorial/en/${esc(t.name)}">Read it in English</a>.` : '';
@@ -9925,6 +10021,31 @@ window.addEventListener('hashchange', () => {
   if (!document.body.classList.contains('tutpage')) return;
   if (TUT_RE.test(location.hash)) loadTutorial(); else location.reload();
 });
+// The index of a tutorial: its sections, on the left, fixed while the page scrolls. A click scrolls to the section,
+// and the section being read is marked as the page moves.
+function buildTutNav() {
+  let nav = document.querySelector('.tutnav');
+  if (!nav) { nav = document.createElement('nav'); nav.className = 'tutnav'; nav.setAttribute('aria-label', 'Sections of the tutorial'); $('helpModal').prepend(nav); }   // inside the window: on its own page, the rest of the body is hidden
+  const hs = [...$('helpBody').querySelectorAll('h2')];
+  hs.forEach((h, i) => { if (!h.id) h.id = 'tut-sec-' + (i + 1); });
+  nav.innerHTML = `<div class="tutnavtitle">${esc($('helpTitle').textContent)}</div>` + hs.map(h => `<a href="#" data-to="${esc(h.id)}">${esc(h.textContent)}</a>`).join('');
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const h = document.getElementById(a.dataset.to); if (h) h.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  document.body.classList.toggle('hasnav', hs.length > 1);
+  tutSpy();
+}
+function tutSpy() {
+  const nav = document.querySelector('.tutnav'); if (!nav || !document.body.classList.contains('tutpage')) return;
+  const hs = [...$('helpBody').querySelectorAll('h2')]; if (!hs.length) return;
+  let cur = hs[0];
+  for (const h of hs) if (h.getBoundingClientRect().top <= 90) cur = h;
+  if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) cur = hs[hs.length - 1];   // at the bottom: the last section
+  nav.querySelectorAll('a').forEach(a => {
+    const on = a.dataset.to === cur.id;
+    if (on && !a.classList.contains('on')) { a.classList.add('on'); a.scrollIntoView({ block: 'nearest' }); } else if (!on) a.classList.remove('on');
+  });
+}
+let tutSpyQ = false;
+window.addEventListener('scroll', () => { if (tutSpyQ) return; tutSpyQ = true; requestAnimationFrame(() => { tutSpyQ = false; tutSpy(); }); }, { passive: true });
 // The first # title of the file becomes the title of the window (and leaves the text, so it is not shown twice).
 function helpTitleFromBody() {
   const box = $('helpBody'), h = box.firstElementChild;
@@ -10316,8 +10437,8 @@ function kdeSvg(k) {
 // ---- free text labels: an image the app writes from m.txt, so they move, align and show guides like any image
 const TXT_DEF = { text: 'Label', size: 14, color: '#1f1f1f', bold: false, italic: false, font: '' };
 function txtSvg(t) {
-  const fam = t.font || settings.fontFamily, w = Math.max(4, measure(t.text || ' ', t.size, fam, t.italic, t.bold)) + 4, h = t.size * 1.3;
-  return { w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${f2(w)}" height="${f2(h)}" viewBox="0 0 ${f2(w)} ${f2(h)}"><text x="2" y="${f2(h * 0.5)}" dominant-baseline="central" font-size="${t.size}" font-family="${esc(fam)}" fill="${t.color}"${t.bold ? ' font-weight="bold"' : ''}${t.italic ? ' font-style="italic"' : ''}>${esc(t.text || '')}</text></svg>` };
+  const fam = t.font || settings.fontFamily, w = Math.max(4, nameWidth(t.text || ' ', t.size, fam, t.italic, t.bold, false)) + 4, h = t.size * 1.3;
+  return { w, h, svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${f2(w)}" height="${f2(h)}" viewBox="0 0 ${f2(w)} ${f2(h)}"><text x="2" y="${f2(h * 0.5)}" dominant-baseline="central" font-size="${t.size}" font-family="${esc(fam)}" fill="${t.color}"${t.bold ? ' font-weight="bold"' : ''}${t.italic ? ' font-style="italic"' : ''}>${nameSvg(t.text || '', !!t.italic, false)}</text></svg>` };
 }
 // The drawing of an item the app makes itself: a density plot or a text label.
 const itemSvg = m => m.geo ? geoSvg(m) : m.kde ? kdeSvg(m.kde) : m.ltt ? lttSvg(m.ltt, m) : m.txt ? txtSvg(m.txt).svg : null;
@@ -10638,7 +10759,7 @@ function treeStats() {
     add('Shape', 'Sackin index (normalized)', fmtS(sMax > sMin ? (sackin - sMin) / (sMax - sMin) : 0), 'The sum of the nodes between each tip and the root, between its smallest (balanced) and largest (ladder-like) possible values: 0 balanced, 1 for a ladder-like tree');
   } else if (n > 2) add('Shape', 'Colless and Sackin (normalized)', '\u2013', 'They need a fully bifurcating tree: resolve its polytomies first');
   // support values
-  const sup = I.filter(x => x.parent && isSupport(x.name)).map(x => parseFloat(String(x.name).split('/')[0])).filter(Number.isFinite);
+  const sup = I.filter(x => x.parent && isSupport(x.name)).map(x => supFirst(x.name)).filter(Number.isFinite);
   if (sup.length) {
     const prob = maxOf(sup) <= 1, thr = prob ? 0.95 : 70, hi = sup.filter(v => v >= thr).length;
     add('Support values', 'Nodes with a value', sup.length);
