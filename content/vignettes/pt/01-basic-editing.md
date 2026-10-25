@@ -43,9 +43,9 @@ Se o arquivo tiver mais de 10.000 árvores, uma janela se abre antes de lê-las 
 - *Keep*: quantas árvores manter depois do burn-in, como número ou como porcentagem.
 - *Which trees*: se as árvores mantidas são espaçadas uniformemente ou escolhidas ao acaso (com uma semente, para que a mesma amostra possa ser obtida de novo).
 
-A mesma janela se abre quando você escolhe vários arquivos de árvores de uma vez, como os arquivos `.t` das corridas de uma análise do MrBayes. Nesse caso, o tree2go os lê como um único conjunto de árvores: o burn-in é aplicado a cada corrida, o mesmo número de árvores é mantido de cada uma, e as árvores mantidas são combinadas. Depois, na seção **Tree**, você pode escolher quais corridas usar (*Runs used*) e ver o quanto elas concordam (ASDSF).
+A mesma janela se abre quando você escolhe vários arquivos de árvores de uma vez, como os arquivos `.t` das corridas de uma análise do MrBayes. Nesse caso, o tree2go os lê como um único conjunto de árvores, o burn-in é aplicado a cada corrida, o mesmo número de árvores é mantido de cada uma, e as árvores mantidas são combinadas. Depois, na seção **Tree**, você pode escolher quais corridas usar (*Runs used*) e ver o quanto elas concordam (ASDSF).
 
-O tree2go também verifica a estrutura das anotações das árvores ao ler um arquivo. Quando chaves ou colchetes não estão pareados, o que pode acontecer quando um arquivo passa por vários programas, o app detecta isso na maioria dos casos e oferece repará-lo (Fig. 1B). É um problema real que costuma passar despercebido, já que o arquivo abre mesmo assim, mas que prejudica silenciosamente os cálculos e gráficos que dependem dessas anotações. O tree2go repara apenas a estrutura das anotações: ele não pode recuperar valores que outros programas perderam ou alteraram.
+O tree2go também verifica a estrutura das anotações das árvores ao ler um arquivo. Quando chaves ou colchetes não estão pareados, o que pode acontecer quando um arquivo passa por vários programas, o app detecta isso na maioria dos casos e oferece repará-lo (Fig. 1B). É um problema real que costuma passar despercebido, já que o arquivo abre mesmo assim, mas que prejudica silenciosamente os cálculos e gráficos que dependem dessas anotações. O tree2go repara apenas a estrutura das anotações, ele não pode recuperar valores que outros programas perderam ou alteraram.
 
 <figure class="vfig pair">
   <div class="vrow">
@@ -100,7 +100,7 @@ Embora não a usemos na figura final, a seção **Tree cloud** desenha todas as 
 
 A seção **Branches** define a aparência de todos os ramos. Em árvores com espécies vivas e extintas, os ramos dos terminais extintos são tracejados por padrão, e seus nomes levam uma adaga (†). Para mudar isso apenas em alguns ramos, selecione-os com `Shift` + clique e mude sua aparência pelo menu de `Right-click`. Em árvores apenas de espécies extintas, ou em árvores não calibradas no tempo, todos os ramos são contínuos por padrão.
 
-As subseções **Color by data** e **Width by data** colorem os ramos, ou mudam sua espessura, de acordo com qualquer valor da árvore (Fig. 5A): suas próprias anotações ou uma tabela anexada na seção **Attachments**. As cores podem ser escolhidas uma a uma (`Custom colors`) ou tiradas de uma paleta, várias das quais são seguras para daltonismo.
+As subseções **Color by data** e **Width by data** colorem os ramos, ou mudam sua espessura, de acordo com qualquer valor da árvore (Fig. 5A), suas próprias anotações ou uma tabela anexada na seção **Attachments**. As cores podem ser escolhidas uma a uma (`Custom colors`) ou tiradas de uma paleta, várias das quais são seguras para daltonismo.
 
 No nosso exemplo, definimos **Branches** > *Line width* como `1.5` px e, em **Color by data**, colorimos os ramos por `rate_median`, que aqui representa uma taxa de evolução morfológica de uma análise bayesiana, com a paleta `Magma` (Fig. 5B).
 
@@ -111,7 +111,7 @@ No nosso exemplo, definimos **Branches** > *Line width* como `1.5` px e, em **Co
   </div>
 </figure>
 
-> **Nota.** A paleta de toda a sessão é definida em `Page settings`, no cabeçalho. Ela muda as cores oferecidas a partir de então, mas não as que já foram dadas aos elementos. O mesmo menu tem `Page settings` > *Color blind preview*, que mostra a figura como seria vista com diferentes deficiências na visão de cores. Ela muda apenas o que você vê na tela: a figura mantém suas cores quando você volta à visão normal ou a exporta.
+> **Nota.** A paleta de toda a sessão é definida em `Page settings`, no cabeçalho. Ela muda as cores oferecidas a partir de então, mas não as que já foram dadas aos elementos. O mesmo menu tem `Page settings` > *Color blind preview*, que mostra a figura como seria vista com diferentes deficiências na visão de cores. Ela muda apenas o que você vê na tela, a figura mantém suas cores quando você volta à visão normal ou a exporta.
 
 ## 6. Valores, nós e sua incerteza
 
@@ -169,7 +169,7 @@ A seção **Tip labels** define a aparência e a posição dos nomes dos termina
 
 Como mencionado antes, o tree2go reconhece automaticamente o tipo de árvore, e com ele os ramos que pertencem a fósseis. Mas, olhando com mais atenção o nosso exemplo, vemos que *Mammuthus primigenius* (mamute-lanoso) e *Smilodon fatalis* (tigre-dente-de-sabre) não têm nem o ramo tracejado nem a adaga que os marca como fósseis. Isso não é um erro, mas uma questão da escala da árvore.
 
-Para distinguir fósseis de espécies vivas, o tree2go admite uma pequena tolerância: terminais que acabam a menos de 0,5% da altura da árvore em relação ao presente ainda contam como vivos, para que o arredondamento dos comprimentos de ramo não transforme espécies vivas em fósseis. Em uma árvore que abrange mais de 450 milhões de anos, como a nossa, esses 0,5% equivalem a mais de dois milhões de anos, e ambas as espécies se extinguiram há apenas cerca de 12.000 anos. A solução é simples: reduzimos **Fossils** > *Tolerance (% of the tree height)* a um valor muito pequeno, como `0.001` (Fig. 10A–B).
+Para distinguir fósseis de espécies vivas, o tree2go admite uma pequena tolerância, terminais que acabam a menos de 0,5% da altura da árvore em relação ao presente ainda contam como vivos, para que o arredondamento dos comprimentos de ramo não transforme espécies vivas em fósseis. Em uma árvore que abrange mais de 450 milhões de anos, como a nossa, esses 0,5% equivalem a mais de dois milhões de anos, e ambas as espécies se extinguiram há apenas cerca de 12.000 anos. A solução é simples, reduzimos **Fossils** > *Tolerance (% of the tree height)* a um valor muito pequeno, como `0.001` (Fig. 10A–B).
 
 <figure class="vfig pair">
   <div class="vrow">
@@ -250,7 +250,7 @@ Para manter nossa árvore estilizada como está, primeiro a copiamos para uma no
   <figcaption><b>Figura 15.</b> Copiando a árvore para uma nova aba.</figcaption>
 </figure>
 
-Para renomear a nova aba, clique duas vezes no seu nome. Depois, na seção **Attachments**, clique em `Add file` e escolha `vertebrates_habitat.simmap`. Os nós da árvore se transformam imediatamente em gráficos de pizza. Sua aparência é definida na seção **Ancestral reconstructions** (Fig. 16A), onde os ramos também podem ser coloridos por estado com **Ancestral reconstructions** > *Color the branches*: pelo estado de máximo a posteriori, pelos estados mais prováveis acima de um limiar, ou como um degradê de probabilidade. Como as pizzas ocupam o lugar dos pontos dos nós, seu tamanho e sua borda são definidos na seção **Nodes**, como os de qualquer outro ponto.
+Para renomear a nova aba, clique duas vezes no seu nome. Depois, na seção **Attachments**, clique em `Add file` e escolha `vertebrates_habitat.simmap`. Os nós da árvore se transformam imediatamente em gráficos de pizza. Sua aparência é definida na seção **Ancestral reconstructions** (Fig. 16A), onde os ramos também podem ser coloridos por estado com **Ancestral reconstructions** > *Color the branches*, pelo estado de máximo a posteriori, pelos estados mais prováveis acima de um limiar, ou como um degradê de probabilidade. Como as pizzas ocupam o lugar dos pontos dos nós, seu tamanho e sua borda são definidos na seção **Nodes**, como os de qualquer outro ponto.
 
 <figure class="vfig pair">
   <div class="vrow">
@@ -347,14 +347,14 @@ Como as legendas, eles podem ser movidos para qualquer lugar, com guias e distâ
 
 ## 17. Tanglegrama
 
-Os tanglegramas são outra figura comum em filogenética comparada: duas árvores frente a frente, geralmente com topologias alternativas, com linhas que ligam seus terminais correspondentes. Na seção **Tanglegram**, a segunda árvore pode ser qualquer árvore do conjunto (`Open a tree of the set`) ou uma árvore de um arquivo (`Load a tree file in a new tab`). Aqui carregamos `vertebrates_alternative.nwk` (Fig. 23).
+Os tanglegramas são outra figura comum em filogenética comparada, duas árvores frente a frente, geralmente com topologias alternativas, com linhas que ligam seus terminais correspondentes. Na seção **Tanglegram**, a segunda árvore pode ser qualquer árvore do conjunto (`Open a tree of the set`) ou uma árvore de um arquivo (`Load a tree file in a new tab`). Aqui carregamos `vertebrates_alternative.nwk` (Fig. 23).
 
 <figure class="vfig">
   <img src="../../img/vignettes/basic-editing/fig23-canvas.png" alt="A árvore principal e a árvore alternativa frente a frente, com linhas que ligam as mesmas espécies">
   <figcaption><b>Figura 23.</b> Um tanglegrama da árvore principal e de uma árvore com uma topologia alternativa.</figcaption>
 </figure>
 
-A segunda árvore se abre em uma aba própria, e é desenhada com a aparência dessa aba: o alinhamento dos nomes, as cores dos ramos e os destaques são definidos ali, como em qualquer outra árvore. Da árvore principal ela recebe apenas o tamanho: seus terminais se distribuem na mesma altura, e sua largura é a mesma, a menos que se defina outra em **Tanglegram** > *Width (0 as this tree)*. Com **Tanglegram** > *Join the highlights of the same clade*, os destaques de um clado nas duas árvores são ligados entre si. A ordem dos seus ramos é própria, e para que as linhas se cruzem o mínimo possível, a árvore principal oferece `Untangle (turn the second tree)`, que gira apenas os nós da segunda árvore, e `Untangle both`, que gira os nós das duas árvores.
+A segunda árvore se abre em uma aba própria, e é desenhada com a aparência dessa aba, o alinhamento dos nomes, as cores dos ramos e os destaques são definidos ali, como em qualquer outra árvore. Da árvore principal ela recebe apenas o tamanho, seus terminais se distribuem na mesma altura, e sua largura é a mesma, a menos que se defina outra em **Tanglegram** > *Width (0 as this tree)*. Com **Tanglegram** > *Join the highlights of the same clade*, os destaques de um clado nas duas árvores são ligados entre si. A ordem dos seus ramos é própria, e para que as linhas se cruzem o mínimo possível, a árvore principal oferece `Untangle (turn the second tree)`, que gira apenas os nós da segunda árvore, e `Untangle both`, que gira os nós das duas árvores.
 
 ## 18. Salvar e exportar
 
@@ -382,6 +382,6 @@ O tree2go reconhece as reticulações, e o tipo de cada uma, a partir do seu ró
   </div>
 </figure>
 
-As reticulações são desenhadas como linhas tracejadas da linhagem doadora até o nó híbrido. Por padrão, uma seta aponta do doador para o receptor (*Arrows* > `To hybrid`), mas também pode apontar no sentido contrário, nos dois sentidos ou não aparecer. Com *Show a value on each line*, cada linha mostra seu γ, e com *Width from γ*, sua espessura o acompanha. *Where on the branches* define onde cada linha começa e termina: `Centered` as coloca no meio dos ramos, enquanto `Lengths` usa as idades escritas no arquivo. Como qualquer outro elemento, cada linha pode ser selecionada com um clique e mudada separadamente pelo seu menu de `Right-click`.
+As reticulações são desenhadas como linhas tracejadas da linhagem doadora até o nó híbrido. Por padrão, uma seta aponta do doador para o receptor (*Arrows* > `To hybrid`), mas também pode apontar no sentido contrário, nos dois sentidos ou não aparecer. Com *Show a value on each line*, cada linha mostra seu γ, e com *Width from γ*, sua espessura o acompanha. *Where on the branches* define onde cada linha começa e termina, `Centered` as coloca no meio dos ramos, enquanto `Lengths` usa as idades escritas no arquivo. Como qualquer outro elemento, cada linha pode ser selecionada com um clique e mudada separadamente pelo seu menu de `Right-click`.
 
 Por fim, *Style* alterna entre duas vistas da mesma rede. `Major tree` desenha a árvore das arestas principais, as que levam a maior parte do genoma, com cada aresta secundária como uma linha a partir do seu doador (Fig. 24A), enquanto `Full network` dá a cada nó híbrido um ponto próprio, onde suas duas arestas parentais se encontram (Fig. 24B).

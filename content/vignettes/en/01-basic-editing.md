@@ -43,9 +43,9 @@ If the file holds more than 10,000 trees, a window opens before reading them (Fi
 - *Keep*: how many trees to keep after the burn-in, as a number or a percentage.
 - *Which trees*: whether the trees kept are evenly spaced or picked at random (with a seed, so that the same sample can be drawn again).
 
-The same window opens when you choose several files of trees at once, such as the `.t` files of the runs of one MrBayes analysis. In that case, tree2go reads them as a single tree set: the burn-in is applied to each run, the same number of trees is kept from each, and the trees kept are combined. Later, in the **Tree** section, you can choose which runs to use (*Runs used*) and see how well they agree (ASDSF).
+The same window opens when you choose several files of trees at once, such as the `.t` files of the runs of one MrBayes analysis. In that case, tree2go reads them as a single tree set, the burn-in is applied to each run, the same number of trees is kept from each, and the trees kept are combined. Later, in the **Tree** section, you can choose which runs to use (*Runs used*) and see how well they agree (ASDSF).
 
-tree2go also checks the structure of the annotations of the trees when reading a file. When braces or brackets do not pair, which can happen when a file goes through several programs, the app detects it in most cases and offers to repair it (Fig. 1B). This is a real problem that usually goes unnoticed, since the file still opens, but it silently breaks the calculations and plots that rely on those annotations. tree2go repairs only the structure of the annotations: it cannot recover values that other programs lost or changed.
+tree2go also checks the structure of the annotations of the trees when reading a file. When braces or brackets do not pair, which can happen when a file goes through several programs, the app detects it in most cases and offers to repair it (Fig. 1B). This is a real problem that usually goes unnoticed, since the file still opens, but it silently breaks the calculations and plots that rely on those annotations. tree2go repairs only the structure of the annotations, it cannot recover values that other programs lost or changed.
 
 <figure class="vfig pair">
   <div class="vrow">
@@ -100,7 +100,7 @@ Although we do not use it in the final figure, the **Tree cloud** section draws 
 
 The **Branches** section sets the look of every branch. In trees with both living and extinct species, the branches of extinct tips are dashed by default, and their names carry a dagger (†). To change this for some branches only, select them with `Shift` + click and change their look from their `Right-click` menu. In trees of extinct species only, or in trees not calibrated in time, all branches are solid by default.
 
-The **Color by data** and **Width by data** subsections color the branches, or change their width, according to any value of the tree (Fig. 5A): its own annotations, or a table attached in the **Attachments** section. The colors can be chosen one by one (`Custom colors`) or taken from a palette, several of which are safe for color blindness.
+The **Color by data** and **Width by data** subsections color the branches, or change their width, according to any value of the tree (Fig. 5A), its own annotations, or a table attached in the **Attachments** section. The colors can be chosen one by one (`Custom colors`) or taken from a palette, several of which are safe for color blindness.
 
 In our example, we set **Branches** > *Line width* to `1.5` px and, in **Color by data**, color the branches by `rate_median`, which here stands for a rate of morphological evolution from a Bayesian analysis, with the `Magma` palette (Fig. 5B).
 
@@ -111,7 +111,7 @@ In our example, we set **Branches** > *Line width* to `1.5` px and, in **Color b
   </div>
 </figure>
 
-> **Note.** The palette of the whole session is set in `Page settings`, in the header. It changes the colors offered from then on, but not the ones already given to elements. The same menu has `Page settings` > *Color blind preview*, which shows the figure as seen with different color vision deficiencies. It only changes what you see on screen: the figure keeps its colors when you go back to normal vision or export it.
+> **Note.** The palette of the whole session is set in `Page settings`, in the header. It changes the colors offered from then on, but not the ones already given to elements. The same menu has `Page settings` > *Color blind preview*, which shows the figure as seen with different color vision deficiencies. It only changes what you see on screen, the figure keeps its colors when you go back to normal vision or export it.
 
 ## 6. Values, nodes and their uncertainty
 
@@ -169,7 +169,7 @@ The **Tip labels** section sets the look and position of the tip names. Here we 
 
 As mentioned before, tree2go recognizes the kind of tree automatically, and with it the branches that belong to fossils. But a closer look at our example shows that *Mammuthus primigenius* (woolly mammoth) and *Smilodon fatalis* (saber-toothed cat) have neither a dashed branch nor the dagger that marks them as fossils. This is not an error, but a matter of the scale of the tree.
 
-To tell fossils from living species, tree2go allows a small tolerance: tips that end within 0.5% of the tree height from the present still count as living, so that rounded branch lengths do not turn living species into fossils. In a tree that spans more than 450 million years, like ours, that 0.5% is more than two million years, and both species went extinct only about 12,000 years ago. The fix is simple: we lower **Fossils** > *Tolerance (% of the tree height)* to a very small value, such as `0.001` (Fig. 10A–B).
+To tell fossils from living species, tree2go allows a small tolerance, tips that end within 0.5% of the tree height from the present still count as living, so that rounded branch lengths do not turn living species into fossils. In a tree that spans more than 450 million years, like ours, that 0.5% is more than two million years, and both species went extinct only about 12,000 years ago. The fix is simple, we lower **Fossils** > *Tolerance (% of the tree height)* to a very small value, such as `0.001` (Fig. 10A–B).
 
 <figure class="vfig pair">
   <div class="vrow">
@@ -250,7 +250,7 @@ To keep our styled tree as it is, we first copy it to a new tab and start the co
   <figcaption><b>Figure 15.</b> Copying the tree to a new tab.</figcaption>
 </figure>
 
-To rename the new tab, double-click its name. Then, in the **Attachments** section, click `Add file` and choose `vertebrates_habitat.simmap`. The nodes of the tree turn into pie charts right away. Their look is set in the **Ancestral reconstructions** section (Fig. 16A), where the branches can also be colored by state with **Ancestral reconstructions** > *Color the branches*: by the maximum a posteriori state, by the most probable states above a threshold, or as a probability gradient. Since the pies take the place of the node dots, their size and border are set in the **Nodes** section, like any other dot.
+To rename the new tab, double-click its name. Then, in the **Attachments** section, click `Add file` and choose `vertebrates_habitat.simmap`. The nodes of the tree turn into pie charts right away. Their look is set in the **Ancestral reconstructions** section (Fig. 16A), where the branches can also be colored by state with **Ancestral reconstructions** > *Color the branches*, by the maximum a posteriori state, by the most probable states above a threshold, or as a probability gradient. Since the pies take the place of the node dots, their size and border are set in the **Nodes** section, like any other dot.
 
 <figure class="vfig pair">
   <div class="vrow">
@@ -347,14 +347,14 @@ Like legends, they can be moved anywhere, with guides and distances to the eleme
 
 ## 17. Tanglegram
 
-Tanglegrams are another common figure in comparative phylogenetics: two trees face to face, usually with alternative topologies, with lines joining their matching tips. In the **Tanglegram** section, the second tree can be any tree of the set (`Open a tree of the set`) or a tree from a file (`Load a tree file in a new tab`). Here we load `vertebrates_alternative.nwk` (Fig. 23).
+Tanglegrams are another common figure in comparative phylogenetics, two trees face to face, usually with alternative topologies, with lines joining their matching tips. In the **Tanglegram** section, the second tree can be any tree of the set (`Open a tree of the set`) or a tree from a file (`Load a tree file in a new tab`). Here we load `vertebrates_alternative.nwk` (Fig. 23).
 
 <figure class="vfig">
   <img src="../../img/vignettes/basic-editing/fig23-canvas.png" alt="The main tree and the alternative tree face to face, with lines joining the same species">
   <figcaption><b>Figure 23.</b> A tanglegram of the main tree and a tree with an alternative topology.</figcaption>
 </figure>
 
-The second tree opens in a tab of its own, and is drawn with the look of that tab: its alignment of names, branch colors and highlights are set there, as for any other tree. From the main tree it only takes its size: its tips spread over the same height, and its width is the same unless set otherwise in **Tanglegram** > *Width (0 as this tree)*. With **Tanglegram** > *Join the highlights of the same clade*, the highlights of a clade in both trees are joined across. The order of its branches is its own, and to make the lines cross as little as possible, the main tree offers `Untangle (turn the second tree)`, which rotates the nodes of the second tree only, and `Untangle both`, which rotates the nodes of both trees.
+The second tree opens in a tab of its own, and is drawn with the look of that tab, its alignment of names, branch colors and highlights are set there, as for any other tree. From the main tree it only takes its size, its tips spread over the same height, and its width is the same unless set otherwise in **Tanglegram** > *Width (0 as this tree)*. With **Tanglegram** > *Join the highlights of the same clade*, the highlights of a clade in both trees are joined across. The order of its branches is its own, and to make the lines cross as little as possible, the main tree offers `Untangle (turn the second tree)`, which rotates the nodes of the second tree only, and `Untangle both`, which rotates the nodes of both trees.
 
 ## 18. Saving and exporting
 
@@ -382,6 +382,6 @@ tree2go recognizes the reticulations, and the kind of each one, from its label i
   </div>
 </figure>
 
-The reticulations are drawn as dashed lines from the donor lineage to the hybrid node. By default, an arrow points from the donor to the receiver (*Arrows* > `To hybrid`), but it can also point the other way, both ways, or not at all. With *Show a value on each line*, each line shows its γ, and with *Width from γ*, its width follows it. *Where on the branches* sets where each line starts and ends: `Centered` places them in the middle of the branches, while `Lengths` uses the ages written in the file. Like any other element, each line can be selected with a click and changed on its own from its `Right-click` menu.
+The reticulations are drawn as dashed lines from the donor lineage to the hybrid node. By default, an arrow points from the donor to the receiver (*Arrows* > `To hybrid`), but it can also point the other way, both ways, or not at all. With *Show a value on each line*, each line shows its γ, and with *Width from γ*, its width follows it. *Where on the branches* sets where each line starts and ends, `Centered` places them in the middle of the branches, while `Lengths` uses the ages written in the file. Like any other element, each line can be selected with a click and changed on its own from its `Right-click` menu.
 
 Finally, *Style* switches between two views of the same network. `Major tree` draws the tree of the major edges, those that carry most of the genome, with each minor edge as a line from its donor (Fig. 24A), while `Full network` gives each hybrid node a point of its own, where its two parental edges meet (Fig. 24B).

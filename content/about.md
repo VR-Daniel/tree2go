@@ -12,14 +12,6 @@ At just ~980 KB, tree2Go is still less than half the size of DOOM, one of the mo
 
 <p class="signature">Daniel</p>
 
-#### How to use it
-
-Using tree2go is quite straightforward—it only requires a mouse and a bit of creativity. The interface is designed to be fully interactive and as intuitive as possible, with no coding involved. Everything (or almost everything, as far as I can tell) can be edited either at the group level or individually, so there should be very few limitations on the visual style you want to achieve.
-
-The menu on the left contains the main sections for controlling the overall appearance of the tree and its elements. However, by clicking directly on individual items and using the right-click menu, you can access more specific options to customize each one independently.
-
-The tool also supports external resources, such as figures or tables containing species data, which makes it possible to take the visual design even further. However, given the number of customization options, the more complex a figure is, the greater the chance of encountering an unnoticed bug. The integration of modules and features is so extensive that there are inevitably combinations I haven’t even thought to test. As I come across them, I’ll keep fixing them.
-
 #### How to cite
 
 If you use tree2go in a publication, we would appreciate it if you cite it as:
