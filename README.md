@@ -54,8 +54,8 @@ Then click `Open tree` in the **Tree** section of the left panel, or drop a tree
 
 - **[Options reference guide](https://vr-daniel.github.io/tree2go/#reference):** every option of tree2go, grouped as in the app, with what it does, its values and when it appears.
 - **Tutorial on the basic options:** a step-by-step walk from opening a set of trees to exporting the final figure, available in three languages:
-  - 🇬🇧 [English](https://vr-daniel.github.io/tree2go/#tutorial/en/01-basic-editing)
-  - 🇪🇸 [Español](https://vr-daniel.github.io/tree2go/#tutorial/es/01-basic-editing)
+  - 🇺🇸 [English](https://vr-daniel.github.io/tree2go/#tutorial/en/01-basic-editing)
+  - 🇨🇴 [Español](https://vr-daniel.github.io/tree2go/#tutorial/es/01-basic-editing)
   - 🇧🇷 [Português](https://vr-daniel.github.io/tree2go/#tutorial/pt/01-basic-editing)
 
 ## How to cite
