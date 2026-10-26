@@ -537,6 +537,7 @@ body.hastabs .status{top:10px}
 .freeitem .freebox{fill:transparent; stroke:transparent}
 .freeitem:hover .freebox, .freeitem.focus .freebox{fill:rgba(39,64,139,.05); stroke:#27408B}
 .freeitem.unlocked .freebox{cursor:move}
+.freeitem.key .freebox{stroke-width:2.6px; fill:rgba(39,64,139,.09)}   /* the reference for aligning */
 .freelock{cursor:pointer; opacity:0; transition:opacity .12s}
 .freeitem:hover .freelock, .freeitem.focus .freelock{opacity:1}
 .freelock circle{fill:#27408B; stroke:#fff; stroke-width:1.5}
@@ -1367,7 +1368,7 @@ const DEFAULTS = {
   bg: '#ffffff', exportDpi: 300, exportSizeMode: 'natural', exportUnit: 'px', exportWidthVal: 0, title: '', titleSize: 18, titleH: 'left', titleV: 'top', titleDx: 0, titleDy: 0, titleColor: '#1f1f1f', titleBold: true, titleItalic: false,
   dataTables: [], dataActive: null, dataCols: [], dataColors: {}, dataWidth: 150, dataGap: 12, dataThick: 70, dataProp: false, dataValues: false, dataValSize: 9, dataAxis: true, dataLegend: true,
   dataOpacity: 100, dataByClade: false, dataPropFmt: 'fraction', dataMax: null, dataLog: false, dataAxisLabGap: 2, dataAxisW: 0.8, dataAxisTick: 4, dataAxisFs: 9, dataAxisGap: 4, dataAxisColor: '#333333',
-  catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catLegend: true, catCircFit: true, catCircW: null, catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
+  catTable: null, catCols: [], catStyle: {}, catShape: 'square', catSize: 10, catGap: 3, catDist: 12, catOrder: 'after', catAbsent: '#E2E2E2', catAbsentStyle: 'fill', catLegend: true, ancShow: true, ancPieBorder: 'nodes', ancPieBorderColor: '#1f1f1f', ancPieBorderWidth: 1, supportDotBorder: 'none', supportDotBorderColor: '#1f1f1f', supportDotBorderWidth: 1, catCircFit: true, catCircW: null, catCell: {}, catBorderStyle: 'none', catBorderColor: '#1f1f1f', catBorderWidth: 1, catBorderCount: 12,
   catInvert: false, ancOn: true, ancWhere: 'internal', ancColors: {}, ancCollapse: false, ancCollapsePct: 10, ancOtherColor: '#D9D9D9', ancBranch: 'none', ancMinRun: 10, ancDom: 50, ancExcl: 25, ancStripe: 3, ancLegend: true,
   ancLabelOn: false, ancLabelDec: 2, ancLabelSize: 9, ancLabelColor: '#6a6a6a', ancLabelAlign: 'left', ancLabelMargin: 3, ancLabelDy: 2,   /* the same look as the support values */ supportSource: 'tree', dotOpacity: 100, nbarStyle: 'violin', nbarHpdIn: false, nbarHpdLevel: 95, nbarMedian: false, nbarHpdColor: '#1f1f1f', nbarHpdH: 3, nbarMedColor: '#1f1f1f', nbarMedW: 1.5, nbarMedStyle: 'solid', bwdSrc: '', bwdCol: '', bwdMin: 0.5, bwdMax: 5, bwdLog: false, bwdLegend: true, heatTable: '', heatCols: [], heatScale: 'column', heatLow: '#2C7BB6', heatMidOn: true, heatMid: '#FFFFBF', heatHigh: '#D7191C', heatNA: '#E5E5E5', heatNAOff: false, heatCellW: 14, heatH: 0.9, heatColGap: 1, heatGap: 10, heatTitles: true, heatTitleAngle: 60, heatTitleSize: 9, heatTitleColor: '#333333', heatLegend: true, labelSrcTable: '', labelSrcCol: '', paletteName: 'default', cvdSim: 'none', lengthSrc: '', lengthCol: '', saOn: true, saDot: 3, saColor: '#1F1F1F', dotDataSrc: '', dotDataCol: '', dotDataColor: true, dotLow: '#2C7BB6', dotHigh: '#D7191C', dotDataSize: false, dotSizeMin: 2, dotSizeMax: 7, dotDataLegend: true, sup2Src: '', sup2Pos: 'below', sup2Color: '#6a6a6a', saLabelPos: 'above', saLabelAlign: 'right', saLabelDy: 0, nlabStack: 'none', nlabShow: 'number', nlabColorBy: true, nlabLow: '#2C7BB6', nlabHigh: '#D7191C', nlabSizeBy: false, nlabDot: 3.5, nlabSizeMin: 2, nlabSizeMax: 7, nlabLegend: true, netOn: true, netColor: '#C8553D', netWidthBy: true, netWidth: 1.5, netWMin: 0.6, netWMax: 4, netDash: 4, netGap: 3, netArrow: 'end', netShape: 'curved', netCurve: 40, netPos: 'center', netPosT: 50, netLabel: false, netLabelSize: 9, netColorLGT: '#2F5D8C', netColorR: '#7A4E9A', netHead: 8, netLabelColor: '#6a6a6a', netLabelDx: 4, netLabelDy: 3, netLabelSrc: 'gamma', netLabelDec: 2, netStyle: 'major', netLabelMajor: false, netLabelMajorColor: '#6a6a6a', netLabelMajorSize: 9, netLabelMajorDx: 0, netLabelMajorDy: 0, netLabelByType: true, rectOrient: 'horizontal', vertText: 'vertical', scaleTurn: 'tree', arrows: [], supportDec: 'auto', lengthColorBy: 'fixed', supportColorBy: 'fixed', ancLabelColorBy: 'fixed', brcPalette: 'custom', brcRev: false, brcHue: 0, dotPalette: 'custom', dotRev: false, dotHue: 0, nbarMean: false, nbarMeanW: 1.2, nbarMeanStyle: 'dashed', nbarMeanColor: '#C8553D', labelSrcBoth: false, labelSrcDec: 2, tipDotShape: 'circle', nodeDotShape: 'circle', lengthVSrc: '__len', lengthVCol: 'Branch length', lengthVPal: 'viridis', lengthVRev: false, lengthVLow: '#2C7BB6', lengthVMidOn: true, lengthVMid: '#FFFFBF', lengthVHigh: '#D7191C', lengthVLegend: true, supportVSrc: '__len', supportVCol: 'Branch length', supportVPal: 'viridis', supportVRev: false, supportVLow: '#2C7BB6', supportVMidOn: true, supportVMid: '#FFFFBF', supportVHigh: '#D7191C', supportVLegend: true, ancLabelVSrc: '__len', ancLabelVCol: 'Branch length', ancLabelVPal: 'viridis', ancLabelVRev: false, ancLabelVLow: '#2C7BB6', ancLabelVMidOn: true, ancLabelVMid: '#FFFFBF', ancLabelVHigh: '#D7191C', ancLabelVLegend: true, rectAngle: 0, dtOn: false, dtN: 300, dtColor: '#2F5D8C', dtOp: 6, dtW: 0.8, dtPlace: 'back', pieData: null, pieColors: {}, pieOn: false, pieR: 5, pieBorder: 0.5, pieBorderColor: '#333333', pieLegend: true, pieTitle: '', dtMode: 'count', dtPct: 10, dtPick: 'even', dtSeed: 123, alnOn: false, alnFrom: 1, alnTo: 0, alnWidth: 300, alnCell: 100, alnGap: 10, alnBars: 'after', alnRuler: true, alnLetters: true, alnColA: '#5CB85C', alnColC: '#4A86C5', alnColG: '#F0AD4E', alnColT: '#D9534F', alnColN: '#B0B0B0', alnColGap: '#F2F2F2', alnSame: '#C8C8C8', alnDiff: '#1F1F1F', alnRulerPos: 'top', alnRulerStep: 0, alnRulerFs: 8, alnRulerGap: 2, alnRulerTick: 4, alnRulerColor: '#555555', piePos: 'node', ancPos: 'node', alnPick: '', sideOrder: [], sideHidden: {}, alnAaHyd: '#80A0F0', alnAaPos: '#F01505', alnAaNeg: '#C048C0', alnAaPol: '#15C015', alnAaCys: '#F08080', alnAaGly: '#F09048', alnAaPro: '#C0C000', alnAaAro: '#15A4A4', gmProj: 'equalearth', gmTable: '', gmLon: '', gmLat: '', gmShape: 'circle', gmSizeBy: 'fixed', gmSize: 3.5, gmSizeMin: 2.5, gmSizeMax: 12, gmColorBy: 'single', gmColor: '#C8553D', gmColorVar: '', gmSizeVar: '', gmPts: {}, gmPal: 'viridis', gmRev: false, gmOp: 85, gmBorder: '#ffffff', gmBorderW: 0.6, gmCluster: 0, gmCount: true, gmMixColor: '#9AA0A6', gmLines: false, gmLineFrom: 'tip', gmLineColor: '#8A8F98', gmLineW: 0.6, gmLineOp: 70, gmLineStyle: 'solid', gmLegend: true, gmLegendTitle: '', gmLineColorBy: 'single', gmLife: 'all', gmPaleo: false, gmAge: 50, gmModel: 'PALEOMAP', gmMap: '', neRes: '110m', neLayers: ['land'], gpAge: 50, gpModel: 'PALEOMAP', axisShow: true, axisPos: 'bottom', geoPos: 'bottom', ax2On: false, ax2Pos: 'top', ax2Interval: 0, ax2Minor: 0, ax2Decimals: -1, ax2Title: '', ax2Gap: 8, geoTitle: true, copyParts: {}, lightMode: false, tgOn: false, tgTab: 0, tgFrom: 'label', tgColorBy: 'single', tgColor: '#8A8F98', tgMismatch: 'blend', tgGrey: '#C8CCD2', tgW: 0.8, tgOp: 80, tgStyle: 'solid', tgCurve: 0, tgGap: 140, tgWidth: 0, tgLabels: true, tgLines: {}, tgBridge: true, screenLines: 'visible', renderOpt: true, brcTable: '', brcCol: '', brcLow: '#2C7BB6', brcMidOn: true, brcMid: '#FFFFBF', brcHigh: '#D7191C', brcLog: false, brcMin: null, brcMax: null, brcLegend: true, nlabSrc: '', nbarSrc: '', nbarH: 6, nbarColor: '#5B8DEF', nbarOpacity: 45, nbarBorder: 'none', nbarBorderColor: '#2F5D8C', nbarBorderW: 0.8, nbarMirror: true, nbarBw: 1, nbarSupW: 40, catTitles: true, catTitleAngle: '45', catTitleSize: 10, catTitleGap: 6, catTitleColor: '#333333', catTitleFont: '', catTitleBold: false, catTitleItalic: false
 };
@@ -1593,6 +1594,9 @@ const SECTIONS_RAW = [
     { k: 'supportVRev', type: 'check', label: 'Reverse the colors', show: s => s.supportColorBy === 'data', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
     { k: 'supportVLegend', type: 'check', label: 'Show a color legend', show: s => s.supportColorBy === 'data', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
     { k: 'supportColor', type: 'color', label: 'Color', enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold' && s.supportColorBy === 'fixed', sub: true },
+    { k: 'supportDotBorder', type: 'seg', label: 'Circle border', opts: [['none', 'None'], ['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], show: s => s.supportMode === 'dots', enable: s => s.supportScheme !== 'categories', sub: true },
+    { k: 'supportDotBorderColor', type: 'color', label: 'Border color', show: s => s.supportMode === 'dots', enable: s => s.supportScheme !== 'categories' && s.supportDotBorder !== 'none', sub: true },
+    { k: 'supportDotBorderWidth', type: 'number', label: 'Border width', min: 0.05, max: 20, step: 0.25, unit: 'px', show: s => s.supportMode === 'dots', enable: s => s.supportScheme !== 'categories' && s.supportDotBorder !== 'none', sub: true },
     { k: 'supportScaleDots', type: 'check', label: 'Bigger circles for higher values', enable: s => s.supportMode === 'dots' && s.supportScheme === 'threshold', sub: true },
     { k: 'supportScheme', type: 'seg', label: 'Which values', opts: [['threshold', 'Above a threshold'], ['categories', 'By categories']], enable: s => s.supportMode !== 'none', optOff: (s, v) => v === 'categories' && piesOnNodes(s), sub: true },
     { k: 'supportThreshold', type: 'range', label: 'Only when support ≥', min: 0, max: 100, step: 1, hmax: 1000, enable: s => s.supportMode !== 'none' && s.supportScheme === 'threshold', sub: true },
@@ -1878,7 +1882,12 @@ const SECTIONS_RAW = [
   ]},
   { title: 'Ancestral reconstructions', items: [
     { type: 'custom', build: ancBox },
-    { k: 'ancOn', type: 'check', label: 'Show pies on the nodes', enable: s => !!smap },
+    { k: 'ancShow', type: 'check', label: 'Show the reconstructions', enable: s => !!smap },
+    { type: 'hint', text: s => smap && s.ancShow === false ? 'Hidden: the pies, branch colors and legend come back as they were when this is ticked again.' : '' },
+    { k: 'ancOn', type: 'check', label: 'Show pies on the nodes', enable: s => !!smap && s.ancShow !== false },
+    { k: 'ancPieBorder', type: 'select', label: 'Pie border', opts: [['nodes', 'As the node dots'], ['none', 'None'], ['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], enable: s => !!smap && s.ancShow !== false && s.ancOn },
+    { k: 'ancPieBorderColor', type: 'color', label: 'Border color', enable: s => !!smap && s.ancOn && !['nodes', 'none'].includes(s.ancPieBorder), sub: true },
+    { k: 'ancPieBorderWidth', type: 'number', label: 'Border width', min: 0.05, max: 20, step: 0.25, unit: 'px', enable: s => !!smap && s.ancOn && !['nodes', 'none'].includes(s.ancPieBorder), sub: true },
     { k: 'ancWhere', type: 'seg', label: 'Show on', opts: [['all', 'All nodes'], ['internal', 'Internal'], ['tips', 'Tips']], enable: s => !!smap && s.ancOn, sub: true },
     { k: 'ancPos', type: 'seg', label: 'Place', opts: [['node', 'On the node'], ['branch', 'Middle of the branch']], enable: s => !!smap && s.ancOn, sub: true },
     { type: 'hint', text: () => 'Size, border and opacity of the pies are set in Nodes. A pie replaces any dot or support circle on its node.' },
@@ -2207,12 +2216,18 @@ function numInput(it, v, cls = 'num') {
 const RST = '<button type="button" class="rst hide" title="Restore the default value" aria-label="Restore the default value">↶</button>';
 // Deep equality of two settings values.
 const sameVal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// The legends each "Show a legend" box of the panel stands for: the box is ticked only while one of them is shown, and
+// ticking it shows them again when they were hidden from their menu or from Legends.
+const LEGEND_OF = { ancLegend: ['anc'], brcLegend: ['brc'], bwdLegend: ['bwd'], catLegend: ['cat'], dataLegend: ['data'], dotDataLegend: ['dotc', 'dots'], gmLegend: ['geo', 'geosize'], heatLegend: ['heat'], lengthVLegend: ['lenvc'], nlabLegend: ['nlabc', 'nlabs'], pieLegend: ['pie'], supportLegend: ['support'], supportVLegend: ['supvc'] };
+const legendBoxOn = k => !!settings[k] && !(LEGEND_OF[k] || []).every(l => (settings.legendHide || {})[l]);
+const checkVal = k => LEGEND_OF[k] ? legendBoxOn(k) : !!settings[k];
+function syncLegendBoxes() { for (const k in LEGEND_OF) syncControl({ k, type: 'check' }); }
 // Shows the current value of a setting in its panel control.
 function syncControl(it) {
   const row = document.querySelector(`.row[data-k="${it.k}"]`); if (!row) return;
   const v = settings[it.k];
   if (it.type === 'seg') row.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === String(v)));
-  else if (it.type === 'check') row.querySelector('input').checked = !!v;
+  else if (it.type === 'check') row.querySelector('input').checked = checkVal(it.k);
   else if (it.type === 'color') { const inp = row.querySelector('input'); const tmp = document.createElement('div'); tmp.innerHTML = `<input ${colorAttrs(v)}>`; const src = tmp.firstChild; inp.value = src.value; if (src.dataset.alpha) { inp.dataset.alpha = src.dataset.alpha; inp.style.setProperty('--a', src.dataset.alpha); } else { delete inp.dataset.alpha; inp.style.removeProperty('--a'); } }
   else if (it.type === 'select') row.querySelector('select').value = String(v);
   else if (it.type === 'text') row.querySelector('input').value = v;
@@ -2302,9 +2317,13 @@ function control(it) {
     num.addEventListener('keydown', e => { if (e.key === 'Enter') num.blur(); });
   } else if (it.type === 'check') {
     row.className = 'row check' + (it.sub ? ' sub' : '');
-    row.innerHTML = `<input id="${id}" type="checkbox" ${v ? 'checked' : ''}><label for="${id}">${it.label}</label>`;
+    row.innerHTML = `<input id="${id}" type="checkbox" ${checkVal(it.k) ? 'checked' : ''}><label for="${id}">${it.label}</label>`;
     const inp = row.querySelector('input');
-    inp.addEventListener('change', () => { settings[it.k] = inp.checked; changed(it); });
+    inp.addEventListener('change', () => {
+      settings[it.k] = inp.checked;
+      if (inp.checked && LEGEND_OF[it.k] && settings.legendHide) { const h = { ...settings.legendHide }; for (const l of LEGEND_OF[it.k]) delete h[l]; settings.legendHide = h; }   // shown again
+      changed(it);
+    });
   } else if (it.type === 'color') {
     row.innerHTML = `<label for="${id}">${it.label}</label><input id="${id}" type="color" ${colorAttrs(v)}>`;
     const inp = row.querySelector('input');
@@ -2978,7 +2997,7 @@ function ancBox() {
     if (!smap) { d.innerHTML = '<p class="hint">Add a SIMMAP file (stochastic character mapping) in Attachments to use these options.</p>'; return; }
     const f = smapFound();
     d.innerHTML = `<p class="hint">${esc(smap.name)}: ${plural(smap.nMaps, 'map', 'maps')}${f ? `, ${f.found} of ${f.tot} internal nodes of the tree found in the maps` : ''}.</p>
-      <div class="tcols">${smap.states.map((s, i) => `<div class="tcol"><span></span><label>State ${esc(s)}</label><input type="color" data-anc="${esc(s)}" ${colorAttrs(ancColor(settings, i))} aria-label="Color for state ${esc(s)}"></div>`).join('')}</div>`;
+      <div class="tcols">${smap.states.map((s, i) => `<div class="tcol"><span></span><label>State: ${esc(s)}</label><input type="color" data-anc="${esc(s)}" ${colorAttrs(ancColor(settings, i))} aria-label="Color for state ${esc(s)}"></div>`).join('')}</div>`;
     d.querySelectorAll('input[data-anc]').forEach(ci => ci.addEventListener('input', () => { settings.ancColors = { ...(settings.ancColors || {}), [ci.dataset.anc]: colorVal(ci) }; render(); clearTimeout(saveT); saveT = setTimeout(persist, 400); }));
   };
   d._fill = fill; setTimeout(fill);
@@ -4433,7 +4452,17 @@ const stv = (n, k) => n.st && n.st[k] != null && n.st[k] !== '' ? n.st[k] : null
 // then the drawing is repeated with every radius mirrored, so the tree sits outside and the categories in the middle.
 let lastReach = null;
 // Redraws the figure (entry point). renderOnce does the work.
+/* Every drawing goes through here: with the ancestral reconstructions hidden (Show the reconstructions off), the SIMMAP
+   is set aside while drawing, so its pies, branch colors, values and legend are left out and come back as they were.
+   After drawing, the panel follows what the drawing changed: the legend boxes, and the layers in use of Side plots. */
+let sideUseSig = '', sideLayersRefresh = null;
 function render() {
+  const keep = smap; if (smap && settings.ancShow === false) smap = null;
+  try { renderBody(); } finally { smap = keep; }
+  try { syncLegendBoxes(); } catch (e) { }
+  try { const sig = JSON.stringify(sideActive(settings)); if (sig !== sideUseSig) { sideUseSig = sig; if (sideLayersRefresh) sideLayersRefresh(); } } catch (e) { }
+}
+function renderBody() {
   document.documentElement.style.setProperty('--canvasbg', settings.bg || '#ffffff');   // the active tab takes the colour of the canvas
   if (PALETTE[0] !== (PALETTES[settings.paletteName] || PALETTES.default)[0]) applyPalette(); else applyCvd();
   radFlip = null;
@@ -4716,7 +4745,8 @@ function renderOnce() {
     const a = f(lo), b = f(hi), stops = brcStops(S);
     const ramp = q => { q = clamp(q, 0, 1) * (stops.length - 1); const i = Math.min(stops.length - 2, Math.floor(q)), u = q - i, c0 = hexRGB(stops[i]), c1 = hexRGB(stops[i + 1]); return rgbHex(c0.map((c, k) => c + (c1[k] - c) * u)); };
     const colorOf = n => { const v = val.get(n); return v == null ? null : ramp(b > a ? (f(v) - a) / (b - a) : 0.5); };
-    return { colorOf, lo, hi, stops, ramp, col: S.brcCol };
+    // on a log scale the color in the middle of the legend is the geometric mean: written there, it shows the change
+    return { colorOf, lo, hi, stops, ramp, col: S.brcCol, mid: S.brcLog && lo > 0 && hi > 0 ? Math.sqrt(lo * hi) : null };
   })();
   // a color given to the branch itself wins, then the data, then the clade color
   const strokeOf = n => stv(n, 'bc') || (brc && brc.colorOf(n)) || n._ec || S.lineColor;
@@ -5062,6 +5092,7 @@ function renderOnce() {
           r = S.supportScaleDots ? sz * 0.25 + sz * 0.35 * (v / supMax) : sz * 0.5;
           // the same color rule as the support written as numbers: one color, the color of the branch, or by data
           fill = stv(n, 'sc') || (S.supportColorBy === 'branch' ? strokeOf(n) : supVC ? supVC(n) || S.supportColor : S.supportColor);
+          border = strokeAttr(S.supportDotBorderColor, S.supportDotBorder, S.supportDotBorderWidth, r, 12);   // their own border, as the categories have
         }
         supL.push(`<circle cx="${f2(n._px)}" cy="${f2(n._py)}" r="${f2(r)}" fill="${fill}"${border}/>`);
         valGeo.set(skey(n.id, 'support'), { cx: n._px, cy: n._py, r });
@@ -5369,6 +5400,8 @@ function renderOnce() {
     // while the pies are shown, a node the maps say nothing about (the root, which has no branch) gets no dot either,
     // unless it was given one of its own: the dots were turned on for the pies
     if (anc && S.ancOn && !anc.cl(n) && n.children.length && stv(n, 'dot') == null && S.ancPrevDots && !S.ancPrevDots.nodeDotOn) return '';
+    // a pie: the border of the node dots, or its own (Pie border), unless this node was given one by hand
+    const pieBorder = S.ancPieBorder && S.ancPieBorder !== 'nodes' && stv(n, 'dbs') == null ? strokeAttr(S.ancPieBorderColor, S.ancPieBorder, S.ancPieBorderWidth, r, 12) : border;
     if (pieAt(n)) {   // pie of state probabilities, with the dot's size, border and opacity
       const sl = anc.slices(anc.cl(n).node), [cx, cy] = piePt(n, S.ancPos); let a = -90, body = '';   // on the node, or mid-branch
       pieHits.push(`<circle class="hitpt" cx="${f2(cx)}" cy="${f2(cy)}" r="${f2(Math.max(r, 4))}" data-id="${n.id}" data-kind="node" data-pie="anc"/>`);
@@ -5377,7 +5410,7 @@ function renderOnce() {
         const b = a + x.p * 360, [x0, y0] = [cx + r * Math.cos(rad(a)), cy + r * Math.sin(rad(a))], [x1, y1] = [cx + r * Math.cos(rad(b)), cy + r * Math.sin(rad(b))];
         body += `<path d="M${f2(cx)},${f2(cy)}L${f2(x0)},${f2(y0)}A${r},${r} 0 ${x.p > 0.5 ? 1 : 0} 1 ${f2(x1)},${f2(y1)}Z" fill="${x.color}"/>`; a = b;
       }
-      return `<g${op}>${body}<circle cx="${f2(cx)}" cy="${f2(cy)}" r="${r}" fill="none"${border}/></g>`;
+      return `<g${op}>${body}<circle cx="${f2(cx)}" cy="${f2(cy)}" r="${r}" fill="none"${pieBorder}/></g>`;
     }
     return shapeSvg(n._px, n._py, r, stv(n, 'dsh') ?? (n.children.length ? S.nodeDotShape : S.tipDotShape), ` fill="${fill}"${border}${op}`);
   };
@@ -5547,6 +5580,7 @@ function renderOnce() {
   // Presence and absence: one column of squares or circles per variable, one row per tip
   let cTop = null, catLastRing = null;
   const catGeo = new Map(), cellGeo = new Map();   // outlines for the selection
+  heatGeo.clear();
   if (cPlot) {
     const catL = [], sz = catPos.sz, half = sz / 2, cs = catPos.cs;
     const prevEnd = !catFirst && dPlot ? dataEnd : labEnd, minStart = !catFirst && dPlot ? barsReach : labEnd;
@@ -5638,13 +5672,15 @@ function renderOnce() {
         const top = minOf(rows.map(r => r[0]._py)) - ch / 2 - 4, ang = clamp(S.heatTitleAngle, 0, 90), tfs = S.heatTitleSize;
         let reach = 0;
         cols.forEach((c, j) => {
-          const x = start + j * (cw + cg) + cw / 2, tw = measure(c, tfs, fam, false, false);
+          const lab = heatName(S, c), x = start + j * (cw + cg) + cw / 2, tw = nameWidth(lab, tfs, fam, false, false, false), tr = `translate(${f2(x)},${f2(top)}) rotate(${f2(-ang)})`;
           reach = Math.max(reach, tw * Math.sin(rad(ang)) + tfs * Math.cos(rad(ang)));
-          anL.push(`<text data-up="title" transform="translate(${f2(x)},${f2(top)}) rotate(${f2(-ang)})" text-anchor="${ang > 0 ? 'start' : 'middle'}" font-size="${f2(tfs)}" fill="${S.heatTitleColor}" font-family="${esc(fam)}">${esc(c)}</text>`);
+          anL.push(`<text data-up="title" transform="${tr}" text-anchor="${ang > 0 ? 'start' : 'middle'}" font-size="${f2(tfs)}" fill="${S.heatTitleColor}" font-family="${esc(fam)}">${nameSvg(lab, false, false)}</text>`);
+          hitL.push(`<rect data-up="title" class="hitlabel" transform="${tr}" x="${f2(ang > 0 ? -2 : -tw / 2 - 2)}" y="${f2(-tfs)}" width="${f2(tw + 4)}" height="${f2(tfs * 1.3)}" data-heatcol="${esc(c)}"/>`);   // right-click or double-click to rename it
+          heatGeo.set(c, { tr, x: ang > 0 ? -3 : -tw / 2 - 3, y: -tfs - 1, w: tw + 6, h: tfs * 1.35 });
         });
         heatTop = top - reach - 2;
       }
-      heatLeg = { stops, lo: all[0], hi: all[1], labels: S.heatScale === 'all' ? null : ['Low', 'High'], col: cols.length === 1 ? cols[0] : 'Heatmap' };
+      heatLeg = { stops, lo: all[0], hi: all[1], labels: S.heatScale === 'all' || cols.length === 1 ? null : ['Low', 'High'],   /* one column: its own values (Low/High can still be written in the legend menu) */ col: cols.length === 1 ? heatName(S, cols[0]) : 'Heatmap' };
     }
   }
 
@@ -6035,7 +6071,7 @@ function renderOnce() {
   if (dotLeg && S.dotDataLegend) {
     const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
     if (S.dotDataColor) blocks.push({ key: 'dotc', title: dotLeg.col, gradient: { stops: dotStops(S), lo: dotLeg.lo, hi: dotLeg.hi } });
-    if (S.dotDataSize) blocks.push({ key: 'dots', title: S.dotDataColor ? '' : dotLeg.col, entries: [dotLeg.lo, (dotLeg.lo + dotLeg.hi) / 2, dotLeg.hi].map(v => ({ text: fmtV(v), sym: { t: 'circle', r: dotData.rOf(v), fill: S.dotDataColor ? '#9a9a9a' : S.dotColor } })) });
+    if (S.dotDataSize) blocks.push({ key: 'dots', title: S.dotDataColor ? '' : dotLeg.col, entries: [dotLeg.lo, (dotLeg.lo + dotLeg.hi) / 2, dotLeg.hi].map(v => ({ text: fmtV(v), sym: { t: 'circle', r: dotData.rOf(v), fill: S.dotDataColor ? '#9a9a9a' : S.dotColor, stroke: strokeAttr(S.dotBorderColor, S.dotBorderStyle, S.dotBorderWidth, dotData.rOf(v), S.dotBorderCount) } })) });
   }
   if (bwd && S.bwdLegend) {
     const fmtV = v => (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) ? v.toExponential(2) : String(+v.toPrecision(3));
@@ -6043,8 +6079,10 @@ function renderOnce() {
     blocks.push({ key: 'bwd', title: bwd.col + (S.bwdLog ? ' (log₁₀ scale)' : ''), entries: steps.map(v => ({ text: fmtV(v), sym: { t: 'line', w: bwd.wOf(v), c: S.lineColor } })) });
   }
   if (anc && S.ancLegend && (S.ancOn || S.ancBranch !== 'none')) {
-    const ent = smap.states.map((st, i) => ({ text: 'State ' + st, sym: { t: 'circle', r: 5, fill: ancColor(S, i) } }));
-    if (anc.usedOther) ent.push({ text: `Other (below ${S.ancCollapsePct}%)`, sym: { t: 'circle', r: 5, fill: S.ancOtherColor } });
+    // the circles take the border of the pies: their own, or that of the node dots
+    const pb = S.ancPieBorder && S.ancPieBorder !== 'nodes' ? strokeAttr(S.ancPieBorderColor, S.ancPieBorder, S.ancPieBorderWidth, 5, 12) : strokeAttr(S.dotBorderColor, S.dotBorderStyle, S.dotBorderWidth, 5, S.dotBorderCount);
+    const ent = smap.states.map((st, i) => ({ text: String(st), sym: { t: 'circle', r: 5, fill: ancColor(S, i), stroke: pb } }));
+    if (anc.usedOther) ent.push({ text: `Other (below ${S.ancCollapsePct}%)`, sym: { t: 'circle', r: 5, fill: S.ancOtherColor, stroke: pb } });
     blocks.push({ key: 'anc', title: '', entries: ent });
   }
   // categories: one entry per column, in its color and shape, and one for the absent shapes
@@ -6060,6 +6098,10 @@ function renderOnce() {
     const own = (S.legendStyle || {})[b.key] || {}, Lv = k => own[k] ?? S[k];
     const decV = own.legendDec, decFix = decV != null && decV !== 'auto' && decV !== '' && isFinite(+decV) ? +decV : null;   // decimals chosen for this legend
     const numTxt = t => decFix != null && isNumText(t) ? (+t).toFixed(decFix) : t;
+    // the border of the symbols: as the elements they stand for, or the width set in the menu of the legend (0: none; a
+    // width on symbols with no border gives them one, in the color of the text)
+    const symBw = own.legendSymBw != null && own.legendSymBw !== '' && isFinite(+own.legendSymBw) ? +own.legendSymBw : null;
+    const symStroke = sym => { const st = sym.stroke || ''; if (symBw == null) return st; if (symBw <= 0) return ''; return st ? st.replace(/stroke-width="[^"]*"/, `stroke-width="${f2(symBw)}"`) : ` stroke="${Lv('legendColor')}" stroke-width="${f2(symBw)}"`; };
     const lfs = Lv('legendFs'), tfs = Lv('legendTitleSize'), sc = Lv('legendSym'), gap = Lv('legendGap'), rg = Lv('legendRowGap'), col = Lv('legendColor'), tbold = Lv('legendTitleBold');
     const out = [], ff = ` font-family="${esc(fam)}" fill="${col}"`;
     let y = 0, w = 0;
@@ -6074,6 +6116,8 @@ function renderOnce() {
       y += H + 3;
       const autoLo = g.labels ? g.labels[0] : fmt(g.lo), autoHi = g.labels ? g.labels[1] : fmt(g.hi), lo = lgText(b.key, 'lo', autoLo), hi = lgText(b.key, 'hi', autoHi);
       legendAuto[b.key].lo = autoLo; legendAuto[b.key].hi = autoHi;
+      if (g.mid != null) { const autoMid = fmt(g.mid), mid = lgText(b.key, 'mid', autoMid); legendAuto[b.key].mid = autoMid;   // the value in the middle, on a log scale
+        out.push(`<line x1="${f2(W / 2)}" y1="${f2(y - 3 - H)}" x2="${f2(W / 2)}" y2="${f2(y - 3)}" stroke="#999" stroke-width="0.5"/><text x="${f2(W / 2)}" y="${f2(y)}" dominant-baseline="hanging" text-anchor="middle" font-size="${f2(lfs * 0.9)}"${ff}>${esc(mid)}</text>`); }
       out.push(`<text x="0" y="${f2(y)}" dominant-baseline="hanging" font-size="${f2(lfs * 0.9)}"${ff}>${esc(lo)}</text><text x="${f2(W)}" y="${f2(y)}" dominant-baseline="hanging" text-anchor="end" font-size="${f2(lfs * 0.9)}"${ff}>${esc(hi)}</text>`);
       y += lfs; w = Math.max(w, W);
     } else {
@@ -6081,8 +6125,8 @@ function renderOnce() {
       b.entries.forEach((e, i) => {
         const symH = e.sym.t === 'circle' ? 2 * e.sym.r * sc : e.sym.t === 'line' ? e.sym.w : 8 * sc, rowH = Math.max(lfs * 1.25, symH), cy = y + rowH / 2, sx0 = symW / 2;
         if (e.sym.t === 'line') out.push(`<line x1="0" y1="${f2(cy)}" x2="${f2(symW)}" y2="${f2(cy)}" stroke="${e.sym.c}" stroke-width="${f2(e.sym.w)}" stroke-linecap="butt"/>`);
-        else if (e.sym.t === 'circle') out.push(`<circle cx="${f2(sx0)}" cy="${f2(cy)}" r="${f2(e.sym.r * sc)}" fill="${e.sym.fill}"${e.sym.stroke || ''}/>`);
-        else out.push(`<rect x="${f2(sx0 - 5 * sc)}" y="${f2(cy - 4 * sc)}" width="${f2(10 * sc)}" height="${f2(8 * sc)}" rx="${f2(2 * sc)}" fill="${e.sym.fill}"${e.sym.stroke || ''}/>`);
+        else if (e.sym.t === 'circle') out.push(`<circle cx="${f2(sx0)}" cy="${f2(cy)}" r="${f2(e.sym.r * sc)}" fill="${e.sym.fill}"${symStroke(e.sym)}/>`);
+        else out.push(`<rect x="${f2(sx0 - 5 * sc)}" y="${f2(cy - 4 * sc)}" width="${f2(10 * sc)}" height="${f2(8 * sc)}" rx="${f2(2 * sc)}" fill="${e.sym.fill}"${symStroke(e.sym)}/>`);
         const txt = lgText(b.key, i, numTxt(e.text));
         out.push(`<text x="${f2(symW + gap)}" y="${f2(cy)}"${vAlign(txt, 'central')} font-size="${f2(lfs)}"${ff}>${nameSvg(txt, false, false)}</text>`);
         w = Math.max(w, symW + gap + nameWidth(txt, lfs, fam, false, false, false));
@@ -6229,6 +6273,8 @@ function renderOnce() {
     else if (kind === 'label') hlLabel(n);
     else hlNode(n);
   }
+  const hg = selHeat != null && heatGeo.get(selHeat);
+  if (hg) ovL.push(`<rect transform="${hg.tr}" x="${f2(hg.x)}" y="${f2(hg.y)}" width="${f2(hg.w)}" height="${f2(hg.h)}" rx="3" fill="${hl}" fill-opacity=".1" stroke="${hl}" stroke-width="1.5"/>`);
   const cg = selCat != null && catGeo.get(selCat);
   if (cg) {
     if (cg.d) ovL.push(`<path d="${cg.d}" fill="none" stroke="${hl}" stroke-width="${f2(cg.w)}" opacity=".25"/>`);
@@ -6431,9 +6477,11 @@ svg.addEventListener('contextmenu', e => {
 function kindFor(t) { return selMode === 'clade' && !VALUE_KINDS.has(t.kind) ? 'clade' : t.kind; }
 // Selects what was clicked (Shift adds to the selection).
 function clickOn(target, cx, cy, shift) {
+  const hc = target && target.closest ? target.closest('[data-heatcol]') : null;
+  if (hc) { selHeat = hc.dataset.heatcol; selCat = selCell = null; sel.clear(); closePop(); render(); return; }
   const cc = target && target.closest ? target.closest('[data-catcol]') : null;
-  if (cc) { selCat = cc.dataset.catcol; selCell = null; sel.clear(); closePop(); render(); return; }
-  selCat = selCell = null;
+  if (cc) { selCat = cc.dataset.catcol; selCell = null; selHeat = null; sel.clear(); closePop(); render(); return; }
+  selCat = selCell = selHeat = null;
   const t = targetInfo(target);
   if (!t) { if (!shift) { sel.clear(); closePop(); render(); } return; }
   const kind = kindFor(t), k = skey(t.id, kind);
@@ -8388,6 +8436,11 @@ function imageHits() {
       (m.layer === 'back' ? back : front).push(`<g${tr}>` + m._geoPts.map((q, i) => (geoSel.has(m.id + '|' + q.key) ? `<circle cx="${f2(m.x + q.x * sx)}" cy="${f2(m.y + q.y * sy)}" r="${f2(q.r * sx + 3 / k)}" fill="none" stroke="var(--accent)" stroke-width="${f2(3 / k)}" opacity=".6" pointer-events="none"/>` : '') + `<circle class="geopt" data-geopt="${m.id}:${i}" cx="${f2(m.x + q.x * sx)}" cy="${f2(m.y + q.y * sy)}" r="${f2(Math.max(q.r * sx, 3 / k))}"/>`).join('') + '</g>');   // a selected point shows a halo
     }
   }
+  for (const x of figImages) if (freeSel.has('img:' + x.id) && (x.id !== selImg || freeKey === 'img:' + x.id)) {   // images in the selection of free items: an outline
+    const tr = x.rot ? ` transform="rotate(${f2(x.rot)} ${f2(x.x + x.w / 2)} ${f2(x.y + x.h / 2)})"` : '';
+    const isKey = freeKey === 'img:' + x.id;
+    front.push(`<rect${tr} x="${f2(x.x - 3 / k)}" y="${f2(x.y - 3 / k)}" width="${f2(x.w + 6 / k)}" height="${f2(x.h + 6 / k)}" rx="${f2(3 / k)}" fill="rgba(39,64,139,${isKey ? '.1' : '.05'})" stroke="#27408B" stroke-width="${f2((isKey ? 2.6 : 1.2) / k)}" stroke-dasharray="${f2(4 / k)} ${f2(3 / k)}" pointer-events="none"/>`);
+  }
   const m = selImg != null && imgById(selImg);
   tgGeom.forEach(g => { if (g.k === tgSel) front.push(`<path d="${g.d}" fill="none" stroke="#3E63DD" stroke-opacity=".45" stroke-width="${f2(6 / k)}" stroke-linecap="round" pointer-events="none"/>`); });   // the line whose menu is open
   tgGeom.forEach((g, i) => front.push(`<path d="${g.d}" fill="none" stroke="#000" stroke-opacity="0" stroke-width="${f2(8 / k)}" pointer-events="stroke" data-tgl="${i}" style="cursor:pointer"><title>${esc(disp(nm(g)))}: click to select it, right-click for its look</title></path>`));   // the lines of a tanglegram
@@ -8404,16 +8457,18 @@ function imageHits() {
   return { back: back.join(''), front: front.join('') };
 }
 // Box of the selected tree elements, in page coordinates
-function selectedBox() {
+function selectedBox(skip) {
   const els = [];
   for (const v of sel.values()) {
     const n = nodeById.get(v.id); if (!n) continue;
     if (v.kind === 'clade') { for (const x of subtreeEx(n, new Set(v.excl || []))) els.push(...hits.querySelectorAll(`[data-id="${x.id}"][data-kind="branch"], [data-id="${x.id}"][data-kind="label"]`)); }
     else els.push(...hits.querySelectorAll(`[data-id="${v.id}"][data-kind="${v.kind}"]`));
   }
-  if (!els.length) return null;
+  const frees = [...freeSel].filter(k => k !== skip).map(freeKeyBox).filter(Boolean);
+  if (!els.length && !frees.length) return null;
   const inv = vp.getScreenCTM().inverse();
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const f of frees) { x0 = Math.min(x0, f.x0); y0 = Math.min(y0, f.y0); x1 = Math.max(x1, f.x1); y1 = Math.max(y1, f.y1); }
   for (const el of els) {
     const b = el.getBBox(), M = inv.multiply(el.getScreenCTM());
     for (const [px, py] of [[b.x, b.y], [b.x + b.width, b.y], [b.x, b.y + b.height], [b.x + b.width, b.y + b.height]]) {
@@ -8423,8 +8478,8 @@ function selectedBox() {
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 }
 // How far a box must move to line up with the selected tree elements
-function alignDelta(B, how) {
-  const b = selectedBox(); if (!b) return null;
+function alignDelta(B, how, skip, R) {
+  const b = R || selectedBox(skip); if (!b) return null;
   const w = B.x1 - B.x0, h = B.y1 - B.y0;
   let dx = 0, dy = 0;
   if (how === 'top') dy = b.y - B.y0; else if (how === 'bottom') dy = b.y + b.h - B.y1; else if (how === 'middle') dy = b.y + b.h / 2 - (B.y0 + h / 2);
@@ -8433,15 +8488,29 @@ function alignDelta(B, how) {
 }
 // Aligns an image with the selected tree elements.
 function alignImage(m, how) {
-  const d = alignDelta(imgAABB(m), how); if (!d) return toast('First shift-click a branch, label or clade');
+  if (keyRules('img:' + m.id)) { alignAllToKey(how); return; }
+  const d = alignDelta(imgAABB(m), how, 'img:' + m.id); if (!d) return toast('First shift-click a branch, label, clade, legend or image');
   pushUndo(); m.x += d[0]; m.y += d[1];
   imgChanged();
 }
 // What the alignment uses as reference, so the user always knows
+// Lines up every selected item with the reference, which stays where it is.
+function alignAllToKey(how) {
+  const K = freeKeyBox(freeKey); if (!K) return;
+  const R = { x: K.x0, y: K.y0, w: K.x1 - K.x0, h: K.y1 - K.y0 };   // as alignDelta takes it
+  if (tree) pushUndo(true);
+  const others = [...freeSel].filter(k => k !== freeKey);
+  let unlocked = false; for (const k of others) if (!k.startsWith('img:') && !isFreeKey(k)) { setFree(k, true); unlocked = true; }   // aligning places them by hand
+  if (unlocked) render();
+  for (const k of others) { const B = freeKeyBox(k); if (!B) continue; const d = alignDelta(B, how, null, R); if (d) moveFreeKey(k, d[0], d[1]); }
+  render(); persist(); persistImages();
+}
+const keyRules = k => freeKey && freeSel.size > 1 && freeSel.has(k);   // the item is one of several, with a reference among them
 function selDescription() {
   const kinds = { label: 'label', branch: 'branch', node: 'node', clade: 'clade', length: 'branch length', support: 'support value', bar: 'clade bar' };
-  const items = [...sel.values()].filter(v => nodeById.has(v.id));
-  if (!items.length) return '';
+  const items = [...sel.values()].filter(v => nodeById.has(v.id)), nf = freeSel.size;
+  if (!items.length) return nf ? (freeKey && nf > 1 ? 'the reference (thicker outline): the other selected items line up with it' : nf === 1 ? 'the selected item' : nf + ' selected items') : '';
+  if (nf) return (items.length === 1 ? '1 tree element' : items.length + ' tree elements') + ' and ' + (nf === 1 ? '1 item' : nf + ' items');
   if (items.length === 1) { const v = items[0], n = nodeById.get(v.id); return (v.kind === 'clade' ? 'the clade of ' : (kinds[v.kind] || 'element') + ' ') + nodeLabel(n); }
   return items.length + ' tree elements';
 }
@@ -8449,17 +8518,18 @@ function selDescription() {
 function alignSection(what) {
   const ref = selDescription();
   return `<div class="part"><b>Align with the selection</b>
-      ${ref ? '' : `<span class="hint">To align ${what}, shift-click a branch, label or clade, then choose how.</span>`}
+      ${ref ? '' : `<span class="hint">To align ${what}, shift-click a branch, label or clade, or other legends, maps or images, then choose how.</span>`}
       <div class="grp${ref ? '' : ' off'}"><span>Vertical</span><div class="seg"><button type="button" data-al="top">Top</button><button type="button" data-al="middle">Middle</button><button type="button" data-al="bottom">Bottom</button></div></div>
       <div class="grp${ref ? '' : ' off'}"><span>Horizontal</span><div class="seg"><button type="button" data-al="left">Left</button><button type="button" data-al="center">Center</button><button type="button" data-al="right">Right</button></div></div></div>`;
 }
 // Aligns a legend, the scale bar or a tree map with the selection (unlocking it).
 function alignFree(key, how) {
-  if (!selectedBox()) return toast('First shift-click a branch, label or clade');
+  if (keyRules(key)) { alignAllToKey(how); return; }
+  if (!selectedBox(key)) return toast('First shift-click a branch, label, clade, legend or image');
   if (tree) pushUndo(true);
   if (!isFreeKey(key)) { setFree(key, true); render(); }   // aligning places it by hand
   const b = freeBoxes[key]; if (!b) return;
-  const d = alignDelta({ x0: b.x, y0: b.y, x1: b.x + b.w, y1: b.y + b.h }, how);
+  const d = alignDelta({ x0: b.x, y0: b.y, x1: b.x + b.w, y1: b.y + b.h }, how, key);
   if (d) moveFree(key, d[0], d[1]);
   focusFree = key; render(); persist(); syncPanelKeys(['scaleFree']);
 }
@@ -8470,6 +8540,14 @@ svg.addEventListener('pointerdown', e => {
   e.stopImmediatePropagation(); e.preventDefault();
   const m = imgById(+t.dataset.img); if (!m) return;
   const handle = t.dataset.imgh, rotating = !!t.dataset.imgr, start = { x: e.clientX, y: e.clientY }, o = { ...m };
+  if (e.shiftKey && !handle && !rotating) {   // Shift-click: add the image to the selection of free items, or take it out
+    const k = 'img:' + m.id; if (freeSel.has(k)) freeSel.delete(k); else freeSel.add(k);
+    render(); return;
+  }
+  // dragged with the other selected items, or alone
+  const groupK = freeSel.has('img:' + m.id) && freeSel.size > 1 && !handle && !rotating ? [...freeSel].filter(k => k !== 'img:' + m.id) : null;
+  if (!groupK) freeSel = new Set(['img:' + m.id]);
+  let gLast = { x: e.clientX, y: e.clientY };
   const cen = () => { const r = svg.getBoundingClientRect(); return [r.left + view.tx + (o.x + o.w / 2) * view.k, r.top + view.ty + (o.y + o.h / 2) * view.k]; };
   const [ccx, ccy] = cen(), a0 = Math.atan2(start.y - ccy, start.x - ccx);
   let moved = false, raf = 0;
@@ -8484,7 +8562,7 @@ svg.addEventListener('pointerdown', e => {
       if (ev.shiftKey) r = Math.round(r / 15) * 15;
       m.rot = +(((r % 360) + 540) % 360 - 180).toFixed(1);
     }
-    else if (!handle) { m.x = o.x + dx; m.y = o.y + dy; }
+    else if (!handle) { m.x = o.x + dx; m.y = o.y + dy; { const sn = circSnap(imgAABB(m)); m.x += sn[0]; m.y += sn[1]; } if (groupK) { const gx = (ev.clientX - gLast.x) / view.k, gy = (ev.clientY - gLast.y) / view.k; for (const k of groupK) moveFreeKey(k, gx, gy); gLast = { x: ev.clientX, y: ev.clientY }; } }
     else {
       const sx = handle.includes('e') ? 1 : -1, sy = handle.includes('s') ? 1 : -1, ratio = o.h / o.w;
       let w = Math.max(8, o.w + sx * (Math.abs(dx) > Math.abs(dy) / ratio ? dx : sy * dy / ratio * sx));
@@ -8496,7 +8574,7 @@ svg.addEventListener('pointerdown', e => {
   };
   const up = () => {
     window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
-    if (moved) { render(); persistImages(); }
+    if (moved) { render(); persistImages(); } else if (groupK) toggleKey('img:' + m.id);   // a click with no drag on one of several: the reference
   };
   window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
 }, true);
@@ -8542,6 +8620,8 @@ function catPlot(S) {
   };
 }
 let selCat = null;   // name of the selected category column
+let selHeat = null;   // name of the selected heatmap column (its title clicked)
+const heatGeo = new Map();   // heatmap column -> where its title is: { tr, x, y, w, h }
 let selCell = null, selCellTip = null;  // one shape of it, picked with a right-click
 // Key of one category shape (column and tip), for its own style.
 const catCellKey = (col, tipName) => col + '\u0001' + normTip(tipName);
@@ -8576,8 +8656,11 @@ function openCatPop(cx, cy, keep) {
       <div class="kv${st === 'dashed' || st === 'dotted' ? '' : ' off'}"><span>Number of dashes or dots</span><span class="numwrap"><input class="num boxed" type="number" step="1" data-cb="bn" value="${o.bn ?? ''}" placeholder="${S.catBorderCount}"${st === 'dashed' || st === 'dotted' ? '' : ' disabled'}><span class="u"></span></span></div>
       <div class="btns"><button class="btn small danger" data-ca="cellreset">Reset this shape</button></div></div>`;
     })()}
+    <div class="part"><b>All the titles</b>
+      <div class="grp"><span>Text size</span><span class="numwrap"><input class="num boxed" type="number" step="any" id="pCatTs" value="${settings.catTitleSize}"><span class="u">px</span></span></div></div>
     <div class="part"><div class="btns"><button class="btn small danger" data-ca="reset">Reset column</button></div></div>`;
   pop.classList.add('on'); placePop(cx, cy, keep); pop.scrollTop = keepScroll;
+  pop.querySelector('#pCatTs').addEventListener('change', e => { const v = parseFloat(e.target.value); if (!(v > 0)) return; if (tree) pushUndo(true); settings.catTitleSize = clamp(v, 4, 40); render(); persist(); syncControl({ k: 'catTitleSize', type: 'number' }); });
   pop.querySelector('.close').onclick = () => closePop();
   const commit = fn => { if (tree) pushUndo(true); catStyleSet(c.name, fn); render(); persist(); refreshAttach(); openCatPop(0, 0, true); };
   pop.querySelector('[data-ca=name]').onclick = () => { const v = pop.querySelector('#pCatName').value.trim(); commit(st => { st.name = v && v !== c.name ? v : null; }); };
@@ -8610,6 +8693,43 @@ function openCatPop(cx, cy, keep) {
   num.addEventListener('change', () => { const v = parseFloat(num.value); if (isNaN(v)) { num.value = c.off; return; } if (tree) pushUndo(true); num.value = setOff(v); rng.value = num.value; persist(); });
   num.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); num.blur(); } });
 }
+// The title shown for a column of the heatmap: a name given to it, or the name of the column in its table.
+const heatName = (S, c) => ((S.heatNames || {})[c] || c);
+function setHeatName(c, v) {
+  if (tree) pushUndo(true);
+  settings.heatNames = { ...(settings.heatNames || {}) };
+  if (v && v !== c) settings.heatNames[c] = v; else delete settings.heatNames[c];
+  render(); persist();
+}
+// Right-click menu of a heatmap column title: its name.
+function openHeatPop(c, cx, cy) {
+  pop.innerHTML = `
+    <button class="close" aria-label="Close">×</button>
+    <div class="dragh" title="Drag to move"><h3>Heatmap column: ${esc(heatName(settings, c))}</h3><div class="meta">Column "${esc(c)}" of the table. Only the title shown changes.</div></div>
+    <div class="part"><b>Title</b>
+      <div class="grp"><span>Name</span><div class="inline"><input type="text" id="pHeatName" value="${esc(heatName(settings, c))}"><button class="btn small" data-hn="set">Rename</button></div></div>
+      <div class="btns"><button class="btn small" data-hn="reset">Use the column name</button></div></div>
+    <div class="part"><b>All the titles</b>
+      <div class="grp"><span>Text size</span><span class="numwrap"><input class="num boxed" type="number" step="any" id="pHeatTs" value="${settings.heatTitleSize}"><span class="u">px</span></span></div></div>`;
+  pop.classList.add('on'); placePop(cx, cy);
+  pop.querySelector('.close').onclick = () => closePop();
+  const inp = pop.querySelector('#pHeatName'), go = () => { setHeatName(c, inp.value.trim()); openHeatPop(c, cx, cy); };
+  pop.querySelector('[data-hn="set"]').onclick = go;
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+  pop.querySelector('[data-hn="reset"]').onclick = () => { setHeatName(c, ''); openHeatPop(c, cx, cy); };
+  pop.querySelector('#pHeatTs').addEventListener('change', e => { const v = parseFloat(e.target.value); if (!(v > 0)) return; if (tree) pushUndo(true); settings.heatTitleSize = clamp(v, 4, 40); render(); persist(); syncControl({ k: 'heatTitleSize', type: 'number' }); });
+}
+svg.addEventListener('contextmenu', e => {
+  const h = e.target.closest && e.target.closest('[data-heatcol]'); if (!h) return;
+  e.preventDefault(); e.stopImmediatePropagation(); sel.clear(); selImg = null; selHeat = h.dataset.heatcol; selCat = selCell = null; render();
+  openHeatPop(h.dataset.heatcol, e.clientX, e.clientY);
+}, true);
+svg.addEventListener('dblclick', e => {
+  const at = document.elementFromPoint(e.clientX, e.clientY), h = at && at.closest && at.closest('[data-heatcol]'); if (!h) return;
+  e.preventDefault(); e.stopImmediatePropagation(); closePop();
+  const c = h.dataset.heatcol, M = h.getScreenCTM(), sc = Math.hypot(M.a, M.b), ang = Math.atan2(M.b, M.a) * 180 / Math.PI, w = +h.getAttribute('width') * sc;
+  inlineEditText(h, heatName(settings, c), v => setHeatName(c, v), { x: M.e, y: M.f, fs: (settings.heatTitleSize || 10) * sc, ang, w, mid: Math.abs(ang) < 0.5 });
+}, true);
 svg.addEventListener('contextmenu', e => {
   const t = e.target.closest && e.target.closest('[data-catcol]'); if (!t) return;
   e.preventDefault(); e.stopImmediatePropagation();
@@ -8699,14 +8819,14 @@ function openImage(cx, cy, keep) {
       { k: 'tkDec', label: 'Decimals', type: 'num' }, { k: 'tkLen', label: 'Tick length', type: 'num', unit: 'px' }, { k: 'tkW', label: 'Tick width', type: 'num', unit: 'px' },
       { k: 'tkGap', label: 'Space to the numbers', type: 'num', unit: 'px' }, { k: 'tkFs', label: 'Text size', type: 'num', unit: 'px' }, { k: 'tkColor', label: 'Color', type: 'color' }];
     const tkDef = { tkStepX: m.geo.tkStep || 0, tkStepY: m.geo.tkStep || 0, tkFmt: 'dec', tkDec: 0, tkLen: 4, tkW: 0.8, tkGap: 2, tkFs: 9, tkColor: '#333333' };
-    pop.querySelector('.part').insertAdjacentHTML('beforebegin', `<div class="part"><b>Map</b><div class="kv"><span>Name</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" id="geoTitleIn" value="${esc(geoTitle(m))}" aria-label="Name of the map"></div>${ctlRows(spec, key => ({ v: key === 'scale' ? Math.round(geoScaleOf(m)) : key === 'bgOn' ? m.geo.bgOn !== false : key === 'bg' ? m.geo.bg || '#FFFFFF' : key === 'frameW' ? m.geo.frameW ?? 1 : m.geo[key], own: false }))}<p class="hint">${m.geo.area === 'custom' ? 'With the map selected, Ctrl + drag moves its view and Ctrl + scroll zooms in and out. The scale is the one of the figure at its size (96 px per inch), true at the center of the map. ' : ''}Its points, projection and lines are set in Geography, with this map chosen in Map.</p></div><div class="part"><b>Coordinates</b><div class="kv"><span>Edges</span><span class="tkedges">${[['b', 'Bottom'], ['l', 'Left'], ['t', 'Top'], ['r', 'Right']].map(([e, l]) => `<label class="opt"><input type="checkbox" data-tke="${e}" ${(m.geo.tk || '').includes(e) ? 'checked' : ''}> ${l}</label>`).join('')}</span></div>${(m.geo.tk || '') ? ctlRows(tkSpec, key => ({ v: m.geo[key] ?? tkDef[key], own: false })) : ''}</div>`);
+    pop.querySelector('.part').insertAdjacentHTML('beforebegin', `<div class="part"><b>Map</b><div class="kv"><span>Name</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><input type="text" class="lgtext" id="geoTitleIn" value="${esc(geoTitle(m))}" aria-label="Name of the map"></div>${ctlRows(spec, key => ({ v: key === 'scale' ? Math.round(geoScaleOf(m)) : key === 'bgOn' ? m.geo.bgOn !== false : key === 'bg' ? m.geo.bg || '#FFFFFF' : key === 'frameW' ? m.geo.frameW ?? 1 : key === 'frame' ? (m.geo.frame === true || (!!m.geo.tk && m.geo.frame !== 'off')) : m.geo[key], own: false }))}<p class="hint">${m.geo.area === 'custom' ? 'With the map selected, Ctrl + drag moves its view and Ctrl + scroll zooms in and out. The scale is the one of the figure at its size (96 px per inch), true at the center of the map. ' : ''}Its points, projection and lines are set in Geography, with this map chosen in Map.</p></div><div class="part"><b>Coordinates</b><div class="kv"><span>Edges</span><span class="tkedges">${[['b', 'Bottom'], ['l', 'Left'], ['t', 'Top'], ['r', 'Right']].map(([e, l]) => `<label class="opt"><input type="checkbox" data-tke="${e}" ${(m.geo.tk || '').includes(e) ? 'checked' : ''}> ${l}</label>`).join('')}</span></div>${(m.geo.tk || '') ? ctlRows(tkSpec, key => ({ v: m.geo[key] ?? tkDef[key], own: false })) : ''}</div>`);
     { const ps = [...pop.querySelectorAll('.part > b')].find(b => b.textContent === 'Position and size');
       if (ps) { ps.insertAdjacentHTML('afterend', `<div class="kv"><span>Proportions</span><button class="rst hide" tabindex="-1" aria-hidden="true"></button><select class="psel" data-free aria-label="Proportions"><option value="0"${m.free ? '' : ' selected'}>Locked</option><option value="1"${m.free ? ' selected' : ''}>Free</option></select></div>${m.free ? '<p class="hint">The map shows more or less of its area to fill the frame, never stretched.</p>' : ''}`);
         ps.parentNode.querySelector('[data-free]').onchange = e => { pushUndo(); m.free = e.target.value === '1'; imgChanged(); openImage(cx, cy, true); }; } }
     pop.querySelectorAll('[data-tke]').forEach(i => i.onchange = () => { pushUndo(); m.geo.tk = [...pop.querySelectorAll('[data-tke]:checked')].map(x => x.dataset.tke).join(''); imgChanged(); openImage(cx, cy, true); });
     { const ti = pop.querySelector('#geoTitleIn'); ti.addEventListener('change', () => { m.geo.title = ti.value.trim() || m.geo.title; if (h3) h3.textContent = m.geo.title; persist(); buildSide(); }); }
     if (m.geo.tk) wireCtl(tkSpec, (key, v) => { pushUndo(); if (key !== 'tkFmt' && key !== 'tkColor') v = Math.max(0, +v || 0); m.geo[key] = v; geoSoon(); });
-    wireCtl(spec, (key, v) => { pushUndo(); if (key === 'scale') { geoSetScale(m, v); openImage(cx, cy, true); return; } if (key === 'area' && v === 'custom' && !m.geo.view && m._geoBox) m.geo.view = [...m._geoBox]; if (key === 'fillOp') v = clamp(v, 0, 100); if (key === 'lw' || key === 'pad') v = Math.max(0, v); if (key === 'frameW') v = clamp(+v || 1, 0.1, 50); m.geo[key] = v; if (key === 'area') { imgChanged(); openImage(cx, cy, true); } else geoSoon(); });   // the menu is built again only when its hint changes
+    wireCtl(spec, (key, v) => { pushUndo(); if (key === 'scale') { geoSetScale(m, v); openImage(cx, cy, true); return; } if (key === 'area' && v === 'custom' && !m.geo.view && m._geoBox) m.geo.view = [...m._geoBox]; if (key === 'fillOp') v = clamp(v, 0, 100); if (key === 'lw' || key === 'pad') v = Math.max(0, v); if (key === 'frameW') v = clamp(+v || 1, 0.1, 50); if (key === 'frame' && v === false) v = 'off';   /* hidden on purpose, even with coordinates */ m.geo[key] = v; if (key === 'area') { imgChanged(); openImage(cx, cy, true); } else geoSoon(); });   // the menu is built again only when its hint changes
   }
   if (m.txt || m.kde) {   // items the app draws: a title that says what they are
     const h3 = pop.querySelector('.dragh h3'), meta = pop.querySelector('.dragh .meta');
@@ -8882,6 +9002,7 @@ function splitEqual(k) {
 // Vertical reach of a page: its rows, its map, and for the first and last pages the items above and below the tree
 function pageReach(g, i) {
   let top = g.y0, bottom = g.y1;
+  if (i === pageGeo.length - 1) { const ax = content.querySelector('#axisGroup'); if (ax) { const b = ax.getBBox(); if (b.height) bottom = Math.max(bottom, b.y + b.height); } }   // the time axis and geologic scale, under the last page
   if (settings.pageExtras) {
     const bb = content.getBBox();
     if (i === 0) top = Math.min(top, bb.y);
@@ -8889,9 +9010,44 @@ function pageReach(g, i) {
   }
   return { top, bottom };
 }
+/* How wide the pages are: the tree and its maps, the time axis with its geologic scale (also where it reaches past the
+   root, with Oldest age of the axis), and whatever lies beside the rows of the tree, such as tip names, side plots and
+   clade names. What lies above or below (legends, the title) is left to Include the title, legends and scale bar. The
+   extra widths dragged on the left and right are added to this. Measured on the drawing, once it is on the canvas. */
+function contentBoxOf(el) {
+  let bb; try { bb = el.getBBox(); } catch (e) { return null; }
+  const t = el.transform && el.transform.baseVal && el.transform.baseVal.consolidate();
+  if (!t) return { x: bb.x, y: bb.y, w: bb.width, h: bb.height };
+  const m = t.matrix, P = [[bb.x, bb.y], [bb.x + bb.width, bb.y], [bb.x, bb.y + bb.height], [bb.x + bb.width, bb.y + bb.height]].map(([x, y]) => [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f]);
+  const xs = P.map(p => p[0]), ys = P.map(p => p[1]);
+  return { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
+}
+function pageWidths() {
+  if (!pageBounds || !pageGeo.length) return;
+  const yA = minOf(pageGeo.map(g => g.y0)), yB = maxOf(pageGeo.map(g => g.y1));
+  let a = pageBounds.ax0, b = pageBounds.ax1;
+  const take = r => { if (r && (r.w || r.h)) { a = Math.min(a, r.x - 8); b = Math.max(b, r.x + r.w + 8); } };
+  const ax = content.querySelector('#axisGroup'); if (ax) take(contentBoxOf(ax));
+  for (const layer of content.children) {
+    if (/^(imgBack|imgFront|tangle|arrows|geoLinesOver|gmLines)$/.test(layer.id)) continue;   // free images, lines to maps and arrows: not part of the rows
+    const inv = content.getCTM().inverse();
+    const boxOf = el => { let bb; try { bb = el.getBBox(); } catch (e) { return null; } if (!bb.width && !bb.height) return null;   // in the units of the figure, whatever the groups around it
+      const M = inv.multiply(el.getCTM()), P = [[bb.x, bb.y], [bb.x + bb.width, bb.y], [bb.x, bb.y + bb.height], [bb.x + bb.width, bb.y + bb.height]].map(([x, y]) => new DOMPoint(x, y).matrixTransform(M));
+      const xs = P.map(q => q.x), ys = P.map(q => q.y); return { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) }; };
+    const beside = r => { if (!r) return; const my = r.y + r.h / 2; if (my >= yA && my <= yB) take(r); };   // only what lies beside the rows, by its middle
+    for (const el of layer.children) {
+      if (el === ax || el.tagName === 'defs' || el.hasAttribute('data-mini')) continue;
+      if (el.tagName === 'g') { for (const c of el.children) if (c.tagName !== 'defs') beside(boxOf(c)); }   // a plot and its column titles are in one group: each part on its own
+      else beside(boxOf(el));
+    }
+  }
+  pageBounds.hx0 = a; pageBounds.hx1 = b;
+  pageBounds.x0 = a - (settings.pageExtL || 0); pageBounds.x1 = Math.max(pageBounds.x0 + 20, b + (settings.pageExtR || 0));
+}
 // Page boxes, tags and draggable edges on the canvas (never exported).
 function pageItemsSvg() {
   if (!pageBounds || !pageGeo.length) return '';
+  pageWidths();
   const k = 1, col = settings.pageColor, out = [];   // sized in figure units: they zoom together with the tree
   pageGeo.forEach((g, i) => {
     const x0 = pageBounds.x0, x1 = pageBounds.x1, w = x1 - x0, fs = 11 / k, tag = `Page ${i + 1}`, tw = measure(tag, fs, 'Helvetica, Arial, sans-serif', false, true) + 12 / k;
@@ -8913,7 +9069,7 @@ svg.addEventListener('pointerdown', e => {
     const moveX = ev => {
       const r = svg.getBoundingClientRect(), x = (ev.clientX - r.left - view.tx) / view.k;
       if (!movedX) { movedX = true; if (tree) pushUndo(true); }
-      if (edge === 'left') settings.pageExtL = Math.round(pageBounds.ax0 - x); else settings.pageExtR = Math.round(x - pageBounds.ax1);
+      if (edge === 'left') settings.pageExtL = Math.round((pageBounds.hx0 ?? pageBounds.ax0) - x); else settings.pageExtR = Math.round(x - (pageBounds.hx1 ?? pageBounds.ax1));
       if (!rafX) rafX = requestAnimationFrame(() => { rafX = 0; render(); });
     };
     const upX = () => { window.removeEventListener('pointermove', moveX); window.removeEventListener('pointerup', upX); window.removeEventListener('pointercancel', upX); if (movedX) { render(); persist(); syncPanelKeys(['pageExtL', 'pageExtR']); } };
@@ -8986,14 +9142,14 @@ function refreshPagesBox() {
   const list = PAGE_SORT();
   d.innerHTML = `
     ${list.length ? `<div class="pagelist">${list.map((p, i) => `<div class="pageitem" data-id="${p.id}"><b>Page ${i + 1}</b><span>Rows ${p.s0 + 1}–${p.s1 + 1}, ${esc(rowName(p.s0))} to ${esc(rowName(p.s1))}</span><button type="button" class="btn small danger" data-del>Remove</button></div>`).join('')}</div>` : '<p class="hint">No pages yet. Right-click a clade and choose Make a page, or split the tree here.</p>'}
-    <div class="btns"><button type="button" class="btn small" data-rest>Split the rest into pages</button>${list.length ? '<button type="button" class="btn small danger" data-clear>Remove all</button>' : ''}</div>
+    ${list.length ? '<div class="btns"><button type="button" class="btn small" data-rest>Split the rest into pages</button><button type="button" class="btn small danger" data-clear>Remove all</button></div>' : ''}
     <div class="row"><label for="pgN">Split the tree into</label><span class="numwrap"><input class="num" type="number" id="pgN" min="1" step="1" value="${Math.max(2, list.length || 2)}"><span>pages</span></span><button type="button" class="btn small" data-eq>Split</button></div>
     ${list.length ? `<div class="btns"><button type="button" class="btn primary" data-xp="pdf">Save pages as PDF</button><button type="button" class="btn" data-xp="png">PNG (.zip)</button><button type="button" class="btn" data-xp="svg">SVG (.zip)</button></div>` : ''}`;
   d.querySelectorAll('.pageitem').forEach(it => {
     it.onclick = e => { if (e.target.closest('button')) return; const r = it.getBoundingClientRect(); openPageMenu(it.dataset.id, r.right + 8, r.top); };
     it.querySelector('[data-del]').onclick = () => { if (tree) pushUndo(true); settings.pages = settings.pages.filter(p => p.id !== it.dataset.id); pagesChanged('Page removed'); };
   });
-  d.querySelector('[data-rest]').onclick = splitRest;
+  const rest = d.querySelector('[data-rest]'); if (rest) rest.onclick = splitRest;   // offered once there is a page
   const clr = d.querySelector('[data-clear]'); if (clr) clr.onclick = () => { if (tree) pushUndo(true); settings.pages = []; pagesChanged('All pages removed'); };
   d.querySelector('[data-eq]').onclick = () => splitEqual(+$('pgN').value);
   d.querySelectorAll('[data-xp]').forEach(b => b.onclick = () => exportPages(b.dataset.xp));
@@ -9012,13 +9168,13 @@ function pageSvgList() {
   const treeOnly = tmp.firstChild.innerHTML;
   return pageGeo.map((g, i) => {
     const R = pageReach(g, i), rowsTop = R.top, rowsBottom = R.bottom;
-    const lastWithExtras = settings.pageExtras && i === pageGeo.length - 1;
+    const lastWithExtras = settings.pageExtras && i === pageGeo.length - 1, lastWithAxis = i === pageGeo.length - 1 && !!axis;
     let y0 = rowsTop - 6, bottom = rowsBottom;
     if (g.mini) { y0 = Math.min(y0, g.mini.y - 6); bottom = Math.max(bottom, g.mini.y + g.mini.h); }
     let y1 = bottom + 6, extra = minis.get(g.sec.id) || '';
-    if (axisStr && !lastWithExtras) { const dy = bottom - pageBounds.treeBottom + 4; extra += `<g transform="translate(0,${f2(dy)})">${axisStr.replace(' id="axisGroup"', '')}</g>`; y1 = bottom + 4 + axisH + 6; }
+    if (axisStr && !lastWithExtras && !lastWithAxis) { const dy = bottom - pageBounds.treeBottom + 4; extra += `<g transform="translate(0,${f2(dy)})">${axisStr.replace(' id="axisGroup"', '')}</g>`; y1 = bottom + 4 + axisH + 6; }
     const h = y1 - y0, cid = 'pgclip' + (i + 1);
-    const svgStr = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f2(x0)} ${f2(y0)} ${f2(w)} ${f2(h)}" width="${Math.ceil(w)}" height="${Math.ceil(h)}"><defs><clipPath id="${cid}"><rect x="${f2(x0)}" y="${f2(rowsTop)}" width="${f2(w)}" height="${f2(rowsBottom - rowsTop)}"/></clipPath></defs><rect x="${f2(x0)}" y="${f2(y0)}" width="${f2(w)}" height="${f2(h)}" fill="${settings.bg}"/><g clip-path="url(#${cid})">${lastWithExtras ? withAxis : treeOnly}</g>${extra}</svg>`;
+    const svgStr = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f2(x0)} ${f2(y0)} ${f2(w)} ${f2(h)}" width="${Math.ceil(w)}" height="${Math.ceil(h)}"><defs><clipPath id="${cid}"><rect x="${f2(x0)}" y="${f2(rowsTop)}" width="${f2(w)}" height="${f2(rowsBottom - rowsTop)}"/></clipPath></defs><rect x="${f2(x0)}" y="${f2(y0)}" width="${f2(w)}" height="${f2(h)}" fill="${settings.bg}"/><g clip-path="url(#${cid})">${lastWithExtras || lastWithAxis ? withAxis : treeOnly}</g>${extra}</svg>`;
     return { svg: alphaAttrs(svgStr), w, h };
   });
 }
@@ -9086,6 +9242,23 @@ async function exportPages(fmt) {
    Hover shows a lock. Open it to drag the item freely, with the same distance guides as images.
    Close it and the item goes back to its automatic place. */
 let freeBoxes = {}, focusFree = null, legendAuto = {};
+/* Free items selected together with Shift-click (legends, the scale bar, tree maps, and images as 'img:<id>'): the
+   reference for Align with the selection, and moved together when one of them is dragged. */
+let freeSel = new Set();
+/* With two or more items selected, a plain click on one of them makes it the reference (a thicker outline): aligning
+   any of the others then lines all of them up with it, and it stays where it is. Another click lets it go. */
+let freeKey = null;
+const toggleKey = k => { freeKey = freeKey === k ? null : k; render(); toast(freeKey ? 'Reference for aligning: the others line up with it' : 'No reference: each item aligns with the selection'); };
+// The box of a free item or image, in figure units.
+function freeKeyBox(k) {
+  if (k.startsWith('img:')) { const m = imgById(+k.slice(4)); if (!m) return null; const a = imgAABB(m); return { x0: a.x0, y0: a.y0, x1: a.x1, y1: a.y1 }; }
+  const b = freeBoxes[k]; return b ? { x0: b.x, y0: b.y, x1: b.x + b.w, y1: b.y + b.h } : null;
+}
+// Moves a free item or an image by hand (only if it can be moved: unlocked, or an image).
+function moveFreeKey(k, dx, dy) {
+  if (k.startsWith('img:')) { const m = imgById(+k.slice(4)); if (m) { m.x += dx; m.y += dy; } return; }
+  if (isFreeKey(k)) moveFree(k, dx, dy);
+}
 // True when a legend, the scale bar or a tree map is unlocked (placed by hand).
 const isFreeKey = k => k === 'scale' ? !!settings.scaleFree : k.startsWith('mini:') ? !!(pageById(k.slice(5)) || {}).free : !!(settings.legendPos && settings.legendPos[k.slice(7)] && settings.legendPos[k.slice(7)].free);
 // Locks or unlocks an item; unlocking keeps it where it was.
@@ -9113,8 +9286,9 @@ function freeItemsSvg() {
   const k = 1, pad = 4 / k, out = [];   // figure units: the lock zooms together with the tree
   for (const [key, b] of Object.entries(freeBoxes)) {
     const open = isFreeKey(key), x = b.x - pad, y = b.y - pad, w = b.w + pad * 2, h = b.h + pad * 2, s = 1 / k;
-    const focus = focusFree === key;
-    out.push(`<g class="freeitem${open ? ' unlocked' : ''}${focus ? ' focus' : ''}" data-free="${key}">
+    if (freeKey && (!freeSel.has(freeKey) || freeSel.size < 2)) freeKey = null;
+    const focus = focusFree === key || freeSel.has(key);
+    out.push(`<g class="freeitem${open ? ' unlocked' : ''}${focus ? ' focus' : ''}${freeKey === key ? ' key' : ''}" data-free="${key}">
       <rect class="freebox" x="${f2(x)}" y="${f2(y)}" width="${f2(w)}" height="${f2(h)}" rx="${f2(3 / k)}" stroke-width="${f2(1.2 / k)}" stroke-dasharray="${f2(4 / k)} ${f2(3 / k)}"/>
       <g class="freelock" data-lock="${key}" transform="translate(${f2(x + w)},${f2(y)}) scale(${f2(s)})"><title>${open ? 'Lock it back in its automatic place' : 'Unlock to move it by hand'}</title><circle r="10"/><rect x="-4" y="-1.2" width="8" height="6.2" rx="1"/><path d="${open ? LOCK_OPEN : LOCK_CLOSED}"/></g></g>`);
   }
@@ -9132,25 +9306,41 @@ svg.addEventListener('pointerdown', e => {
     toast(on ? 'Unlocked. Drag it anywhere, or click the lock to put it back.' : 'Locked in its automatic place');
     return;
   }
+  const any = e.target.closest && e.target.closest('[data-free]');
+  if (any && e.shiftKey && (e.pointerType !== 'mouse' || e.button === 0)) {   // Shift-click: add it to the selection, or take it out
+    e.stopImmediatePropagation(); e.preventDefault();
+    const k = any.dataset.free; if (freeSel.has(k)) freeSel.delete(k); else freeSel.add(k);
+    render(); return;
+  }
+  if (any && !any.classList.contains('unlocked') && freeSel.has(any.dataset.free) && freeSel.size > 1 && (e.pointerType !== 'mouse' || e.button === 0)) {   // a locked one: the reference
+    e.stopImmediatePropagation(); e.preventDefault(); toggleKey(any.dataset.free); return;
+  }
   const it = e.target.closest && e.target.closest('.freeitem.unlocked');
   if (!it || (e.pointerType === 'mouse' && e.button !== 0)) return;
   e.stopImmediatePropagation(); e.preventDefault();
-  const key = it.dataset.free; focusFree = key; selImg = null; if (!e.shiftKey) sel.clear();
-  let last = { x: e.clientX, y: e.clientY }, moved = false, raf = 0;
+  const key = it.dataset.free; focusFree = key; selImg = null; sel.clear();
+  // dragged with the others selected, or alone (then the selection is just this one)
+  const group = freeSel.has(key) && freeSel.size > 1 ? [...freeSel] : [key];
+  if (group.length === 1) freeSel = new Set([key]);
+  const b0 = freeBoxes[key] ? { ...freeBoxes[key] } : null;
+  let moved = false, raf = 0, applied = [0, 0];
   const move = ev => {
     if (!moved && Math.hypot(ev.clientX - e.clientX, ev.clientY - e.clientY) < 3) return;
     if (!moved) { moved = true; if (tree) pushUndo(true); }
-    moveFree(key, (ev.clientX - last.x) / view.k, (ev.clientY - last.y) / view.k); last = { x: ev.clientX, y: ev.clientY };
+    let ax = (ev.clientX - e.clientX) / view.k, ay = (ev.clientY - e.clientY) / view.k;   // where the pointer has taken it so far
+    if (b0) { const sn = circSnap({ x0: b0.x + ax, y0: b0.y + ay, x1: b0.x + b0.w + ax, y1: b0.y + b0.h + ay }); ax += sn[0]; ay += sn[1]; }
+    const dx = ax - applied[0], dy = ay - applied[1]; applied = [ax, ay];
+    for (const k of group) moveFreeKey(k, dx, dy);
     if (!raf) raf = requestAnimationFrame(() => { raf = 0; render(); });
   };
-  const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); render(); if (moved) persist(); };
+  const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); if (!moved && group.length > 1) { toggleKey(key); return; } render(); if (moved) persist(); };   // a click with no drag on one of several: the reference
   window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
   render();
 }, true);
 // Clicking elsewhere lets go of the item (its guides disappear)
 svg.addEventListener('pointerdown', e => {
-  if (focusFree == null || (e.target.closest && e.target.closest('[data-free], [data-guide]'))) return;
-  focusFree = null;
+  if (e.target.closest && e.target.closest('[data-free], [data-guide], [data-img]')) return;
+  focusFree = null; if (!e.shiftKey) freeSel.clear();   // a click on the tree keeps the items selected only with Shift
 }, true);
 svg.addEventListener('contextmenu', e => {
   const it = e.target.closest && e.target.closest('[data-free]'); if (!it) return;
@@ -9195,7 +9385,8 @@ const LEGEND_SPEC = [
   { k: 'legendSym', label: 'Symbol size', unit: '×' },
   { k: 'legendGap', label: 'Symbol to text', unit: 'px' },
   { k: 'legendRowGap', label: 'Space between rows', unit: 'px' },
-  { k: 'legendColor', label: 'Text color', type: 'color' }
+  { k: 'legendColor', label: 'Text color', type: 'color' },
+  { k: 'legendSymBw', label: 'Symbol border width', type: 'numb', ph: 'Auto', unit: 'px' }   // empty: as the elements they stand for; 0: none
 ];
 // Decimals of the numbers of one legend (gradient ends, sizes): only offered when it shows numbers.
 const LEGEND_DEC_SPEC = { k: 'legendDec', label: 'Decimals', type: 'sel', opts: [['auto', 'Auto'], ...[0, 1, 2, 3, 4, 5, 6].map(d => [d, String(d)])] };
@@ -9376,10 +9567,53 @@ function guideTarget() {
   if (b && isFreeKey(focusFree)) { const k = focusFree; return { box: { x0: b.x, y0: b.y, x1: b.x + b.w, y1: b.y + b.h }, move: (dx, dy) => { moveFree(k, dx, dy); persist(); } }; }
   return null;
 }
-// Draws the distance guides with their editable numbers (rectangular trees).
+/* On circular and fan trees, what an item is lined up with: the circle of the tree, or its sector on a fan, out to the
+   outer edge of what is drawn around it (names, side plots). Its middle is where an item is centered. */
+function circRef() {
+  const S = settings; if (!tree || !(S.layout === 'circular' || S.layout === 'fan') || !lastReach) return null;
+  const R = Math.max(lastReach.reach || 0, radFlip || 0); if (!(R > 0)) return null;
+  const a = leaves(tree).map(l => l._a).filter(Number.isFinite); if (!a.length) return null;
+  const lo = minOf(a), hi = maxOf(a), st = a.length > 1 ? (hi - lo) / (a.length - 1) : 0;
+  if (hi - lo + st >= 359) return { x0: -R, y0: -R, x1: R, y1: R, cx: 0, cy: 0 };   // a whole circle
+  const pts = [[0, 0]];
+  for (let t = lo - st / 2; t <= hi + st / 2 + 1e-9; t += 1) pts.push(polar0(R, t));
+  pts.push(polar0(R, hi + st / 2));
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), x0 = minOf(xs), x1 = maxOf(xs), y0 = minOf(ys), y1 = maxOf(ys);
+  return { x0, y0, x1, y1, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
+// While dragging on a circular or fan tree: the shift that pulls the middle of a box onto the middle of the tree, on each
+// axis that is within a few pixels of it (a magnet), else 0.
+function circSnap(B) {
+  const r = circRef(); if (!r) return [0, 0];
+  const tol = 6 / (view.k || 1), cx = (B.x0 + B.x1) / 2, cy = (B.y0 + B.y1) / 2;
+  return [Math.abs(r.cx - cx) < tol ? r.cx - cx : 0, Math.abs(r.cy - cy) < tol ? r.cy - cy : 0];
+}
+// Guides on circular and fan trees: a line across the middle of the tree each way, and how far the middle of the item is
+// from it, editable (type 0 to center it).
+function drawCircGuides(tgt) {
+  const r = circRef(); if (!r) return;
+  const B = tgt.box, cx = (B.x0 + B.x1) / 2, cy = (B.y0 + B.y1) / 2, dx = cx - r.cx, dy = cy - r.cy;
+  guideNow = { G: { cx: { d: dx, signed: true }, cy: { d: dy, signed: true } }, tgt };
+  const k = 1, lw = 1.2 / k, fs = 11 / k, col = '#27408B', dash = `stroke-dasharray="${f2(2 / k)} ${f2(3 / k)}" stroke-linecap="round"`, lines = [], labels = [];
+  const on = (v) => Math.abs(v) < 0.05;   // already centered on that axis: the line is solid
+  lines.push(`<line x1="${f2(r.cx)}" y1="${f2(r.y0)}" x2="${f2(r.cx)}" y2="${f2(r.y1)}" stroke="${col}" stroke-width="${f2(lw)}" ${on(dx) ? '' : dash}/>`);
+  lines.push(`<line x1="${f2(r.x0)}" y1="${f2(r.cy)}" x2="${f2(r.x1)}" y2="${f2(r.cy)}" stroke="${col}" stroke-width="${f2(lw)}" ${on(dy) ? '' : dash}/>`);
+  lines.push(`<circle cx="${f2(r.cx)}" cy="${f2(r.cy)}" r="${f2(3 / k)}" fill="${col}"/><circle cx="${f2(cx)}" cy="${f2(cy)}" r="${f2(2.5 / k)}" fill="none" stroke="${col}" stroke-width="${f2(lw)}"/>`);
+  if (!on(dx)) lines.push(`<line x1="${f2(cx)}" y1="${f2(cy)}" x2="${f2(r.cx)}" y2="${f2(cy)}" stroke="${col}" stroke-width="${f2(lw)}" ${dash}/>`);
+  if (!on(dy)) lines.push(`<line x1="${f2(cx)}" y1="${f2(cy)}" x2="${f2(cx)}" y2="${f2(r.cy)}" stroke="${col}" stroke-width="${f2(lw)}" ${dash}/>`);
+  const bubble = (dir, txt, mx, my) => { const tw = measure(txt, fs, 'Helvetica, Arial, sans-serif', false, true) + 10 / k, th = fs * 1.5;
+    labels.push(`<g class="guidelab" data-guide="${dir}"><rect x="${f2(mx - tw / 2)}" y="${f2(my - th / 2)}" width="${f2(tw)}" height="${f2(th)}" rx="${f2(th / 2)}" fill="${col}"/><text x="${f2(mx)}" y="${f2(my)}" dy="0.35em" text-anchor="middle" font-size="${f2(fs)}" font-weight="bold" fill="#fff" font-family="Helvetica, Arial, sans-serif">${txt}</text><title>From the middle of the tree. Click to type it (0 centers it).</title></g>`); };
+  const n = v => String(Math.round(v * 10) / 10);
+  bubble('cx', '↔ ' + n(dx), (cx + r.cx) / 2, cy - fs * 1.4);
+  bubble('cy', '↕ ' + n(dy), cx + fs * 2.6, (cy + r.cy) / 2);
+  overlay.insertAdjacentHTML('beforeend', lines.join(''));
+  (hits.querySelector('#hitExtra') || hits).insertAdjacentHTML('beforeend', labels.join(''));
+}
+// Draws the distance guides with their editable numbers (rectangular trees; on circular and fan trees, the middle).
 function drawGuides() {
   guideNow = null;
-  const tgt = guideTarget(); if (!tgt || !tree || settings.layout !== 'rect' || (isTurned(settings) && !isVertical(settings))) return;   // not on a custom angle, as on circular trees
+  const tgt0 = guideTarget(); if (tgt0 && tree && (settings.layout === 'circular' || settings.layout === 'fan')) { drawCircGuides(tgt0); return; }
+  const tgt = tgt0; if (!tgt || !tree || settings.layout !== 'rect' || (isTurned(settings) && !isVertical(settings))) return;   // not on a custom angle, as on circular trees
   const G = computeGuidesBox(tgt.box); guideNow = { G, tgt };
   const k = 1, lw = 1.2 / k, fs = 11 / k, col = '#27408B';   // figure units: the distances zoom together with the tree
   const lines = [], labels = [];
@@ -9413,10 +9647,11 @@ svg.addEventListener('pointerdown', e => {
   const finish = ok => {
     if (done) return; done = true;
     const v = parseFloat(inp.value); inp.remove();
-    if (!ok || isNaN(v) || v < 0) return;
+    if (!ok || isNaN(v) || (v < 0 && !g.signed)) return;
     const delta = v - g.d; if (Math.abs(delta) < 1e-6) return;
     if (tree) pushUndo(true);
-    tgt.move(dir === 'left' ? delta : dir === 'right' ? -delta : 0, dir === 'up' ? delta : dir === 'down' ? -delta : 0);
+    if (g.signed) tgt.move(dir === 'cx' ? delta : 0, dir === 'cy' ? delta : 0);   // from the middle of a circular tree
+    else tgt.move(dir === 'left' ? delta : dir === 'right' ? -delta : 0, dir === 'up' ? delta : dir === 'down' ? -delta : 0);
     render();
   };
   inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); finish(true); } else if (ev.key === 'Escape') { ev.stopPropagation(); finish(false); } });
@@ -9482,11 +9717,16 @@ svg.addEventListener('wheel', hideHover, { passive: true });
    The texts that the right-click menu renames (tip names, the name of a collapsed clade, the name or support of a node,
    a branch length, a clade name) can also be written right where they are: a double click opens a box over the text,
    and Enter or clicking elsewhere keeps the change, as the menu would; Esc leaves it as it was. */
-function inlineEditText(el, value, commit) {
+function inlineEditText(el, value, commit, at) {
   const r = el.getBoundingClientRect(), box = document.createElement('input');
   box.type = 'text'; box.value = value; box.className = 'inlineedit';
+  if (at) {   // a turned text: the box starts where the text starts and follows its angle
+    const fs = Math.max(11, Math.min(28, at.fs)), w = Math.round(Math.max(at.w + 60, 140)), h = Math.round(fs * 1.7);
+    Object.assign(box.style, { position: 'fixed', left: `${Math.round(at.x - (at.mid ? w / 2 : 4))}px`, top: `${Math.round(at.y - h + fs * 0.45)}px`, width: `${w}px`, height: `${h}px`, fontSize: `${Math.round(fs)}px`, zIndex: 60, transformOrigin: `${at.mid ? '50%' : '4px'} ${h - fs * 0.45}px`, transform: `rotate(${f2(at.ang)}deg)` });
+  } else {
   const fs = Math.max(11, Math.min(28, r.height * 0.8));
   Object.assign(box.style, { position: 'fixed', left: `${Math.round(r.left) - 3}px`, top: `${Math.round(r.top + r.height / 2 - fs * 0.85)}px`, width: `${Math.round(Math.max(r.width + 60, 120))}px`, height: `${Math.round(fs * 1.7)}px`, fontSize: `${Math.round(fs)}px`, zIndex: 60 });
+  }
   document.body.appendChild(box); box.focus(); box.select();
   let done = false;
   const finish = keep => { if (done) return; done = true; const v = box.value.trim(); box.remove(); if (keep && v !== String(value)) commit(v); };
@@ -9794,12 +10034,13 @@ let tabs = [], tabIdx = 0, tabUid = 0, treeSetRO = null;
 // Everything a tab holds: tree, settings, history, images, view and tree set.
 function captureTab() {
   return { tree: tree ? serialize(tree) : null, src: srcText, settings: JSON.parse(JSON.stringify(settings)), undo: undoStack.slice(), redo: redoStack.slice(),
-    images: figImages.map(m => ({ ...m })), view: { ...view }, treeSet, ro: treeSetRO };
+    images: figImages.map(m => ({ ...m })), view: { ...view }, treeSet, ro: treeSetRO, smapRec: smap ? smapRecord() : null };   // the SIMMAP of this tab
 }
 // Makes a saved tab the active one.
 function applyTab(d) {
   tree = d.tree ? deserialize(d.tree) : null; srcText = d.src || ''; settings = freshSettings(d.settings);
   undoStack = d.undo || []; redoStack = d.redo || []; figImages = d.images || []; treeSet = d.treeSet || null; treeSetRO = d.ro || null;
+  if ('smapRec' in d) { try { smap = d.smapRec ? smapRevive(d.smapRec) : null; } catch (e) { smap = null; } persistSmap(); }   // (tabs saved before keep the one there is)
   if (tree) reindex();
   sel.clear(); selImg = null; focusFree = null; closePop(); lastContentStr = lastHitsStr = null;
   $('nwkIn').value = srcText;
@@ -9824,7 +10065,7 @@ function openInTab(t, name, inherit) {
   st.tgOn = false; st.tgTab = 0; st.tgLines = {};   // a new tab has no tanglegram of its own
   if (st.layout === 'rect' && !(st.rootStub > 0)) st.rootStub = 24;   // the clade's own branch, where its support and age are written
   const d = { tree: serialize(t), src: toNewick(t), settings: st, undo: [], redo: [], images: [], view: { ...view },
-    treeSet: inherit ? treeSet : null, ro: inherit && treeSet ? { from: tabs[tabIdx].name } : null };
+    treeSet: inherit ? treeSet : null, ro: inherit && treeSet ? { from: tabs[tabIdx].name } : null, smapRec: inherit && smap ? smapRecord() : null };   // a clade keeps the SIMMAP of its tree, another tree starts without
   tabs.push({ id: ++tabUid, name, doc: null }); tabIdx = tabs.length - 1;
   applyTab(d); fit();
 }
@@ -11114,6 +11355,7 @@ function sideOrderOf(S) {
 const sideActive = S => ({ aln: !!alnData, cat: !!(typeof hasCat === 'function' && hasCat(S)), bar: !!(typeof hasData === 'function' && hasData(S)), heat: !!(typeof hasHeat === 'function' && hasHeat(S)), clade: !!tree && [...nodeById.values()].some(n => n.cladeLabel) });
 function sideLayersBox() {
   const d = document.createElement('div'); d.className = 'treetools sidelayers';
+  sideLayersRefresh = () => { if (d.isConnected) fill(); };   // a layer starts or stops being in use (clades named, a table chosen)
   const fill = () => {
     const S = settings, o = sideOrderOf(S), on = sideActive(S), rect = S.layout === 'rect', hid = S.sideHidden || {};
     const rectOnly = { aln: true, heat: true };   // drawn on rectangular trees only
@@ -11351,7 +11593,7 @@ function geoSvg(m) {
   }
   out += '</g>';
   { const fw = Math.max(0.1, +(k.frameW ?? 1) || 1), h = fw / 2;   // the frame inside the map's edge, whatever its width
-    if (k.frame || tk) out += `<rect x="${f2(h)}" y="${f2(h)}" width="${f2(W - fw)}" height="${f2(H - fw)}" fill="none" stroke="${k.frameColor}" stroke-width="${f2(fw)}"/>`; }   // the frame over everything (always with coordinates)
+    if (k.frame === true || (tk && k.frame !== 'off')) out += `<rect x="${f2(h)}" y="${f2(h)}" width="${f2(W - fw)}" height="${f2(H - fw)}" fill="none" stroke="${k.frameColor}" stroke-width="${f2(fw)}"/>`; }   // the frame over everything (always with coordinates)
   if (tk) out += geoTicksSvg(k, g, S, { x0, y0, x1, y1, sc, pad, W, H, X, Y, tkLen, tkGap, tkFs });
   return out + '</g></svg>';
 }
