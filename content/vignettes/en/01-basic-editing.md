@@ -49,8 +49,8 @@ tree2go also checks the structure of the annotations of the trees when reading a
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig01-window.png" alt="The window shown before reading a file with more than 10,000 trees, with fields for the burn-in, the number of trees to keep and how to pick them"><figcaption><b>Figure 1A.</b> The window shown before reading a file with more than 10,000 trees, with a burn-in and the number of trees to keep.</figcaption></figure>
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig01-repair.png" alt="The window that warns about annotations whose braces do not pair, showing where, and offers to load the file with the repair"><figcaption><b>Figure 1B.</b> The window shown when opening a file whose annotations have unpaired braces.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig01-window.png" style="height: 300px; max-height: none" alt="The window shown before reading a file with more than 10,000 trees, with fields for the burn-in, the number of trees to keep and how to pick them"><figcaption><b>Figure 1A.</b> The window shown before reading a file with more than 10,000 trees.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig01-repair.png" style="height: 300px; max-height: none" alt="The window that warns about annotations whose braces do not pair, showing where, and offers to load the file with the repair"><figcaption><b>Figure 1B.</b> The window shown when opening a file whose annotations have unpaired braces.</figcaption></figure>
   </div>
 </figure>
 
@@ -60,13 +60,16 @@ For this tutorial, let’s open `vertebrates_posterior.trees`, which holds 10,00
 
 ## 3. Summarizing the trees
 
-Once the trees are read, the **Tree** section shows how many were kept (Fig. 2). From there, you can show any single tree of the set, or build a summary tree: a consensus (strict, majority-rule or maximum compatible), a maximum clade credibility (MCC) tree, or a maximum a posteriori (MAP) tree. The MAP tree also needs the `.p` file of MrBayes or the `.log` file of BEAST2, attached in **Attachments**.
+Once the trees are read, the **Tree** section shows how many were kept (Fig. 2A). From there, you can show any single tree of the set (Fig. 2B), or build a summary tree: a consensus (strict, majority-rule or maximum compatible), a maximum clade credibility (MCC) tree, or a maximum a posteriori (MAP) tree. The MAP tree also needs the `.p` file of MrBayes or the `.log` file of BEAST2, attached in **Attachments**.
 
 Here we build an MCC tree, which should be almost identical to the one in `vertebrates_mcc.tre`. Since we already left out 10% of the trees when reading the file, we keep the *Burn-in* of this section at `0`. And since the trees are time-calibrated, we set *Node ages* to `Median`, so that each node takes the median of its ages across the sample. Then we click `Build summary tree`.
 
-<figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig02-panel.png" alt="The Tree section with a tree set loaded, Maximum clade credibility chosen as summary tree and Median as node ages">
-  <figcaption><b>Figure 2.</b> The Tree section, building an MCC tree with median node ages from the sample of trees.</figcaption>
+<figure class="vfig pair">
+  <div class="vrow">
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig02-panel.png" style="height: 400px; max-height: none" alt="The Tree section with a tree set loaded, Maximum clade credibility chosen as summary tree and Median as node ages">
+  <figcaption><b>Figure 2A.</b> The Tree section, building an MCC tree with median node ages from the sample of trees.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig02-canvas.png" style="height: 400px; max-height: none" alt="The first tree of the set, drawn on the canvas before the MCC tree is built"><figcaption><b>Figure 2B.</b> The first tree of the set, shown before building the MCC tree.</figcaption></figure>
+  </div>
 </figure>
 
 The **Tree** section also has a **Reading properties** subsection, with two options that make large files lighter to work with. Both take effect with the next file you open:
@@ -82,15 +85,15 @@ Here we set **Layout** > *Order nodes* to `Decreasing`, so that larger clades go
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig03-panel.png" alt="The Layout section, with Order nodes set to Decreasing and a root branch of 25 px"><figcaption><b>Figure 3A.</b> Layout options.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig03-canvas.png" alt="The tree with its clades ordered by size and a short root branch"><figcaption><b>Figure 3B.</b> The MCC tree, with its clades ordered by size and a short root branch.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig03-panel.png" style="height: 400px; max-height: none" alt="The Layout section, with Order nodes set to Decreasing and a root branch of 25 px"><figcaption><b>Figure 3A.</b> Layout options.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig03-canvas.png" style="height: 400px; max-height: none" alt="The tree with its clades ordered by size and a short root branch"><figcaption><b>Figure 3B.</b> The MCC tree, with its clades ordered by size and a short root branch.</figcaption></figure>
   </div>
 </figure>
 
 Although we do not use it in the final figure, the **Tree cloud** section draws all the trees of the set on top of each other, as DensiTree does (Fig. 4), to show the uncertainty in the topology and the ages. It is available only for tree sets.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig04-cloud.png" alt="The trees of the sample drawn on top of each other behind the MCC tree">
+  <img src="../../img/vignettes/basic-editing/fig04-cloud.png" style="height: 400px; max-height: none" alt="The trees of the sample drawn on top of each other behind the MCC tree">
   <figcaption><b>Figure 4.</b> The trees of the sample drawn as a tree cloud.</figcaption>
 </figure>
 
@@ -100,14 +103,14 @@ Although we do not use it in the final figure, the **Tree cloud** section draws 
 
 The **Branches** section sets the look of every branch. In trees with both living and extinct species, the branches of extinct tips are dashed by default, and their names carry a dagger (†). To change this for some branches only, select them with `Shift` + click and change their look from their `Right-click` menu. In trees of extinct species only, or in trees not calibrated in time, all branches are solid by default.
 
-The **Color by data** and **Width by data** subsections color the branches, or change their width, according to any value of the tree (Fig. 5A), its own annotations, or a table attached in the **Attachments** section. The colors can be chosen one by one (`Custom colors`) or taken from a palette, several of which are safe for color blindness.
+The **Color by data** and **Width by data** subsections color the branches, or change their width, according to any value of the tree, such as its own annotations, or of a table attached in the **Attachments** section (Fig. 5A). The colors can be chosen one by one (`Custom colors`) or taken from a palette, several of which are safe for color blindness.
 
-In our example, we set **Branches** > *Line width* to `1.5` px and, in **Color by data**, color the branches by `rate_median`, which here stands for a rate of morphological evolution from a Bayesian analysis, with the `Magma` palette (Fig. 5B).
+In our example, we set **Branches** > *Line width* to `3` px to make the colors stand out and, in **Color by data**, color the branches by `rate_median` with the `Magma` palette (Fig. 5B), which here stands for a rate of morphological evolution.
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig05-panel.png" alt="The Color by data subsection, coloring the branches by rate_median with the Magma palette"><figcaption><b>Figure 5A.</b> Color by data options.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig05-canvas.png" alt="The tree with its branches colored from dark to light by their evolutionary rate"><figcaption><b>Figure 5B.</b> Branches colored by their evolutionary rate with a color-blind-safe palette.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig05-panel.png" style="height: 400px; max-height: none" alt="The Color by data subsection, coloring the branches by rate_median with the Magma palette"><figcaption><b>Figure 5A.</b> Color by data options.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig05-canvas.png" style="height: 400px; max-height: none" alt="The tree with its branches colored from dark to light by their evolutionary rate"><figcaption><b>Figure 5B.</b> Branches colored by their evolutionary rate with a color-blind-safe palette.</figcaption></figure>
   </div>
 </figure>
 
@@ -129,10 +132,12 @@ In our example, we first show the **Support values** as numbers, leaving every o
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig06-panel.png" alt="The Node values section, with the support values shown as numbers and the median node ages stacked below the branch"><figcaption><b>Figure 6A.</b> Support values and node ages in the Node values section.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig06-canvas.png" alt="The tree with the support value above each node and its median age below the branch, with a red circle around values that overlap"><figcaption><b>Figure 6B.</b> The age of each node shown as a second value, below its support.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig06-panel.png" style="height: 400px; max-height: none" alt="The Node values section, with the support values shown as numbers and the median node ages stacked below the branch"><figcaption><b>Figure 6A.</b> The Other node labels subsection, showing the node ages below the support values.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig06-canvas.png" style="height: 400px; max-height: none" alt="The tree with the support value above each node and its median age below the branch, with a red circle around values that overlap"><figcaption><b>Figure 6B.</b> The age of each node shown as a second value below its support.</figcaption></figure>
   </div>
 </figure>
+
+> **Note.** The **Other node labels** subsection shows any annotation of the tree or of the attached files that is linked to the nodes, as well as the second values of analyses that write several supports separated by `/`, `|` or `\` (e.g., 98/0.95).
 
 In many cases, especially in large clades with short branches, some values end up on top of each other (red circle in Fig. 6B). There are several ways around this. One is to move each overlapping label on its own, changing its offset from its `Right-click` menu. Another, which we follow here, is to replace the numbers with symbols whose size and color give a visual cue of their value.
 
@@ -140,8 +145,8 @@ To do so, we hide the node ages again and switch the support values from `Number
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig07-panel.png" alt="The Support values subsection, showing the supports as circles in three ranges with their own colors and sizes"><figcaption><b>Figure 7A.</b> Support values shown as symbols, by categories.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig07-canvas.png" alt="The tree with a black, blue or red circle on each node according to its support"><figcaption><b>Figure 7B.</b> The tree with its support values shown as symbols.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig07-panel.png" style="height: 400px; max-height: none" alt="The Support values subsection, showing the supports as circles in three ranges with their own colors and sizes"><figcaption><b>Figure 7A.</b> Support values shown as symbols, by categories.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig07-canvas.png" style="height: 400px; max-height: none" alt="The tree with a black, blue or red circle on each node according to its support"><figcaption><b>Figure 7B.</b> The tree with its support values shown as symbols.</figcaption></figure>
   </div>
 </figure>
 
@@ -149,8 +154,8 @@ Next, since our tree comes from a sample of trees, we can show the uncertainty i
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig08-panel.png" alt="The Node bars subsection, with the ages shown as violins"><figcaption><b>Figure 8A.</b> The Node bars subsection, where the ages can be shown as an HPD bar or as densities.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig08-canvas.png" alt="The tree with a violin plot on each node showing the distribution of its age"><figcaption><b>Figure 8B.</b> The tree with violin plots on its nodes, showing the uncertainty of the ages across the sample.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig08-panel.png" style="height: 400px; max-height: none" alt="The Node bars subsection, with the ages shown as violins"><figcaption><b>Figure 8A.</b> The Node bars subsection, where the ages can be shown as an HPD bar or as densities.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig08-canvas.png" style="height: 400px; max-height: none" alt="The tree with a violin plot on each node showing the distribution of its age"><figcaption><b>Figure 8B.</b> The tree with violin plots on its nodes, showing the uncertainty of the ages across the sample.</figcaption></figure>
   </div>
 </figure>
 
@@ -162,8 +167,8 @@ The **Tip labels** section sets the look and position of the tip names. Here we 
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig08-canvas.png" alt="The tree with the names of its fossil tips next to the end of their branches"><figcaption><b>Figure 9A.</b> Tip labels not aligned.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig09-canvas.png" alt="The tree with all tip names aligned in one column, the fossil tips highlighted in yellow"><figcaption><b>Figure 9B.</b> Tip labels aligned in one column, with the fossil tips highlighted in yellow to make the change easier to see.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig09-canvas.png" style="height: 320px; max-height: none" alt="The tree with the names of its fossil tips next to the end of their branches"><figcaption><b>Figure 9A.</b> Tip labels not aligned, with the fossil tips highlighted in yellow to make the change easier to see.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig09-canvas_alternative.png" style="height: 320px; max-height: none" alt="The tree with all tip names aligned in one column, the fossil tips highlighted in yellow"><figcaption><b>Figure 9B.</b> Tip labels aligned in one column, with the fossil tips highlighted in yellow to make the change easier to see.</figcaption></figure>
   </div>
 </figure>
 
@@ -173,8 +178,8 @@ To tell fossils from living species, tree2go allows a small tolerance, tips that
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig10-panel.png" alt="The Fossils section, with the tolerance lowered to 0.001%"><figcaption><b>Figure 10A.</b> The Fossils section and its options.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig10-canvas.png" alt="The tips of the woolly mammoth and the saber-toothed cat drawn as fossils, with dashed branches and a dagger"><figcaption><b>Figure 10B.</b> The fossil tips after lowering the tolerance.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig10-panel.png" style="height: 350px; max-height: none" alt="The Fossils section, with the tolerance lowered to 0.001%"><figcaption><b>Figure 10A.</b> The Fossils section and its options.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig10-canvas.png" style="height: 350px; max-height: none" alt="The tips of the woolly mammoth and the saber-toothed cat drawn as fossils and highlighted in yellow, with dashed branches and a dagger"><figcaption><b>Figure 10B.</b> The fossil tips, highlighted in yellow, after lowering the tolerance.</figcaption></figure>
   </div>
 </figure>
 
@@ -189,52 +194,61 @@ The **Clades** section highlights and names clades, and sets the look of their h
 
 Highlights and names apply to the selection, and can cover the whole clade, only its living lineages (crown), or only its extinct ones (stem). A highlight can be a solid block of color or a gradient, from left to right or from right to left.
 
-If you already know which tips belong to each group, you can also write a plain text file, such as `clade_groups.txt`, with one clade per line in the format `Clade={sp1, sp2, …}`. Each clade needs at least two tips, written as they appear in the tree. With `Highlight clades from a file…` or `Name clades from a file…`, tree2go finds the most recent common ancestor of the tips of each clade, and highlights or names that clade for you (Fig. 11A).
+If you already know which tips belong to each group, you can also write a plain text file, such as `clade_groups.txt`, with one clade per line in the format `Clade={sp1, sp2, …}` (Fig. 11A). Each clade needs at least two tips, written as they appear in the tree. With `Highlight clades from a file…` or `Name clades from a file…`, tree2go finds the most recent common ancestor of the tips of each clade, and highlights or names that clade for you (Fig. 11B).
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig11-canvas.png" alt="The rectangular tree with several major clades highlighted and named from a file"><figcaption><b>Figure 11A.</b> The tree with some of its major clades highlighted from a file.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig11-canvas_fan.png" alt="The same tree drawn as a fan, with the same clades highlighted and named"><figcaption><b>Figure 11B.</b> The same tree, with its highlighted clades, in fan layout.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig11-file.png" style="height: 320px; max-height: none" alt="A plain text file with one clade per line, each with its name and the tips it includes"><figcaption><b>Figure 11A.</b> The format of the plain text file for clades.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig11-canvas.png" style="height: 320px; max-height: none" alt="The rectangular tree with several major clades highlighted and named from the file"><figcaption><b>Figure 11B.</b> The tree with some of its major clades highlighted from a file.</figcaption></figure>
   </div>
 </figure>
 
-Every change is kept when the layout changes (rectangular, circular, fan or unrooted), unless it cannot be drawn in the new layout, such as a sequence alignment on a circular tree. Also, although the app is designed to adapt to every layout, some elements that can be carried over from one layout to another are not practical in all of them. For example, violin plots on a circular or fan tree overlap each other towards the root (Fig. 11B).
+Every change is kept when the layout changes (rectangular, circular, fan or unrooted), unless it cannot be drawn in the new layout, such as a sequence alignment on a circular tree. Also, although the app is designed to adapt to every layout, some elements that can be carried over from one layout to another are not practical in all of them. For example, violin plots on a circular or fan tree overlap each other towards the root (Fig. 12).
+
+<figure class="vfig">
+  <img src="../../img/vignettes/basic-editing/fig12-canvas_fan.png" style="height: 400px; max-height: none" alt="The same tree drawn as a fan, with its clades highlighted and named, and its violin plots overlapping towards the root">
+  <figcaption><b>Figure 12.</b> The same tree in fan layout, with its highlighted and named clades. Towards the root, the violin plots overlap each other.</figcaption>
+</figure>
 
 ## 9. Legends and placing elements
 
 As we add elements that carry colors, symbols or sizes, tree2go adds their legends at the bottom left of the figure. Every legend can be moved and restyled, and hidden from its `Right-click` menu or from the **Legends** section. By default, legends are locked in place, as shown by the blue lock at their top right corner. A click on the lock turns it yellow and frees the legend, which can then be dragged anywhere on the canvas, like images and plots.
 
-While an element is being moved, dotted guides show the other elements around it, each with its distance (Fig. 12). Click the blue bubble of a distance to type an exact value, and the element moves there.
+While an element is being moved, dotted guides show the other elements around it, each with its distance (Fig. 13). Click the blue bubble of a distance to type an exact value, and the element moves there.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig12-canvas.png" alt="A legend being moved, with dotted guides and blue distance bubbles to the elements around it">
-  <figcaption><b>Figure 12.</b> Moving a legend freely, with the guides and distances to the elements around it.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig13-canvas.png" style="height: 350px; max-height: none" alt="A legend being moved, with dotted guides and blue distance bubbles to the elements around it">
+  <figcaption><b>Figure 13.</b> Moving a legend freely, with the guides and distances to the elements around it.</figcaption>
 </figure>
 
 ## 10. Time axis and geologic time scale
 
-For time-calibrated trees, `Show time axis` in the **Time axis** section adds an axis of ages under the tree, or above it with *Position*. Its subsections set the axis:
+For time-calibrated trees, *Show time axis* in the **Time axis** section adds an axis of ages under the tree, or above it with *Position*. Its subsections set the axis:
 
-- **Ages**: among other options, an offset for trees of fossils only, in which no species reaches the present. When this value changes, every label that shows an age updates automatically.
+- **Ages**: among other options, an offset for trees of fossils only, in which no species reaches the present. When this value changes, every label that shows an age updates automatically (Fig. 14A).
 - **Ticks** and **Axis look**: where the ticks go and how the axis looks.
-- **Geologic time scale**: boxes with the geologic intervals, in the colors of the Geological Society of America (GSA Geologic Time Scale v. 6.0), and backgrounds that shade those intervals, or ranges of your own, behind the tree (Fig. 13).
+- **Geologic time scale**: boxes with the geologic intervals, in the colors of the Geological Society of America (GSA Geologic Time Scale v. 6.0), and backgrounds that shade those intervals, or ranges of your own, behind the tree (Fig. 14B).
 
-<figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig13-canvas.png" alt="The tree with a time axis and the geologic time scale boxes under it">
-  <figcaption><b>Figure 13.</b> A time axis with the geologic time scale under the tree.</figcaption>
+For this example, we turn on *Show geologic boxes with official colors* in **Geologic time scale**, with its default options. In **Ages**, we also extend the time scale to the left, so that it covers the whole range of the violin plots towards the root, by setting *Oldest age of the axis* to `600`. Finally, we set *Tree background* to `Stripes` and *Background interval* to `Period` (Fig. 14A–B).
+
+<figure class="vfig pair">
+  <div class="vrow">
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig14-panel.png" style="height: 350px; max-height: none" alt="The Time axis section, with the oldest age of the axis set to 600 and the geologic boxes turned on"><figcaption><b>Figure 14A.</b> The Time axis section, where the time scale can be extended into the past.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig14-canvas.png" style="height: 350px; max-height: none" alt="The tree with a time axis and the geologic time scale under it, and the periods shaded as stripes behind the tree"><figcaption><b>Figure 14B.</b> The tree with a time axis and the geologic time scale, with the periods shaded behind it.</figcaption></figure>
+  </div>
 </figure>
 
 > **Note.** As with the other elements of the figure, most of the look of the time axis and the geologic time scale can be customized. The only exception is the colors of the geologic boxes, which follow an international convention. You can also add a second time axis with a different scale (**Time axis** > *Show a second axis*), and shade intervals behind the tree, either standard geologic intervals or ranges you define. The time axis also works on circular and fan trees, as concentric rings, but the geologic boxes are not drawn there, since they do not fit a radial layout.
 
 ## 11. Splitting a long tree into pages
 
-A tree too tall for one printed page can be split from the **Split into pages** section. tree2go finds the clades that go on each page, for the number of pages you choose, and shows the limits of each page on the canvas as dashed boxes (Fig. 14). To move a limit, drag it.
+A tree too tall for one printed page can be split from the **Split into pages** section. tree2go finds the clades that go on each page, for the number of pages you choose, and shows the limits of each page on the canvas as dashed boxes (Fig. 15). To move a limit, drag it.
 
 Each page has the same width, and can carry its own time axis or geologic time scale. A miniature of the whole tree (the tree map) shows, on each page, where its clades are in the tree. Its position, colors and highlight are set from its `Right-click` menu. When exporting, you can save the whole tree in one file, or each page as a file of its own.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig14-canvas.png" alt="A tree split into pages, each page with a miniature of the whole tree">
-  <figcaption><b>Figure 14.</b> A tree split into pages, each with a miniature of the whole tree.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig15-canvas.png" style="height: 400px; max-height: none" alt="A tree split into pages, each page with a miniature of the whole tree">
+  <figcaption><b>Figure 15.</b> A tree split into pages, each with a miniature of the whole tree.</figcaption>
 </figure>
 
 > **Note.** When a figure with a time axis or a geologic time scale is split into pages, you can repeat the axis under each page or show it only on the last one, with **Split into pages** > *Repeat the time axis under each page*, in its **Look** subsection. The change does not show on the canvas, only in the exported files.
@@ -243,23 +257,23 @@ Each page has the same width, and can carry its own time axis or geologic time s
 
 Sometimes we have, for each node, an estimate made of proportions, such as the state probabilities of an ancestral state reconstruction. tree2go can draw them as pie charts on the nodes, for one character or several, and color the branches by their most probable states.
 
-To keep our styled tree as it is, we first copy it to a new tab and start the copy from the default look. `Right-click` the root of the tree and choose `Copy tree to a new tab` (Fig. 15). A window then asks whether the copy keeps the same look or starts from the default one, and here we choose `Default look`. To reset the look of the current tab instead, use `Reset styles` in `Page settings`. If you `Right-click` any other node instead of the root, `Extract clade` opens only that clade in a new tab.
+To keep our styled tree as it is, we first copy it to a new tab and start the copy from the default look. `Right-click` the root of the tree and choose `Copy tree to a new tab` (Fig. 16). A window then asks whether the copy keeps the same look or starts from the default one, and here we choose `Default look`. To reset the look of the current tab instead, use `Reset styles` in `Page settings`. If you `Right-click` any other node instead of the root, `Extract clade` opens only that clade in a new tab.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig15-panel.png" alt="The right-click menu of the root with Copy tree to a new tab, and the window that asks whether the copy keeps the same look or starts from the default look">
-  <figcaption><b>Figure 15.</b> Copying the tree to a new tab.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig16-panel.png" style="height: 400px; max-height: none" alt="The right-click menu of the root with Copy tree to a new tab, and the window that asks whether the copy keeps the same look or starts from the default look">
+  <figcaption><b>Figure 16.</b> Copying the tree to a new tab.</figcaption>
 </figure>
 
-To rename the new tab, double-click its name. Then, in the **Attachments** section, click `Add file` and choose `vertebrates_habitat.simmap`. The nodes of the tree turn into pie charts right away. Their look is set in the **Ancestral reconstructions** section (Fig. 16A), where the branches can also be colored by state with **Ancestral reconstructions** > *Color the branches*, by the maximum a posteriori state, by the most probable states above a threshold, or as a probability gradient. Since the pies take the place of the node dots, their size and border are set in the **Nodes** section, like any other dot.
+To rename the new tab, double-click its name. Then, in the **Attachments** section, click `Add file` and choose `vertebrates_habitat.simmap`. The nodes of the tree turn into pie charts right away. Their look is set in the **Ancestral reconstructions** section (Fig. 17A), where the branches can also be colored by state with **Ancestral reconstructions** > *Color the branches*, by the maximum a posteriori state, by the most probable states above a threshold, or as a probability gradient. Since the pies take the place of the node dots, their size and border are set in the **Nodes** section, like any other dot.
+
+For this example, we set **Nodes** > *Node dot size* to `9` px and **Branches** > *Line width* to `3` px, gave the pies a black border, and moved the legend. We also colored the branches with `Most probable states (threshold-based)`. This option sets how dominant a state must be to color a stretch of branch, so the stretches where the state is uncertain stand out as a dashed line (red circle in Fig. 17B).
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig16-panel.png" alt="The Ancestral reconstructions section, with pies on the nodes and the branches colored by their most probable states"><figcaption><b>Figure 16A.</b> The Ancestral reconstructions section.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig16-canvas.png" alt="The copied tree with a pie chart of habitat on each node and its branches colored by state, with an uncertain stretch drawn dashed inside a red circle"><figcaption><b>Figure 16B.</b> Pie charts of habitat on the nodes, and branches colored by their most probable states.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig17-panel.png" style="height: 400px; max-height: none" alt="The Ancestral reconstructions section, with pies on the nodes and the branches colored by their most probable states"><figcaption><b>Figure 17A.</b> The Ancestral reconstructions section.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig17-canvas.png" style="height: 400px; max-height: none" alt="The copied tree with a pie chart of habitat on each node and its branches colored by state, with an uncertain stretch drawn dashed inside a red circle"><figcaption><b>Figure 17B.</b> Pie charts of habitat on the nodes, and branches colored by their most probable states.</figcaption></figure>
   </div>
 </figure>
-
-For this example, we set **Nodes** > *Node dot size* to `9` px and **Branches** > *Line width* to `3` px, gave the pies a black border, moved the legend, and renamed its states from its `Right-click` menu. We also colored the branches with `Most probable states (threshold-based)`. This option sets how dominant a state must be to color a stretch of branch, so the stretches where the state is uncertain stand out as a dashed line (red circle in Fig. 16B).
 
 > **Note.** Pie charts can also come from a file, with `Pie charts from a file…` in the **Pie charts** subsection of **Node values**. The file can be a table with the names in the first column and one column per category, holding the proportion of each, or a plain text file with one line per tip or node, such as `Name | {A:0.3, B:0.7}`, the notation of SIMMAP files. Internal nodes are matched by their names, so the tree needs names on its internal nodes, written as in the file.
 
@@ -267,67 +281,67 @@ For this example, we set **Nodes** > *Node dot size* to `9` px and **Branches** 
 
 One of the most useful features of tree2go is drawing plots side by side with the tips: bar plots, matrices of categories (such as presence and absence), heatmaps of continuous values, and even DNA alignments.
 
-First, in the **Attachments** section, click `Add file` and choose `regions.csv`, `traits.csv`, `vertebrates_traits_heatmap.csv` and `vertebrates_alignment.fasta`, which can be chosen together (Fig. 17A). As described at the beginning of this tutorial, these files hold the geographic distribution of the species, some of their traits, and DNA sequences of the living species. The tables are simple: one column with the names of the tips, and one column for each value. You can make them in any spreadsheet program, such as Excel, and save them as `.csv`. tree2go finds the column with the tip names by itself, and you can choose another one in its *Names in* list in **Attachments** if needed.
+First, in the **Attachments** section, click `Add file` and choose `regions.csv`, `traits.csv`, `vertebrates_traits_heatmap.csv` and `vertebrates_alignment.fasta`, which can be chosen together (Fig. 18A). As described at the beginning of this tutorial, these files hold the geographic distribution of the species, some of their traits, and DNA sequences of the living species. The tables are simple: one column with the names of the tips, and one column for each value. You can make them in any spreadsheet program, such as Excel, and save them as `.csv`. tree2go finds the column with the tip names by itself, and you can choose another one in its *Names in* list in **Attachments** if needed.
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig17-attachments.png" alt="The Attachments section with the SIMMAP, the alignment and three tables loaded, each with the number of tips it matches"><figcaption><b>Figure 17A.</b> The files attached, each with the number of tips of the tree it matches.</figcaption></figure>
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig17-sideplots.png" alt="The list at the top of the Side plots section, with the plots in their order from the tips outwards and an eye icon for each"><figcaption><b>Figure 17B.</b> The Side plots section, with the plots in their order from the tips outwards.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig18-attachments.png" style="height: 350px; max-height: none" alt="The Attachments section with the SIMMAP, the alignment and three tables loaded, each with the number of tips it matches"><figcaption><b>Figure 18A.</b> The files attached, each with the number of tips of the tree it matches.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig18-sideplots.png" style="height: 350px; max-height: none" alt="The list at the top of the Side plots section, with the plots in their order from the tips outwards and an eye icon for each"><figcaption><b>Figure 18B.</b> The Side plots section, with the plots in their order from the tips outwards.</figcaption></figure>
   </div>
 </figure>
 
 Each file attached is listed in the **Attachments** section, with the number of tips of the tree it matches. Here, the geographic distribution (`regions.csv`) and the traits (`traits.csv` and `vertebrates_traits_heatmap.csv`) match 31 of the 31 tips, while the alignment matches only 24, which makes sense, since the 7 fossils have no DNA.
 
-The side plots can be stacked. Several can be shown at once, and their order, from the tips outwards, is changed by dragging them in the list at the top of the **Side plots** section, where the eye icon shows or hides each one (Fig. 17B). The look of each plot is set in its subsection of **Side plots**, and some elements can also be changed one by one from their `Right-click` menu. Some plots can also take the look of the tree, for example coloring the bars by the named clade each tip belongs to (**Side plots** > *Color the bars by named clade*).
+The side plots can be stacked. Several can be shown at once, and their order, from the tips outwards, is changed by dragging them in the list at the top of the **Side plots** section, where the eye icon shows or hides each one (Fig. 18B). The look of each plot is set in its subsection of **Side plots**, and some elements can also be changed one by one from their `Right-click` menu. Some plots can also take the look of the tree, for example coloring the bars by the named clade each tip belongs to (**Side plots** > *Color the bars by named clade*).
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig18-canvas.png" alt="The tree with bars of brain mass on a logarithmic scale next to the living species, and a heatmap of five continuous traits">
-  <figcaption><b>Figure 18.</b> Bars of brain mass on a logarithmic scale, and a heatmap of five continuous traits.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig19-canvas.png" style="height: 400px; max-height: none" alt="The tree with bars of body mass on a logarithmic scale next to the tips, and a heatmap of four continuous traits">
+  <figcaption><b>Figure 19.</b> Bars of body mass on a logarithmic scale, and a heatmap of four continuous traits.</figcaption>
 </figure>
 
-In this example, we drew bars of brain mass (`brain_g`, from `traits.csv`), colored by the named clade of each tip, and on a logarithmic scale (**Side plots** > *Logarithmic scale (log₁₀)*), since brain mass goes from a fraction of a gram to several kilograms. Next to them, we drew a heatmap of five continuous traits (`vertebrates_traits_heatmap.csv`): body mass, maximum lifespan, genome size, body temperature and offspring per year. Note that the side plots leave a tip empty when it has no value. Here, the fossils have no bar, since their brain mass is unknown, and in the heatmap they only show their body mass (Fig. 18).
+In this example, we drew bars of body mass (`mass_kg`, from `traits.csv`), colored by the named clade of each tip, and on a logarithmic scale (**Side plots** > *Logarithmic scale (log₁₀)*), since mass goes from a fraction of a gram to several tons. Next to them, we drew a heatmap of four continuous traits (`vertebrates_traits_heatmap.csv`): maximum lifespan, genome size, body temperature and offspring per year. Note that the side plots leave a tip empty when it has no value. Here, the fossils do have a bar, since their body mass is known from estimates, but in the heatmap their cells are left empty for the traits that cannot be known from fossils, such as genome size (Fig. 19).
 
 Side plots can also show DNA or protein sequences, straight from a `.fasta` file. Here we use `vertebrates_alignment.fasta`. tree2go gives each base its own color, and the colors can be changed in the **Alignment** subsection of **Side plots**.
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig19-bases.png" alt="Sites 15 to 30 of the alignment next to the tips, one colored square per base, with the letters inside"><figcaption><b>Figure 19A.</b> Sites 15 to 30 of the alignment, as one square per base.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig19-barcode.png" alt="The whole alignment next to the tips as a barcode, each site marked where it differs from its most common base"><figcaption><b>Figure 19B.</b> The whole alignment, as a barcode.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig20-bases.png" style="height: 350px; max-height: none" alt="Sites 15 to 30 of the alignment next to the tips, one colored square per base, with the letters inside"><figcaption><b>Figure 20A.</b> Sites 15 to 30 of the alignment, as one square per base.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig20-barcode.png" style="height: 350px; max-height: none" alt="The whole alignment next to the tips as a barcode, each site marked where it differs from its most common base"><figcaption><b>Figure 20B.</b> The whole alignment, as a barcode.</figcaption></figure>
   </div>
 </figure>
 
-How the alignment is drawn depends on how many sites are shown. When they fit in the width of the plot (**Side plots** > *Width*, in **Alignment**), each base is drawn as a colored square, with its letter inside when there is room (Fig. 19A). When they do not fit, the alignment is drawn as a barcode, which marks at each site, in two contrasting colors, the bases that differ from the most common one (Fig. 19B). tree2go works out how many sites fit, and the hint under *Width* tells you. You can also choose which sites to show with *From site* and *To site*.
+How the alignment is drawn depends on how many sites are shown. When they fit in the width of the plot (**Side plots** > *Width*, in **Alignment**), each base is drawn as a colored square, with its letter inside when there is room (Fig. 20A). When they do not fit, the alignment is drawn as a barcode, which marks at each site, in two contrasting colors, the bases that differ from the most common one (Fig. 20B). tree2go works out how many sites fit, and the hint under *Width* tells you. You can also choose which sites to show with *From site* and *To site*.
 
 ## 14. Presence and absence in a circular tree
 
-We left binary data for last because, besides drawing them like the other plots, we will combine them with a different layout. For this example, we hide the bars, the heatmap and the alignment with their eye icons in the list of **Side plots**, and keep only **Categories**, with `regions.csv`. Like the other plots, it draws a grid of squares, colored where a species is present and grey where it is absent, and both colors can be changed. Then, in **Layout**, we choose the `Circular` shape and turn the tree inside out with **Layout** > *Turn circular and fan trees inside out*. To lighten the figure, we also removed the violin plots and the node ages, turned the tree into a cladogram by unticking **Layout** > *Use branch lengths*, and widened the center with **Layout** > *Inner radius (center gap)*. Finally, with **Side plots** > *Squares follow the circle*, in **Categories**, the squares become wedges that follow the circle, and *Width of the bands* sets how wide they are (Fig. 20).
+We left binary data for last because, besides drawing them like the other plots, we will combine them with a different layout. For this example, we hide the bars, the heatmap and the alignment with their eye icons in the list of **Side plots**, and keep only **Categories**, with `regions.csv`. Like the other plots, it draws a grid of squares, colored where a species is present and grey where it is absent, and both colors can be changed. Then, in **Layout**, we choose the `Circular` shape and turn the tree inside out with **Layout** > *Turn circular and fan trees inside out*. To lighten the figure, we also removed the violin plots and the node ages, turned the tree into a cladogram by unticking **Layout** > *Use branch lengths*, and widened the center with **Layout** > *Inner radius (center gap)*. Finally, with **Side plots** > *Squares follow the circle*, in **Categories**, the squares become wedges that follow the circle, and *Width of the bands* sets how wide they are (Fig. 21).
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig20-canvas.png" alt="A circular cladogram turned inside out, with the presence and absence of each species in seven regions drawn as rings of colored wedges inside the circle, and an empty space in the center">
-  <figcaption><b>Figure 20.</b> The tree turned inside out, with its presence and absence matrix inside the circle.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig21-canvas.png" alt="A circular cladogram turned inside out, with the presence and absence of each species in seven regions drawn as rings of colored wedges inside the circle, and an empty space in the center">
+  <figcaption><b>Figure 21.</b> The tree turned inside out, with its presence and absence matrix inside the circle.</figcaption>
 </figure>
 
 The result is a view that is especially useful in biogeography, since it shows at a glance both the relationships of the species and their presence and absence in each region. And the space we opened in the center will take our figure one step further in the next section.
 
 ## 15. Geography
 
-Another distinctive feature of tree2go is drawing maps with occurrence records right in the app, with no need for GIS software. This is done in the **Geography** section of the left panel (Fig. 21). You can load your own maps as shapefiles (`.shp`, or zipped in a `.zip`), or download basic outlines from [Natural Earth](https://www.naturalearthdata.com) for present-day maps, or from [GPlates](https://www.gplates.org) for paleogeographic reconstructions. Downloading them needs an internet connection.
+Another distinctive feature of tree2go is drawing maps with occurrence records right in the app, with no need for GIS software. This is done in the **Geography** section of the left panel (Fig. 22). You can load your own maps as shapefiles (`.shp`, or zipped in a `.zip`), or download basic outlines from [Natural Earth](https://www.naturalearthdata.com) for present-day maps, or from [GPlates](https://www.gplates.org) for paleogeographic reconstructions. Downloading them needs an internet connection.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig21-panel.png" alt="The Geography section, with its Map, Points and Lines to the tips subsections">
-  <figcaption><b>Figure 21.</b> The Geography section.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig22-panel.png" style="height: 400px; max-height: none" alt="The Geography section, with its Map, Points and Lines to the tips subsections">
+  <figcaption><b>Figure 22.</b> The Geography section. The functions of Natural Earth and GPlates require an internet connection.</figcaption>
 </figure>
 
 For this example, we use `fossil_records.csv`, with the sampling sites of the seven fossils of our tree. The file needs, at least, one column with the names of the tips, which can repeat when a species has several records, and one column each for longitude and latitude. When the records are many, tree2go can group the nearby ones. Since our fossils span a long stretch of time, we show the records as present-day sampling sites. With GPlates, the coordinates can instead be placed on a paleogeographic reconstruction, from several models, which also needs an internet connection. This is most useful when the fossils are of similar ages and we want to show how their distribution looked at that time.
 
 First, in the **Map** subsection, we download the `Land` outlines of Natural Earth at `1:110 million`, and set **Geography** > *Projection (maps in degrees)* to `Mollweide (ESRI:54009)`, which gives the map an oval shape. The best projection depends on your data and on what you want to show. Then we move the map to the center of the circle, the space we opened in the previous section. Like the other elements, the map has its own `Right-click` menu, which changes not only its look but also its extent and zoom. Directly on the map, `Ctrl` + drag moves the view inside its frame, and `Ctrl` + scroll zooms in and out, as in a GIS.
 
-Next, with `fossil_records.csv` attached in **Attachments**, we choose it in **Geography** > *Table*, in the **Points** subsection, and the records appear on the map. With *Size* set to `By the number of records`, each point grows with the number of records at its site. The size and color of the points can also follow a value of the tree or of an attached table, and the color can follow the named clades or, as here, the highlight of each clade (`As the highlight of its clade`). Figures 22A and 22B show two ways of bringing geographic data into a tree.
+Next, with `fossil_records.csv` attached in **Attachments**, we choose it in **Geography** > *Table*, in the **Points** subsection, and the records appear on the map. With *Size* set to `By the number of records`, each point grows with the number of records at its site. The size and color of the points can also follow a value of the tree or of an attached table, and the color can follow the named clades or, as here, the highlight of each clade (`As the highlight of its clade`). Figures 23A and 23B show two ways of bringing geographic data into a tree.
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig22-canvas.png" alt="The inside-out circular tree with a world map in its center, the fossil records as points colored by the highlight of their clade, and the rings of regions between the map and the tree"><figcaption><b>Figure 22A.</b> The tree with a map of the fossil records in its center. The inner rings show the regions where each species lives or was found, and the points of the map are colored by the highlight of their clade.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig22-canvas_alternative.png" alt="A tree with a map beside it, showing the occurrence records grouped by geographic proximity and colored by the clades of the tree"><figcaption><b>Figure 22B.</b> An alternative view of a map within a phylogeny. The map shows the occurrence records grouped by geographic proximity and colored by the clades of the tree.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig23-canvas.png" style="height: 350px; max-height: none" alt="The inside-out circular tree with a world map in its center, the fossil records as points colored by the highlight of their clade, and the rings of regions between the map and the tree"><figcaption><b>Figure 23A.</b> The tree with a map of the fossil records in its center. The points of the map are colored by the highlight of their clade.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig23-canvas_alternative.png" style="height: 350px; max-height: none" alt="A tree with a map beside it, showing the fossil records grouped by geographic proximity and colored by the clades of the tree"><figcaption><b>Figure 23B.</b> An alternative view of a map within a phylogeny. The map shows the fossil records grouped by geographic proximity and colored by the clades of the tree.</figcaption></figure>
   </div>
 </figure>
 
@@ -347,11 +361,11 @@ Like legends, they can be moved anywhere, with guides and distances to the eleme
 
 ## 17. Tanglegram
 
-Tanglegrams are another common figure in comparative phylogenetics, two trees face to face, usually with alternative topologies, with lines joining their matching tips. In the **Tanglegram** section, the second tree can be any tree of the set (`Open a tree of the set`) or a tree from a file (`Load a tree file in a new tab`). Here we load `vertebrates_alternative.nwk` (Fig. 23).
+Tanglegrams are another common figure in comparative phylogenetics, two trees face to face, usually with alternative topologies, with lines joining their matching tips. In the **Tanglegram** section, the second tree can be any tree of the set (`Open a tree of the set`) or a tree from a file (`Load a tree file in a new tab`). Here we load `vertebrates_alternative.nwk` (Fig. 24).
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig23-canvas.png" alt="The main tree and the alternative tree face to face, with lines joining the same species">
-  <figcaption><b>Figure 23.</b> A tanglegram of the main tree and a tree with an alternative topology.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig24-canvas.png" style="height: 400px; max-height: none" alt="The main tree and the alternative tree face to face, with lines joining the same species">
+  <figcaption><b>Figure 24.</b> A tanglegram of the main tree and a tree with an alternative topology.</figcaption>
 </figure>
 
 The second tree opens in a tab of its own, and is drawn with the look of that tab, its alignment of names, branch colors and highlights are set there, as for any other tree. From the main tree it only takes its size, its tips spread over the same height, and its width is the same unless set otherwise in **Tanglegram** > *Width (0 as this tree)*. With **Tanglegram** > *Join the highlights of the same clade*, the highlights of a clade in both trees are joined across. The order of its branches is its own, and to make the lines cross as little as possible, the main tree offers `Untangle (turn the second tree)`, which rotates the nodes of the second tree only, and `Untangle both`, which rotates the nodes of both trees.
@@ -377,11 +391,11 @@ tree2go recognizes the reticulations, and the kind of each one, from its label i
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig24-major.png" alt="The Heliconius network drawn as its major tree, with two dashed arrows from the branch of H. melpomene to H. heurippa and H. timareta, labeled with their gamma values"><figcaption><b>Figure 24A.</b> The network drawn as its major tree, with each reticulation as an arrow from the donor to the hybrid lineage.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig24-full.png" alt="The same network drawn in full, where each hybrid node joins its two parental edges, their widths following gamma"><figcaption><b>Figure 24B.</b> The same network drawn in full, with both parental edges of each hybrid node.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig25-major.png" style="height: 300px; max-height: none" alt="The Heliconius network drawn as its major tree in an unrooted view, with two dashed arrows from the branch of H. melpomene to H. heurippa and H. timareta, labeled with their gamma values"><figcaption><b>Figure 25A.</b> The network drawn as its major tree in an unrooted view, with each reticulation as an arrow from the donor to the hybrid lineage.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig25-full.png" style="height: 300px; max-height: none" alt="The same network drawn in full, where each hybrid node joins its two parental edges, their widths following gamma"><figcaption><b>Figure 25B.</b> The same network drawn in full, with both parental edges of each hybrid node and the proportion of the genome inherited through each one (γ).</figcaption></figure>
   </div>
 </figure>
 
-The reticulations are drawn as dashed lines from the donor lineage to the hybrid node. By default, an arrow points from the donor to the receiver (*Arrows* > `To hybrid`), but it can also point the other way, both ways, or not at all. With *Show a value on each line*, each line shows its γ, and with *Width from γ*, its width follows it. *Where on the branches* sets where each line starts and ends, `Centered` places them in the middle of the branches, while `Lengths` uses the ages written in the file. Like any other element, each line can be selected with a click and changed on its own from its `Right-click` menu.
+The reticulations are drawn as dashed lines from the donor lineage to the hybrid node. By default, an arrow points from the donor to the receiver (*Arrows* set to `To hybrid`), but it can also point the other way, both ways, or not at all. With *Show a value on each line*, each line shows its γ, and with *Width from γ*, its width follows it. *Where on the branches* sets where each line starts and ends, `Centered` places them in the middle of the branches, while `Lengths` uses the ages written in the file. Like any other element, each line can be selected with a click and changed on its own from its `Right-click` menu.
 
-Finally, *Style* switches between two views of the same network. `Major tree` draws the tree of the major edges, those that carry most of the genome, with each minor edge as a line from its donor (Fig. 24A), while `Full network` gives each hybrid node a point of its own, where its two parental edges meet (Fig. 24B).
+Finally, *Style* switches between two views of the same network. `Major tree` draws the tree of the major edges, those that carry most of the genome, with each minor edge as a line from its donor (Fig. 25A), while `Full network` gives each hybrid node a point of its own, where its two parental edges meet (Fig. 25B).

@@ -49,24 +49,27 @@ tree2go también revisa la estructura de las anotaciones de los árboles al leer
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig01-window.png" alt="La ventana que aparece antes de leer un archivo con más de 10.000 árboles, con campos para el burn-in, el número de árboles a conservar y cómo elegirlos"><figcaption><b>Figura 1A.</b> La ventana que aparece antes de leer un archivo con más de 10.000 árboles, con un burn-in y el número de árboles a conservar.</figcaption></figure>
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig01-repair.png" alt="La ventana que avisa de anotaciones cuyas llaves no están pareadas, indica dónde, y ofrece cargar el archivo con la reparación"><figcaption><b>Figura 1B.</b> La ventana que aparece al abrir un archivo cuyas anotaciones tienen llaves sin pareja.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig01-window.png" style="height: 300px; max-height: none" alt="La ventana que aparece antes de leer un archivo con más de 10.000 árboles, con campos para el burn-in, el número de árboles a conservar y cómo elegirlos"><figcaption><b>Figura 1A.</b> La ventana que aparece antes de leer un archivo con más de 10.000 árboles.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig01-repair.png" style="height: 300px; max-height: none" alt="La ventana que avisa de anotaciones cuyas llaves no están pareadas, indica dónde, y ofrece cargar el archivo con la reparación"><figcaption><b>Figura 1B.</b> La ventana que aparece al abrir un archivo cuyas anotaciones tienen llaves sin pareja.</figcaption></figure>
   </div>
 </figure>
 
-Para este tutorial, abramos `vertebrates_posterior.trees`, que contiene 10.001 árboles. En la ventana, ponemos un burn-in de `10`% y conservamos 9.000 árboles que quedan después de él (Fig. 1A).
+Para este tutorial, abramos `vertebrates_posterior.trees`, que contiene 10.001 árboles. En la ventana, ponemos un burn-in de `10`% y conservamos los 9.001 árboles que quedan después de él (Fig. 1A).
 
 > **Nota.** Cuantos más árboles tiene un archivo, más memoria necesita. tree2go no tiene un límite propio más allá de la memoria que el navegador da a cada pestaña, pero las muestras muy grandes hacen más lenta la app, según el número de puntas y las anotaciones de cada árbol. Como regla general, una muestra de 10.000 árboles es más que suficiente para los árboles resumen.
 
 ## 3. Resumir los árboles
 
-Una vez leídos los árboles, la sección **Tree** muestra cuántos se conservaron (Fig. 2). Desde ahí puedes mostrar cualquier árbol del conjunto, o construir un árbol resumen: un consenso (estricto, de mayoría o de máxima compatibilidad), un árbol de máxima credibilidad de clados (MCC) o un árbol de máximo a posteriori (MAP). El árbol MAP necesita además el archivo `.p` de MrBayes o el archivo `.log` de BEAST2, adjuntos en **Attachments**.
+Una vez leídos los árboles, la sección **Tree** muestra cuántos se conservaron (Fig. 2A). Desde ahí puedes mostrar cualquier árbol del conjunto (Fig. 2B), o construir un árbol resumen: un consenso (estricto, de mayoría o de máxima compatibilidad), un árbol de máxima credibilidad de clados (MCC) o un árbol de máximo a posteriori (MAP). El árbol MAP necesita además el archivo `.p` de MrBayes o el archivo `.log` de BEAST2, adjuntos en **Attachments**.
 
 Aquí construimos un árbol MCC, que debería ser casi idéntico al de `vertebrates_mcc.tre`. Como ya descartamos el 10% de los árboles al leer el archivo, dejamos el *Burn-in* de esta sección en `0`. Y como los árboles están calibrados en el tiempo, ponemos *Node ages* en `Median`, para que cada nodo tome la mediana de sus edades en la muestra. Luego hacemos clic en `Build summary tree`.
 
-<figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig02-panel.png" alt="La sección Tree con un conjunto de árboles cargado, Maximum clade credibility elegido como árbol resumen y Median como edades de los nodos">
-  <figcaption><b>Figura 2.</b> La sección Tree, construyendo un árbol MCC con las edades medianas de los nodos a partir de la muestra de árboles.</figcaption>
+<figure class="vfig pair">
+  <div class="vrow">
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig02-panel.png" style="height: 400px; max-height: none" alt="La sección Tree con un conjunto de árboles cargado, Maximum clade credibility elegido como árbol resumen y Median como edades de los nodos">
+  <figcaption><b>Figura 2A.</b> La sección Tree, construyendo un árbol MCC con las edades medianas de los nodos a partir de la muestra de árboles.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig02-canvas.png" style="height: 400px; max-height: none" alt="El primer árbol del conjunto, dibujado en el lienzo antes de construir el árbol MCC"><figcaption><b>Figura 2B.</b> El primer árbol del conjunto, mostrado antes de construir el árbol MCC.</figcaption></figure>
+  </div>
 </figure>
 
 La sección **Tree** también tiene una subsección **Reading properties**, con dos opciones que hacen más ligero el trabajo con archivos grandes. Ambas se aplican al siguiente archivo que abras:
@@ -82,15 +85,15 @@ Aquí ponemos **Layout** > *Order nodes* en `Decreasing`, para que los clados m�
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig03-panel.png" alt="La sección Layout, con Order nodes en Decreasing y una rama de raíz de 25 px"><figcaption><b>Figura 3A.</b> Opciones de Layout.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig03-canvas.png" alt="El árbol con sus clados ordenados por tamaño y una rama de raíz corta"><figcaption><b>Figura 3B.</b> El árbol MCC, con sus clados ordenados por tamaño y una rama de raíz corta.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig03-panel.png" style="height: 400px; max-height: none" alt="La sección Layout, con Order nodes en Decreasing y una rama de raíz de 25 px"><figcaption><b>Figura 3A.</b> Opciones de Layout.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig03-canvas.png" style="height: 400px; max-height: none" alt="El árbol con sus clados ordenados por tamaño y una rama de raíz corta"><figcaption><b>Figura 3B.</b> El árbol MCC, con sus clados ordenados por tamaño y una rama de raíz corta.</figcaption></figure>
   </div>
 </figure>
 
 Aunque no la usamos en la figura final, la sección **Tree cloud** dibuja todos los árboles del conjunto superpuestos, como hace DensiTree (Fig. 4), para mostrar la incertidumbre en la topología y en las edades. Solo está disponible para conjuntos de árboles.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig04-cloud.png" alt="Los árboles de la muestra dibujados uno sobre otro detrás del árbol MCC">
+  <img src="../../img/vignettes/basic-editing/fig04-cloud.png" style="height: 400px; max-height: none" alt="Los árboles de la muestra dibujados uno sobre otro detrás del árbol MCC">
   <figcaption><b>Figura 4.</b> Los árboles de la muestra dibujados como una nube de árboles.</figcaption>
 </figure>
 
@@ -100,14 +103,14 @@ Aunque no la usamos en la figura final, la sección **Tree cloud** dibuja todos 
 
 La sección **Branches** define el aspecto de todas las ramas. En árboles con especies vivas y extintas, las ramas de las puntas extintas son discontinuas por defecto, y sus nombres llevan una daga (†). Para cambiar esto solo en algunas ramas, selecciónalas con `Shift` + clic y cambia su aspecto desde su menú de `Right-click`. En árboles solo de especies extintas, o en árboles no calibrados en el tiempo, todas las ramas son continuas por defecto.
 
-Las subsecciones **Color by data** y **Width by data** colorean las ramas, o cambian su grosor, según cualquier valor del árbol (Fig. 5A), sus propias anotaciones o una tabla adjunta en la sección **Attachments**. Los colores pueden elegirse uno a uno (`Custom colors`) o tomarse de una paleta, varias de las cuales son seguras para el daltonismo.
+Las subsecciones **Color by data** y **Width by data** colorean las ramas, o cambian su grosor, según cualquier valor del árbol, como sus propias anotaciones, o de una tabla adjunta en la sección **Attachments** (Fig. 5A). Los colores pueden elegirse uno a uno (`Custom colors`) o tomarse de una paleta, varias de las cuales son seguras para el daltonismo.
 
-En nuestro ejemplo, ponemos **Branches** > *Line width* en `1.5` px y, en **Color by data**, coloreamos las ramas por `rate_median`, que aquí representa una tasa de evolución morfológica de un análisis bayesiano, con la paleta `Magma` (Fig. 5B).
+En nuestro ejemplo, ponemos **Branches** > *Line width* en `3` px para que los colores resalten mejor y, en **Color by data**, coloreamos las ramas por `rate_median` con la paleta `Magma` (Fig. 5B), que aquí representa una tasa de evolución morfológica.
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig05-panel.png" alt="La subsección Color by data, coloreando las ramas por rate_median con la paleta Magma"><figcaption><b>Figura 5A.</b> Opciones de Color by data.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig05-canvas.png" alt="El árbol con sus ramas coloreadas de oscuro a claro según su tasa evolutiva"><figcaption><b>Figura 5B.</b> Ramas coloreadas según su tasa evolutiva con una paleta segura para el daltonismo.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig05-panel.png" style="height: 400px; max-height: none" alt="La subsección Color by data, coloreando las ramas por rate_median con la paleta Magma"><figcaption><b>Figura 5A.</b> Opciones de Color by data.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig05-canvas.png" style="height: 400px; max-height: none" alt="El árbol con sus ramas coloreadas de oscuro a claro según su tasa evolutiva"><figcaption><b>Figura 5B.</b> Ramas coloreadas según su tasa evolutiva con una paleta segura para el daltonismo.</figcaption></figure>
   </div>
 </figure>
 
@@ -129,10 +132,12 @@ En nuestro ejemplo, primero mostramos los **Support values** como números, deja
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig06-panel.png" alt="La sección Node values, con los valores de soporte como números y las edades medianas de los nodos apiladas debajo de la rama"><figcaption><b>Figura 6A.</b> Valores de soporte y edades de los nodos en la sección Node values.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig06-canvas.png" alt="El árbol con el valor de soporte sobre cada nodo y su edad mediana debajo de la rama, con un círculo rojo alrededor de valores que se superponen"><figcaption><b>Figura 6B.</b> La edad de cada nodo mostrada como un segundo valor, debajo de su soporte.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig06-panel.png" style="height: 400px; max-height: none" alt="La sección Node values, con los valores de soporte como números y las edades medianas de los nodos apiladas debajo de la rama"><figcaption><b>Figura 6A.</b> La subsección Other node labels, mostrando las edades de los nodos debajo de los valores de soporte.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig06-canvas.png" style="height: 400px; max-height: none" alt="El árbol con el valor de soporte sobre cada nodo y su edad mediana debajo de la rama, con un círculo rojo alrededor de valores que se superponen"><figcaption><b>Figura 6B.</b> La edad de cada nodo mostrada como un segundo valor, debajo de su soporte.</figcaption></figure>
   </div>
 </figure>
+
+> **Nota.** La subsección **Other node labels** muestra cualquier anotación del árbol o de los archivos adjuntos que esté asociada a los nodos, así como los segundos valores de los análisis que escriben varios soportes separados por `/`, `|` o `\` (p. ej., 98/0.95).
 
 En muchos casos, especialmente en clados grandes con ramas cortas, algunos valores terminan uno encima de otro (círculo rojo en la Fig. 6B). Hay varias formas de resolverlo. Una es mover por separado cada etiqueta que se superpone, cambiando su desplazamiento desde su menú de `Right-click`. Otra, la que seguimos aquí, es reemplazar los números por símbolos cuyo tamaño y color den una pista visual de su valor.
 
@@ -140,8 +145,8 @@ Para ello, volvemos a ocultar las edades de los nodos y cambiamos los valores de
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig07-panel.png" alt="La subsección Support values, mostrando los soportes como círculos en tres rangos, cada uno con su color y tamaño"><figcaption><b>Figura 7A.</b> Valores de soporte mostrados como símbolos, por categorías.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig07-canvas.png" alt="El árbol con un círculo negro, azul o rojo en cada nodo según su soporte"><figcaption><b>Figura 7B.</b> El árbol con sus valores de soporte mostrados como símbolos.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig07-panel.png" style="height: 400px; max-height: none" alt="La subsección Support values, mostrando los soportes como círculos en tres rangos, cada uno con su color y tamaño"><figcaption><b>Figura 7A.</b> Valores de soporte mostrados como símbolos, por categorías.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig07-canvas.png" style="height: 400px; max-height: none" alt="El árbol con un círculo negro, azul o rojo en cada nodo según su soporte"><figcaption><b>Figura 7B.</b> El árbol con sus valores de soporte mostrados como símbolos.</figcaption></figure>
   </div>
 </figure>
 
@@ -149,8 +154,8 @@ A continuación, como nuestro árbol proviene de una muestra de árboles, podemo
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig08-panel.png" alt="La subsección Node bars, con las edades mostradas como violines"><figcaption><b>Figura 8A.</b> La subsección Node bars, donde las edades pueden mostrarse como una barra HPD o como densidades.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig08-canvas.png" alt="El árbol con un gráfico de violín en cada nodo que muestra la distribución de su edad"><figcaption><b>Figura 8B.</b> El árbol con gráficos de violín en sus nodos, que muestran la incertidumbre de las edades en la muestra.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig08-panel.png" style="height: 400px; max-height: none" alt="La subsección Node bars, con las edades mostradas como violines"><figcaption><b>Figura 8A.</b> La subsección Node bars, donde las edades pueden mostrarse como una barra HPD o como densidades.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig08-canvas.png" style="height: 400px; max-height: none" alt="El árbol con un gráfico de violín en cada nodo que muestra la distribución de su edad"><figcaption><b>Figura 8B.</b> El árbol con gráficos de violín en sus nodos, que muestran la incertidumbre de las edades en la muestra.</figcaption></figure>
   </div>
 </figure>
 
@@ -162,8 +167,8 @@ La sección **Tip labels** define el aspecto y la posición de los nombres de la
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig08-canvas.png" alt="El árbol con los nombres de sus puntas fósiles junto al final de sus ramas"><figcaption><b>Figura 9A.</b> Nombres de las puntas sin alinear.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig09-canvas.png" alt="El árbol con todos los nombres de las puntas alineados en una columna, con las puntas fósiles resaltadas en amarillo"><figcaption><b>Figura 9B.</b> Nombres de las puntas alineados en una columna, con las puntas fósiles resaltadas en amarillo para que el cambio se vea mejor.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig09-canvas.png" style="height: 320px; max-height: none" alt="El árbol con los nombres de sus puntas fósiles junto al final de sus ramas"><figcaption><b>Figura 9A.</b> Nombres de las puntas sin alinear, con las puntas fósiles resaltadas en amarillo para que el cambio se vea mejor.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig09-canvas_alternative.png" style="height: 320px; max-height: none" alt="El árbol con todos los nombres de las puntas alineados en una columna, con las puntas fósiles resaltadas en amarillo"><figcaption><b>Figura 9B.</b> Nombres de las puntas alineados en una columna, con las puntas fósiles resaltadas en amarillo para que el cambio se vea mejor.</figcaption></figure>
   </div>
 </figure>
 
@@ -173,8 +178,8 @@ Para distinguir los fósiles de las especies vivas, tree2go admite una pequeña 
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig10-panel.png" alt="La sección Fossils, con la tolerancia reducida a 0.001%"><figcaption><b>Figura 10A.</b> La sección Fossils y sus opciones.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig10-canvas.png" alt="Las puntas del mamut lanudo y del tigre dientes de sable dibujadas como fósiles, con ramas discontinuas y una daga"><figcaption><b>Figura 10B.</b> Las puntas fósiles después de reducir la tolerancia.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig10-panel.png" style="height: 350px; max-height: none" alt="La sección Fossils, con la tolerancia reducida a 0.001%"><figcaption><b>Figura 10A.</b> La sección Fossils y sus opciones.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig10-canvas.png" style="height: 350px; max-height: none" alt="Las puntas del mamut lanudo y del tigre dientes de sable dibujadas como fósiles y resaltadas en amarillo, con ramas discontinuas y una daga"><figcaption><b>Figura 10B.</b> Las puntas fósiles, resaltadas en amarillo, después de reducir la tolerancia.</figcaption></figure>
   </div>
 </figure>
 
@@ -189,52 +194,61 @@ La sección **Clades** resalta y nombra clados, y define el aspecto de sus resal
 
 Los resaltados y los nombres se aplican a la selección, y pueden cubrir todo el clado, solo sus linajes vivos (corona) o solo sus linajes extintos (tallo). Un resaltado puede ser un bloque de color sólido o un degradado, de izquierda a derecha o de derecha a izquierda.
 
-Si ya sabes qué puntas pertenecen a cada grupo, también puedes escribir un archivo de texto plano, como `clade_groups.txt`, con un clado por línea en el formato `Clade={sp1, sp2, …}`. Cada clado necesita al menos dos puntas, escritas como aparecen en el árbol. Con `Highlight clades from a file…` o `Name clades from a file…`, tree2go encuentra el ancestro común más reciente de las puntas de cada clado, y resalta o nombra ese clado por ti (Fig. 11A).
+Si ya sabes qué puntas pertenecen a cada grupo, también puedes escribir un archivo de texto plano, como `clade_groups.txt`, con un clado por línea en el formato `Clade={sp1, sp2, …}` (Fig. 11A). Cada clado necesita al menos dos puntas, escritas como aparecen en el árbol. Con `Highlight clades from a file…` o `Name clades from a file…`, tree2go encuentra el ancestro común más reciente de las puntas de cada clado, y resalta o nombra ese clado por ti (Fig. 11B).
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig11-canvas.png" alt="El árbol rectangular con varios clados principales resaltados y nombrados desde un archivo"><figcaption><b>Figura 11A.</b> El árbol con algunos de sus clados principales resaltados desde un archivo.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig11-canvas_fan.png" alt="El mismo árbol dibujado en abanico, con los mismos clados resaltados y nombrados"><figcaption><b>Figura 11B.</b> El mismo árbol, con sus clados resaltados, en forma de abanico.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig11-file.png" style="height: 320px; max-height: none" alt="Un archivo de texto plano con un clado por línea, cada uno con su nombre y las puntas que incluye"><figcaption><b>Figura 11A.</b> El formato del archivo de texto plano para clados.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig11-canvas.png" style="height: 320px; max-height: none" alt="El árbol rectangular con varios clados principales resaltados y nombrados desde el archivo"><figcaption><b>Figura 11B.</b> El árbol con algunos de sus clados principales resaltados desde un archivo.</figcaption></figure>
   </div>
 </figure>
 
-Todos los cambios se conservan cuando cambia la forma del árbol (rectangular, circular, en abanico o sin raíz), salvo que no puedan dibujarse en la forma nueva, como un alineamiento de secuencias en un árbol circular. Además, aunque la app está pensada para adaptarse a todas las formas, algunos elementos que pueden pasar de una forma a otra no resultan prácticos en todas. Por ejemplo, los gráficos de violín en un árbol circular o en abanico se superponen unos a otros hacia la raíz (Fig. 11B).
+Todos los cambios se conservan cuando cambia la forma del árbol (rectangular, circular, en abanico o sin raíz), salvo que no puedan dibujarse en la forma nueva, como un alineamiento de secuencias en un árbol circular. Además, aunque la app está pensada para adaptarse a todas las formas, algunos elementos que pueden pasar de una forma a otra no resultan prácticos en todas. Por ejemplo, los gráficos de violín en un árbol circular o en abanico se superponen unos a otros hacia la raíz (Fig. 12).
+
+<figure class="vfig">
+  <img src="../../img/vignettes/basic-editing/fig12-canvas_fan.png" style="height: 400px; max-height: none" alt="El mismo árbol dibujado en abanico, con sus clados resaltados y nombrados, y sus gráficos de violín superpuestos hacia la raíz">
+  <figcaption><b>Figura 12.</b> El mismo árbol en forma de abanico, con sus clados resaltados y nombrados. Hacia la raíz, los gráficos de violín se superponen unos a otros.</figcaption>
+</figure>
 
 ## 9. Leyendas y colocación de elementos
 
 A medida que añadimos elementos con colores, símbolos o tamaños, tree2go añade sus leyendas en la parte inferior izquierda de la figura. Cada leyenda puede moverse, cambiar de estilo y ocultarse desde su menú de `Right-click` o desde la sección **Legends**. Por defecto, las leyendas están fijas en su lugar, como indica el candado azul en su esquina superior derecha. Un clic en el candado lo vuelve amarillo y libera la leyenda, que entonces puede arrastrarse a cualquier lugar del lienzo, como las imágenes y los gráficos.
 
-Mientras se mueve un elemento, unas guías punteadas muestran los demás elementos a su alrededor, cada uno con su distancia (Fig. 12). Haz clic en la burbuja azul de una distancia para escribir un valor exacto, y el elemento se mueve ahí.
+Mientras se mueve un elemento, unas guías punteadas muestran los demás elementos a su alrededor, cada uno con su distancia (Fig. 13). Haz clic en la burbuja azul de una distancia para escribir un valor exacto, y el elemento se mueve ahí.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig12-canvas.png" alt="Una leyenda en movimiento, con guías punteadas y burbujas azules con las distancias a los elementos a su alrededor">
-  <figcaption><b>Figura 12.</b> Mover una leyenda libremente, con las guías y las distancias a los elementos a su alrededor.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig13-canvas.png" style="height: 350px; max-height: none" alt="Una leyenda en movimiento, con guías punteadas y burbujas azules con las distancias a los elementos a su alrededor">
+  <figcaption><b>Figura 13.</b> Mover una leyenda libremente, con las guías y las distancias a los elementos a su alrededor.</figcaption>
 </figure>
 
 ## 10. Eje de tiempo y escala geológica
 
-En árboles calibrados en el tiempo, `Show time axis` en la sección **Time axis** añade un eje de edades debajo del árbol, o encima de él con *Position*. Sus subsecciones definen el eje:
+En árboles calibrados en el tiempo, *Show time axis* en la sección **Time axis** añade un eje de edades debajo del árbol, o encima de él con *Position*. Sus subsecciones definen el eje:
 
-- **Ages**: entre otras opciones, un desplazamiento para árboles solo de fósiles, en los que ninguna especie llega al presente. Cuando este valor cambia, todas las etiquetas que muestran una edad se actualizan automáticamente.
+- **Ages**: entre otras opciones, un desplazamiento para árboles solo de fósiles, en los que ninguna especie llega al presente. Cuando este valor cambia, todas las etiquetas que muestran una edad se actualizan automáticamente (Fig. 14A).
 - **Ticks** y **Axis look**: dónde van las marcas y qué aspecto tiene el eje.
-- **Geologic time scale**: cajas con los intervalos geológicos, en los colores de la Geological Society of America (GSA Geologic Time Scale v. 6.0), y fondos que sombrean esos intervalos, o rangos propios, detrás del árbol (Fig. 13).
+- **Geologic time scale**: cajas con los intervalos geológicos, en los colores de la Geological Society of America (GSA Geologic Time Scale v. 6.0), y fondos que sombrean esos intervalos, o rangos propios, detrás del árbol (Fig. 14B).
 
-<figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig13-canvas.png" alt="El árbol con un eje de tiempo y las cajas de la escala geológica debajo de él">
-  <figcaption><b>Figura 13.</b> Un eje de tiempo con la escala geológica debajo del árbol.</figcaption>
+Para este ejemplo, activamos *Show geologic boxes with official colors* en **Geologic time scale**, con sus opciones por defecto. En **Ages**, también extendemos la escala de tiempo hacia la izquierda, para que abarque todo el rango de los gráficos de violín hacia la raíz, poniendo *Oldest age of the axis* en `600`. Por último, ponemos *Tree background* en `Stripes` y *Background interval* en `Period` (Fig. 14A–B).
+
+<figure class="vfig pair">
+  <div class="vrow">
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig14-panel.png" style="height: 350px; max-height: none" alt="La sección Time axis, con la edad más antigua del eje en 600 y las cajas geológicas activadas"><figcaption><b>Figura 14A.</b> La sección Time axis, donde la escala de tiempo puede extenderse hacia el pasado.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig14-canvas.png" style="height: 350px; max-height: none" alt="El árbol con un eje de tiempo y la escala geológica debajo de él, y los periodos sombreados como franjas detrás del árbol"><figcaption><b>Figura 14B.</b> El árbol con un eje de tiempo y la escala geológica, con los periodos sombreados detrás de él.</figcaption></figure>
+  </div>
 </figure>
 
 > **Nota.** Como con los demás elementos de la figura, casi todo el aspecto del eje de tiempo y de la escala geológica puede personalizarse. La única excepción son los colores de las cajas geológicas, que siguen una convención internacional. También puedes añadir un segundo eje de tiempo con una escala distinta (**Time axis** > *Show a second axis*), y sombrear intervalos detrás del árbol, ya sean intervalos geológicos estándar o rangos que definas. El eje de tiempo también funciona en árboles circulares y en abanico, como anillos concéntricos, pero las cajas geológicas no se dibujan ahí, porque no encajan en una forma radial.
 
 ## 11. Dividir un árbol largo en páginas
 
-Un árbol demasiado alto para una página impresa puede dividirse desde la sección **Split into pages**. tree2go encuentra los clados que van en cada página, según el número de páginas que elijas, y muestra los límites de cada página en el lienzo como recuadros discontinuos (Fig. 14). Para mover un límite, arrástralo.
+Un árbol demasiado alto para una página impresa puede dividirse desde la sección **Split into pages**. tree2go encuentra los clados que van en cada página, según el número de páginas que elijas, y muestra los límites de cada página en el lienzo como recuadros discontinuos (Fig. 15). Para mover un límite, arrástralo.
 
 Cada página tiene el mismo ancho, y puede llevar su propio eje de tiempo o escala geológica. Una miniatura de todo el árbol (el mapa del árbol) muestra, en cada página, dónde están sus clados dentro del árbol. Su posición, colores y resaltado se definen desde su menú de `Right-click`. Al exportar, puedes guardar todo el árbol en un archivo, o cada página como un archivo propio.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig14-canvas.png" alt="Un árbol dividido en páginas, cada página con una miniatura de todo el árbol">
-  <figcaption><b>Figura 14.</b> Un árbol dividido en páginas, cada una con una miniatura de todo el árbol.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig15-canvas.png" style="height: 400px; max-height: none" alt="Un árbol dividido en páginas, cada página con una miniatura de todo el árbol">
+  <figcaption><b>Figura 15.</b> Un árbol dividido en páginas, cada una con una miniatura de todo el árbol.</figcaption>
 </figure>
 
 > **Nota.** Cuando una figura con un eje de tiempo o una escala geológica se divide en páginas, puedes repetir el eje debajo de cada página o mostrarlo solo en la última, con **Split into pages** > *Repeat the time axis under each page*, en su subsección **Look**. El cambio no se ve en el lienzo, solo en los archivos exportados.
@@ -243,23 +257,23 @@ Cada página tiene el mismo ancho, y puede llevar su propio eje de tiempo o esca
 
 A veces tenemos, para cada nodo, una estimación hecha de proporciones, como las probabilidades de los estados en una reconstrucción de estados ancestrales. tree2go puede dibujarlas como gráficos de pastel en los nodos, para uno o varios caracteres, y colorear las ramas según sus estados más probables.
 
-Para conservar nuestro árbol con su estilo tal como está, primero lo copiamos a una pestaña nueva y empezamos la copia con el aspecto por defecto. Haz `Right-click` en la raíz del árbol y elige `Copy tree to a new tab` (Fig. 15). Una ventana pregunta entonces si la copia conserva el mismo aspecto o empieza con el aspecto por defecto, y aquí elegimos `Default look`. Para reiniciar en cambio el aspecto de la pestaña actual, usa `Reset styles` en `Page settings`. Si haces `Right-click` en cualquier otro nodo en lugar de la raíz, `Extract clade` abre solo ese clado en una pestaña nueva.
+Para conservar nuestro árbol con su estilo tal como está, primero lo copiamos a una pestaña nueva y empezamos la copia con el aspecto por defecto. Haz `Right-click` en la raíz del árbol y elige `Copy tree to a new tab` (Fig. 16). Una ventana pregunta entonces si la copia conserva el mismo aspecto o empieza con el aspecto por defecto, y aquí elegimos `Default look`. Para reiniciar en cambio el aspecto de la pestaña actual, usa `Reset styles` en `Page settings`. Si haces `Right-click` en cualquier otro nodo en lugar de la raíz, `Extract clade` abre solo ese clado en una pestaña nueva.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig15-panel.png" alt="El menú de clic derecho de la raíz con Copy tree to a new tab, y la ventana que pregunta si la copia conserva el mismo aspecto o empieza con el aspecto por defecto">
-  <figcaption><b>Figura 15.</b> Copiar el árbol a una pestaña nueva.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig16-panel.png" style="height: 400px; max-height: none" alt="El menú de clic derecho de la raíz con Copy tree to a new tab, y la ventana que pregunta si la copia conserva el mismo aspecto o empieza con el aspecto por defecto">
+  <figcaption><b>Figura 16.</b> Copiar el árbol a una pestaña nueva.</figcaption>
 </figure>
 
-Para renombrar la pestaña nueva, haz doble clic en su nombre. Luego, en la sección **Attachments**, haz clic en `Add file` y elige `vertebrates_habitat.simmap`. Los nodos del árbol se convierten de inmediato en gráficos de pastel. Su aspecto se define en la sección **Ancestral reconstructions** (Fig. 16A), donde las ramas también pueden colorearse por estado con **Ancestral reconstructions** > *Color the branches*, según el estado de máximo a posteriori, según los estados más probables por encima de un umbral, o como un degradado de probabilidad. Como los pasteles ocupan el lugar de los puntos de los nodos, su tamaño y su borde se definen en la sección **Nodes**, como los de cualquier otro punto.
+Para renombrar la pestaña nueva, haz doble clic en su nombre. Luego, en la sección **Attachments**, haz clic en `Add file` y elige `vertebrates_habitat.simmap`. Los nodos del árbol se convierten de inmediato en gráficos de pastel. Su aspecto se define en la sección **Ancestral reconstructions** (Fig. 17A), donde las ramas también pueden colorearse por estado con **Ancestral reconstructions** > *Color the branches*, según el estado de máximo a posteriori, según los estados más probables por encima de un umbral, o como un degradado de probabilidad. Como los pasteles ocupan el lugar de los puntos de los nodos, su tamaño y su borde se definen en la sección **Nodes**, como los de cualquier otro punto.
+
+Para este ejemplo, ponemos **Nodes** > *Node dot size* en `9` px y **Branches** > *Line width* en `3` px, damos a los pasteles un borde negro y movemos la leyenda. También coloreamos las ramas con `Most probable states (threshold-based)`. Esta opción define qué tan dominante debe ser un estado para colorear un tramo de rama, de modo que los tramos donde el estado es incierto destacan como una línea discontinua (círculo rojo en la Fig. 17B).
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig16-panel.png" alt="La sección Ancestral reconstructions, con pasteles en los nodos y las ramas coloreadas según sus estados más probables"><figcaption><b>Figura 16A.</b> La sección Ancestral reconstructions.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig16-canvas.png" alt="El árbol copiado con un gráfico de pastel del hábitat en cada nodo y sus ramas coloreadas por estado, con un tramo incierto dibujado discontinuo dentro de un círculo rojo"><figcaption><b>Figura 16B.</b> Gráficos de pastel del hábitat en los nodos, y ramas coloreadas según sus estados más probables.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig17-panel.png" style="height: 400px; max-height: none" alt="La sección Ancestral reconstructions, con pasteles en los nodos y las ramas coloreadas según sus estados más probables"><figcaption><b>Figura 17A.</b> La sección Ancestral reconstructions.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig17-canvas.png" style="height: 400px; max-height: none" alt="El árbol copiado con un gráfico de pastel del hábitat en cada nodo y sus ramas coloreadas por estado, con un tramo incierto dibujado discontinuo dentro de un círculo rojo"><figcaption><b>Figura 17B.</b> Gráficos de pastel del hábitat en los nodos, y ramas coloreadas según sus estados más probables.</figcaption></figure>
   </div>
 </figure>
-
-Para este ejemplo, ponemos **Nodes** > *Node dot size* en `9` px y **Branches** > *Line width* en `3` px, damos a los pasteles un borde negro, movemos la leyenda y renombramos sus estados desde su menú de `Right-click`. También coloreamos las ramas con `Most probable states (threshold-based)`. Esta opción define qué tan dominante debe ser un estado para colorear un tramo de rama, de modo que los tramos donde el estado es incierto destacan como una línea discontinua (círculo rojo en la Fig. 16B).
 
 > **Nota.** Los gráficos de pastel también pueden venir de un archivo, con `Pie charts from a file…` en la subsección **Pie charts** de **Node values**. El archivo puede ser una tabla con los nombres en la primera columna y una columna por categoría, con la proporción de cada una, o un archivo de texto plano con una línea por punta o nodo, como `Name | {A:0.3, B:0.7}`, la notación de los archivos SIMMAP. Los nodos internos se emparejan por sus nombres, así que el árbol necesita nombres en sus nodos internos, escritos como en el archivo.
 
@@ -267,67 +281,67 @@ Para este ejemplo, ponemos **Nodes** > *Node dot size* en `9` px y **Branches** 
 
 Una de las funciones más útiles de tree2go es dibujar gráficos junto a las puntas: gráficos de barras, matrices de categorías (como presencia y ausencia), mapas de calor de valores continuos, e incluso alineamientos de ADN.
 
-Primero, en la sección **Attachments**, haz clic en `Add file` y elige `regions.csv`, `traits.csv`, `vertebrates_traits_heatmap.csv` y `vertebrates_alignment.fasta`, que pueden elegirse juntos (Fig. 17A). Como se describió al principio de este tutorial, estos archivos contienen la distribución geográfica de las especies, algunos de sus rasgos, y secuencias de ADN de las especies vivas. Las tablas son sencillas: una columna con los nombres de las puntas, y una columna para cada valor. Puedes hacerlas en cualquier programa de hojas de cálculo, como Excel, y guardarlas como `.csv`. tree2go encuentra por sí mismo la columna con los nombres de las puntas, y si hace falta puedes elegir otra en su lista *Names in* de **Attachments**.
+Primero, en la sección **Attachments**, haz clic en `Add file` y elige `regions.csv`, `traits.csv`, `vertebrates_traits_heatmap.csv` y `vertebrates_alignment.fasta`, que pueden elegirse juntos (Fig. 18A). Como se describió al principio de este tutorial, estos archivos contienen la distribución geográfica de las especies, algunos de sus rasgos, y secuencias de ADN de las especies vivas. Las tablas son sencillas: una columna con los nombres de las puntas, y una columna para cada valor. Puedes hacerlas en cualquier programa de hojas de cálculo, como Excel, y guardarlas como `.csv`. tree2go encuentra por sí mismo la columna con los nombres de las puntas, y si hace falta puedes elegir otra en su lista *Names in* de **Attachments**.
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig17-attachments.png" alt="La sección Attachments con el SIMMAP, el alineamiento y tres tablas cargadas, cada una con el número de puntas con las que coincide"><figcaption><b>Figura 17A.</b> Los archivos adjuntos, cada uno con el número de puntas del árbol con las que coincide.</figcaption></figure>
-    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig17-sideplots.png" alt="La lista en la parte superior de la sección Side plots, con los gráficos en su orden desde las puntas hacia fuera y un icono de ojo para cada uno"><figcaption><b>Figura 17B.</b> La sección Side plots, con los gráficos en su orden desde las puntas hacia fuera.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig18-attachments.png" style="height: 350px; max-height: none" alt="La sección Attachments con el SIMMAP, el alineamiento y tres tablas cargadas, cada una con el número de puntas con las que coincide"><figcaption><b>Figura 18A.</b> Los archivos adjuntos, cada uno con el número de puntas del árbol con las que coincide.</figcaption></figure>
+    <figure><img class="vpanel" src="../../img/vignettes/basic-editing/fig18-sideplots.png" style="height: 350px; max-height: none" alt="La lista en la parte superior de la sección Side plots, con los gráficos en su orden desde las puntas hacia fuera y un icono de ojo para cada uno"><figcaption><b>Figura 18B.</b> La sección Side plots, con los gráficos en su orden desde las puntas hacia fuera.</figcaption></figure>
   </div>
 </figure>
 
 Cada archivo adjunto aparece en la sección **Attachments**, con el número de puntas del árbol con las que coincide. Aquí, la distribución geográfica (`regions.csv`) y los rasgos (`traits.csv` y `vertebrates_traits_heatmap.csv`) coinciden con 31 de las 31 puntas, mientras que el alineamiento coincide solo con 24, lo cual tiene sentido, ya que los 7 fósiles no tienen ADN.
 
-Los gráficos laterales pueden apilarse. Pueden mostrarse varios a la vez, y su orden, desde las puntas hacia fuera, se cambia arrastrándolos en la lista de la parte superior de la sección **Side plots**, donde el icono del ojo muestra u oculta cada uno (Fig. 17B). El aspecto de cada gráfico se define en su subsección de **Side plots**, y algunos elementos también pueden cambiarse uno a uno desde su menú de `Right-click`. Algunos gráficos también pueden tomar el aspecto del árbol, por ejemplo coloreando las barras según el clado nombrado al que pertenece cada punta (**Side plots** > *Color the bars by named clade*).
+Los gráficos laterales pueden apilarse. Pueden mostrarse varios a la vez, y su orden, desde las puntas hacia fuera, se cambia arrastrándolos en la lista de la parte superior de la sección **Side plots**, donde el icono del ojo muestra u oculta cada uno (Fig. 18B). El aspecto de cada gráfico se define en su subsección de **Side plots**, y algunos elementos también pueden cambiarse uno a uno desde su menú de `Right-click`. Algunos gráficos también pueden tomar el aspecto del árbol, por ejemplo coloreando las barras según el clado nombrado al que pertenece cada punta (**Side plots** > *Color the bars by named clade*).
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig18-canvas.png" alt="El árbol con barras de masa cerebral en escala logarítmica junto a las especies vivas, y un mapa de calor de cinco rasgos continuos">
-  <figcaption><b>Figura 18.</b> Barras de masa cerebral en escala logarítmica, y un mapa de calor de cinco rasgos continuos.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig19-canvas.png" style="height: 400px; max-height: none" alt="El árbol con barras de masa corporal en escala logarítmica junto a las puntas, y un mapa de calor de cuatro rasgos continuos">
+  <figcaption><b>Figura 19.</b> Barras de masa corporal en escala logarítmica, y un mapa de calor de cuatro rasgos continuos.</figcaption>
 </figure>
 
-En este ejemplo, dibujamos barras de masa cerebral (`brain_g`, de `traits.csv`), coloreadas según el clado nombrado de cada punta, y en escala logarítmica (**Side plots** > *Logarithmic scale (log₁₀)*), ya que la masa cerebral va desde una fracción de gramo hasta varios kilogramos. Junto a ellas, dibujamos un mapa de calor de cinco rasgos continuos (`vertebrates_traits_heatmap.csv`): masa corporal, longevidad máxima, tamaño del genoma, temperatura corporal y descendientes por año. Observa que los gráficos laterales dejan vacía una punta cuando no tiene valor. Aquí, los fósiles no tienen barra, ya que su masa cerebral se desconoce, y en el mapa de calor solo muestran su masa corporal (Fig. 18).
+En este ejemplo, dibujamos barras de masa corporal (`mass_kg`, de `traits.csv`), coloreadas según el clado nombrado de cada punta, y en escala logarítmica (**Side plots** > *Logarithmic scale (log₁₀)*), ya que la masa va desde una fracción de gramo hasta varias toneladas. Junto a ellas, dibujamos un mapa de calor de cuatro rasgos continuos (`vertebrates_traits_heatmap.csv`): longevidad máxima, tamaño del genoma, temperatura corporal y descendientes por año. Observa que los gráficos laterales dejan vacía una punta cuando no tiene valor. Aquí, los fósiles sí tienen barra, ya que su masa corporal se conoce a partir de estimaciones, pero en el mapa de calor sus celdas quedan vacías en los rasgos que no pueden conocerse a partir de fósiles, como el tamaño del genoma (Fig. 19).
 
 Los gráficos laterales también pueden mostrar secuencias de ADN o de proteínas, directamente desde un archivo `.fasta`. Aquí usamos `vertebrates_alignment.fasta`. tree2go da a cada base su propio color, y los colores pueden cambiarse en la subsección **Alignment** de **Side plots**.
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig19-bases.png" alt="Las posiciones 15 a 30 del alineamiento junto a las puntas, un cuadro de color por base, con las letras dentro"><figcaption><b>Figura 19A.</b> Las posiciones 15 a 30 del alineamiento, como un cuadro por base.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig19-barcode.png" alt="Todo el alineamiento junto a las puntas como un código de barras, con cada posición marcada donde difiere de su base más común"><figcaption><b>Figura 19B.</b> Todo el alineamiento, como un código de barras.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig20-bases.png" style="height: 350px; max-height: none" alt="Las posiciones 15 a 30 del alineamiento junto a las puntas, un cuadro de color por base, con las letras dentro"><figcaption><b>Figura 20A.</b> Las posiciones 15 a 30 del alineamiento, como un cuadro por base.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig20-barcode.png" style="height: 350px; max-height: none" alt="Todo el alineamiento junto a las puntas como un código de barras, con cada posición marcada donde difiere de su base más común"><figcaption><b>Figura 20B.</b> Todo el alineamiento, como un código de barras.</figcaption></figure>
   </div>
 </figure>
 
-La forma en que se dibuja el alineamiento depende de cuántas posiciones se muestran. Cuando caben en el ancho del gráfico (**Side plots** > *Width*, en **Alignment**), cada base se dibuja como un cuadro de color, con su letra dentro cuando hay espacio (Fig. 19A). Cuando no caben, el alineamiento se dibuja como un código de barras, que marca en cada posición, en dos colores contrastantes, las bases que difieren de la más común (Fig. 19B). tree2go calcula cuántas posiciones caben, y la ayuda bajo *Width* te lo indica. También puedes elegir qué posiciones mostrar con *From site* y *To site*.
+La forma en que se dibuja el alineamiento depende de cuántas posiciones se muestran. Cuando caben en el ancho del gráfico (**Side plots** > *Width*, en **Alignment**), cada base se dibuja como un cuadro de color, con su letra dentro cuando hay espacio (Fig. 20A). Cuando no caben, el alineamiento se dibuja como un código de barras, que marca en cada posición, en dos colores contrastantes, las bases que difieren de la más común (Fig. 20B). tree2go calcula cuántas posiciones caben, y la ayuda bajo *Width* te lo indica. También puedes elegir qué posiciones mostrar con *From site* y *To site*.
 
 ## 14. Presencia y ausencia en un árbol circular
 
-Dejamos los datos binarios para el final porque, además de dibujarlos como los otros gráficos, los combinaremos con una forma de árbol distinta. Para este ejemplo, ocultamos las barras, el mapa de calor y el alineamiento con sus iconos de ojo en la lista de **Side plots**, y dejamos solo **Categories**, con `regions.csv`. Como los otros gráficos, dibuja una cuadrícula de cuadros, coloreados donde una especie está presente y en gris donde está ausente, y ambos colores pueden cambiarse. Luego, en **Layout**, elegimos la forma `Circular` y damos la vuelta al árbol con **Layout** > *Turn circular and fan trees inside out*. Para aligerar la figura, también quitamos los gráficos de violín y las edades de los nodos, convertimos el árbol en un cladograma desmarcando **Layout** > *Use branch lengths*, y ampliamos el centro con **Layout** > *Inner radius (center gap)*. Por último, con **Side plots** > *Squares follow the circle*, en **Categories**, los cuadros se convierten en cuñas que siguen el círculo, y *Width of the bands* define su ancho (Fig. 20).
+Dejamos los datos binarios para el final porque, además de dibujarlos como los otros gráficos, los combinaremos con una forma de árbol distinta. Para este ejemplo, ocultamos las barras, el mapa de calor y el alineamiento con sus iconos de ojo en la lista de **Side plots**, y dejamos solo **Categories**, con `regions.csv`. Como los otros gráficos, dibuja una cuadrícula de cuadros, coloreados donde una especie está presente y en gris donde está ausente, y ambos colores pueden cambiarse. Luego, en **Layout**, elegimos la forma `Circular` y damos la vuelta al árbol con **Layout** > *Turn circular and fan trees inside out*. Para aligerar la figura, también quitamos los gráficos de violín y las edades de los nodos, convertimos el árbol en un cladograma desmarcando **Layout** > *Use branch lengths*, y ampliamos el centro con **Layout** > *Inner radius (center gap)*. Por último, con **Side plots** > *Squares follow the circle*, en **Categories**, los cuadros se convierten en cuñas que siguen el círculo, y *Width of the bands* define su ancho (Fig. 21).
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig20-canvas.png" alt="Un cladograma circular invertido, con la presencia y ausencia de cada especie en siete regiones dibujadas como anillos de cuñas de colores dentro del círculo, y un espacio vacío en el centro">
-  <figcaption><b>Figura 20.</b> El árbol invertido, con su matriz de presencia y ausencia dentro del círculo.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig21-canvas.png" alt="Un cladograma circular invertido, con la presencia y ausencia de cada especie en siete regiones dibujadas como anillos de cuñas de colores dentro del círculo, y un espacio vacío en el centro">
+  <figcaption><b>Figura 21.</b> El árbol invertido, con su matriz de presencia y ausencia dentro del círculo.</figcaption>
 </figure>
 
 El resultado es una vista especialmente útil en biogeografía, ya que muestra de un vistazo tanto las relaciones entre las especies como su presencia y ausencia en cada región. Y el espacio que abrimos en el centro llevará nuestra figura un paso más allá en la siguiente sección.
 
 ## 15. Geografía
 
-Otra función distintiva de tree2go es dibujar mapas con registros de ocurrencia directamente en la app, sin necesidad de un programa de SIG. Esto se hace en la sección **Geography** del panel izquierdo (Fig. 21). Puedes cargar tus propios mapas como shapefiles (`.shp`, o comprimidos en un `.zip`), o descargar contornos básicos de [Natural Earth](https://www.naturalearthdata.com) para mapas actuales, o de [GPlates](https://www.gplates.org) para reconstrucciones paleogeográficas. Descargarlos requiere conexión a internet.
+Otra función distintiva de tree2go es dibujar mapas con registros de ocurrencia directamente en la app, sin necesidad de un programa de SIG. Esto se hace en la sección **Geography** del panel izquierdo (Fig. 22). Puedes cargar tus propios mapas como shapefiles (`.shp`, o comprimidos en un `.zip`), o descargar contornos básicos de [Natural Earth](https://www.naturalearthdata.com) para mapas actuales, o de [GPlates](https://www.gplates.org) para reconstrucciones paleogeográficas. Descargarlos requiere conexión a internet.
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig21-panel.png" alt="La sección Geography, con sus subsecciones Map, Points y Lines to the tips">
-  <figcaption><b>Figura 21.</b> La sección Geography.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig22-panel.png" style="height: 400px; max-height: none" alt="La sección Geography, con sus subsecciones Map, Points y Lines to the tips">
+  <figcaption><b>Figura 22.</b> La sección Geography. Las funciones de Natural Earth y GPlates requieren conexión a internet.</figcaption>
 </figure>
 
 Para este ejemplo, usamos `fossil_records.csv`, con los sitios de muestreo de los siete fósiles de nuestro árbol. El archivo necesita, como mínimo, una columna con los nombres de las puntas, que pueden repetirse cuando una especie tiene varios registros, y una columna para la longitud y otra para la latitud. Cuando los registros son muchos, tree2go puede agrupar los cercanos. Como nuestros fósiles abarcan un largo periodo de tiempo, mostramos los registros como sitios de muestreo actuales. Con GPlates, las coordenadas pueden colocarse en cambio sobre una reconstrucción paleogeográfica, a partir de varios modelos, lo que también requiere conexión a internet. Esto es más útil cuando los fósiles tienen edades similares y queremos mostrar cómo era su distribución en ese momento.
 
 Primero, en la subsección **Map**, descargamos los contornos `Land` de Natural Earth a `1:110 million`, y ponemos **Geography** > *Projection (maps in degrees)* en `Mollweide (ESRI:54009)`, que da al mapa una forma ovalada. La mejor proyección depende de tus datos y de lo que quieras mostrar. Luego movemos el mapa al centro del círculo, el espacio que abrimos en la sección anterior. Como los demás elementos, el mapa tiene su propio menú de `Right-click`, que cambia no solo su aspecto sino también su extensión y su zoom. Directamente sobre el mapa, `Ctrl` + arrastrar mueve la vista dentro de su marco, y `Ctrl` + rueda acerca y aleja, como en un SIG.
 
-A continuación, con `fossil_records.csv` adjunto en **Attachments**, lo elegimos en **Geography** > *Table*, en la subsección **Points**, y los registros aparecen en el mapa. Con *Size* en `By the number of records`, cada punto crece con el número de registros de su sitio. El tamaño y el color de los puntos también pueden seguir un valor del árbol o de una tabla adjunta, y el color puede seguir los clados nombrados o, como aquí, el resaltado de cada clado (`As the highlight of its clade`). Las Figuras 22A y 22B muestran dos formas de incorporar datos geográficos a un árbol.
+A continuación, con `fossil_records.csv` adjunto en **Attachments**, lo elegimos en **Geography** > *Table*, en la subsección **Points**, y los registros aparecen en el mapa. Con *Size* en `By the number of records`, cada punto crece con el número de registros de su sitio. El tamaño y el color de los puntos también pueden seguir un valor del árbol o de una tabla adjunta, y el color puede seguir los clados nombrados o, como aquí, el resaltado de cada clado (`As the highlight of its clade`). Las Figuras 23A y 23B muestran dos formas de incorporar datos geográficos a un árbol.
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig22-canvas.png" alt="El árbol circular invertido con un mapa del mundo en su centro, los registros fósiles como puntos coloreados según el resaltado de su clado, y los anillos de regiones entre el mapa y el árbol"><figcaption><b>Figura 22A.</b> El árbol con un mapa de los registros fósiles en su centro. Los anillos interiores muestran las regiones donde cada especie vive o fue encontrada, y los puntos del mapa están coloreados según el resaltado de su clado.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig22-canvas_alternative.png" alt="Un árbol con un mapa a su lado, que muestra los registros de ocurrencia agrupados por cercanía geográfica y coloreados según los clados del árbol"><figcaption><b>Figura 22B.</b> Una vista alternativa de un mapa dentro de una filogenia. El mapa muestra los registros de ocurrencia agrupados por cercanía geográfica y coloreados según los clados del árbol.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig23-canvas.png" style="height: 350px; max-height: none" alt="El árbol circular invertido con un mapa del mundo en su centro, los registros fósiles como puntos coloreados según el resaltado de su clado, y los anillos de regiones entre el mapa y el árbol"><figcaption><b>Figura 23A.</b> El árbol con un mapa de los registros fósiles en su centro. Los puntos del mapa están coloreados según el resaltado de su clado.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig23-canvas_alternative.png" style="height: 350px; max-height: none" alt="Un árbol con un mapa a su lado, que muestra los registros fósiles agrupados por cercanía geográfica y coloreados según los clados del árbol"><figcaption><b>Figura 23B.</b> Una vista alternativa de un mapa dentro de una filogenia. El mapa muestra los registros fósiles agrupados por cercanía geográfica y coloreados según los clados del árbol.</figcaption></figure>
   </div>
 </figure>
 
@@ -347,11 +361,11 @@ Como las leyendas, pueden moverse a cualquier lugar, con guías y distancias a l
 
 ## 17. Tanglegrama
 
-Los tanglegramas son otra figura común en filogenética comparada, dos árboles frente a frente, normalmente con topologías alternativas, con líneas que unen sus puntas correspondientes. En la sección **Tanglegram**, el segundo árbol puede ser cualquier árbol del conjunto (`Open a tree of the set`) o un árbol de un archivo (`Load a tree file in a new tab`). Aquí cargamos `vertebrates_alternative.nwk` (Fig. 23).
+Los tanglegramas son otra figura común en filogenética comparada, dos árboles frente a frente, normalmente con topologías alternativas, con líneas que unen sus puntas correspondientes. En la sección **Tanglegram**, el segundo árbol puede ser cualquier árbol del conjunto (`Open a tree of the set`) o un árbol de un archivo (`Load a tree file in a new tab`). Aquí cargamos `vertebrates_alternative.nwk` (Fig. 24).
 
 <figure class="vfig">
-  <img src="../../img/vignettes/basic-editing/fig23-canvas.png" alt="El árbol principal y el árbol alternativo frente a frente, con líneas que unen las mismas especies">
-  <figcaption><b>Figura 23.</b> Un tanglegrama del árbol principal y un árbol con una topología alternativa.</figcaption>
+  <img src="../../img/vignettes/basic-editing/fig24-canvas.png" style="height: 400px; max-height: none" alt="El árbol principal y el árbol alternativo frente a frente, con líneas que unen las mismas especies">
+  <figcaption><b>Figura 24.</b> Un tanglegrama del árbol principal y un árbol con una topología alternativa.</figcaption>
 </figure>
 
 El segundo árbol se abre en una pestaña propia, y se dibuja con el aspecto de esa pestaña, la alineación de sus nombres, los colores de sus ramas y sus resaltados se definen ahí, como en cualquier otro árbol. Del árbol principal solo toma su tamaño, sus puntas se reparten en la misma altura, y su ancho es el mismo salvo que se defina otro en **Tanglegram** > *Width (0 as this tree)*. Con **Tanglegram** > *Join the highlights of the same clade*, los resaltados de un clado en ambos árboles se unen entre sí. El orden de sus ramas es el suyo propio, y para que las líneas se crucen lo menos posible, el árbol principal ofrece `Untangle (turn the second tree)`, que gira solo los nodos del segundo árbol, y `Untangle both`, que gira los nodos de ambos árboles.
@@ -377,11 +391,11 @@ tree2go reconoce las reticulaciones, y el tipo de cada una, a partir de su etiqu
 
 <figure class="vfig pair">
   <div class="vrow">
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig24-major.png" alt="La red de Heliconius dibujada como su árbol mayor, con dos flechas discontinuas desde la rama de H. melpomene hacia H. heurippa y H. timareta, rotuladas con sus valores de gamma"><figcaption><b>Figura 24A.</b> La red dibujada como su árbol mayor, con cada reticulación como una flecha desde el donante hacia el linaje híbrido.</figcaption></figure>
-    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig24-full.png" alt="La misma red dibujada completa, donde cada nodo híbrido une sus dos aristas parentales, con grosores que siguen a gamma"><figcaption><b>Figura 24B.</b> La misma red dibujada completa, con las dos aristas parentales de cada nodo híbrido.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig25-major.png" style="height: 300px; max-height: none" alt="La red de Heliconius dibujada como su árbol mayor en una vista sin raíz, con dos flechas discontinuas desde la rama de H. melpomene hacia H. heurippa y H. timareta, rotuladas con sus valores de gamma"><figcaption><b>Figura 25A.</b> La red dibujada como su árbol mayor en una vista sin raíz, con cada reticulación como una flecha desde el donante hacia el linaje híbrido.</figcaption></figure>
+    <figure><img class="vcanvas" src="../../img/vignettes/basic-editing/fig25-full.png" style="height: 300px; max-height: none" alt="La misma red dibujada completa, donde cada nodo híbrido une sus dos aristas parentales, con grosores que siguen a gamma"><figcaption><b>Figura 25B.</b> La misma red dibujada completa, con las dos aristas parentales de cada nodo híbrido y la proporción del genoma heredada a través de cada una (γ).</figcaption></figure>
   </div>
 </figure>
 
-Las reticulaciones se dibujan como líneas discontinuas desde el linaje donante hasta el nodo híbrido. Por defecto, una flecha apunta del donante al receptor (*Arrows* > `To hybrid`), pero también puede apuntar en sentido contrario, en ambos sentidos o no mostrarse. Con *Show a value on each line*, cada línea muestra su γ, y con *Width from γ*, su grosor lo sigue. *Where on the branches* define dónde empieza y termina cada línea, `Centered` las coloca en el centro de las ramas, mientras que `Lengths` usa las edades escritas en el archivo. Como cualquier otro elemento, cada línea puede seleccionarse con un clic y cambiarse por separado desde su menú de `Right-click`.
+Las reticulaciones se dibujan como líneas discontinuas desde el linaje donante hasta el nodo híbrido. Por defecto, una flecha apunta del donante al receptor (*Arrows* en `To hybrid`), pero también puede apuntar en sentido contrario, en ambos sentidos o no mostrarse. Con *Show a value on each line*, cada línea muestra su γ, y con *Width from γ*, su grosor lo sigue. *Where on the branches* define dónde empieza y termina cada línea, `Centered` las coloca en el centro de las ramas, mientras que `Lengths` usa las edades escritas en el archivo. Como cualquier otro elemento, cada línea puede seleccionarse con un clic y cambiarse por separado desde su menú de `Right-click`.
 
-Por último, *Style* alterna entre dos vistas de la misma red. `Major tree` dibuja el árbol de las aristas mayores, las que llevan la mayor parte del genoma, con cada arista menor como una línea desde su donante (Fig. 24A), mientras que `Full network` da a cada nodo híbrido un punto propio, donde se unen sus dos aristas parentales (Fig. 24B).
+Por último, *Style* alterna entre dos vistas de la misma red. `Major tree` dibuja el árbol de las aristas mayores, las que llevan la mayor parte del genoma, con cada arista menor como una línea desde su donante (Fig. 25A), mientras que `Full network` da a cada nodo híbrido un punto propio, donde se unen sus dos aristas parentales (Fig. 25B).
