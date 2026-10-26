@@ -46,9 +46,36 @@ It runs directly in your web browser, with or without an internet connection, an
 There are two ways to use tree2go:
 
 1. **Online:** open [vr-daniel.github.io/tree2go](https://vr-daniel.github.io/tree2go/) in any modern browser (Chrome, Edge, Firefox or Safari).
-2. **Offline:** download `index.html` from this repository and open it like any web page. It works without an internet connection, except for a few functions that download data, such as world maps.
+2. **Offline:** download the app to your computer and open `index.html` like any web page. It works without an internet connection, except for a few functions that download data, such as world maps.
 
 Then click `Open tree` in the **Tree** section of the left panel, or drop a tree file on the window.
+
+### Download the latest version
+
+Copy the block for your system, paste it into a terminal and press `Enter`. It downloads the latest version of tree2go into a `tree2go` folder inside your Downloads folder. Running it again later updates it.
+
+**Windows** (open `cmd`):
+
+```bat
+cd /d "%USERPROFILE%\Downloads"
+if not exist tree2go mkdir tree2go
+cd tree2go
+curl -L -o tree2go.zip https://github.com/VR-Daniel/tree2go/archive/refs/heads/main.zip
+tar -xf tree2go.zip --strip-components=1 tree2go-main/index.html tree2go-main/content
+del tree2go.zip
+```
+
+**macOS** (open `Terminal`):
+
+```bash
+cd ~/Downloads
+mkdir -p tree2go && cd tree2go
+curl -L -o tree2go.zip https://github.com/VR-Daniel/tree2go/archive/refs/heads/main.zip
+tar -xf tree2go.zip --strip-components=1 tree2go-main/index.html tree2go-main/content
+rm tree2go.zip
+```
+
+Then open `index.html` from the `tree2go` folder. The `content` folder next to it holds the reference guide, the tutorials and the example files, so they also work offline. The download is about 30 MB.
 
 ## Documentation
 
