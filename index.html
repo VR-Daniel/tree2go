@@ -1049,6 +1049,7 @@ function serialize(n) {
   if (n.hyb && n.hyb.length) o.hy = n.hyb;
   if (n.poly) o.py = n.poly;   // the branches a polytomy replaced, to restore them
   if (n._unrooted) o.ur = 1; if (n._rooted) o.rr = 1;   // [&U] or [&R] of the file
+  if (n.ghost && n.ghost.length) o.gh = n.ghost;   // tips deleted below this node
   if (n.don && n.don.length) o.dn = n.don;
   if (n.children.length) o.k = n.children.map(serialize);
   return o;
@@ -1064,6 +1065,7 @@ function deserialize(o, parent = null) {
   if (o.hy) n.hyb = JSON.parse(JSON.stringify(o.hy));
   if (o.py) n.poly = JSON.parse(JSON.stringify(o.py));
   if (o.ur) n._unrooted = true; if (o.rr) n._rooted = true;
+  if (o.gh) n.ghost = [...o.gh];
   if (o.dn) n.don = JSON.parse(JSON.stringify(o.dn));
   if (o.gr) n.grafts = o.gr.map(g => markGraft(deserialize(g, null), n));
   if (o.fx) n.grafts = (n.grafts || []).concat(o.fx.map(f => { const G = mk(f.name || 'Fossil'); G.fa = f.age; G.bud = f.bud ?? null; return markGraft(G, n); }));
@@ -2940,6 +2942,7 @@ function treeCladeKeys(t, ref, tot) {
     if (!x.children.length) { const h = tipHash(x.name); keys.set(x, [h[0], h[1], 1]); hasRef.set(x, rn != null && normTip(x.name) === rn); return keys.get(x); }
     let a = 0, b = 0, c = 0, r = false;
     for (const y of x.children) { const k = g(y); a = (a + k[0]) >>> 0; b = (b + k[1]) >>> 0; c += k[2]; if (hasRef.get(y)) r = true; }
+    if (x.ghost) for (const nm of x.ghost) { const h = tipHash(nm); a = (a + h[0]) >>> 0; b = (b + h[1]) >>> 0; c += 1; if (rn != null && normTip(nm) === rn) r = true; }   // tips deleted below it: the clade it was
     keys.set(x, [a, b, c]); hasRef.set(x, r); return keys.get(x);
   })(t);
   const T = tot || keys.get(t), out = new Map();   // tot: the whole set of tips, when t is a clade cut from a larger tree
@@ -3154,11 +3157,32 @@ function kdeValues(S, k, positiveOnly) {
 // Only the numbers shown change: the tree keeps its own heights.
 const AGE_KEY = /^(height|age)(_|$)/i;
 const ageOut = (v, S = settings) => S.axisOn ? (S.axisOffset || 0) + v * (S.axisUnit > 0 ? S.axisUnit : 1) : v;
+/* The frame of ages of a dated tree, kept when tips are deleted. Heights are counted from the youngest tip, so deleting
+   the youngest tips makes the tree count from an older one: by that much (ageShift, in the units of the tree) the age
+   of the youngest tip in Time axis goes up, so the axis still gives the true ages, and the ages from the tree set or
+   from the annotations (age densities, HPD bars, age labels), counted from the youngest tip of the whole set, are
+   brought back by it. A new tree (a summary or a sample of the set, a file) starts from the frame of its own. */
+const ageShiftOf = (S = settings) => +S.ageShift || 0;
+function keepAgeFrame(h0) {
+  if (!h0 || !h0.size || !tree) return;
+  const hs = leaves(tree).map(l => h0.get(l.name)).filter(Number.isFinite); if (!hs.length) return;
+  const d = minOf(hs); if (!(d > 1e-9)) return;   // the youngest tip is still there
+  const unit = settings.axisUnit > 0 ? settings.axisUnit : 1;
+  settings.axisOffset = +((+settings.axisOffset || 0) + d * unit).toPrecision(12);
+  settings.ageShift = +(ageShiftOf() + d).toPrecision(12);
+  try { syncControl({ k: 'axisOffset', type: 'number' }); } catch (e) { }
+}
+function resetAgeFrame() {
+  const sh = ageShiftOf(); if (!sh) return;
+  const unit = settings.axisUnit > 0 ? settings.axisUnit : 1;
+  settings.axisOffset = +((+settings.axisOffset || 0) - sh * unit).toPrecision(12); settings.ageShift = 0;
+  try { syncControl({ k: 'axisOffset', type: 'number' }); } catch (e) { }
+}
 function nodeValues(S, src, col, positiveOnly) {
   const val = new Map(); if (!src || !col || !tree) return val;
   if (src === '__len') { walkAll(tree, x => { if (x.parent && typeof x.len === 'number' && isFinite(x.len) && (!positiveOnly || x.len > 0)) val.set(x, x.len); }); return val; }   // the branch lengths themselves
   if (src === '__sup') { walkAll(tree, x => { const v = x.children.length && x.parent ? supValue(x) : null; if (v != null && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, v); }); return val; }   // the support of every internal node
-  if (src === 'meta') { const age = AGE_KEY.test(col); walkAll(tree, x => { const v = x.meta && x.meta[col]; if (typeof v === 'number' && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, age ? ageOut(v, S) : v); }); return val; }   // ages from the youngest tip
+  if (src === 'meta') { const age = AGE_KEY.test(col); walkAll(tree, x => { const v = x.meta && x.meta[col]; if (typeof v === 'number' && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, age ? ageOut(v - ageShiftOf(S), S) : v); }); return val; }   // ages from the youngest tip (of the whole set, brought back to this tree)
   const t = (S.dataTables || []).find(x => x.id === src), ci = t ? t.header.indexOf(col) : -1; if (!t || ci < 0) return val;
   const m = tableIndex(t);
   walkAll(tree, x => { if (!x.name) return; const r = m.get(normTip(x.name)); const v = r ? cellNum(r[ci], t.delim) : null; if (v != null && (!positiveOnly || v > 0)) val.set(x, v); });
@@ -3552,7 +3576,7 @@ function sampleSummary(kind, heights) {
 function showFromSet(t, msg) {
   if (tree) pushUndo();
   srcText = toNewick(t) + ';'; $('nwkIn').value = srcText;
-  setTree(t); toast(msg); refreshTreeSetBox();
+  resetAgeFrame(); setTree(t); toast(msg); refreshTreeSetBox();
 }
 // Builds the tree set box of the Tree section (burn-in, single trees, summary trees).
 function treeSetBox() {
@@ -3808,12 +3832,12 @@ function loadTreeList(trees, name, txt = '') {
     treeSet = summarizeTrees(P.trees, name || 'Trees', 0); treeSet.clockScaled = clocked; treeSet.shown = 1; treeSet.mode = 'majority'; treeSet.pct = 50;
     srcText = txt && txt.length < 2e6 ? txt : ''; $('nwkIn').value = srcText ? txt : toNewick(P.trees[0]) + ';';
     if (settings.supportSource === 'tree') settings.supportSource = 'boot';
-    setTree(cloneTree(P.trees[0])); persistTreeSet(); buildSide();
+    resetAgeFrame(); setTree(cloneTree(P.trees[0])); persistTreeSet(); buildSide();
     toast(`${plural(P.trees.length, 'tree', 'trees')} read, showing tree 1`);
   } else {
     if (treeSet) { treeSet = null; persistTreeSet(); buildSide(); }
     srcText = txt; $('nwkIn').value = txt;
-    setTree(P.trees[0]);
+    resetAgeFrame(); setTree(P.trees[0]);
     toast(plural(leafCount(P.trees[0]), 'tip', 'tips') + ' loaded');
   }
 }
@@ -5337,8 +5361,9 @@ function renderOnce() {
     // where a value falls on the tree, as a depth from the root: an age counts back from the youngest tip,
     // a branch length runs from the parent node, a support runs on a short scale that ends at the node
     let curN = null;
-    const depthOf = v => field === 'lens' ? curN.parent._d + v : field === 'sups' ? curN._d - (1 - clamp(v / supMax, 0, 1)) * S.nbarSupW / (circ ? (S.radius - rIn) / maxD : sx) : maxD - v;
-    const posR = h => { const d = key ? maxD - h : depthOf(h); return circ ? rOf(d) : d * sx; };
+    const sh = ageShiftOf(S);   // ages of the set count from its youngest tip, which may have been deleted
+    const depthOf = v => field === 'lens' ? curN.parent._d + v : field === 'sups' ? curN._d - (1 - clamp(v / supMax, 0, 1)) * S.nbarSupW / (circ ? (S.radius - rIn) / maxD : sx) : maxD - (v - sh);
+    const posR = h => { const d = key ? maxD - (h - (AGE_KEY.test(key) ? sh : 0)) : depthOf(h); return circ ? rOf(d) : d * sx; };
     const dash = (st, w) => st === 'dashed' ? ` stroke-dasharray="${f2(w * 4)} ${f2(w * 3)}"` : st === 'dotted' ? ` stroke-dasharray="0 ${f2(w * 2.2)}" stroke-linecap="round"` : '';
     // a point at age h, off the branch by 'off' px (circular: along the arc)
     const pt = (n, h, off) => { if (!circ) return [posR(h), n._py + off]; const r = posR(h); return polar(r, n._a + off / Math.max(1, realR(r)) * 180 / Math.PI); };
@@ -7208,7 +7233,17 @@ function openEdit(cx, cy, keep) {
         .then(ok => { if (ok === null) return; copyTreeToTab(!ok); });
     }
     else if (a === 'extract') { const sub = deserialize(serialize(n)); sub.len = null; sub.parent = null; openInTab(sub, n.cladeLabel || (n.name && !isSupport(n.name) ? disp(nm(n)) : `Clade (${leafCount(n)} tips)`), true); toast('The clade opens in a new tab. The full tree stays in its own tab.'); if (false) sel.clear(); closePop(); render(); }
-    else if (a === 'prune') { mutate(() => { tree = prune(tree, n); }, n.children.length ? 'Clade deleted' : 'Tip deleted'); sel.clear(); closePop(); render(); }
+    else if (a === 'prune') {
+      const H0 = treeInTime(tree) ? nodeHeights(tree) : null, h0 = new Map(); if (H0) for (const l of leaves(tree)) h0.set(l.name, H0.get(l));   // the heights before, to keep the frame of ages
+      // its tips, kept as ghosts by the clade it was in: its parent if that stays (a polytomy), else the node above,
+      // which also takes the ghosts of the parent that goes
+      const p0 = n.parent, stays = p0 && p0.children.length > 2, at = stays ? p0 : p0 && p0.parent, gone = [];
+      walkAll(n, x => { if (!x.children.length) gone.push(x.name); if (x.ghost) gone.push(...x.ghost); });
+      if (!stays && p0 && p0.ghost) gone.push(...p0.ghost);
+      pushUndo(true); tree = prune(tree, n); reindex(); keepAgeFrame(h0);
+      const g2 = at && nodeById.get(at.id); if (g2) g2.ghost = [...(g2.ghost || []), ...gone];   // with the settings, so undo brings back the age of the youngest tip too
+      sel.clear(); closePop(); runSearch(); render(); persist(); toast(n.children.length ? 'Clade deleted' : 'Tip deleted');
+    }
     else if (a === 'copy') { navigator.clipboard?.writeText(toNewick(n)).then(() => toast('Newick copied'), () => toast('Copying is blocked in this browser')); }
     else if (a === 'reset') {
       const all = uniqArr([...roots, ...T.branch, ...T.len, ...T.tip, ...T.node, ...T.sup, ...T.nlab, ...T.nbar, ...T.bar, ...T.data]);
