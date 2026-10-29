@@ -3165,6 +3165,8 @@ const ageOut = (v, S = settings) => (+S.axisOffset || 0) + v * (S.axisUnit > 0 ?
    from the annotations (age densities, HPD bars, age labels), counted from the youngest tip of the whole set, are
    brought back by it. A new tree (a summary or a sample of the set, a file) starts from the frame of its own. */
 const ageShiftOf = (S = settings) => +S.ageShift || 0;
+// A small surprise when a tip is renamed "Joaosaurus", with its quotes.
+const eggName = v => { if (/^["“”]joaosaurus["“”]$/i.test(String(v || '').trim()) && window.triggerBugEasterEgg) setTimeout(() => window.triggerBugEasterEgg(), 250); };
 /* The dagger after the names of extinct tips: shown when some tips reach the present (the fossils stand out among living
    species), hidden when all tips are fossils (it would be on every name). Ticking or unticking it in Fossils keeps that
    choice (fossilDag). An earlier "off" (fossilDagger false) is kept too. */
@@ -7197,7 +7199,7 @@ function openEdit(cx, cy, keep) {
     else if (a === 'rotateAll') { const under = (a, d) => { for (let x = d.parent; x; x = x.parent) if (x === a) return true; return false; }, tops = T.internal.filter(x => !T.internal.some(y => y !== x && under(y, x))); apply(tops, x => walkAll(x, y => { if (y.children.length) y.children.reverse(); })); }   // the clade mirrored
     else if (a === 'ladder') apply(T.internal, x => ladderize(x, false));
     else if (a === 'expandSub') apply(T.internal, x => walkAll(x, y => { y.collapsed = false; }));
-    else if (a === 'rename') apply([n], x => { const v = pop.querySelector('#pName').value.trim(); if (x.children.length) x.name = v; else x.label = v && v !== x.name ? v : null; });   // a tip keeps its original name as the key of its data
+    else if (a === 'rename') { const nv = pop.querySelector('#pName').value.trim(); apply([n], x => { const v = nv; if (x.children.length) x.name = v; else x.label = v && v !== x.name ? v : null; }); if (!n.children.length) eggName(nv); }   // a tip keeps its original name as the key of its data
     else if (a === 'setlen') { const v = pop.querySelector('#pLen').value.trim(); if (v !== '' && isNaN(parseFloat(v))) { toast('Enter a number, or leave it empty'); return; } apply([n], x => { x.len = v === '' ? null : parseFloat(v); }); }
     else if (a === 'cladename') apply([n], x => { x.cladeLabel = pop.querySelector('#pClade').value.trim() || null; });
     else if (a === 'addfossil') {
@@ -9786,7 +9788,7 @@ svg.addEventListener('dblclick', e => {
   let value, set, msg;
   if (kind === 'label' && n.collapsed && n.children.length) {   // the name shown: one given to it, else the name of the node, else the number of tips
     value = stv(n, 'tl') || (n.name && !isSupport(n.name) ? nm(n) : `${leafCount(n)} tips`); set = v => { n.st = n.st || {}; if (v) n.st.tl = v; else delete n.st.tl; if (!Object.keys(n.st).length) n.st = null; }; msg = 'Name of the collapsed clade changed'; }
-  else if (kind === 'label' && !n.children.length) { value = nm(n); set = v => { n.label = v && v !== n.name ? v : null; }; msg = 'Name changed'; }   // a tip keeps its original name for its data
+  else if (kind === 'label' && !n.children.length) { value = nm(n); set = v => { n.label = v && v !== n.name ? v : null; eggName(v); }; msg = 'Name changed'; }   // a tip keeps its original name for its data
   else if (kind === 'support' && supSource() !== 'tree') { toast('These supports are counted from the tree set or the SIMMAP, so they cannot be written by hand'); return; }
   else if (kind === 'label' || kind === 'support') {   // the name of the node: a number there is its support, over the annotations
     const shown = kind === 'support' && !n.name ? treeSup(n) : null;
@@ -12017,5 +12019,404 @@ updUndo();
 render();
 requestAnimationFrame(() => { if (had) fit(); });
 </script>
+<!-- ================================================= -->
+<!-- EASTER EGG: DEV INTERACTIVO + "Kill the bug!"     -->
+<!-- Se activa al renombrar una punta como "Joaosaurus" -->
+<!-- ================================================= -->
+<div id="chancla-backdrop" style="display: none; position: fixed; inset: 0; z-index: 99998; background: rgba(0,0,0,0.35); backdrop-filter: blur(1px); cursor: not-allowed;"></div>
+<div id="chancla-container" style="display: none; position: fixed; bottom: 0; right: 28px; z-index: 99999; user-select: none; width: 280px; height: 280px;">
+  <div id="chancla-tip" style="display: none; position: absolute; top: -36px; left: 50%; transform: translateX(-50%); background: #fbbf24; color: #000; font-family: monospace; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 9999px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); white-space: nowrap;">
+    🩴 Kill the bug!
+  </div>
+  <canvas id="chanclaCanvas" width="288" height="288" style="image-rendering: pixelated; width: 100%; height: 100%; display: block; pointer-events: none;"></canvas>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('chanclaCanvas');
+  const ctx = canvas.getContext('2d');
+  const backdrop = document.getElementById('chancla-backdrop');
+  const container = document.getElementById('chancla-container');
+  const tip = document.getElementById('chancla-tip');
+
+  let state = 'idle';
+  let isRunning = false;
+  let animId = null;
+
+  let charY = 300;
+  let charRotation = 0;
+  let bug = { x: -40, y: 40, targetX: 144, targetY: 105 };
+  let chancla = { x: 380, y: -60, startX: 380, startY: -60, targetX: 144, targetY: 108, progress: 0, rot: 0 };
+  let smackedTimer = 0;
+  let dizzyTimer = 0;
+  let flyFrames = 0;
+
+  // Audio Retro Web Audio API (se crea al activarse: los navegadores no permiten sonido antes de que el usuario actúe)
+  let audioCtx = null;
+  function audio() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) { audioCtx = null; } return audioCtx; }
+  function playBeep(freq, type, duration) {
+    try {
+      const ac = audio(); if (!ac) return;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ac.currentTime);
+      gain.gain.setValueAtTime(0.12, ac.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.start();
+      osc.stop(ac.currentTime + duration);
+    } catch(e) {}
+  }
+
+  function playSlap() {
+    try {
+      const ac = audio(); if (!ac) return;
+      const buffer = ac.createBuffer(1, ac.sampleRate * 0.25, ac.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < buffer.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ac.sampleRate * 0.04));
+      }
+      const node = ac.createBufferSource();
+      node.buffer = buffer;
+      const gain = ac.createGain();
+      gain.gain.setValueAtTime(0.4, ac.currentTime);
+      node.connect(gain);
+      gain.connect(ac.destination);
+      node.start();
+    } catch(e) {}
+  }
+
+  function drawPixelDev(x, y, mode) {
+    ctx.save();
+    ctx.translate(x, y);
+    if (mode === 'dizzy') ctx.rotate(charRotation);
+
+    // Torso / Ropa
+    ctx.fillStyle = "#1e2124";
+    ctx.fillRect(-42, 68, 84, 85);
+    ctx.fillStyle = "#333a42";
+    ctx.fillRect(-30, 72, 60, 4);
+
+    // Cuello
+    ctx.fillStyle = "#dfaa8b";
+    ctx.fillRect(-16, 52, 32, 20);
+
+    // Cabello largo y rizado
+    ctx.fillStyle = "#261a16";
+    ctx.fillRect(-50, 14, 100, 75);
+    ctx.fillRect(-56, 30, 14, 52);
+    ctx.fillRect(42, 30, 14, 52);
+    ctx.fillRect(-60, 52, 12, 36);
+    ctx.fillRect(48, 52, 12, 36);
+
+    // Rostro
+    ctx.fillStyle = "#e8b898";
+    ctx.fillRect(-30, 0, 60, 60);
+
+    // Flequillo y división
+    ctx.fillStyle = "#1f1411";
+    ctx.fillRect(-32, -6, 64, 16);
+    ctx.fillRect(-42, 6, 18, 28);
+    ctx.fillRect(24, 6, 18, 28);
+    ctx.fillRect(-14, -4, 28, 6);
+
+    // Ojos según el estado
+    if (mode === 'dizzy') {
+      ctx.strokeStyle = "#1f1411";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-19, 21); ctx.lineTo(-11, 29);
+      ctx.moveTo(-11, 21); ctx.lineTo(-19, 29);
+      ctx.moveTo(11, 21); ctx.lineTo(19, 29);
+      ctx.moveTo(19, 21); ctx.lineTo(11, 29);
+      ctx.stroke();
+      ctx.fillStyle = "#882420";
+      ctx.fillRect(-8, 45, 16, 8);
+    } else if (mode === 'looking_up') {
+      ctx.fillStyle = "#1f1411";
+      ctx.fillRect(-18, 20, 7, 7);
+      ctx.fillRect(11, 20, 7, 7);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-17, 24, 5, 2);
+      ctx.fillRect(12, 24, 5, 2);
+
+      ctx.strokeStyle = "#1f1411";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-21, 14); ctx.lineTo(-11, 16);
+      ctx.moveTo(11, 16); ctx.lineTo(21, 13);
+      ctx.stroke();
+
+      ctx.fillStyle = "#ef4444";
+      ctx.font = 'bold 16px monospace';
+      ctx.fillText("?!", 36, 10);
+
+      ctx.fillStyle = "#99473e";
+      ctx.fillRect(-6, 44, 12, 5);
+    } else {
+      ctx.fillStyle = "#1f1411";
+      ctx.fillRect(-18, 23, 7, 7);
+      ctx.fillRect(11, 23, 7, 7);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-17, 23, 2, 2);
+      ctx.fillRect(12, 23, 2, 2);
+      ctx.fillStyle = "#99473e";
+      ctx.fillRect(-6, 45, 12, 3);
+    }
+
+    // Gafas oscuras
+    ctx.strokeStyle = "#111114";
+    ctx.lineWidth = 3.2;
+    ctx.strokeRect(-24, 17, 18, 17);
+    ctx.strokeRect(6, 17, 18, 17);
+    ctx.fillStyle = "#111114";
+    ctx.fillRect(-6, 25, 12, 3.5);
+
+    // Bigote y barba
+    ctx.fillStyle = "#1b120f";
+    ctx.fillRect(-16, 39, 32, 6);
+    ctx.fillRect(-11, 49, 22, 10);
+    ctx.fillRect(-6, 59, 12, 4);
+
+    // Lunar
+    ctx.fillStyle = "#794c35";
+    ctx.fillRect(-17, 35, 3, 3);
+
+    ctx.restore();
+  }
+
+  function drawPixelBug(x, y, isSettled, wingTimer) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    ctx.strokeStyle = "#064e3b";
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(-6, -1); ctx.lineTo(-13, 5);
+    ctx.moveTo(-5, 3);  ctx.lineTo(-14, 9);
+    ctx.moveTo(6, -1);  ctx.lineTo(13, 5);
+    ctx.moveTo(5, 3);   ctx.lineTo(14, 9);
+    ctx.stroke();
+
+    const antennaJiggle = Math.sin(wingTimer * 1.5) * 2;
+    ctx.beginPath();
+    ctx.moveTo(-3, -7); ctx.lineTo(-8 + antennaJiggle, -15);
+    ctx.moveTo(3, -7);  ctx.lineTo(8 - antennaJiggle, -15);
+    ctx.stroke();
+
+    ctx.fillStyle = "#059669";
+    ctx.fillRect(-6, -7, 12, 16);
+    ctx.fillStyle = "#34d399";
+    ctx.fillRect(-4, -5, 8, 12);
+
+    ctx.fillStyle = "#065f46";
+    ctx.fillRect(-5, -10, 10, 5);
+    ctx.fillStyle = "#facc15";
+    ctx.fillRect(-4, -10, 2, 2);
+    ctx.fillRect(2, -10, 2, 2);
+
+    if (!isSettled || Math.sin(wingTimer * 3) > 0.6) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+      ctx.fillRect(-15, -9, 11, 7);
+      ctx.fillRect(4, -9, 11, 7);
+    }
+    ctx.restore();
+  }
+
+  function drawChancla(x, y, rot) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+
+    ctx.fillStyle = "#0284c7";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 16, 32, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#0369a1";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.strokeStyle = "#bae6fd";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 12, 27, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(0, -11);
+    ctx.lineTo(-12, 14);
+    ctx.moveTo(0, -11);
+    ctx.lineTo(12, 14);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawSmack(x, y, progress) {
+    ctx.save();
+    ctx.translate(x, y);
+    const rOuter = 30 + progress * 24;
+    const rInner = 14 + progress * 10;
+    const points = 10;
+
+    ctx.fillStyle = "#fde047";
+    ctx.strokeStyle = "#ef4444";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    for (let i = 0; i < points * 2; i++) {
+      const r = i % 2 === 0 ? rOuter : rInner;
+      const angle = (i * Math.PI) / points;
+      const px = Math.cos(angle) * r;
+      const py = Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#7f1d1d";
+    ctx.font = 'bold 16px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText("POW!", 0, 6);
+    ctx.restore();
+  }
+
+  // Ends it and gives the page back (at the end, or with Esc).
+  function finish() {
+    state = 'idle';
+    isRunning = false;
+    if (animId) cancelAnimationFrame(animId);
+    animId = null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    backdrop.style.display = 'none';
+    container.style.display = 'none';
+    tip.style.display = 'none';
+    canvas.style.cursor = 'default';
+    canvas.style.pointerEvents = 'none';
+  }
+
+  let cycle = 0;
+  function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    cycle += 0.18;
+
+    if (state === 'rising') {
+      charY += (142 - charY) * 0.08;
+      if (Math.abs(charY - 142) < 1.5) {
+        charY = 142;
+        state = 'bug_flying';
+        flyFrames = 0;
+        bug.x = -30;
+        bug.y = 30;
+      }
+    }
+    else if (state === 'bug_flying') {
+      flyFrames++;
+      // the buzzing fades as it comes near, so it can land (and it lands anyway after about 3 seconds)
+      const near = Math.min(1, Math.hypot(bug.targetX - bug.x, bug.targetY - bug.y) / 40);
+      bug.x += (bug.targetX - bug.x) * 0.045 + Math.sin(cycle * 1.5) * 2 * near;
+      bug.y += (bug.targetY - bug.y) * 0.045 + Math.cos(cycle * 1.2) * 1.5 * near;
+
+      if ((Math.abs(bug.x - bug.targetX) < 3 && Math.abs(bug.y - bug.targetY) < 3) || flyFrames > 180) {
+        bug.x = bug.targetX;
+        bug.y = bug.targetY;
+        state = 'waiting_click';
+        canvas.style.cursor = 'pointer';
+        canvas.style.pointerEvents = 'auto';
+        tip.style.display = 'block';
+        playBeep(260, 'triangle', 0.2);
+      }
+    }
+    else if (state === 'waiting_click') {
+      bug.y = bug.targetY + Math.sin(cycle * 0.8) * 0.8;
+    }
+    else if (state === 'chancla_throw') {
+      chancla.progress += 0.055;
+      chancla.x = chancla.startX + (chancla.targetX - chancla.startX) * chancla.progress;
+      chancla.y = chancla.startY + (chancla.targetY - chancla.startY) * chancla.progress;
+      chancla.rot += 0.32;
+
+      if (chancla.progress >= 1) {
+        state = 'smacked';
+        smackedTimer = 0;
+        playSlap();
+      }
+    }
+    else if (state === 'smacked') {
+      smackedTimer += 0.08;
+      if (smackedTimer > 1.3) {
+        state = 'falling';
+        dizzyTimer = 0;
+      }
+    }
+    else if (state === 'falling') {
+      dizzyTimer++;
+      charRotation = Math.sin(dizzyTimer * 0.3) * 0.25;
+      charY += (dizzyTimer * 0.55);
+
+      if (charY > 310) { finish(); return; }
+    }
+
+    if (state !== 'idle') {
+      let mode = 'normal';
+      if (state === 'waiting_click') mode = 'looking_up';
+      if (state === 'smacked' || state === 'falling') mode = 'dizzy';
+
+      drawPixelDev(144, charY, mode);
+
+      if (state === 'bug_flying') {
+        drawPixelBug(bug.x, bug.y, false, cycle);
+      } else if (state === 'waiting_click') {
+        drawPixelBug(bug.x, bug.y, true, cycle);
+      }
+
+      if (state === 'chancla_throw') {
+        drawChancla(chancla.x, chancla.y, chancla.rot);
+      }
+
+      if (state === 'smacked') {
+        drawSmack(144, 110, smackedTimer);
+      }
+
+      animId = requestAnimationFrame(update);
+    }
+  }
+
+  canvas.addEventListener('click', () => {
+    if (state === 'waiting_click') {
+      tip.style.display = 'none';
+      canvas.style.cursor = 'default';
+      state = 'chancla_throw';
+      chancla.progress = 0;
+      chancla.x = 380;
+      chancla.y = -60;
+      chancla.startX = 380;
+      chancla.startY = -60;
+    }
+  });
+  document.addEventListener('keydown', e => { if (isRunning && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(); } }, true);
+
+  // ========================================================
+  // DISPARADOR GLOBAL
+  // ========================================================
+  window.triggerBugEasterEgg = function() {
+    if (isRunning) return;
+    isRunning = true;
+    audio();   // the rename is a user action: sound is allowed from here on
+    backdrop.style.display = 'block';
+    container.style.display = 'block';
+    state = 'rising';
+    charY = 300;
+    charRotation = 0;
+    animId = requestAnimationFrame(update);
+  };
+})();
+</script>
+
 </body>
 </html>
