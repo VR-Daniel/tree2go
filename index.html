@@ -12020,8 +12020,8 @@ render();
 requestAnimationFrame(() => { if (had) fit(); });
 </script>
 <!-- ================================================= -->
-<!-- EASTER EGG: DEV INTERACTIVO + "Kill the bug!"     -->
-<!-- Se activa al renombrar una punta como "Joaosaurus" -->
+<!-- EASTER EGG: INTERACTIVE DEV + "Kill the bug!"    -->
+<!-- Starts when a tip is renamed "Joaosaurus"       -->
 <!-- ================================================= -->
 <div id="chancla-backdrop" style="display: none; position: fixed; inset: 0; z-index: 99998; background: rgba(0,0,0,0.35); backdrop-filter: blur(1px); cursor: not-allowed;"></div>
 <div id="chancla-container" style="display: none; position: fixed; bottom: 0; right: 28px; z-index: 99999; user-select: none; width: 280px; height: 280px;">
@@ -12051,7 +12051,7 @@ requestAnimationFrame(() => { if (had) fit(); });
   let dizzyTimer = 0;
   let flyFrames = 0;
 
-  // Audio Retro Web Audio API (se crea al activarse: los navegadores no permiten sonido antes de que el usuario actúe)
+  // Retro sounds with the Web Audio API (opened when it starts and closed when it ends: browsers allow no sound before the user does something)
   let audioCtx = null;
   function audio() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) { audioCtx = null; } return audioCtx; }
   function playBeep(freq, type, duration) {
@@ -12093,17 +12093,17 @@ requestAnimationFrame(() => { if (had) fit(); });
     ctx.translate(x, y);
     if (mode === 'dizzy') ctx.rotate(charRotation);
 
-    // Torso / Ropa
+    // Torso and clothes
     ctx.fillStyle = "#1e2124";
     ctx.fillRect(-42, 68, 84, 85);
     ctx.fillStyle = "#333a42";
     ctx.fillRect(-30, 72, 60, 4);
 
-    // Cuello
+    // Neck
     ctx.fillStyle = "#dfaa8b";
     ctx.fillRect(-16, 52, 32, 20);
 
-    // Cabello largo y rizado
+    // Long curly hair
     ctx.fillStyle = "#261a16";
     ctx.fillRect(-50, 14, 100, 75);
     ctx.fillRect(-56, 30, 14, 52);
@@ -12111,18 +12111,18 @@ requestAnimationFrame(() => { if (had) fit(); });
     ctx.fillRect(-60, 52, 12, 36);
     ctx.fillRect(48, 52, 12, 36);
 
-    // Rostro
+    // Face
     ctx.fillStyle = "#e8b898";
     ctx.fillRect(-30, 0, 60, 60);
 
-    // Flequillo y división
+    // Fringe and parting
     ctx.fillStyle = "#1f1411";
     ctx.fillRect(-32, -6, 64, 16);
     ctx.fillRect(-42, 6, 18, 28);
     ctx.fillRect(24, 6, 18, 28);
     ctx.fillRect(-14, -4, 28, 6);
 
-    // Ojos según el estado
+    // Eyes, by state
     if (mode === 'dizzy') {
       ctx.strokeStyle = "#1f1411";
       ctx.lineWidth = 3;
@@ -12166,7 +12166,7 @@ requestAnimationFrame(() => { if (had) fit(); });
       ctx.fillRect(-6, 45, 12, 3);
     }
 
-    // Gafas oscuras
+    // Dark glasses
     ctx.strokeStyle = "#111114";
     ctx.lineWidth = 3.2;
     ctx.strokeRect(-24, 17, 18, 17);
@@ -12174,13 +12174,13 @@ requestAnimationFrame(() => { if (had) fit(); });
     ctx.fillStyle = "#111114";
     ctx.fillRect(-6, 25, 12, 3.5);
 
-    // Bigote y barba
+    // Moustache and beard
     ctx.fillStyle = "#1b120f";
     ctx.fillRect(-16, 39, 32, 6);
     ctx.fillRect(-11, 49, 22, 10);
     ctx.fillRect(-6, 59, 12, 4);
 
-    // Lunar
+    // Mole
     ctx.fillStyle = "#794c35";
     ctx.fillRect(-17, 35, 3, 3);
 
@@ -12298,6 +12298,7 @@ requestAnimationFrame(() => { if (had) fit(); });
     tip.style.display = 'none';
     canvas.style.cursor = 'default';
     canvas.style.pointerEvents = 'none';
+    if (audioCtx) { try { audioCtx.close(); } catch (e) { } audioCtx = null; }   // the sound system is let go: nothing of it stays open
   }
 
   let cycle = 0;
@@ -12402,7 +12403,7 @@ requestAnimationFrame(() => { if (had) fit(); });
   document.addEventListener('keydown', e => { if (isRunning && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(); } }, true);
 
   // ========================================================
-  // DISPARADOR GLOBAL
+  // GLOBAL TRIGGER
   // ========================================================
   window.triggerBugEasterEgg = function() {
     if (isRunning) return;
