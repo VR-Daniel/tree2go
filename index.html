@@ -1341,7 +1341,7 @@ const DEFAULTS = {
   readDigits: 6, readBinary: true,   // reading properties of files with several trees
   layout: 'rect', useLengths: true, width: 700, spacing: 18, radius: 320, innerRadius: 0, circSpan: 360, fanSpan: 180, rotation: 0, rootStub: 0,
   lineWidth: 1, lineColor: '#1f1f1f', lineCap: 'round', branchAngle: 90, branchRound: 0, lineStyle: 'solid', lineDash: 5, lineGap: 3,
-  fossilDagger: true, extinctBranch: 'dashed', xbDash: true, fossilAuto: true, fossilAutoTol: 0.5, fossilStyle: 'dashed',
+  fossilDagger: true, fossilDag: null, extinctBranch: 'dashed', xbDash: true, fossilAuto: true, fossilAutoTol: 0.5, fossilStyle: 'dashed',
   tipDotOn: false, tipDot: 3, nodeDotOn: false, nodeDot: 3, dotColor: '#1f1f1f',
   showTips: true, fontSize: 12, fontFamily: FONTS[0][0], italic: true, openNom: true, bold: false, labelColor: '#1f1f1f', labelOffset: 5, underscores: true,
   align: false, alignStyle: 'dotted', labelsFollowClade: true, showInternal: false,
@@ -1733,7 +1733,7 @@ const SECTIONS_RAW = [
     { k: 'fossilAuto', type: 'check', label: 'Tips that end before the present are extinct' },
     { type: 'hint', text: s => s.fossilAuto ? 'For dated trees. When the youngest tip is above 0, as in a fossil-only tree, every tip is extinct. Right-click a tip to change it by hand. For very recent fossils, such as those of the last ice age, type a smaller tolerance in the box (0.001%, for example).' : '' },
     { k: 'fossilAutoTol', type: 'range', label: 'Tolerance (% of the tree height)', min: 0, max: 5, step: 0.01, hmax: 50, unit: '%', enable: s => s.fossilAuto, sub: true },
-    { k: 'fossilDagger', type: 'check', label: 'Add † after the names of extinct tips and fossils' },
+    { k: 'fossilDag', type: 'check', label: 'Add † after the names of extinct tips and fossils' },
     { k: 'extinctBranch', type: 'seg', label: 'Branches of extinct tips', opts: [['same', 'Same'], ['dashed', 'Dashed'], ['dotted', 'Dotted']] },
     { type: 'hint', text: () => 'Grafted fossil lineages are always drawn dashed, using the dash length and gap from Branches.' },
     { type: 'head', label: 'Sampled ancestors' },
@@ -1812,9 +1812,9 @@ const SECTIONS_RAW = [
     { type: 'hint', text: s => s.axisOn && s.geoOn ? 'With the geologic time scale, the axis goes with its boxes: set its position there.' : '' },
     { type: 'hint', text: s => s.axisOn && s.layout === 'rect' && (s.rectOrient === 'vertical' || s.rectOrient === 'custom') ? 'On vertical trees, Bottom is on the right and Top on the left.' : '' },
     { type: 'head', label: 'Ages' },
-    { k: 'axisOffset', type: 'number', label: 'Age of the youngest tip', min: -1e6, max: 1e6, step: 1, enable: s => s.axisOn, sub: true },
+    { k: 'axisOffset', type: 'number', label: 'Age of the youngest tip', min: -1e6, max: 1e6, step: 1, enable: s => s.axisOn || (!!tree && treeInTime(tree)), sub: true },
     { type: 'hint', text: () => 'Change it when the youngest tip is not from the present, as in a fossil-only tree. All tips then count as extinct.' },
-    { k: 'axisUnit', type: 'number', label: 'Time units per branch length unit', min: 1e-9, max: 1e9, step: 1, enable: s => s.axisOn, sub: true },
+    { k: 'axisUnit', type: 'number', label: 'Time units per branch length unit', min: 1e-9, max: 1e9, step: 1, enable: s => s.axisOn || (!!tree && treeInTime(tree)), sub: true },
     { k: 'axisOldest', type: 'number', label: 'Oldest age of the axis', min: 0, max: 1e9, step: 1, blank: 'Auto', enable: s => s.axisOn && s.layout === 'rect', sub: true },
     { type: 'hint', text: s => s.axisOn && s.layout === 'rect' ? 'Empty, the axis starts at the root. An older age stretches the axis and the geologic scale past the root, for example to cover the age density of the root.' : '' },
     { type: 'hint', text: () => 'Multiplies the branch lengths to get ages. Leave it at 1 when the lengths are already in the units of the axis.' },
@@ -2222,7 +2222,7 @@ const sameVal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 // ticking it shows them again when they were hidden from their menu or from Legends.
 const LEGEND_OF = { ancLegend: ['anc'], brcLegend: ['brc'], bwdLegend: ['bwd'], catLegend: ['cat'], dataLegend: ['data'], dotDataLegend: ['dotc', 'dots'], gmLegend: ['geo', 'geosize'], heatLegend: ['heat'], lengthVLegend: ['lenvc'], nlabLegend: ['nlabc', 'nlabs'], pieLegend: ['pie'], supportLegend: ['support'], supportVLegend: ['supvc'] };
 const legendBoxOn = k => !!settings[k] && !(LEGEND_OF[k] || []).every(l => (settings.legendHide || {})[l]);
-const checkVal = k => LEGEND_OF[k] ? legendBoxOn(k) : !!settings[k];
+const checkVal = k => k === 'fossilDag' ? daggerOn() : LEGEND_OF[k] ? legendBoxOn(k) : !!settings[k];
 function syncLegendBoxes() { for (const k in LEGEND_OF) syncControl({ k, type: 'check' }); }
 // Shows the current value of a setting in its panel control.
 function syncControl(it) {
@@ -2242,7 +2242,7 @@ const OVERRIDES = {
   tipDot: ['tipst:dot'], nodeDot: ['nodest:dot'], dotColor: ['st:dc'], dotFill: ['st:df'],
   dotBorderStyle: ['st:dbs'], dotBorderColor: ['st:dbc'], dotBorderWidth: ['st:dbw'], dotBorderCount: ['st:dbn'],
   fontSize: ['st:fs'], italic: ['st:it'], openNom: ['st:onq'], bold: ['st:fw'], labelColor: ['prop:labelColor'],
-  fossilDagger: ['st:dg'], extinctBranch: ['st:xb'],
+  fossilDagger: ['st:dg'], fossilDag: ['st:dg'], extinctBranch: ['st:xb'],
   showLengths: ['st:lv'], lengthAlign: ['st:la'], lengthMargin: ['st:lm'], lengthDy: ['st:ldy'], lengthSize: ['st:ls'], lengthColor: ['st:lcol'],
   supportMode: ['st:svm'], supportAlign: ['st:sa'], supportMargin: ['st:sm'], supportDy: ['st:sdy'], supportSize: ['st:ss'], supportColor: ['st:sc'],
   ancLabelOn: ['st:nlv'], ancLabelAlign: ['st:na'], ancLabelMargin: ['st:nm'], ancLabelDy: ['st:ndy'], ancLabelSize: ['st:ns'], ancLabelColor: ['st:nc'],
@@ -3156,13 +3156,23 @@ function kdeValues(S, k, positiveOnly) {
 // Ages written in labels count from the age of the youngest tip, in the unit of the axis, as the time axis does.
 // Only the numbers shown change: the tree keeps its own heights.
 const AGE_KEY = /^(height|age)(_|$)/i;
-const ageOut = (v, S = settings) => S.axisOn ? (S.axisOffset || 0) + v * (S.axisUnit > 0 ? S.axisUnit : 1) : v;
+// An age from a height above the youngest tip: the age of the youngest tip and the time units belong to the dating of the
+// tree, not to the axis, so ages are true ages with the axis shown or not.
+const ageOut = (v, S = settings) => (+S.axisOffset || 0) + v * (S.axisUnit > 0 ? S.axisUnit : 1);
 /* The frame of ages of a dated tree, kept when tips are deleted. Heights are counted from the youngest tip, so deleting
    the youngest tips makes the tree count from an older one: by that much (ageShift, in the units of the tree) the age
    of the youngest tip in Time axis goes up, so the axis still gives the true ages, and the ages from the tree set or
    from the annotations (age densities, HPD bars, age labels), counted from the youngest tip of the whole set, are
    brought back by it. A new tree (a summary or a sample of the set, a file) starts from the frame of its own. */
 const ageShiftOf = (S = settings) => +S.ageShift || 0;
+/* The dagger after the names of extinct tips: shown when some tips reach the present (the fossils stand out among living
+   species), hidden when all tips are fossils (it would be on every name). Ticking or unticking it in Fossils keeps that
+   choice (fossilDag). An earlier "off" (fossilDagger false) is kept too. */
+let lastAllFossil = false;
+const daggerOn = (S = settings) => S.fossilDag != null ? !!S.fossilDag : S.fossilDagger === false ? false : !lastAllFossil;
+// An age counted from the youngest tip of the tree set or of the annotations, as the axis gives it: the tips deleted since
+// are taken back out, as the age of the youngest tip already counts them.
+const setAgeOut = (v, S = settings) => ageOut(v - ageShiftOf(S), S);
 function keepAgeFrame(h0) {
   if (!h0 || !h0.size || !tree) return;
   const hs = leaves(tree).map(l => h0.get(l.name)).filter(Number.isFinite); if (!hs.length) return;
@@ -3182,7 +3192,7 @@ function nodeValues(S, src, col, positiveOnly) {
   const val = new Map(); if (!src || !col || !tree) return val;
   if (src === '__len') { walkAll(tree, x => { if (x.parent && typeof x.len === 'number' && isFinite(x.len) && (!positiveOnly || x.len > 0)) val.set(x, x.len); }); return val; }   // the branch lengths themselves
   if (src === '__sup') { walkAll(tree, x => { const v = x.children.length && x.parent ? supValue(x) : null; if (v != null && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, v); }); return val; }   // the support of every internal node
-  if (src === 'meta') { const age = AGE_KEY.test(col); walkAll(tree, x => { const v = x.meta && x.meta[col]; if (typeof v === 'number' && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, age ? ageOut(v - ageShiftOf(S), S) : v); }); return val; }   // ages from the youngest tip (of the whole set, brought back to this tree)
+  if (src === 'meta') { const age = AGE_KEY.test(col); walkAll(tree, x => { const v = x.meta && x.meta[col]; if (typeof v === 'number' && isFinite(v) && (!positiveOnly || v > 0)) val.set(x, age ? setAgeOut(v, S) : v); }); return val; }   // ages from the youngest tip (of the whole set, brought back to this tree)
   const t = (S.dataTables || []).find(x => x.id === src), ci = t ? t.header.indexOf(col) : -1; if (!t || ci < 0) return val;
   const m = tableIndex(t);
   walkAll(tree, x => { if (!x.name) return; const r = m.get(normTip(x.name)); const v = r ? cellNum(r[ci], t.delim) : null; if (v != null && (!positiveOnly || v > 0)) val.set(x, v); });
@@ -3832,12 +3842,12 @@ function loadTreeList(trees, name, txt = '') {
     treeSet = summarizeTrees(P.trees, name || 'Trees', 0); treeSet.clockScaled = clocked; treeSet.shown = 1; treeSet.mode = 'majority'; treeSet.pct = 50;
     srcText = txt && txt.length < 2e6 ? txt : ''; $('nwkIn').value = srcText ? txt : toNewick(P.trees[0]) + ';';
     if (settings.supportSource === 'tree') settings.supportSource = 'boot';
-    resetAgeFrame(); setTree(cloneTree(P.trees[0])); persistTreeSet(); buildSide();
+    resetAgeFrame(); settings.fossilDag = null; setTree(cloneTree(P.trees[0])); persistTreeSet(); buildSide();   // a new file: the dagger as its tree needs
     toast(`${plural(P.trees.length, 'tree', 'trees')} read, showing tree 1`);
   } else {
     if (treeSet) { treeSet = null; persistTreeSet(); buildSide(); }
     srcText = txt; $('nwkIn').value = txt;
-    resetAgeFrame(); setTree(P.trees[0]);
+    resetAgeFrame(); settings.fossilDag = null; setTree(P.trees[0]);
     toast(plural(leafCount(P.trees[0]), 'tip', 'tips') + ' loaded');
   }
 }
@@ -4483,7 +4493,7 @@ let sideUseSig = '', sideLayersRefresh = null;
 function render() {
   const keep = smap; if (smap && settings.ancShow === false) smap = null;
   try { renderBody(); } finally { smap = keep; }
-  try { syncLegendBoxes(); } catch (e) { }
+  try { syncLegendBoxes(); syncControl({ k: 'fossilDag', type: 'check' }); } catch (e) { }
   try { const sig = JSON.stringify(sideActive(settings)); if (sig !== sideUseSig) { sideUseSig = sig; if (sideLayersRefresh) sideLayersRefresh(); } } catch (e) { }
 }
 function renderBody() {
@@ -4637,11 +4647,12 @@ function renderOnce() {
   if (S.fossilAuto && lay.useLen && maxD > 0) {
     const tipsAll = vis.filter(n => !n.children.length), tol = fossilTolOf(maxD, S.fossilAutoTol);
     const atPresent = tipsAll.filter(n => maxD - n._d <= tol).length;
-    if (S.axisOn && S.axisOffset > 0) { for (const n of tipsAll) if (!n.noEx) autoExt.add(n.id); }   // the youngest tip is older than the present: all are fossils
+    if (S.axisOffset > 0) { for (const n of tipsAll) if (!n.noEx) autoExt.add(n.id); }   // the youngest tip is older than the present: all are fossils (as part of the dating, the axis shown or not)
     else if (tipsAll.length > 2 && atPresent >= tipsAll.length / 2) for (const n of tipsAll) if (maxD - n._d > tol && !n.noEx) autoExt.add(n.id);
   }
   const isExt = n => !!n.ex || autoExt.has(n.id);
   const extLine = new Set(), allFossil = vis.filter(n => !n.children.length).every(isExt);
+  lastAllFossil = allFossil;   // for the dagger shown by default
   (function ex(n) { if (!n.children.length || n._tri) { const e = !n.children.length ? isExt(n) : leaves(n).every(isExt); if (e) extLine.add(n); return e; } let all = true; for (const c of n.children) if (!ex(c)) all = false; if (all) extLine.add(n); return all; })(tree);
   const altN = altNames(S);
   const tipText = n => n._tri ? (stv(n, 'tl') ? disp(stv(n, 'tl')) + (S.triCount ? ` (${leafCount(n)})` : '') : n.name && !isSupport(n.name) ? disp(nm(n)) + (S.triCount ? ` (${leafCount(n)})` : '') : (S.triCount ? leafCount(n) + ' tips' : '')) : disp(n.label || (altN.get(n) ?? n.name));   // a name given by hand, then the column of names chosen, then the original
@@ -4652,7 +4663,7 @@ function renderOnce() {
     n._q = !n._tri && (stv(n, 'onq') ?? S.openNom);
     n._fwt = stv(n, 'fw') ?? S.bold;
     n._lw = S.showTips ? nameWidth(tipText(n), n._fs, fam, n._it, n._fwt, n._q) : 0;
-    n._dag = !!(isExt(n) && !n._tri && (stv(n, 'dg') ?? S.fossilDagger));
+    n._dag = !!(isExt(n) && !n._tri && (stv(n, 'dg') ?? daggerOn(S)));
     if (S.showTips && n._dag) n._lw += measure('†', n._fs * 0.7, fam, false, false) + 1;
     maxLW = Math.max(maxLW, n._lw);
   }
@@ -4748,7 +4759,7 @@ function renderOnce() {
       if (x.children.length) continue;
       x._fs = stv(x, 'fs') ?? S.fontSize;
       x._it = stv(x, 'it') ?? S.italic;
-      x._dag = stv(x, 'dg') ?? S.fossilDagger;
+      x._dag = stv(x, 'dg') ?? daggerOn(S);
       x._txt = disp(nm(x) || 'Fossil');
       x._q = stv(x, 'onq') ?? S.openNom;
       x._fwt = stv(x, 'fw') ?? S.bold;
@@ -6655,13 +6666,13 @@ function nodeLabelText(n, S = settings) {
     const f = x => (+x.toFixed(S.ancLabelDec)).toString(), ag = c.ages || [];
     if (src === 'ts:freq') return Math.round(100 * c.n / treeSet.count) + '%';
     if (!ag.length) return null;
-    if (src === 'ts:mean') return f(ageOut(ag.reduce((a, b) => a + b, 0) / ag.length, S));
+    if (src === 'ts:mean') return f(setAgeOut(ag.reduce((a, b) => a + b, 0) / ag.length, S));
     const h = hpdOf(ag, 0.95);
-    return src === 'ts:median' ? f(ageOut(h.med, S)) : `[${f(ageOut(h.lo, S))}, ${f(ageOut(h.hi, S))}]`;   // ages from the youngest tip
+    return src === 'ts:median' ? f(setAgeOut(h.med, S)) : `[${f(setAgeOut(h.lo, S))}, ${f(setAgeOut(h.hi, S))}]`;   // ages from the youngest tip of the set
   }
   if (src === 'anc') { const c = smap && smap.states.length && ancKeys && smap.clades.get(ancKeys.get(n)); return c && c.node && c.node.length ? '{' + smap.states.map((st, i) => `${st}:${c.node[i].toFixed(S.ancLabelDec)}`).join(',') + '}' : null; }
   const v = n.meta && n.meta[src.slice(5)]; if (v == null) return null;
-  const age = AGE_KEY.test(src.slice(5)), f = x => typeof x === 'number' ? (+(age ? ageOut(x, S) : x).toFixed(S.ancLabelDec)).toString() : String(x);   // ages from the youngest tip
+  const age = AGE_KEY.test(src.slice(5)), f = x => typeof x === 'number' ? (+(age ? setAgeOut(x, S) : x).toFixed(S.ancLabelDec)).toString() : String(x);   // ages from the youngest tip of the annotations
   return Array.isArray(v) ? '[' + v.map(f).join(', ') + ']' : f(v);
 }
 // True when internal nodes have names that are not support values.
@@ -6890,7 +6901,7 @@ function openEdit(cx, cy, keep) {
     const cur = selVal(T[arr].length ? (stv(T[arr][0], k) ?? globalVal) : globalVal);
     return rs(k, arr) + `<select class="psel" data-ek="${k}" data-t="${arr}">${opts.map(([a, b]) => `<option value="${a}" ${a === cur ? 'selected' : ''}>${b}</option>`).join('')}</select>`;
   };
-  const EFF_GLOBAL = { fw: S.bold, onq: S.openNom, bgS: S.hlStart, bgE: S.hlEnd, bgG: S.hlGradient, barNH: !S.barShowName, barTM: S.barTextMode, barTA: S.barTextAlign, dg: S.fossilDagger, xb: S.extinctBranch, bs: S.lineStyle, barB: S.barBold, barI: S.barItalic, it: S.italic, df: S.dotFill, dbs: S.dotBorderStyle, triF: S.triFill };
+  const EFF_GLOBAL = { fw: S.bold, onq: S.openNom, bgS: S.hlStart, bgE: S.hlEnd, bgG: S.hlGradient, barNH: !S.barShowName, barTM: S.barTextMode, barTA: S.barTextAlign, dg: daggerOn(S), xb: S.extinctBranch, bs: S.lineStyle, barB: S.barBold, barI: S.barItalic, it: S.italic, df: S.dotFill, dbs: S.dotBorderStyle, triF: S.triFill };
 
   const parts = [];
   // ---- Clade and structure
@@ -7000,7 +7011,7 @@ function openEdit(cx, cy, keep) {
     const allExt = T.fosTips.every(n => n.ex || autoExt.has(n.id)), anyAuto = T.fosTips.some(n => !n.ex && autoExt.has(n.id));
     parts.push(`<div class="part"><b>${T.fosTips.length === 1 ? 'Fossil tip' : `Fossil tips (${T.fosTips.length})`}</b>
       <label class="row check"><input type="checkbox" id="sExt" ${allExt ? 'checked' : ''}><span style="font-size:13px">Extinct (fossil)</span></label>${anyAuto ? '<span class="hint">Marked as extinct because it ends before the present. Untick to keep it as living.</span>' : ''}
-      <div class="kv${allExt ? '' : ' off'}"><span>Dagger (†)</span>${allExt ? esel('dg', 'fosTips', [['1', 'Shown'], ['0', 'Hidden']], S.fossilDagger) : `<select class="psel" disabled><option>${S.fossilDagger ? 'Shown' : 'Hidden'}</option></select>`}</div>
+      <div class="kv${allExt ? '' : ' off'}"><span>Dagger (†)</span>${allExt ? esel('dg', 'fosTips', [['1', 'Shown'], ['0', 'Hidden']], daggerOn(S)) : `<select class="psel" disabled><option>${daggerOn(S) ? 'Shown' : 'Hidden'}</option></select>`}</div>
       <div class="kv${allExt ? '' : ' off'}"><span>Branch style</span>${allExt ? esel('xb', 'fosTips', [['same', 'Same'], ['dashed', 'Dashed'], ['dotted', 'Dotted']], S.extinctBranch) : `<select class="psel" disabled><option>${{ same: 'Same', dashed: 'Dashed', dotted: 'Dotted' }[S.extinctBranch]}</option></select>`}</div>
       ${allExt ? '' : '<span class="hint">Mark as extinct to add the † and change the branch style.</span>'}</div>`);
   }
@@ -9893,7 +9904,7 @@ function altNames(S) {
   const out = new Map(); if (!tree || !S.labelSrcTable) return out;
   const dec = S.labelSrcDec ?? 3, fmt = v => v !== '' && v != null && isFinite(+v) ? String(+(+v).toFixed(dec)) : String(v).trim();
   if (S.labelSrcTable === 'meta') {
-    const age = AGE_KEY.test(S.labelSrcCol || ''), fa = v => age && typeof v === 'number' ? fmt(ageOut(v, S)) : fmt(v);   // ages from the youngest tip
+    const age = AGE_KEY.test(S.labelSrcCol || ''), fa = v => age && typeof v === 'number' ? fmt(setAgeOut(v, S)) : fmt(v);   // ages from the youngest tip of the annotations
     for (const n of leaves(tree)) { const v = n.meta && n.meta[S.labelSrcCol]; if (v != null && v !== true && v !== '') out.set(n, Array.isArray(v) ? `[${v.map(fa).join(', ')}]` : fa(v)); }
   } else if (S.labelSrcTable === 'calc') {
     const d = new Map(); let H = 0;
